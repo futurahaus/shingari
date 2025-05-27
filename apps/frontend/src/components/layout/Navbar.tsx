@@ -1,30 +1,32 @@
 import Link from 'next/link';
 
-const Navbar = () => {
+export default function Navbar() {
   return (
-    <nav className="bg-white shadow-md">
+    <nav className="bg-red-600 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex-shrink-0">
-            <Link href="/" className="text-red-600 font-bold text-xl">
-              SHINGARI
-            </Link>
-          </div>
-          <div className="flex space-x-4">
-            <Link href="/" className="text-red-600 hover:text-red-700 px-3 py-2 rounded-md">
-              Home
-            </Link>
-            <Link href="/about-us" className="text-red-600 hover:text-red-700 px-3 py-2 rounded-md">
+        <div className="flex justify-between items-center h-12">
+          <div className="flex space-x-8">
+            <Link href="/about-us" className="flex items-center hover:bg-red-700 px-3 h-full">
               Sobre Nosotros
             </Link>
-            <Link href="/contact" className="text-red-600 hover:text-red-700 px-3 py-2 rounded-md">
-              Contacto
+            <Link href="/categories" className="flex items-center hover:bg-red-700 px-3 h-full">
+              Categorías
+            </Link>
+            <Link href="/mas-ganadores" className="flex items-center hover:bg-red-700 px-3 h-full">
+              Alta gastronomía
+            </Link>
+            <Link href="/ofertas" className="flex items-center hover:bg-red-700 px-3 h-full">
+              Ofertas
+            </Link>
+            <Link href="/mas-vendidos" className="flex items-center hover:bg-red-700 px-3 h-full">
+              Más vendidos
+            </Link>
+            <Link href="/novedades" className="flex items-center hover:bg-red-700 px-3 h-full">
+              Novedades
             </Link>
           </div>
         </div>
       </div>
     </nav>
   );
-};
-
-export default Navbar;
+}
