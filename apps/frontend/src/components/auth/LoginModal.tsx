@@ -165,27 +165,30 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             </div>
             <button
               type="submit"
-              className="w-full bg-red-600 text-white py-2 px-4 rounded text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-red-600 text-white py-3 px-4 rounded-lg text-base font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isLoading}
             >
-              {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+              Inicia Sesión
             </button>
           </form>
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              ¿Aún no estás registrado?{' '}
-              <Link
-                href="/register"
-                className="font-medium text-red-600 hover:text-red-500"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onClose();
-                  router.push('/register');
-                }}
-              >
-                Regístrate
-              </Link>
-            </p>
+
+          <div className="mt-8 space-y-4">
+            <div className="text-center">
+              <p className="text-base text-gray-900">
+                ¿Aún no estás registrado?
+              </p>
+            </div>
+            <Link
+              href="/register"
+              onClick={(e) => {
+                e.preventDefault();
+                onClose();
+                router.push('/register');
+              }}
+              className="block w-full bg-red-600 text-white py-3 px-4 rounded-lg text-base font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 text-center"
+            >
+              Regístrate
+            </Link>
           </div>
         </div>
       </div>
