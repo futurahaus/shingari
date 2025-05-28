@@ -11,6 +11,20 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: Implement login logic
+        // Login
+    // const response = await fetch('http://localhost:3001/auth/login', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   credentials: 'include',
+    //   body: JSON.stringify({
+    //     email: 'user@example.com',
+    //     password: 'password123'
+    //   }),
+    // });
+
+    // const { accessToken, refreshToken, user } = await response.json();
     console.log('Login attempt with:', formData);
   };
 

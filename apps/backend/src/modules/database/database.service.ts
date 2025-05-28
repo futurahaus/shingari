@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { supabase } from '../../config/supabase.config';
 import { DatabaseLogger } from './database.logger';
 import { PostgrestBuilder } from '@supabase/postgrest-js';
+import { AuthError } from '@supabase/supabase-js';
 
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
@@ -10,9 +11,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   async onModuleInit() {
     this.logger.logInfo('Initializing database connection...');
     try {
-      // Simple connection test
-      const { data, error } = await supabase.auth.getSession();
-
+      const { error } = await supabase.auth.getSession();
       if (error) {
         this.logger.logError('Database Connection', error);
       } else {
@@ -20,6 +19,28 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       }
     } catch (error) {
       this.logger.logError('Database Connection', error);
+    }
+  }
+
+  async testConnection(email: string, password: string) {
+    this.logger.logInfo(`Testing connection with email: ${email}`);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        this.logger.logError('Authentication Test', error);
+        return { success: false, error: error.message };
+      }
+
+      this.logger.logInfo('Successfully authenticated user');
+      return { success: true, user: data.user };
+    } catch (error) {
+      const authError = error as AuthError;
+      this.logger.logError('Authentication Test', authError);
+      return { success: false, error: authError.message };
     }
   }
 

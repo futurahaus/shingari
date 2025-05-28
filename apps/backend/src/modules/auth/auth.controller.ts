@@ -29,5 +29,13 @@ export class AuthController {
     getProfile(@Request() req) {
         return req.user;
     }
+
+    @Post('logout')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(JwtAuthGuard)
+    async logout() {
+        await this.authService.signOut();
+        return { message: 'Successfully logged out' };
+    }
 }
 
