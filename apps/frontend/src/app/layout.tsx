@@ -22,14 +22,14 @@ export default function RootLayout({
     <html lang="es">
       <body className={inter.className}>
         <Providers>
-          <div className="min-h-screen flex flex-col">
-            <SearchHeader />
-            <Navbar />
-            <main className="flex-grow">
-              {children}
-            </main>
-            <Footer />
-          </div>
+        <div className="min-h-screen flex flex-col">
+          <SearchHeader />
+          <Navbar />
+          <main className="flex-grow">
+            {children}
+          </main>
+          <Footer />
+        </div>
         </Providers>
       </body>
     </html>

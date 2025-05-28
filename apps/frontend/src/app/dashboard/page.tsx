@@ -51,7 +51,7 @@ export default function DashboardPage() {
         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
           <p>{error}</p>
           <button
-            onClick={() => router.push('/login')}
+            onClick={() => router.push('/')}
             className="mt-4 text-sm font-medium text-red-600 hover:text-red-500"
           >
             Volver al inicio de sesión
