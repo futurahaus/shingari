@@ -1,7 +1,25 @@
+'use client';
+
 import Link from 'next/link';
-import { FaSearch, FaShoppingCart } from 'react-icons/fa';
+import { FaSearch, FaShoppingCart, FaUser } from 'react-icons/fa';
+import { useAuth } from '@/contexts/AuthContext';
+import { useState } from 'react';
 
 export default function SearchHeader() {
+  const { user, logout } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await logout();
+    } catch (error) {
+      console.error('Error during logout:', error);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   return (
     <div className="bg-white py-4">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -24,12 +42,31 @@ export default function SearchHeader() {
           </div>
 
           <div className="flex items-center space-x-4">
-            <Link
-              href="/login"
-              className="text-sm font-medium text-white bg-red-600 px-4 py-2 rounded-md hover:bg-red-700"
-            >
-              Inicia sesión
-            </Link>
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <Link
+                  href="/dashboard"
+                  className="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-red-600"
+                >
+                  <FaUser className="h-5 w-5" />
+                  <span>{user.email}</span>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="text-sm font-medium text-white bg-red-600 px-4 py-2 rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoggingOut ? 'Cerrando sesión...' : 'Cerrar sesión'}
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="text-sm font-medium text-white bg-red-600 px-4 py-2 rounded-md hover:bg-red-700"
+              >
+                Iniciar sesión
+              </Link>
+            )}
             <button className="text-gray-600 hover:text-red-500">
               <FaShoppingCart className="h-6 w-6" />
             </button>

@@ -13,7 +13,7 @@ export class AuthController {
     async login(@Body() loginDto: LoginDto) {
         const user = await this.authService.validateUser(loginDto.email, loginDto.password);
         if (!user) {
-            throw new UnauthorizedException('Invalid credentials');
+            throw new UnauthorizedException('Usuario o contraseña incorrectos');
         }
         return this.authService.generateTokens(user);
     }
