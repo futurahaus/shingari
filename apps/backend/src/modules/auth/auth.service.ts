@@ -1,7 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { DatabaseService } from '../database/database.service';
 import { DatabaseLogger } from '../database/database.logger';
+import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
@@ -9,7 +10,45 @@ export class AuthService {
         private readonly jwtService: JwtService,
         private readonly databaseService: DatabaseService,
         private readonly logger: DatabaseLogger,
-    ) {}
+    ) { }
+
+    async register(registerDto: RegisterDto) {
+        console.log(process.env.FRONTEND_URL);
+        try {
+            const { data, error } = await this.databaseService
+                .getClient()
+                .auth.signUp({
+                    email: registerDto.email,
+                    password: registerDto.password,
+                    options: {
+                        emailRedirectTo: `${process.env.FRONTEND_URL}/auth/callback`,
+                    },
+                });
+
+            if (error) {
+                if (error.message.includes('already registered')) {
+                    throw new ConflictException('Email already registered');
+                }
+                this.logger.logError('User Registration', error);
+                throw error;
+            }
+
+            if (!data.user) {
+                throw new Error('Failed to create user');
+            }
+
+            return {
+                message: 'Registration successful. Please check your email to confirm your account.',
+                user: {
+                    id: data.user.id,
+                    email: data.user.email,
+                }
+            };
+        } catch (error) {
+            this.logger.logError('User Registration', error);
+            throw error;
+        }
+    }
 
     async validateUser(email: string, password: string): Promise<any> {
         try {
@@ -21,6 +60,9 @@ export class AuthService {
                 });
 
             if (error) {
+                if (error.message.includes('Email not confirmed')) {
+                    throw new UnauthorizedException('Please confirm your email before logging in');
+                }
                 this.logger.logError('User Validation', error);
                 return null;
             }
@@ -34,7 +76,7 @@ export class AuthService {
             return result;
         } catch (error) {
             this.logger.logError('User Validation', error);
-            return null;
+            throw error;
         }
     }
 
@@ -65,12 +107,10 @@ export class AuthService {
 
     async refreshTokens(refreshToken: string) {
         try {
-            // Verify the refresh token
             const payload = await this.jwtService.verifyAsync(refreshToken, {
                 secret: process.env.JWT_REFRESH_SECRET,
             });
 
-            // Get current session from Supabase
             const { data: { user }, error } = await this.databaseService
                 .getClient()
                 .auth.getUser();
@@ -79,7 +119,6 @@ export class AuthService {
                 throw new UnauthorizedException('Invalid refresh token');
             }
 
-            // Generate new tokens
             return this.generateTokens(user);
         } catch (error) {
             this.logger.logError('Token Refresh', error);

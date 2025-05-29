@@ -26,10 +26,12 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccessMessage('');
     setIsLoading(true);
 
     try {
@@ -70,6 +72,42 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     }
   };
 
+  const handleRegister = async () => {
+    setError('');
+    setSuccessMessage('');
+    setIsLoading(true);
+
+    try {
+      console.log('Attempting registration with:', { email: formData.email });
+
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      console.log('Register response status:', response.status);
+
+      const data = await response.json();
+      console.log('Register response:', data);
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al registrar usuario');
+      }
+
+      setSuccessMessage(data.message);
+      // Clear form after successful registration
+      setFormData({ email: '', password: '' });
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError(err instanceof Error ? err.message : 'Error al registrar usuario');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -102,6 +140,11 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded relative" role="alert">
                 <span className="block sm:inline">{error}</span>
+              </div>
+            )}
+            {successMessage && (
+              <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded relative" role="alert">
+                <span className="block sm:inline">{successMessage}</span>
               </div>
             )}
             <div>
@@ -178,17 +221,13 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 ¿Aún no estás registrado?
               </p>
             </div>
-            <Link
-              href="/register"
-              onClick={(e) => {
-                e.preventDefault();
-                onClose();
-                router.push('/register');
-              }}
-              className="block w-full bg-red-600 text-white py-3 px-4 rounded-lg text-base font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 text-center"
+            <button
+              onClick={handleRegister}
+              disabled={isLoading}
+              className="block w-full bg-red-600 text-white py-3 px-4 rounded-lg text-base font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 text-center disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Regístrate
-            </Link>
+            </button>
           </div>
         </div>
       </div>
