@@ -49,16 +49,3 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
     },
   },
 });
-
-// Direct database connection config (if needed)
-export const supabaseConfig = {
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : undefined,
-  database: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  poolMode: 'transaction',
-  ssl: {
-    rejectUnauthorized: true, // Enforce SSL certificate validation
-  },
-};
