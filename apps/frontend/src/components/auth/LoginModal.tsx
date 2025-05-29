@@ -54,9 +54,10 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         throw new Error(data.message || 'Error al iniciar sesión');
       }
 
-      // Store tokens in cookies
-      document.cookie = `accessToken=${data.accessToken}; path=/`;
-      document.cookie = `refreshToken=${data.refreshToken}; path=/`;
+      // Store tokens in localStorage
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      localStorage.setItem('user', JSON.stringify(data.user));
 
       // Use the auth context to handle login
       login(data.accessToken, data.refreshToken, data.user);

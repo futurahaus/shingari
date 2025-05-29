@@ -36,16 +36,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Set cookies for the tokens
-    const cookieOptions = 'Path=/; HttpOnly; SameSite=Strict';
-    const headers = new Headers();
-    headers.append('Set-Cookie', `accessToken=${data.accessToken}; ${cookieOptions}`);
-    headers.append('Set-Cookie', `refreshToken=${data.refreshToken}; ${cookieOptions}`);
-
-    return NextResponse.json(data, {
-      headers,
-      status: 200
-    });
+    return NextResponse.json(data, { status: 200 });
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(

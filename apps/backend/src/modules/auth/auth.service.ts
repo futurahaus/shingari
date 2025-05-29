@@ -13,7 +13,6 @@ export class AuthService {
     ) { }
 
     async register(registerDto: RegisterDto) {
-        console.log(process.env.FRONTEND_URL);
         try {
             const { data, error } = await this.databaseService
                 .getClient()
@@ -21,7 +20,7 @@ export class AuthService {
                     email: registerDto.email,
                     password: registerDto.password,
                     options: {
-                        emailRedirectTo: `${process.env.FRONTEND_URL}/auth/callback`,
+                        emailRedirectTo: `${process.env.FRONTEND_URL}`,
                     },
                 });
 

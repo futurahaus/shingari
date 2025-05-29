@@ -19,15 +19,9 @@ export async function POST(request: Request) {
       );
     }
 
-    // Clear the auth cookies
-    const cookieOptions = 'Path=/; HttpOnly; SameSite=Strict; Max-Age=0';
-    const headers = new Headers();
-    headers.append('Set-Cookie', `accessToken=; ${cookieOptions}`);
-    headers.append('Set-Cookie', `refreshToken=; ${cookieOptions}`);
-
     return NextResponse.json(
       { message: 'Logged out successfully' },
-      { headers, status: 200 }
+      { status: 200 }
     );
   } catch (error) {
     console.error('Logout error:', error);
