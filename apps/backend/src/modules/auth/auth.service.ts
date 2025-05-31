@@ -83,7 +83,8 @@ export class AuthService {
         const payload = {
             email: user.email,
             sub: user.id,
-            provider: user.app_metadata?.provider || 'email'
+            provider: user.app_metadata?.provider || 'email',
+            role: user.app_metadata?.role
         };
 
         const [accessToken, refreshToken] = await Promise.all([
