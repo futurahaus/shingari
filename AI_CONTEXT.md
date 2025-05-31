@@ -6,7 +6,7 @@ Shingari es un monorepo gestionado con Yarn Workspaces, compuesto por una aplica
 
 ## Backend (`apps/backend`)
 
-Aplicación construida con NestJS.
+Aplicación construida con NestJS. **Todas las rutas de la API del backend están prefijadas con `/api`** (configurado mediante `app.setGlobalPrefix('api');` en `main.ts`).
 
 ### Estructura Principal de `apps/backend/src`:
 
