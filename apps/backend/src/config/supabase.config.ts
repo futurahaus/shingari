@@ -15,11 +15,6 @@ for (const envVar of requiredEnvVars) {
 const supabaseUrl = process.env.SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_ANON_KEY!;
 
-// Log environment variable status (without exposing full values)
-console.log('Supabase Configuration:');
-console.log('- URL configured:', !!process.env.SUPABASE_URL);
-console.log('- Key configured:', !!process.env.SUPABASE_ANON_KEY);
-
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     persistSession: false,
