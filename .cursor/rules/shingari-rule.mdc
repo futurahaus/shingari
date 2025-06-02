@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Siempre revisa el archivo AI_CONTEXT.md en el root del proyecto que contiene la estructura general del proyecto. Ademas, cada vez que se actualice la estructura, este archivo debe mantenerse actualizado
