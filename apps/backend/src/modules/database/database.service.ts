@@ -1,16 +1,32 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { supabase } from '../../config/supabase.config';
 import { DatabaseLogger } from './database.logger';
 import { PostgrestBuilder } from '@supabase/postgrest-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
-  constructor(private readonly logger: DatabaseLogger) {}
+  private readonly supabase: SupabaseClient;
+  private readonly supabaseAdmin: SupabaseClient;
+
+  constructor(private readonly logger: DatabaseLogger) {
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+    const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceRoleKey) {
+      throw new Error(
+        'Missing required environment variables. Please check SUPABASE_URL, SUPABASE_ANON_KEY, and SUPABASE_SERVICE_ROLE_KEY'
+      );
+    }
+
+    this.supabase = createClient(supabaseUrl, supabaseAnonKey);
+    this.supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
+  }
 
   async onModuleInit() {
     this.logger.logInfo('Initializing database connection...');
     try {
-      const { error } = await supabase.auth.getSession();
+      const { error } = await this.supabase.auth.getSession();
       if (error) {
         this.logger.logError('Database Connection', error);
       } else {
@@ -24,15 +40,19 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   async onModuleDestroy() {
     this.logger.logInfo('Cleaning up database connections...');
     try {
-      await supabase.auth.signOut();
+      await this.supabase.auth.signOut();
       this.logger.logInfo('Successfully cleaned up database connections');
     } catch (error) {
       this.logger.logError('Database Cleanup', error);
     }
   }
 
-  getClient() {
-    return supabase;
+  getClient(): SupabaseClient {
+    return this.supabase;
+  }
+
+  getAdminClient(): SupabaseClient {
+    return this.supabaseAdmin;
   }
 
   async executeQuery<T>(
