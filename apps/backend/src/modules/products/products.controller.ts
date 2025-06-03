@@ -11,6 +11,7 @@ import {
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
+  ParseIntPipe,
   Request as NestRequest,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
@@ -85,15 +86,15 @@ export class ProductsController {
 
   // --- User-Specific Endpoint --- 
   @Get('discounts')
-  @UseGuards(JwtAuthGuard) // Requiere autenticación
   @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Obtener descuentos de productos para el usuario autenticado' })
-  @ApiQuery({ name: 'productId', description: 'ID opcional del producto para filtrar descuentos', required: false, type: 'string', format: 'uuid' })
+  @ApiQuery({ name: 'productId', description: 'ID numérico opcional del producto para filtrar descuentos', required: false, type: 'integer' })
   @ApiResponse({ status: 200, description: 'Lista de descuentos obtenida.', type: [ProductDiscountResponseDto] })
   @ApiResponse({ status: 401, description: 'No autorizado.' })
   async findDiscountsForUser(
     @NestRequest() req, // Para obtener req.user.id
-    @Query('productId', new ParseUUIDPipe({ optional: true })) productId?: string,
+    @Query('productId', new ParseIntPipe({ optional: true })) productId?: number,
   ): Promise<ProductDiscountResponseDto[]> {
     const userId = req.user.id;
     return this.productsService.findDiscountsForUser(userId, productId);
@@ -103,10 +104,10 @@ export class ProductsController {
   // Es buena práctica tener un endpoint para obtener detalles de un solo producto.
   @Get(':id')
   @ApiOperation({ summary: 'Obtener detalles de un producto específico por su ID' })
-  @ApiParam({ name: 'id', description: 'ID del producto', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', description: 'ID numérico del producto', type: 'integer' })
   @ApiResponse({ status: 200, description: 'Detalles del producto obtenidos.', type: ProductResponseDto })
   @ApiResponse({ status: 404, description: 'Producto no encontrado.' })
-  async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<ProductResponseDto> {
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<ProductResponseDto> {
     return this.productsService.findOne(id);
   }
 } 

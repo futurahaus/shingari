@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'src/modules/prisma/prisma.service'; // Ajusta si tu ruta es diferente
-import { Prisma, products as ProductPrismaType, product_states, categories as CategoryPrismaType, products_categories as ProductsCategoriesPrismaType } from '../../../generated/prisma'; // Importar tipos y enums de Prisma
+import { Prisma, products as ProductPrismaType, product_states, categories as CategoryPrismaType, products_categories as ProductsCategoriesPrismaType, products_discounts as ProductDiscountPrismaType } from '../../../generated/prisma'; // Importar tipos y enums de Prisma
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductDto, ProductSortByPrice } from './dto/query-product.dto';
@@ -10,6 +10,11 @@ import { ProductDiscountResponseDto } from './dto/product-discount-response.dto'
 // Tipo para el producto con categorías incluidas, específico para findAllPublic y findOne
 type ProductWithCategoriesForResponse = ProductPrismaType & {
     products_categories: (ProductsCategoriesPrismaType & { categories: CategoryPrismaType })[];
+};
+
+// Tipo para el descuento con detalles del producto incluidos
+type DiscountWithProductDetails = ProductDiscountPrismaType & {
+    products?: { list_price: Prisma.Decimal, name: string | null } | null;
 };
 
 @Injectable()
@@ -76,10 +81,26 @@ export class ProductsService {
         };
     }
 
-    async findOne(id: string): Promise<ProductResponseDto> {
-        // Placeholder - Implementar con Prisma si es necesario
-        console.log('findOne called with id:', id);
-        throw new NotFoundException('Implementar findOne en ProductsService');
+    async findOne(id: number): Promise<ProductResponseDto> {
+        const product = await this.prisma.products.findUnique({
+            where: {
+                id: id,
+                status: product_states.active, // Solo encontrar productos activos
+            },
+            include: {
+                products_categories: {
+                    include: {
+                        categories: true, // Incluir los datos de la categoría
+                    },
+                },
+            },
+        });
+
+        if (!product) {
+            throw new NotFoundException(`Producto con ID "${id}" no encontrado o no está activo.`);
+        }
+
+        return this.mapToProductResponseDto(product as ProductWithCategoriesForResponse);
     }
 
     async create(createProductDto: CreateProductDto): Promise<ProductResponseDto> {
@@ -100,10 +121,45 @@ export class ProductsService {
         return;
     }
 
-    async findDiscountsForUser(userId: string, productId?: string): Promise<ProductDiscountResponseDto[]> {
-        // Placeholder - Implementar con Prisma si es necesario
-        console.log('findDiscountsForUser called for userId:', userId, 'productId:', productId);
-        return [];
+    async findDiscountsForUser(userId: string, productId?: number): Promise<ProductDiscountResponseDto[]> {
+        const now = new Date();
+        const where: Prisma.products_discountsWhereInput = {
+            user_id: userId,
+            is_active: true,
+            AND: [
+                {
+                    OR: [
+                        { valid_from: { lte: now } },
+                        { valid_from: null }, // Considerar si null significa siempre válido desde el pasado
+                    ],
+                },
+                {
+                    OR: [
+                        { valid_to: { gte: now } },
+                        { valid_to: null }, // Considerar si null significa que no expira
+                    ],
+                },
+            ],
+        };
+
+        if (productId) {
+            where.product_id = productId;
+        }
+
+        const discounts = await this.prisma.products_discounts.findMany({
+            where,
+            include: {
+                products: { // Incluir el producto para obtener su precio original y nombre
+                    select: { list_price: true, name: true },
+                },
+            },
+            orderBy: {
+                // Opcional: ordenar los descuentos, por ejemplo, por fecha de creación o por producto
+                // id: 'desc' // Ejemplo
+            }
+        });
+
+        return discounts.map(d => this.mapToProductDiscountResponseDto(d as DiscountWithProductDetails));
     }
 
     private mapToProductResponseDto(product: ProductWithCategoriesForResponse): ProductResponseDto {
@@ -119,33 +175,21 @@ export class ProductsService {
         };
     }
 
-    // Placeholder para el mapper de descuentos, mantenerlo por si se usa en el futuro
-    private mapToProductDiscountResponseDto(discount: any): ProductDiscountResponseDto {
-        const originalPrice = discount.product?.price?.toNumber() || 0;
-        // Lógica de ejemplo, ajustar según el significado de discount.price (porcentaje o valor final)
-        const discountValue = discount.price?.toNumber() || 0;
-        let finalDiscountPercentage = 0;
-        let finalDiscountedPrice = originalPrice;
-
-        if (discountValue > 0 && discountValue <= 100) { // Asumiendo que discount.price es el porcentaje si es <=100
-            finalDiscountPercentage = discountValue;
-            finalDiscountedPrice = originalPrice * (1 - finalDiscountPercentage / 100);
-        } else if (discountValue > 0 && discountValue < originalPrice) { // Asumiendo que es un precio final descontado
-            finalDiscountedPrice = discountValue;
-            if (originalPrice > 0) finalDiscountPercentage = (1 - (discountValue / originalPrice)) * 100;
-        }
+    private mapToProductDiscountResponseDto(discount: DiscountWithProductDetails): ProductDiscountResponseDto {
+        const originalPrice = discount.products?.list_price?.toNumber() || 0;
+        const discountedPrice = discount.price?.toNumber() || 0;
 
         return {
-            id: discount.id?.toString(),
-            productId: discount.product_id?.toString(),
-            userId: discount.user_id,
-            discountPercentage: parseFloat(finalDiscountPercentage.toFixed(2)),
+            id: discount.id.toString(),
+            productId: discount.product_id?.toString() || '', // product_id puede ser null
+            productName: discount.products?.name || undefined,
+            userId: discount.user_id || '', // user_id puede ser null
             originalPrice: originalPrice,
-            discountedPrice: parseFloat(finalDiscountedPrice.toFixed(2)),
-            startDate: discount.valid_from,
-            endDate: discount.valid_to,
-            isActive: discount.is_active ?? false,
-            createdAt: new Date(),
+            discountedPrice: discountedPrice,
+            startDate: discount.valid_from || undefined,
+            endDate: discount.valid_to || undefined,
+            isActive: discount.is_active ?? false, // is_active puede ser null, default a false
+            createdAt: new Date(), // Placeholder: products_discounts no tiene createdAt. Considerar añadirlo.
         };
     }
 } 

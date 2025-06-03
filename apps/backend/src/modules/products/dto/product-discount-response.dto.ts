@@ -7,15 +7,11 @@ export class ProductDiscountResponseDto {
   @ApiProperty({ description: 'ID del producto asociado al descuento' })
   productId: string;
 
-  // Opcionalmente, podrías incluir el nombre o algunos detalles del producto aquí
-  // @ApiPropertyOptional({ description: 'Nombre del producto' })
-  // productName?: string;
+  @ApiPropertyOptional({ description: 'Nombre del producto asociado al descuento' })
+  productName?: string;
 
   @ApiProperty({ description: 'ID del usuario al que aplica el descuento' })
   userId: string;
-
-  @ApiProperty({ description: 'Porcentaje de descuento', example: 10, type: Number })
-  discountPercentage: number;
 
   @ApiProperty({ description: 'Precio original del producto', example: 100.00, type: Number })
   originalPrice: number;
@@ -32,6 +28,6 @@ export class ProductDiscountResponseDto {
   @ApiProperty({ description: 'Indica si el descuento está activo', example: true })
   isActive: boolean;
 
-  @ApiProperty({ description: 'Fecha de creación del descuento' })
+  @ApiProperty({ description: 'Fecha de creación del descuento (placeholder si no existe en DB)' })
   createdAt: Date;
 } 
