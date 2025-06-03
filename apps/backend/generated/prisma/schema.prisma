@@ -384,9 +384,10 @@ model products {
   name                String                @db.VarChar(150)
   description         String?
   image_url           String?
-  price               Decimal               @db.Decimal(10, 2)
+  list_price          Decimal               @db.Decimal(10, 2)
   created_at          DateTime?             @default(now()) @db.Timestamp(6)
   status              product_states?
+  wholesale_price     Decimal?              @db.Decimal
   products_categories products_categories[]
   products_discounts  products_discounts[]
   products_stock      products_stock[]

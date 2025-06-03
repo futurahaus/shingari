@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import { IsOptional, IsInt, Min, IsString, IsArray, IsEnum } from 'class-validator';
 
 export enum ProductSortByPrice {
@@ -27,12 +27,20 @@ export class QueryProductDto {
   @IsString()
   searchName?: string;
 
-  @ApiPropertyOptional({ description: 'IDs o nombres de categorías para filtrar (separados por coma si es string, o array)', type: [String] })
+  @ApiPropertyOptional({ 
+    description: 'Nombres de categorías para filtrar. Para múltiples categorías, envíe el parámetro repetido (ej: categoryFilters=Cat1&categoryFilters=Cat2). Swagger UI debería manejar esto automáticamente.',
+    type: [String],
+    name: 'categoryFilters'
+  })
   @IsOptional()
+  @Transform(({ value }) => {
+    if (value && !Array.isArray(value)) {
+      return [value];
+    }
+    return value;
+  })
   @IsArray()
-  // Si las categorías son IDs numéricos, podrías usar @IsNumberString({ each: true }) o transformar y validar.
-  // Por ahora, asumimos strings para flexibilidad (pueden ser slugs o nombres).
-  @IsString({ each: true }) 
+  @IsString({ each: true })
   categoryFilters?: string[];
 
   @ApiPropertyOptional({ description: 'Ordenar por precio', enum: ProductSortByPrice })
