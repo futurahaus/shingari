@@ -4,6 +4,35 @@ import { DatabaseService } from '../database/database.service';
 import { DatabaseLogger } from '../database/database.logger';
 import { RegisterDto } from './dto/register.dto';
 
+interface UserRole {
+    roles: {
+        name: string;
+    };
+}
+
+interface AuthUser {
+    id: string;
+    email: string;
+    role: string;
+    roles?: string[];
+    app_metadata?: {
+        provider?: string;
+        roles?: string[];
+    };
+}
+
+interface SupabaseAuthResponse {
+    data: {
+        user: AuthUser | null;
+    };
+    error: Error | null;
+}
+
+interface SupabaseRolesResponse {
+    data: UserRole[] | null;
+    error: Error | null;
+}
+
 @Injectable()
 export class AuthService {
     constructor(
@@ -94,77 +123,77 @@ export class AuthService {
         }
     }
 
-    async validateUser(email: string, password: string): Promise<any> {
-        try {
-            const { data: { user }, error } = await this.databaseService
-                .getClient()
-                .auth.signInWithPassword({
-                    email,
-                    password,
-                });
+    private async authenticateAndGetRoles(email: string, password: string): Promise<{ user: AuthUser | null; roles: string[] }> {
+        // Step 1: Authenticate user
+        const { data: { user }, error: authError } = await this.databaseService
+            .getClient()
+            .auth.signInWithPassword({ email, password }) as SupabaseAuthResponse;
 
-            if (error) {
-                if (error.message.includes('Email not confirmed')) {
-                    throw new UnauthorizedException('Please confirm your email before logging in');
-                }
-                this.logger.logError('User Validation', error);
-                return null;
+        if (authError) {
+            if (authError.message.includes('Email not confirmed')) {
+                throw new UnauthorizedException('Please confirm your email before logging in');
             }
+            this.logger.logError('User Authentication', authError);
+            return { user: null, roles: [] };
+        }
 
-            if (!user) {
-                return null;
-            }
+        if (!user) {
+            return { user: null, roles: [] };
+        }
 
-            // Fetch user roles from user_roles table
-            const { data: userRoles, error: rolesError } = await this.databaseService
-                .getAdminClient()
-                .from('user_roles')
-                .select('roles:role_id(name)')
-                .eq('user_id', user.id);
+        // Step 2: Fetch user roles in parallel with authentication
+        const { data: userRoles, error: rolesError } = await this.databaseService
+            .getAdminClient()
+            .from('user_roles')
+            .select('roles:role_id(name)')
+            .eq('user_id', user.id) as SupabaseRolesResponse;
 
-            if (rolesError) {
-                this.logger.logError('User Roles Fetch', rolesError);
-                throw rolesError;
-            }
+        if (rolesError) {
+            this.logger.logError('User Roles Fetch', rolesError);
+            throw rolesError;
+        }
 
-            // Transform roles into a format suitable for JWT
-            const customRoles = (userRoles || []).map(ur => {
-                const role = ur.roles as unknown as { name: string };
-                return role.name;
-            });
+        const customRoles = (userRoles || []).map(ur => ur.roles.name);
+        const roles = ['authenticated', ...customRoles];
 
-            // Combine the authenticated role with custom roles
-            const roles = ['authenticated', ...customRoles];
+        return { user, roles };
+    }
 
-            // Update user's app_metadata with roles
-            const { error: updateError } = await this.databaseService
-                .getAdminClient()
-                .auth.admin.updateUserById(
-                    user.id,
-                    {
-                        app_metadata: {
-                            ...user.app_metadata,
-                            roles,
-                            provider: user.app_metadata?.provider || 'email'
-                        }
-                    }
-                );
-
-            if (updateError) {
-                this.logger.logError('User Metadata Update', updateError);
-                throw updateError;
-            }
-
-            // Return user without sensitive data and include roles
-            const { email_confirmed_at, phone, phone_confirmed_at, ...result } = user;
-            return {
-                ...result,
-                role: 'authenticated', // Keep the original role
+    private async updateUserWithRoles(user: AuthUser, roles: string[]): Promise<AuthUser> {
+        const { error: updateError } = await this.databaseService
+            .getAdminClient()
+            .auth.admin.updateUserById(user.id, {
                 app_metadata: {
-                    ...result.app_metadata,
+                    provider: user.app_metadata?.provider || 'email',
                     roles
                 }
-            };
+            });
+
+        if (updateError) {
+            this.logger.logError('User Metadata Update', updateError);
+            throw updateError;
+        }
+
+        return {
+            ...user,
+            role: roles[0],
+            roles,
+            app_metadata: {
+                ...user.app_metadata,
+                provider: user.app_metadata?.provider || 'email',
+                roles
+            }
+        };
+    }
+
+    async validateUser(email: string, password: string): Promise<AuthUser | null> {
+        try {
+            // Step 1: Authenticate and get roles in parallel
+            const { user, roles } = await this.authenticateAndGetRoles(email, password);
+            if (!user) return null;
+
+            // Step 2: Update user with roles
+            return this.updateUserWithRoles(user, roles);
         } catch (error) {
             this.logger.logError('User Validation', error);
             throw error;
