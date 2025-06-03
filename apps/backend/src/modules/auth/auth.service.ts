@@ -115,9 +115,56 @@ export class AuthService {
                 return null;
             }
 
-            // Return user without sensitive data
+            // Fetch user roles from user_roles table
+            const { data: userRoles, error: rolesError } = await this.databaseService
+                .getAdminClient()
+                .from('user_roles')
+                .select('roles:role_id(name)')
+                .eq('user_id', user.id);
+
+            if (rolesError) {
+                this.logger.logError('User Roles Fetch', rolesError);
+                throw rolesError;
+            }
+
+            // Transform roles into a format suitable for JWT
+            const customRoles = (userRoles || []).map(ur => {
+                const role = ur.roles as unknown as { name: string };
+                return role.name;
+            });
+
+            // Combine the authenticated role with custom roles
+            const roles = ['authenticated', ...customRoles];
+
+            // Update user's app_metadata with roles
+            const { error: updateError } = await this.databaseService
+                .getAdminClient()
+                .auth.admin.updateUserById(
+                    user.id,
+                    {
+                        app_metadata: {
+                            ...user.app_metadata,
+                            roles,
+                            provider: user.app_metadata?.provider || 'email'
+                        }
+                    }
+                );
+
+            if (updateError) {
+                this.logger.logError('User Metadata Update', updateError);
+                throw updateError;
+            }
+
+            // Return user without sensitive data and include roles
             const { email_confirmed_at, phone, phone_confirmed_at, ...result } = user;
-            return result;
+            return {
+                ...result,
+                role: 'authenticated', // Keep the original role
+                app_metadata: {
+                    ...result.app_metadata,
+                    roles
+                }
+            };
         } catch (error) {
             this.logger.logError('User Validation', error);
             throw error;
@@ -129,7 +176,8 @@ export class AuthService {
             email: user.email,
             sub: user.id,
             provider: user.app_metadata?.provider || 'email',
-            role: user.app_metadata?.role
+            role: user.role || 'authenticated',  // Include the root-level role
+            roles: user.app_metadata?.roles || ['authenticated']  // Include the roles array with default
         };
 
         const [accessToken, refreshToken] = await Promise.all([
