@@ -20,12 +20,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.8.2
- * Query Engine version: 2060c79ba17c6bb9f5823312b6f6b7f4a845738e
+ * Prisma Client JS version: 6.9.0
+ * Query Engine version: 81e4af48011447c3cc503a190e86995b66d2a28e
  */
 Prisma.prismaVersion = {
-  client: "6.8.2",
-  engine: "2060c79ba17c6bb9f5823312b6f6b7f4a845738e"
+  client: "6.9.0",
+  engine: "81e4af48011447c3cc503a190e86995b66d2a28e"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -339,6 +339,53 @@ exports.Prisma.Public_usersScalarFieldEnum = {
   uuid: 'uuid'
 };
 
+exports.Prisma.CategoriesScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  created_at: 'created_at'
+};
+
+exports.Prisma.ProductsScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  image_url: 'image_url',
+  price: 'price',
+  created_at: 'created_at',
+  status: 'status'
+};
+
+exports.Prisma.Products_categoriesScalarFieldEnum = {
+  product_id: 'product_id',
+  category_id: 'category_id'
+};
+
+exports.Prisma.Products_discountsScalarFieldEnum = {
+  id: 'id',
+  product_id: 'product_id',
+  price: 'price',
+  is_active: 'is_active',
+  valid_from: 'valid_from',
+  valid_to: 'valid_to',
+  user_id: 'user_id'
+};
+
+exports.Prisma.Products_stockScalarFieldEnum = {
+  id: 'id',
+  product_id: 'product_id',
+  quantity: 'quantity',
+  unit_id: 'unit_id',
+  updated_at: 'updated_at'
+};
+
+exports.Prisma.UnitsScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  description: 'description',
+  created_at: 'created_at'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -405,6 +452,13 @@ exports.gender = exports.$Enums.gender = {
   O: 'O'
 };
 
+exports.product_states = exports.$Enums.product_states = {
+  active: 'active',
+  draft: 'draft',
+  paused: 'paused',
+  deleted: 'deleted'
+};
+
 exports.Prisma.ModelName = {
   audit_log_entries: 'audit_log_entries',
   flow_state: 'flow_state',
@@ -424,7 +478,13 @@ exports.Prisma.ModelName = {
   auth_users: 'auth_users',
   roles: 'roles',
   user_roles: 'user_roles',
-  public_users: 'public_users'
+  public_users: 'public_users',
+  categories: 'categories',
+  products: 'products',
+  products_categories: 'products_categories',
+  products_discounts: 'products_discounts',
+  products_stock: 'products_stock',
+  units: 'units'
 };
 
 /**
