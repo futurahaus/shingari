@@ -49,7 +49,7 @@ export class AuthService {
                     email: registerDto.email,
                     password: registerDto.password,
                     options: {
-                        emailRedirectTo: `${process.env.FRONTEND_URL}`,
+                        emailRedirectTo: `${process.env.FRONTEND_URL}/auth/verify-email`,
                     },
                 });
 
@@ -66,49 +66,49 @@ export class AuthService {
             }
 
             // Create entry in public.users table using admin client
-            const { error: insertError } = await this.databaseService
-                .getAdminClient()
-                .from('users')
-                .insert({
-                    uuid: data.user.id,
-                });
+            // const { error: insertError } = await this.databaseService
+            //     .getAdminClient()
+            //     .from('users')
+            //     .insert({
+            //         uuid: data.user.id,
+            //     });
 
-            if (insertError) {
-                this.logger.logError('User Table Creation', insertError);
-                throw insertError;
-            }
+            // if (insertError) {
+            //     this.logger.logError('User Table Creation', insertError);
+            //     throw insertError;
+            // }
 
-            // TODO: Move to email verification time.
-            // Get the consumer role ID
-            const { data: roleData, error: roleError } = await this.databaseService
-                .getAdminClient()
-                .from('roles')
-                .select('id')
-                .eq('name', 'consumer')
-                .single();
+            // // TODO: Move to email verification time.
+            // // Get the consumer role ID
+            // const { data: roleData, error: roleError } = await this.databaseService
+            //     .getAdminClient()
+            //     .from('roles')
+            //     .select('id')
+            //     .eq('name', 'consumer')
+            //     .single();
 
-            if (roleError) {
-                this.logger.logError('Role Fetch', roleError);
-                throw roleError;
-            }
+            // if (roleError) {
+            //     this.logger.logError('Role Fetch', roleError);
+            //     throw roleError;
+            // }
 
-            if (!roleData) {
-                throw new Error('Consumer role not found');
-            }
+            // if (!roleData) {
+            //     throw new Error('Consumer role not found');
+            // }
 
-            // Create user role association
-            const { error: userRoleError } = await this.databaseService
-                .getAdminClient()
-                .from('user_roles')
-                .insert({
-                    user_id: data.user.id,
-                    role_id: roleData.id,
-                });
+            // // Create user role association
+            // const { error: userRoleError } = await this.databaseService
+            //     .getAdminClient()
+            //     .from('user_roles')
+            //     .insert({
+            //         user_id: data.user.id,
+            //         role_id: roleData.id,
+            //     });
 
-            if (userRoleError) {
-                this.logger.logError('User Role Creation', userRoleError);
-                throw userRoleError;
-            }
+            // if (userRoleError) {
+            //     this.logger.logError('User Role Creation', userRoleError);
+            //     throw userRoleError;
+            // }
 
             return {
                 message: 'Registration successful. Please check your email to confirm your account.',
@@ -258,6 +258,27 @@ export class AuthService {
             this.logger.logInfo('User signed out successfully');
         } catch (error) {
             this.logger.logError('Sign Out', error);
+            throw error;
+        }
+    }
+
+    async verifyEmail(token: string) {
+        this.logger.logInfo('Attempting to verify email');
+
+        try {
+            const { data: { user }, error } = await this.databaseService
+                .getClient()
+                .auth.getUser(token);
+
+            if (error) {
+                this.logger.logError('Email verification failed', error);
+                throw error;
+            }
+
+            this.logger.logInfo('Email verified successfully');
+            return { message: 'Email verified successfully', user };
+        } catch (error) {
+            this.logger.logError('Email verification error', error);
             throw error;
         }
     }

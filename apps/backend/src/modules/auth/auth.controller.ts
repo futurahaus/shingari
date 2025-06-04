@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, UnauthorizedException, Get, Request as NestRequest } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, UnauthorizedException, Get, Request as NestRequest, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -8,10 +8,13 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nes
 import { LoginResponseDto } from './dto/login-response.dto';
 import { SimpleMessageResponseDto } from './dto/simple-message-response.dto';
 import { MeResponseDto } from './dto/me-response.dto';
+import { Logger } from '@nestjs/common';
 
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
+    private readonly logger = new Logger(AuthController.name);
+
     constructor(private readonly authService: AuthService) { }
 
     @Post('register')
@@ -23,6 +26,50 @@ export class AuthController {
     async register(@Body() registerDto: RegisterDto): Promise<SimpleMessageResponseDto> {
         const result = await this.authService.register(registerDto);
         return { message: result.message };
+    }
+
+    @Get('verify-email')
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Verify email' })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Email verified successfully.', type: SimpleMessageResponseDto })
+    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
+    async verifyEmail(
+        @Query('access_token') accessToken?: string,
+        @Query('type') type?: string,
+        @Query('refresh_token') refreshToken?: string,
+        @Query('expires_in') expiresIn?: string,
+        @Query('expires_at') expiresAt?: string,
+        @Query('token_type') tokenType?: string,
+    ): Promise<SimpleMessageResponseDto> {
+        this.logger.log('Verifying email with token parameters', {
+            accessToken: accessToken?.substring(0, 10) + '...',
+            type,
+            tokenType,
+            expiresIn,
+            expiresAt
+        });
+
+        if (!accessToken) {
+            throw new UnauthorizedException('No access token provided');
+        }
+
+        try {
+            const result = await this.authService.verifyEmail(accessToken);
+
+            // If verification successful and we have refresh token, store it
+            if (refreshToken) {
+                // Store the refresh token or handle it as needed
+                this.logger.log('Storing refresh token for future use');
+            }
+
+            return result;
+        } catch (error) {
+            this.logger.error('Email verification failed', error);
+            if (error.message.includes('Invalid token format')) {
+                throw new UnauthorizedException('Invalid verification token');
+            }
+            throw error;
+        }
     }
 
     @Post('login')
@@ -70,5 +117,7 @@ export class AuthController {
         await this.authService.signOut();
         return { message: 'Successfully logged out' };
     }
+
+
 }
 
