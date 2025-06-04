@@ -28,7 +28,6 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
 
     if (!response.ok) {
-      // Check for specific error types
       if (data.code === 'otp_expired') {
         return NextResponse.json(
           { message: 'Verification link has expired. Please request a new one.' },
@@ -42,9 +41,9 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Email verification error:', error);
     return NextResponse.json(
-      { 
-        message: error instanceof Error 
-          ? error.message 
+      {
+        message: error instanceof Error
+          ? error.message
           : 'Failed to verify email. Please try again or request a new verification link.'
       },
       { status: 500 }

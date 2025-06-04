@@ -15,28 +15,34 @@ export default function VerifyEmailPage() {
   useEffect(() => {
     const verifyEmail = async () => {
       try {
-        // Get the hash from the URL
-        const hash = window.location.hash;
-        if (!hash) {
-          setStatus('error');
-          setMessage('No verification parameters found');
-          return;
-        }
+        // Debug logging
+        // First try search params
+        let accessToken = null;
+        let refreshToken = null;
+        let type = null;
 
-        // Remove the # and parse the parameters
-        const params = new URLSearchParams(hash.substring(1));
-        const accessToken = params.get('access_token');
-        const refreshToken = params.get('refresh_token');
-        const expiresIn = params.get('expires_in');
-        const expiresAt = params.get('expires_at');
+        // Check URL search params first
+        const searchParams = new URLSearchParams(window.location.search);
+        accessToken = searchParams.get('access_token');
+        refreshToken = searchParams.get('refresh_token');
+        type = searchParams.get('type');
+
+        // If not found in search params, check hash
+        if (!accessToken && window.location.hash) {
+          console.log('[VerifyEmailPage verifyEmail] Access token not found in search params, checking hash.');
+          const hashParams = new URLSearchParams(window.location.hash.substring(1));
+          accessToken = hashParams.get('access_token');
+          refreshToken = hashParams.get('refresh_token');
+          type = hashParams.get('type');
+        }
 
         if (!accessToken) {
           setStatus('error');
-          setMessage('No access token found');
+          setMessage('No verification parameters found. Please check your verification link and try again.');
+          console.error('[VerifyEmailPage verifyEmail] accessToken is falsy, returning. AccessToken value:', accessToken);
           return;
         }
 
-        // Call the backend API to get user info
         const response = await fetch(`/api/auth/verify-email?access_token=${accessToken}`, {
           method: 'GET',
           headers: {
@@ -61,16 +67,13 @@ export default function VerifyEmailPage() {
         setStatus('success');
         setMessage('Email verified successfully! Redirecting to dashboard...');
 
-        // Clear the hash from the URL without reloading the page
-        window.history.replaceState(null, '', window.location.pathname);
-
         // Redirect to dashboard since we're already logged in
         setTimeout(() => {
           router.push('/dashboard');
-        }, 3000);
+        }, 2000);
 
       } catch (error) {
-        console.error('Verification error:', error);
+        console.error('[VerifyEmailPage verifyEmail] Verification error:', error);
         setStatus('error');
         setMessage(error instanceof Error ? error.message : 'Failed to verify email');
       }
@@ -141,4 +144,4 @@ export default function VerifyEmailPage() {
       </div>
     </div>
   );
-} 
+}

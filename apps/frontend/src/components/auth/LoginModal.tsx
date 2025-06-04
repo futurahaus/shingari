@@ -28,58 +28,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
-  // Add email verification handling
-  useEffect(() => {
-    // Function to handle email verification
-    const handleEmailVerification = async (hash: string) => {
-      try {
-        setIsLoading(true);
-        setError('');
-
-        // Parse the hash to get the parameters
-        const params = new URLSearchParams(hash.replace('#', ''));
-        const accessToken = params.get('access_token');
-        const refreshToken = params.get('refresh_token');
-        const type = params.get('type');
-        const expiresIn = params.get('expires_in');
-        const expiresAt = params.get('expires_at');
-        const tokenType = params.get('token_type');
-
-        if (!accessToken) {
-          throw new Error('No access token found in URL');
-        }
-
-        // Call the backend to verify email
-        const response = await fetch(`/api/auth/verify-email?access_token=${accessToken}&type=${type}&refresh_token=${refreshToken}&expires_in=${expiresIn}&expires_at=${expiresAt}&token_type=${tokenType}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || 'Error verifying email');
-        }
-
-        setSuccessMessage('Email verified successfully! You can now log in.');
-
-        // Clear the hash from the URL without reloading the page
-        window.history.replaceState(null, '', window.location.pathname);
-      } catch (err) {
-        console.error('Email verification error:', err);
-        setError(err instanceof Error ? err.message : 'Error verifying email');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    // Check if we have a hash in the URL
-    if (typeof window !== 'undefined' && window.location.hash) {
-      handleEmailVerification(window.location.hash);
-    }
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
