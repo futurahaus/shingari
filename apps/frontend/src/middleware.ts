@@ -11,9 +11,8 @@ export function middleware(request: NextRequest) {
   );
 
   if (isProtectedPath) {
-    // Check for access token in Authorization header
-    const authHeader = request.headers.get('Authorization');
-    const accessToken = authHeader?.split(' ')[1];
+    // Check for access token in cookies
+    const accessToken = request.cookies.get('accessToken')?.value;
 
     if (!accessToken) {
       // Redirect to login if no token found
