@@ -2,9 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
-    // Get the query parameters
+    // Get all query parameters
     const searchParams = request.nextUrl.searchParams;
     const accessToken = searchParams.get('access_token');
+    const refreshToken = searchParams.get('refresh_token');
+    const type = searchParams.get('type');
+    const expiresIn = searchParams.get('expires_in');
+    const expiresAt = searchParams.get('expires_at');
+    const tokenType = searchParams.get('token_type');
 
     if (!accessToken) {
       return NextResponse.json(
@@ -13,17 +18,24 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Forward the request to your backend
+    // Construct backend URL with all parameters
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-    const response = await fetch(
-      `${backendUrl}/auth/verify-email?access_token=${accessToken}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    const backendApiUrl = new URL(`${backendUrl}/auth/verify-email`);
+
+    // Add all parameters to the backend URL
+    if (accessToken) backendApiUrl.searchParams.append('access_token', accessToken);
+    if (refreshToken) backendApiUrl.searchParams.append('refresh_token', refreshToken);
+    if (type) backendApiUrl.searchParams.append('type', type);
+    if (expiresIn) backendApiUrl.searchParams.append('expires_in', expiresIn);
+    if (expiresAt) backendApiUrl.searchParams.append('expires_at', expiresAt);
+    if (tokenType) backendApiUrl.searchParams.append('token_type', tokenType);
+
+    const response = await fetch(backendApiUrl.toString(), {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
     const data = await response.json();
 

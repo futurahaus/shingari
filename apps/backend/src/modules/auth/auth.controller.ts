@@ -41,7 +41,7 @@ export class AuthController {
         @Query('expires_at') expiresAt?: string,
         @Query('token_type') tokenType?: string,
     ): Promise<SimpleMessageResponseDto> {
-        this.logger.log('Verifying email with token parameters', {
+        this.logger.log('>> Verifying email with token parameters', {
             accessToken: accessToken?.substring(0, 10) + '...',
             type,
             tokenType,
