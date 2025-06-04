@@ -13,12 +13,18 @@ interface UserData {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout, accessToken } = useAuth();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Check if user is authenticated
+    if (!accessToken) {
+      router.push('/login?from=/dashboard');
+      return;
+    }
+
     const fetchUserData = async () => {
       try {
         const data = await api.get<UserData>('/auth/me', { requireAuth: true });
@@ -28,6 +34,7 @@ export default function DashboardPage() {
         setError(err instanceof Error ? err.message : 'Failed to fetch user data');
         if (err instanceof Error && err.message === 'Authentication required') {
           logout();
+          router.push('/login?from=/dashboard');
         }
       } finally {
         setLoading(false);
@@ -35,7 +42,7 @@ export default function DashboardPage() {
     };
 
     fetchUserData();
-  }, [logout]);
+  }, [accessToken, logout, router]);
 
   if (loading) {
     return (

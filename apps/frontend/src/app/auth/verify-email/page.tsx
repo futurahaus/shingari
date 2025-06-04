@@ -4,6 +4,23 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { api } from '@/lib/api';
+
+interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: {
+    id: string;
+    email: string;
+    [key: string]: unknown;
+  };
+}
+
+interface TokenExchangeRequest extends Record<string, unknown> {
+  email: string;
+  password: string;
+  supabaseToken: string;
+}
 
 export default function VerifyEmailPage() {
   const router = useRouter();
@@ -16,28 +33,26 @@ export default function VerifyEmailPage() {
     const verifyEmail = async () => {
       try {
         let accessToken = null;
-        let refreshToken = null;
-        let type = null;
         let expiresIn = null;
         let expiresAt = null;
         let tokenType = null;
 
-        const searchParams = new URLSearchParams(window.location.search);
-        accessToken = searchParams.get('access_token');
-        refreshToken = searchParams.get('refresh_token');
-        type = searchParams.get('type');
-        expiresIn = searchParams.get('expires_in');
-        expiresAt = searchParams.get('expires_at');
-        tokenType = searchParams.get('token_type');
-
-        if (!accessToken && window.location.hash) {
+        // First try to get parameters from URL hash
+        if (window.location.hash) {
           const hashParams = new URLSearchParams(window.location.hash.substring(1));
           accessToken = hashParams.get('access_token');
-          refreshToken = hashParams.get('refresh_token');
-          type = hashParams.get('type');
           expiresIn = hashParams.get('expires_in');
           expiresAt = hashParams.get('expires_at');
           tokenType = hashParams.get('token_type');
+        }
+
+        // If not found in hash, try query parameters
+        if (!accessToken) {
+          const searchParams = new URLSearchParams(window.location.search);
+          accessToken = searchParams.get('access_token');
+          expiresIn = searchParams.get('expires_in');
+          expiresAt = searchParams.get('expires_at');
+          tokenType = searchParams.get('token_type');
         }
 
         if (!accessToken) {
@@ -46,19 +61,9 @@ export default function VerifyEmailPage() {
           return;
         }
 
-        // Call NestJS backend directly
+        // Call NestJS backend directly with access token as query parameter
         const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const apiUrl = new URL(`${backendUrl}/auth/verify-email`);
-
-        // Add all parameters to the backend URL
-        if (accessToken) apiUrl.searchParams.append('access_token', accessToken);
-        if (refreshToken) apiUrl.searchParams.append('refresh_token', refreshToken);
-        if (type) apiUrl.searchParams.append('type', type);
-        if (expiresIn) apiUrl.searchParams.append('expires_in', expiresIn);
-        if (expiresAt) apiUrl.searchParams.append('expires_at', expiresAt);
-        if (tokenType) apiUrl.searchParams.append('token_type', tokenType);
-
-        const response = await fetch(apiUrl.toString(), {
+        const response = await fetch(`${backendUrl}/auth/verify-email?access_token=${encodeURIComponent(accessToken)}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -70,25 +75,52 @@ export default function VerifyEmailPage() {
         if (!response.ok) {
           if (response.status === 403) {
             setIsExpired(true);
+            // Clear stored tokens on error
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
           }
           throw new Error(data.message || 'Failed to verify email');
         }
 
         if (data.user) {
-          await login(accessToken, refreshToken || '', data.user);
+          // After successful verification, exchange Supabase tokens for backend tokens
+          try {
+            const loginResponse = await api.post<LoginResponse, TokenExchangeRequest>('/auth/exchange-token', {
+              email: data.user.email,
+              password: '', // Not needed for token exchange
+              supabaseToken: accessToken,
+            });
+
+            if (loginResponse.accessToken && loginResponse.refreshToken) {
+              // Update auth context with the backend tokens and user data
+              await login(
+                loginResponse.accessToken,
+                loginResponse.refreshToken,
+                loginResponse.user
+              );
+
+              setStatus('success');
+              setMessage('Email verified successfully! Redirecting to dashboard...');
+
+              setTimeout(() => {
+                router.push('/dashboard');
+              }, 2000);
+            } else {
+              throw new Error('Failed to exchange tokens');
+            }
+          } catch (error) {
+            console.error('Token exchange error:', error);
+            throw new Error('Failed to complete authentication. Please try logging in manually.');
+          }
         }
-
-        setStatus('success');
-        setMessage('Email verified successfully! Redirecting to dashboard...');
-
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 2000);
 
       } catch (error) {
         console.error('Verification error:', error);
         setStatus('error');
         setMessage(error instanceof Error ? error.message : 'Failed to verify email');
+        // Clear stored tokens on error
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
       }
     };
 

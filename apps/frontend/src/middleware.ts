@@ -1,27 +1,8 @@
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 
-// Add any paths that require authentication
-const protectedPaths = ['/dashboard'];
-
-export function middleware(request: NextRequest) {
-  // Check if the path requires authentication
-  const isProtectedPath = protectedPaths.some(path =>
-    request.nextUrl.pathname.startsWith(path)
-  );
-
-  if (isProtectedPath) {
-    // Check for access token in cookies
-    const accessToken = request.cookies.get('accessToken')?.value;
-
-    if (!accessToken) {
-      // Redirect to login if no token found
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('from', request.nextUrl.pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-  }
-
+export function middleware() {
+  // We'll let the client handle authentication
+  // The client will check localStorage and redirect if needed
   return NextResponse.next();
 }
 

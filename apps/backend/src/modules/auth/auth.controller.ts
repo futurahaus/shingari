@@ -96,6 +96,33 @@ export class AuthController {
         return this.authService.refreshTokens(refreshTokenDto.refreshToken);
     }
 
+    @Post('exchange-token')
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Exchange Supabase token for backend tokens' })
+    @ApiBody({ type: LoginDto })
+    @ApiResponse({ status: HttpStatus.OK, description: 'Token exchange successful.', type: LoginResponseDto })
+    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid token.' })
+    async exchangeToken(@Body() loginDto: LoginDto & { supabaseToken?: string }): Promise<LoginResponseDto> {
+        if (!loginDto.supabaseToken) {
+            throw new UnauthorizedException('No Supabase token provided');
+        }
+
+        try {
+            // Verify the Supabase token and get user data
+            const { data: { user }, error } = await this.authService.verifySupabaseToken(loginDto.supabaseToken);
+            
+            if (error || !user) {
+                throw new UnauthorizedException('Invalid Supabase token');
+            }
+
+            // Generate our backend tokens
+            return this.authService.generateTokens(user);
+        } catch (error) {
+            this.logger.error('Token exchange failed', error);
+            throw new UnauthorizedException('Token exchange failed');
+        }
+    }
+
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     @Get('me')

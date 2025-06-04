@@ -65,51 +65,6 @@ export class AuthService {
                 throw new Error('Failed to create user');
             }
 
-            // Create entry in public.users table using admin client
-            // const { error: insertError } = await this.databaseService
-            //     .getAdminClient()
-            //     .from('users')
-            //     .insert({
-            //         uuid: data.user.id,
-            //     });
-
-            // if (insertError) {
-            //     this.logger.logError('User Table Creation', insertError);
-            //     throw insertError;
-            // }
-
-            // // TODO: Move to email verification time.
-            // // Get the consumer role ID
-            // const { data: roleData, error: roleError } = await this.databaseService
-            //     .getAdminClient()
-            //     .from('roles')
-            //     .select('id')
-            //     .eq('name', 'consumer')
-            //     .single();
-
-            // if (roleError) {
-            //     this.logger.logError('Role Fetch', roleError);
-            //     throw roleError;
-            // }
-
-            // if (!roleData) {
-            //     throw new Error('Consumer role not found');
-            // }
-
-            // // Create user role association
-            // const { error: userRoleError } = await this.databaseService
-            //     .getAdminClient()
-            //     .from('user_roles')
-            //     .insert({
-            //         user_id: data.user.id,
-            //         role_id: roleData.id,
-            //     });
-
-            // if (userRoleError) {
-            //     this.logger.logError('User Role Creation', userRoleError);
-            //     throw userRoleError;
-            // }
-
             return {
                 message: 'Registration successful. Please check your email to confirm your account.',
                 user: {
@@ -146,7 +101,7 @@ export class AuthService {
             .getAdminClient()
             .from('user_roles')
             .select('roles:role_id(name)')
-            .eq('user_id', user.id) as SupabaseRolesResponse;
+            .eq('user_id', user.id) as { data: UserRole[] | null; error: any };
 
         if (rolesError) {
             this.logger.logError('User Roles Fetch', rolesError);
@@ -250,11 +205,15 @@ export class AuthService {
 
     async signOut() {
         try {
-            const { error } = await this.databaseService.getClient().auth.signOut();
+            const { error } = await this.databaseService
+                .getClient()
+                .auth.signOut();
+
             if (error) {
                 this.logger.logError('Sign Out', error);
                 throw error;
             }
+
             this.logger.logInfo('User signed out successfully');
         } catch (error) {
             this.logger.logError('Sign Out', error);
@@ -271,15 +230,65 @@ export class AuthService {
                 .auth.getUser(token);
 
             if (error) {
-                this.logger.logError('Email verification failed', error);
+                this.logger.logError('Email verification', error);
                 throw error;
             }
 
             this.logger.logInfo('Email verified successfully');
             return { message: 'Email verified successfully', user };
         } catch (error) {
-            this.logger.logError('Email verification error', error);
+            this.logger.logError('Email verification', error);
             throw error;
+        }
+    }
+
+    async verifySupabaseToken(token: string) {
+        try {
+            // Use Supabase client to verify the token
+            const { data: { user }, error } = await this.databaseService
+                .getClient()
+                .auth.getUser(token);
+
+            if (error) {
+                this.logger.logError('Supabase token verification', error);
+                return { data: { user: null }, error };
+            }
+
+            if (!user) {
+                return { data: { user: null }, error: new Error('No user found') };
+            }
+
+            // Get user roles
+            const { data: userRoles, error: rolesError } = await this.databaseService
+                .getAdminClient()
+                .from('user_roles')
+                .select('roles:role_id(name)')
+                .eq('user_id', user.id) as { data: UserRole[] | null; error: any };
+
+            if (rolesError) {
+                this.logger.logError('User roles fetch', rolesError);
+                return { data: { user: null }, error: rolesError };
+            }
+
+            const customRoles = (userRoles || []).map(ur => ur.roles.name);
+            const roles = ['authenticated', ...customRoles];
+
+            // Update user with roles
+            const updatedUser = {
+                ...user,
+                role: roles[0],
+                roles,
+                app_metadata: {
+                    ...user.app_metadata,
+                    provider: user.app_metadata?.provider || 'email',
+                    roles
+                }
+            };
+
+            return { data: { user: updatedUser }, error: null };
+        } catch (error) {
+            this.logger.logError('Supabase token verification', error);
+            return { data: { user: null }, error };
         }
     }
 }
