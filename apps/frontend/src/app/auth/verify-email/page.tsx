@@ -13,7 +13,6 @@ export default function VerifyEmailPage() {
   const [isExpired, setIsExpired] = useState(false);
 
   useEffect(() => {
-    console.log('[VerifyEmailPage useEffect] Running. Search:', window.location.search, 'Hash:', window.location.hash);
     const verifyEmail = async () => {
       try {
         let accessToken = null;
@@ -32,7 +31,6 @@ export default function VerifyEmailPage() {
         tokenType = searchParams.get('token_type');
 
         if (!accessToken && window.location.hash) {
-          console.log('[VerifyEmailPage verifyEmail] Access token not found in search params, checking hash.');
           const hashParams = new URLSearchParams(window.location.hash.substring(1));
           accessToken = hashParams.get('access_token');
           refreshToken = hashParams.get('refresh_token');
@@ -42,14 +40,17 @@ export default function VerifyEmailPage() {
           tokenType = hashParams.get('token_type');
         }
 
-         if (!accessToken) {
+        if (!accessToken) {
           setStatus('error');
           setMessage('No verification parameters found. Please check your verification link and try again.');
-          console.error('[VerifyEmailPage verifyEmail] accessToken is falsy, returning. AccessToken value:', accessToken);
           return;
         }
 
-        const apiUrl = new URL('/api/auth/verify-email', window.location.origin);
+        // Call NestJS backend directly
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const apiUrl = new URL(`${backendUrl}/auth/verify-email`);
+
+        // Add all parameters to the backend URL
         if (accessToken) apiUrl.searchParams.append('access_token', accessToken);
         if (refreshToken) apiUrl.searchParams.append('refresh_token', refreshToken);
         if (type) apiUrl.searchParams.append('type', type);
@@ -85,7 +86,7 @@ export default function VerifyEmailPage() {
         }, 2000);
 
       } catch (error) {
-        console.error('[VerifyEmailPage verifyEmail] Verification error:', error);
+        console.error('Verification error:', error);
         setStatus('error');
         setMessage(error instanceof Error ? error.message : 'Failed to verify email');
       }
