@@ -70,24 +70,11 @@ export class AuthService {
                 throw new ConflictException('Registration failed. Please try again later.');
             }
 
-            // If user exists and is not confirmed, treat as already registered
-            if (
-                data?.user &&
-                data.user.email?.toLowerCase() === registerDto.email.toLowerCase() &&
-                data.user.confirmation_sent_at
-            ) {
-                throw new ConflictException('Email already registered. Please check your email to confirm your account.');
-            }
-
-            if (!data?.user) {
-                throw new ConflictException('Email already registered or failed to create user');
-            }
-
             return {
                 message: 'Registration successful. Please check your email to confirm your account.',
                 user: {
-                    id: data.user.id,
-                    email: data.user.email,
+                    id: data.user?.id,
+                    email: data.user?.email,
                 }
             };
         } catch (error) {
