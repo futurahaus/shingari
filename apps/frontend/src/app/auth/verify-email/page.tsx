@@ -69,7 +69,6 @@ export default function VerifyEmailPage() {
         if (!response.ok) {
           if (response.status === 403) {
             setIsExpired(true);
-            // Clear stored tokens on error
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
             localStorage.removeItem('user');
@@ -78,7 +77,6 @@ export default function VerifyEmailPage() {
         }
 
         if (user) {
-          // After successful verification, exchange Supabase tokens for backend tokens
           try {
               await login(
                 accessToken,
@@ -90,18 +88,15 @@ export default function VerifyEmailPage() {
               setMessage('Email verified successfully! Redirecting to dashboard...');
               setTimeout(() => {
                 router.push('/dashboard');
-              }, 6000);
+              }, 1000);
           } catch (error) {
-            console.error('Token exchange error:', error);
             throw new Error('Failed to complete authentication. Please try logging in manually.');
           }
         }
 
       } catch (error) {
-        console.error('Verification error:', error);
         setStatus('error');
         setMessage(error instanceof Error ? error.message : 'Failed to verify email');
-        // Clear stored tokens on error
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');

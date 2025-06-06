@@ -27,7 +27,6 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: Implement registration logic
-    console.log('Registration attempt with:', formData);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -36,9 +36,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     setIsLoading(true);
 
     try {
-      console.log('Attempting login with:', { email: formData.email });
-
-
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
         method: 'POST',
         headers: {
@@ -47,10 +44,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         body: JSON.stringify(formData),
       });
 
-      console.log('Login response status:', response.status);
-
       const data = await response.json();
-      console.log('Login response:', data);
 
       if (!response.ok) {
         throw new Error(data.message || 'Error al iniciar sesión');
@@ -60,18 +54,16 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       localStorage.setItem('accessToken', data.accessToken);
       localStorage.setItem('refreshToken', data.refreshToken);
       localStorage.setItem('user', JSON.stringify(data.user));
-      
+
       // Set access token cookie
       document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Strict`;
 
       // Use the auth context to handle login
       login(data.accessToken, data.refreshToken, data.user);
 
-      console.log('Login successful, redirecting to dashboard...');
       onClose(); // Close the modal
       router.push('/dashboard');
     } catch (err) {
-      console.error('Login error:', err);
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
     } finally {
       setIsLoading(false);
@@ -84,7 +76,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     setIsLoading(true);
 
     try {
-      console.log('Attempting registration with:', { email: formData.email });
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
         method: 'POST',
@@ -94,17 +85,13 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         body: JSON.stringify(formData),
       });
 
-      console.log('Register response status:', response.status);
-
       const data = await response.json();
-      console.log('Register response:', data);
 
       if (!response.ok) {
         throw new Error(data.message || 'Error al registrar usuario');
       }
 
       setSuccessMessage(data.message);
-      // Clear form after successful registration
       setFormData({ email: '', password: '' });
     } catch (err) {
       console.error('Registration error:', err);
