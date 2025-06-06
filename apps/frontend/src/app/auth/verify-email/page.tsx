@@ -33,44 +33,38 @@ export default function VerifyEmailPage() {
     const verifyEmail = async () => {
       try {
         let accessToken = null;
-        let expiresIn = null;
-        let expiresAt = null;
-        let tokenType = null;
+        let refreshToken = null;
 
         // First try to get parameters from URL hash
         if (window.location.hash) {
           const hashParams = new URLSearchParams(window.location.hash.substring(1));
           accessToken = hashParams.get('access_token');
-          expiresIn = hashParams.get('expires_in');
-          expiresAt = hashParams.get('expires_at');
-          tokenType = hashParams.get('token_type');
+          refreshToken = hashParams.get('refresh_token');
         }
 
         // If not found in hash, try query parameters
-        if (!accessToken) {
+        if (!accessToken || !refreshToken) {
           const searchParams = new URLSearchParams(window.location.search);
           accessToken = searchParams.get('access_token');
-          expiresIn = searchParams.get('expires_in');
-          expiresAt = searchParams.get('expires_at');
-          tokenType = searchParams.get('token_type');
+          refreshToken = searchParams.get('refresh_token');
         }
 
-        if (!accessToken) {
+        if (!accessToken || !refreshToken) {
           setStatus('error');
           setMessage('No verification parameters found. Please check your verification link and try again.');
           return;
         }
-
         // Call NestJS backend directly with access token as query parameter
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const response = await fetch(`${backendUrl}/auth/verify-email?access_token=${encodeURIComponent(accessToken)}`, {
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL;
+        const response = await fetch(`${backendUrl}/auth/me`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
           },
         });
 
-        const data = await response.json();
+        const user = await response.json();
 
         if (!response.ok) {
           if (response.status === 403) {
@@ -78,36 +72,25 @@ export default function VerifyEmailPage() {
             // Clear stored tokens on error
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
           }
-          throw new Error(data.message || 'Failed to verify email');
+          throw new Error(user || 'Failed to verify email');
         }
 
-        if (data.user) {
+        if (user) {
           // After successful verification, exchange Supabase tokens for backend tokens
           try {
-            const loginResponse = await api.post<LoginResponse, TokenExchangeRequest>('/auth/exchange-token', {
-              email: data.user.email,
-              password: '', // Not needed for token exchange
-              supabaseToken: accessToken,
-            });
-
-            if (loginResponse.accessToken && loginResponse.refreshToken) {
-              // Update auth context with the backend tokens and user data
               await login(
-                loginResponse.accessToken,
-                loginResponse.refreshToken,
-                loginResponse.user
+                accessToken,
+                refreshToken,
+                user
               );
 
               setStatus('success');
               setMessage('Email verified successfully! Redirecting to dashboard...');
-
               setTimeout(() => {
                 router.push('/dashboard');
-              }, 2000);
-            } else {
-              throw new Error('Failed to exchange tokens');
-            }
+              }, 6000);
           } catch (error) {
             console.error('Token exchange error:', error);
             throw new Error('Failed to complete authentication. Please try logging in manually.');
@@ -121,6 +104,7 @@ export default function VerifyEmailPage() {
         // Clear stored tokens on error
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
       }
     };
 
