@@ -33,14 +33,14 @@ export default function SearchHeader() {
 
             <div className="flex-1 max-w-2xl mx-8">
               <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                  <FaSearch />
+                </span>
                 <input
                   type="text"
-                  placeholder="¿Qué estás buscando?"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  placeholder="Buscar"
+                  className="w-full pl-10 pr-4 py-2 rounded-md focus:outline-none focus:ring-2 bg-[color:var(--search-background)]"
                 />
-                <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500">
-                  <FaSearch />
-                </button>
               </div>
             </div>
 
@@ -51,7 +51,7 @@ export default function SearchHeader() {
                     href="/dashboard"
                     className="flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-red-600"
                   >
-                    <FaUser className="h-5 w-5" />
+                    <FaUser className="h-4 w-4" />
                     <span>{user.email}</span>
                   </Link>
                   <button
@@ -67,11 +67,12 @@ export default function SearchHeader() {
                   onClick={() => setIsLoginModalOpen(true)}
                   className="text-sm font-medium text-white bg-red-600 px-4 py-2 rounded-md hover:bg-red-700"
                 >
+                  <FaUser className="h-4 w-4" />
                   Iniciar sesión
                 </button>
               )}
               <button className="text-gray-600 hover:text-red-500">
-                <FaShoppingCart className="h-6 w-6" />
+                <FaShoppingCart className="h-4 w-4" />
               </button>
             </div>
           </div>
