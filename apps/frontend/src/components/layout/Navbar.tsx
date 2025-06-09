@@ -9,7 +9,7 @@ export default function Navbar() {
             <Link href="/about-us" className="flex items-center px-3 h-full">
               Sobre Nosotros
             </Link>
-            <Link href="/categories" className="flex items-center px-3 h-full">
+            <Link href="/products" className="flex items-center px-3 h-full">
               Categorías
             </Link>
             <Link href="/mas-ganadores" className="flex items-center px-3 h-full">

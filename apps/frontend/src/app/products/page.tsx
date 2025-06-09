@@ -254,7 +254,7 @@ const ProductsSection = ({
     );
 };
 
-export default function CategoriesPage() {
+export default function ProductsPage() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
