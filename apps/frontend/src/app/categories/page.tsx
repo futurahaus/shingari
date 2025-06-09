@@ -118,7 +118,7 @@ const ProductFilters = ({ filters, onFilterChange }: ProductFiltersProps) => (
                 <option value="">Tipo</option>
                 {/* Add real types later */}
             </select>
-            <ChevronDown className="h-5 w-5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <ChevronDown className="h-5 w-5 text-[color:var(--list-item-color)] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
         <div className="relative">
             <select
@@ -128,10 +128,10 @@ const ProductFilters = ({ filters, onFilterChange }: ProductFiltersProps) => (
                 className="appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
             >
                 <option value="">Precio</option>
-                <option value="asc">Menor a Mayor</option>
-                <option value="desc">Mayor a Menor</option>
+                <option value="ASC">Menor a Mayor</option>
+                <option value="DESC">Mayor a Menor</option>
             </select>
-            <ChevronDown className="h-5 w-5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <ChevronDown className="h-5 w-5 text-[color:var(--list-item-color)] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
         <div className="relative">
             <select
@@ -143,7 +143,7 @@ const ProductFilters = ({ filters, onFilterChange }: ProductFiltersProps) => (
                 <option value="">Venta por cajas</option>
                 {/* Add real stock types later */}
             </select>
-            <ChevronDown className="h-5 w-5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <ChevronDown className="h-5 w-5 text-[color:var(--list-item-color)] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
     </div>
 );
@@ -156,9 +156,9 @@ const ProductCard = ({ product }: { product: Product }) => (
         <div className="p-4">
             <h3 className="text-lg font-bold">{product.name}</h3>
             <div className="flex items-center my-2">
-                <span className="text-xl font-bold text-gray-900">
+                <h4>
                     ${new Intl.NumberFormat('es-CO').format(product.price)}
-                </span>
+                </h4>
                 {product.originalPrice && (
                     <span className="text-sm text-gray-500 line-through ml-2">
                         ${new Intl.NumberFormat('es-CO').format(product.originalPrice)}
@@ -170,7 +170,7 @@ const ProductCard = ({ product }: { product: Product }) => (
                     </span>
                 )}
             </div>
-            <p className="text-sm text-gray-600 mb-4">{product.description}</p>
+            <p className="mb-4">{product.description}</p>
             <button className="w-full bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition-colors">
                 Agregar al carrito
             </button>
@@ -208,7 +208,11 @@ const ProductsSection = ({
             // Append filters if they exist
             Object.entries(filters).forEach(([key, value]) => {
                 if (value) {
-                    params.append(key, value);
+                    if (key === 'price') {
+                        params.append('sortByPrice', value);
+                    } else {
+                        params.append(key, value);
+                    }
                 }
             });
             
@@ -318,7 +322,7 @@ export default function CategoriesPage() {
     }, []);
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-8 bg-white">
             <div className="flex">
                 <CategorySidebar
                     categories={categories}
