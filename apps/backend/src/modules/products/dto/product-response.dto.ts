@@ -16,6 +16,9 @@ export class ProductResponseDto {
   @ApiPropertyOptional({ description: 'Precio original del producto sin descuento', example: 1499.99 })
   originalPrice?: number;
 
+  @ApiPropertyOptional({ description: 'Porcentaje de descuento aplicado al producto', example: 10 })
+  discount: number;
+
   @ApiPropertyOptional({ description: 'Stock disponible del producto', example: 50 })
   stock?: number;
 

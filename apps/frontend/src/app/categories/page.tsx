@@ -4,21 +4,11 @@ import { ChevronDown, ChevronsRight, Home } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import Link from 'next/link';
+import { ProductCard, Product } from '@/components/ProductCard';
 
 interface Category {
     id: string;
     name: string;
-}
-
-interface Product {
-    id: string;
-    name: string;
-    price: number;
-    originalPrice?: number;
-    discount?: number;
-    description: string;
-    image?: string;
-    categories: string[];
 }
 
 interface PaginatedProductsResponse {
@@ -60,11 +50,10 @@ const CategorySidebar = ({
                                 e.preventDefault();
                                 onSelectCategory(category.name);
                             }}
-                            className={`font-medium ${
-                                isSelected
-                                    ? 'text-red-500 font-bold'
-                                    : 'text-gray-700 hover:text-black'
-                            }`}
+                            className={`font-medium ${isSelected
+                                ? 'text-red-500 font-bold'
+                                : 'text-gray-700 hover:text-black'
+                                }`}
                         >
                             {category.name}
                         </a>
@@ -148,36 +137,6 @@ const ProductFilters = ({ filters, onFilterChange }: ProductFiltersProps) => (
     </div>
 );
 
-const ProductCard = ({ product }: { product: Product }) => (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden group">
-        <div className="bg-gray-200 h-48 flex items-center justify-center">
-            {/* Placeholder for image */}
-        </div>
-        <div className="p-4">
-            <h3 className="text-lg font-bold">{product.name}</h3>
-            <div className="flex items-center my-2">
-                <h4>
-                    ${new Intl.NumberFormat('es-CO').format(product.price)}
-                </h4>
-                {product.originalPrice && (
-                    <span className="text-sm text-gray-500 line-through ml-2">
-                        ${new Intl.NumberFormat('es-CO').format(product.originalPrice)}
-                    </span>
-                )}
-                {product.discount && (
-                    <span className="ml-auto bg-red-100 text-red-600 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-                        -{product.discount}%
-                    </span>
-                )}
-            </div>
-            <p className="mb-4">{product.description}</p>
-            <button className="w-full bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition-colors">
-                Agregar al carrito
-            </button>
-        </div>
-    </div>
-);
-
 const ProductsSection = ({
     selectedCategory,
     onSelectCategory,
@@ -215,7 +174,7 @@ const ProductsSection = ({
                     }
                 }
             });
-            
+
             if (selectedCategory) {
                 params.append('categoryFilters', selectedCategory);
             }
@@ -228,7 +187,7 @@ const ProductsSection = ({
             } else {
                 setHasMore(true);
             }
-            
+
             setProducts(pageNumber === 1 ? newProducts : [...currentProducts, ...newProducts]);
 
         } catch (e: any) {
@@ -285,7 +244,7 @@ const ProductsSection = ({
                                 disabled={loading}
                                 className="bg-red-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-600 transition-colors disabled:bg-gray-400"
                             >
-                                {loading ? 'Cargando...' : 'Mostrar más'}
+                                <b>{loading ? 'Cargando...' : 'Mostrar más'}</b>
                             </button>
                         )}
                     </div>

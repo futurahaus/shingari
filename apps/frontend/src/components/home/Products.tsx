@@ -1,20 +1,39 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { api } from '@/lib/api';
+import { Product, ProductCard } from '../ProductCard';
+
+interface PaginatedProductsResponse {
+    data: Product[];
+    total: number;
+    page: number;
+    limit: number;
+    lastPage: number;
+}
 
 const Products = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Placeholder products - replace with actual product data
-  const products = [
-    { id: 1, name: 'Product 1', image: '/placeholder.jpg' },
-    { id: 2, name: 'Product 2', image: '/placeholder.jpg' },
-    { id: 3, name: 'Product 3', image: '/placeholder.jpg' },
-    { id: 4, name: 'Product 4', image: '/placeholder.jpg' },
-    { id: 5, name: 'Product 5', image: '/placeholder.jpg' },
-    { id: 6, name: 'Product 6', image: '/placeholder.jpg' },
-    { id: 7, name: 'Product 7', image: '/placeholder.jpg' },
-    { id: 8, name: 'Product 8', image: '/placeholder.jpg' },
-  ];
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get<PaginatedProductsResponse>('/products');
+        setProducts(response.data);
+        setError(null);
+      } catch (error) {
+        setError('Failed to fetch products');
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % Math.ceil(products.length / 4));
@@ -25,6 +44,28 @@ const Products = () => {
       prev === 0 ? Math.ceil(products.length / 4) - 1 : prev - 1
     );
   };
+
+  if (loading) {
+    return (
+      <section className="py-12 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center mb-8">Nuestros Productos</h2>
+          <p className="text-center">Cargando productos...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="py-12 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center mb-8">Nuestros Productos</h2>
+          <p className="text-center text-red-500">{error}</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-12 bg-white">
@@ -45,7 +86,7 @@ const Products = () => {
               <div className="flex gap-4 min-w-full">
                 {products.slice(currentSlide * 4, (currentSlide + 1) * 4).map((product) => (
                   <div key={product.id} className="w-1/4">
-                    <div className="bg-gray-200 aspect-square rounded-lg"></div>
+                    <ProductCard product={product} />
                   </div>
                 ))}
               </div>

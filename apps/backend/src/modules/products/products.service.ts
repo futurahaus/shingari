@@ -164,14 +164,17 @@ export class ProductsService {
     }
 
     private mapToProductResponseDto(product: ProductWithCategoriesForResponse): ProductResponseDto {
-        // Este mapper se usa para findAllPublic. Ajustar según necesidad.
+
+        const discount = (1 - ((product.wholesale_price?.toNumber() || 0) / product.list_price.toNumber())) * 100;
+
         return {
             updatedAt: new Date(),
             id: product.id.toString(), // Asumiendo que el DTO espera string y product.id es Int
             name: product.name,
             description: product.description || '',
-            price: product.list_price.toNumber(),
+            price: product.wholesale_price?.toNumber() || 0,
             originalPrice: product.list_price.toNumber(),
+            discount: discount,
             createdAt: product.created_at || new Date(),
             categories: product.products_categories?.map(pc => pc.categories.name) || [],
         };
