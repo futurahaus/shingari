@@ -3,32 +3,30 @@
 import { ChevronDown, ChevronsRight, Home } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
+import Link from 'next/link';
 
-const categories = [
-    'Arroz',
-    'Algas',
-    'Vegetales',
-    'Condimentos',
-    'Ramen',
-    'Harinas y Panko',
-    'Vinagres y Aceites',
-    'Para Sushi',
-    'Salsas y Aderezos',
-    'Sin Gluten',
-    'Sopas',
-    'Dulces y Snacks',
-    'Sake',
-    'Té',
-    'Otros',
-];
+interface Category {
+    id: string;
+    name: string;
+}
 
 interface Product {
+    id: string;
     name: string;
     price: number;
-    originalPrice: number;
-    discount: number;
+    originalPrice?: number;
+    discount?: number;
     description: string;
-    image: string;
+    image?: string;
+    categories: string[];
+}
+
+interface PaginatedProductsResponse {
+    data: Product[];
+    total: number;
+    page: number;
+    limit: number;
+    lastPage: number;
 }
 
 interface ProductFiltersProps {
@@ -40,35 +38,71 @@ interface ProductFiltersProps {
     onFilterChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
-const CategorySidebar = () => (
+const CategorySidebar = ({
+    categories,
+    selectedCategory,
+    onSelectCategory,
+}: {
+    categories: Category[];
+    selectedCategory: string | null;
+    onSelectCategory: (name: string | null) => void;
+}) => (
     <aside className="w-64 pr-8">
         <h2 className="text-xl font-bold mb-4">Categorías</h2>
         <ul className="space-y-2">
-            {categories.map((category) => (
-                <li key={category}>
-                    <a
-                        href="#"
-                        className="text-gray-700 hover:text-black font-medium"
-                    >
-                        {category}
-                    </a>
-                </li>
-            ))}
+            {categories.map((category) => {
+                const isSelected = category.name === selectedCategory;
+                return (
+                    <li key={category.id}>
+                        <a
+                            href="#"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                onSelectCategory(category.name);
+                            }}
+                            className={`font-medium ${
+                                isSelected
+                                    ? 'text-red-500 font-bold'
+                                    : 'text-gray-700 hover:text-black'
+                            }`}
+                        >
+                            {category.name}
+                        </a>
+                    </li>
+                );
+            })}
         </ul>
     </aside>
 );
 
-const Breadcrumb = () => (
+const Breadcrumb = ({
+    selectedCategory,
+    onSelectCategory,
+}: {
+    selectedCategory: string | null;
+    onSelectCategory: (name: string | null) => void;
+}) => (
     <nav className="flex items-center text-sm text-gray-500 mb-4">
-        <a href="#" className="hover:text-gray-700 flex items-center">
+        <Link href="/" className="hover:text-gray-700 flex items-center">
             <Home className="h-4 w-4 mr-1" /> Inicio
-        </a>
+        </Link>
         <ChevronsRight className="h-4 w-4 mx-1" />
-        <a href="#" className="hover:text-gray-700">
+        <a
+            href="#"
+            onClick={(e) => {
+                e.preventDefault();
+                onSelectCategory(null);
+            }}
+            className="hover:text-gray-700 cursor-pointer"
+        >
             Productos
         </a>
-        <ChevronsRight className="h-4 w-4 mx-1" />
-        <span className="font-semibold text-gray-800">Arroz</span>
+        {selectedCategory && (
+            <>
+                <ChevronsRight className="h-4 w-4 mx-1" />
+                <span className="font-semibold text-gray-800">{selectedCategory}</span>
+            </>
+        )}
     </nav>
 );
 
@@ -125,12 +159,16 @@ const ProductCard = ({ product }: { product: Product }) => (
                 <span className="text-xl font-bold text-gray-900">
                     ${new Intl.NumberFormat('es-CO').format(product.price)}
                 </span>
-                <span className="text-sm text-gray-500 line-through ml-2">
-                    ${new Intl.NumberFormat('es-CO').format(product.originalPrice)}
-                </span>
-                <span className="ml-auto bg-red-100 text-red-600 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-                    -{product.discount}%
-                </span>
+                {product.originalPrice && (
+                    <span className="text-sm text-gray-500 line-through ml-2">
+                        ${new Intl.NumberFormat('es-CO').format(product.originalPrice)}
+                    </span>
+                )}
+                {product.discount && (
+                    <span className="ml-auto bg-red-100 text-red-600 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                        -{product.discount}%
+                    </span>
+                )}
             </div>
             <p className="text-sm text-gray-600 mb-4">{product.description}</p>
             <button className="w-full bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition-colors">
@@ -140,7 +178,13 @@ const ProductCard = ({ product }: { product: Product }) => (
     </div>
 );
 
-const ProductsSection = () => {
+const ProductsSection = ({
+    selectedCategory,
+    onSelectCategory,
+}: {
+    selectedCategory: string | null;
+    onSelectCategory: (name: string | null) => void;
+}) => {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -159,16 +203,30 @@ const ProductsSection = () => {
             const params = new URLSearchParams({
                 page: pageNumber.toString(),
                 limit: '8', // Adjust limit as needed
-                ...filters,
             });
 
-            const newProducts = await api.get<Product[]>(`/products?${params.toString()}`);
+            // Append filters if they exist
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value) {
+                    params.append(key, value);
+                }
+            });
+            
+            if (selectedCategory) {
+                params.append('categoryFilters', selectedCategory);
+            }
 
-            if (newProducts.length === 0) {
+            const response = await api.get<PaginatedProductsResponse>(`/products?${params.toString()}`);
+            const newProducts = response.data;
+
+            if (newProducts.length === 0 || response.page >= response.lastPage) {
                 setHasMore(false);
             } else {
-                setProducts([...currentProducts, ...newProducts]);
+                setHasMore(true);
             }
+            
+            setProducts(pageNumber === 1 ? newProducts : [...currentProducts, ...newProducts]);
+
         } catch (e: any) {
             setError(e.message);
         } finally {
@@ -181,7 +239,7 @@ const ProductsSection = () => {
         setPage(1);
         setHasMore(true);
         fetchProducts(1, []);
-    }, [filters]);
+    }, [filters, selectedCategory]);
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -199,8 +257,11 @@ const ProductsSection = () => {
 
     return (
         <main className="flex-1">
-            <Breadcrumb />
-            <h1 className="text-4xl font-extrabold mb-6">Arroz</h1>
+            <Breadcrumb
+                selectedCategory={selectedCategory}
+                onSelectCategory={onSelectCategory}
+            />
+            <h1 className="text-4xl font-extrabold mb-6">{selectedCategory || 'Todos los Productos'}</h1>
             <ProductFilters filters={filters} onFilterChange={handleFilterChange} />
             {loading && products.length === 0 ? (
                 <p>Cargando productos...</p>
@@ -209,8 +270,8 @@ const ProductsSection = () => {
             ) : (
                 <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {products.map((product, index) => (
-                            <ProductCard key={index} product={product} />
+                        {products.map((product) => (
+                            <ProductCard key={product.id} product={product} />
                         ))}
                     </div>
                     <div className="text-center mt-8">
@@ -231,11 +292,43 @@ const ProductsSection = () => {
 };
 
 export default function CategoriesPage() {
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+    const handleSelectCategory = (categoryName: string | null) => {
+        if (categoryName === null) {
+            setSelectedCategory(null);
+            return;
+        }
+        // If the same category is clicked again, deselect it to show all products
+        setSelectedCategory(prev => (prev === categoryName ? null : categoryName));
+    };
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const data = await api.get<Category[]>('/products/categories');
+                setCategories(data);
+            } catch (error) {
+                console.error('Failed to fetch categories:', error);
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="flex">
-                <CategorySidebar />
-                <ProductsSection />
+                <CategorySidebar
+                    categories={categories}
+                    selectedCategory={selectedCategory}
+                    onSelectCategory={handleSelectCategory}
+                />
+                <ProductsSection
+                    selectedCategory={selectedCategory}
+                    onSelectCategory={handleSelectCategory}
+                />
             </div>
         </div>
     );

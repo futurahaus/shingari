@@ -6,6 +6,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductDto, ProductSortByPrice } from './dto/query-product.dto';
 import { ProductResponseDto, PaginatedProductResponseDto } from './dto/product-response.dto';
 import { ProductDiscountResponseDto } from './dto/product-discount-response.dto';
+import { CategoryResponseDto } from './dto/category-response.dto';
 
 // Tipo para el producto con categorías incluidas, específico para findAllPublic y findOne
 type ProductWithCategoriesForResponse = ProductPrismaType & {
@@ -191,5 +192,29 @@ export class ProductsService {
             isActive: discount.is_active ?? false, // is_active puede ser null, default a false
             createdAt: new Date(), // Placeholder: products_discounts no tiene createdAt. Considerar añadirlo.
         };
+    }
+
+    async findAllCategories(): Promise<CategoryResponseDto[]> {
+        const categories = await this.prisma.categories.findMany({
+            where: {
+                // Opcional: filtrar por categorías que tienen productos activos
+                products_categories: {
+                    some: {
+                        products: {
+                            status: product_states.active,
+                        },
+                    },
+                },
+            },
+            select: {
+                id: true,
+                name: true,
+            },
+            orderBy: {
+                name: 'asc',
+            },
+        });
+
+        return categories.map(c => ({ id: c.id.toString(), name: c.name }));
     }
 } 

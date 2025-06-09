@@ -29,6 +29,13 @@ import { AdminGuard } from '../auth/guards/admin.guard'; // Import AdminGuard de
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
+  @Get('categories')
+  @ApiOperation({ summary: 'Obtener una lista de todas las categorías de productos' })
+  @ApiResponse({ status: 200, description: 'Lista de categorías obtenida exitosamente.', type: [ProductDiscountResponseDto] })
+  async findAllCategories() {
+    return this.productsService.findAllCategories();
+  }
+
   // --- Public Endpoint --- 
   @Get()
   @ApiOperation({ summary: 'Obtener lista pública de productos con paginación, búsqueda y filtros' })
