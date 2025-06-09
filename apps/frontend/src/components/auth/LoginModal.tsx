@@ -50,18 +50,16 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         throw new Error(data.message || 'Error al iniciar sesión');
       }
 
-      // Store tokens in localStorage and cookie
       localStorage.setItem('accessToken', data.accessToken);
       localStorage.setItem('refreshToken', data.refreshToken);
       localStorage.setItem('user', JSON.stringify(data.user));
 
-      // Set access token cookie
+      //TODO review if needed.
       document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Strict`;
 
-      // Use the auth context to handle login
       login(data.accessToken, data.refreshToken, data.user);
 
-      onClose(); // Close the modal
+      onClose();
       router.push('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
