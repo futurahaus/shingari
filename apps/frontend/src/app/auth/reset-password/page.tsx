@@ -80,7 +80,7 @@ export default function ResetPasswordPage() {
 
       setSuccessMessage('Contraseña restablecida exitosamente. Redirigiendo al inicio de sesión...');
       setTimeout(() => {
-        router.push('/login');
+        router.push('/#login');
       }, 2000);
     } catch (err) {
       console.error('Password reset confirmation error:', err);
