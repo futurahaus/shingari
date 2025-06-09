@@ -170,7 +170,8 @@ export class ProductsService {
             id: product.id.toString(), // Asumiendo que el DTO espera string y product.id es Int
             name: product.name,
             description: product.description || '',
-            price: product.list_price.toNumber(), // Convertir Decimal de Prisma a número
+            price: product.list_price.toNumber(),
+            originalPrice: product.list_price.toNumber(),
             createdAt: product.created_at || new Date(),
             categories: product.products_categories?.map(pc => pc.categories.name) || [],
         };

@@ -10,8 +10,11 @@ export class ProductResponseDto {
   @ApiPropertyOptional({ description: 'Descripción detallada del producto', example: 'Una laptop potente para gaming y trabajo.' })
   description?: string;
 
-  @ApiProperty({ description: 'Precio del producto', example: 1299.99 })
+  @ApiProperty({ description: 'Precio del producto (con descuento, si aplica)', example: 1299.99 })
   price: number;
+
+  @ApiPropertyOptional({ description: 'Precio original del producto sin descuento', example: 1499.99 })
+  originalPrice?: number;
 
   @ApiPropertyOptional({ description: 'Stock disponible del producto', example: 50 })
   stock?: number;
