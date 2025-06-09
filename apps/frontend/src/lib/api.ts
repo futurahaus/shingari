@@ -5,7 +5,7 @@ interface RequestOptions extends RequestInit {
 class ApiClient {
   private baseUrl: string;
 
-  constructor(baseUrl: string = '/api') {
+  constructor(baseUrl: string = 'http://localhost:3001/api') {
     this.baseUrl = baseUrl;
   }
 
