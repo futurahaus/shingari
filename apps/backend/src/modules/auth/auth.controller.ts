@@ -8,6 +8,7 @@ import {
   UnauthorizedException,
   Get,
   Request as NestRequest,
+  Headers,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -25,6 +26,10 @@ import { LoginResponseDto } from './dto/login-response.dto';
 import { SimpleMessageResponseDto } from './dto/simple-message-response.dto';
 import { MeResponseDto } from './dto/me-response.dto';
 import { Logger } from '@nestjs/common';
+import {
+  RequestPasswordResetDto,
+  ConfirmPasswordResetDto,
+} from './dto/reset-password.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -130,5 +135,74 @@ export class AuthController {
   async logout(): Promise<SimpleMessageResponseDto> {
     await this.authService.signOut();
     return { message: 'Successfully logged out' };
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Request password reset' })
+  @ApiBody({ type: RequestPasswordResetDto })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Password reset email sent successfully.',
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          example: 'Se ha enviado un correo electrónico con instrucciones para restablecer tu contraseña.',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Error al solicitar el restablecimiento de contraseña',
+  })
+  async requestPasswordReset(
+    @Body() { email }: RequestPasswordResetDto,
+  ): Promise<{ message: string }> {
+    await this.authService.requestPasswordReset(email);
+    return {
+      message: 'Se ha enviado un correo electrónico con instrucciones para restablecer tu contraseña.',
+    };
+  }
+
+  @Post('reset-password/confirm')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Confirm password reset' })
+  @ApiBody({ type: ConfirmPasswordResetDto })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Password reset successful.',
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          example: 'Contraseña restablecida exitosamente.',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Error al restablecer la contraseña',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Token de restablecimiento de contraseña no válido o expirado',
+  })
+  async confirmPasswordReset(
+    @Headers('authorization') authHeader: string,
+    @Body() { password }: ConfirmPasswordResetDto,
+  ): Promise<{ message: string }> {
+    const accessToken = authHeader?.replace('Bearer ', '');
+    if (!accessToken) {
+      throw new UnauthorizedException('Token de restablecimiento de contraseña no válido o expirado');
+    }
+    await this.authService.confirmPasswordReset(accessToken, password);
+    return {
+      message: 'Contraseña restablecida exitosamente.',
+    };
   }
 }
