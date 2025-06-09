@@ -8,7 +8,10 @@ import { JwtService } from '@nestjs/jwt';
 import { DatabaseService } from '../database/database.service';
 import { DatabaseLogger } from '../database/database.logger';
 import { RegisterDto } from './dto/register.dto';
-import { RequestPasswordResetDto, ConfirmPasswordResetDto } from './dto/reset-password.dto';
+import {
+  RequestPasswordResetDto,
+  ConfirmPasswordResetDto,
+} from './dto/reset-password.dto';
 
 interface UserRole {
   roles: {
@@ -336,33 +339,42 @@ export class AuthService {
 
       if (error) {
         this.logger.logError('Password Reset Request', error);
-        throw new BadRequestException('Error al solicitar el restablecimiento de contraseña');
+        throw new BadRequestException(
+          'Error al solicitar el restablecimiento de contraseña',
+        );
       }
     } catch (error) {
       this.logger.logError('Password Reset Request', error);
-      throw new BadRequestException('Error al solicitar el restablecimiento de contraseña');
+      throw new BadRequestException(
+        'Error al solicitar el restablecimiento de contraseña',
+      );
     }
   }
 
-  async confirmPasswordReset(accessToken: string, newPassword: string): Promise<void> {
+  async confirmPasswordReset(
+    accessToken: string,
+    newPassword: string,
+  ): Promise<void> {
     try {
       // First verify the token
-      const { data: { user }, error: verifyError } = await this.databaseService
-        .getClient()
-        .auth.getUser(accessToken);
+      const {
+        data: { user },
+        error: verifyError,
+      } = await this.databaseService.getClient().auth.getUser(accessToken);
 
       if (verifyError || !user) {
         this.logger.logError('Password Reset Token Verification', verifyError);
-        throw new BadRequestException('Token de restablecimiento de contraseña no válido o expirado');
+        throw new BadRequestException(
+          'Token de restablecimiento de contraseña no válido o expirado',
+        );
       }
 
-      // Update the user's password
+      // Update the user's password using the regular auth API
       const { error: updateError } = await this.databaseService
         .getClient()
-        .auth.admin.updateUserById(
-          user.id,
-          { password: newPassword }
-        );
+        .auth.updateUser({
+          password: newPassword,
+        });
 
       if (updateError) {
         this.logger.logError('Password Reset Update', updateError);

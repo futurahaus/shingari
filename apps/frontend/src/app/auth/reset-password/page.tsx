@@ -73,7 +73,6 @@ export default function ResetPasswordPage() {
       });
 
       const data = await response.json();
-      console.log('Reset password confirmation response:', data);
 
       if (!response.ok) {
         throw new Error(data.message || 'Error al restablecer la contraseña');

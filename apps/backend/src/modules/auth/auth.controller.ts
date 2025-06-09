@@ -21,6 +21,7 @@ import {
   ApiResponse,
   ApiBody,
   ApiBearerAuth,
+  ApiHeader,
 } from '@nestjs/swagger';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { SimpleMessageResponseDto } from './dto/simple-message-response.dto';
@@ -171,6 +172,15 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Confirm password reset' })
   @ApiBody({ type: ConfirmPasswordResetDto })
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'Bearer token received in the password reset email link',
+    required: true,
+    schema: {
+      type: 'string',
+      example: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImNHanA3c0x4ano5RTVDdVQiLCJ0eXAiOiJKV1QifQ...',
+    },
+  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Password reset successful.',

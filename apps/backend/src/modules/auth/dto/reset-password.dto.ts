@@ -12,13 +12,6 @@ export class RequestPasswordResetDto {
 
 export class ConfirmPasswordResetDto {
   @ApiProperty({
-    example: 'reset-token-123',
-    description: 'Password reset token received via email',
-  })
-  @IsString()
-  token: string;
-
-  @ApiProperty({
     example: 'newPassword123',
     description: 'New password to set',
     minLength: 6,
