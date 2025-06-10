@@ -49,7 +49,7 @@ export function BundledProducts() {
               </div>
             </div>
             {!product.main && (
-              <button className="p-2 text-gray-500 hover:text-gray-800">
+              <button className="button p-2 text-gray-500 hover:text-gray-800">
                 <RefreshCw className="w-5 h-5" />
               </button>
             )}
@@ -66,7 +66,7 @@ export function BundledProducts() {
         </div>
         <p className="text-2xl font-bold">€000.000,00</p>
       </div>
-      <button className="w-full px-4 py-3 mt-4 font-bold text-orange-600 bg-white border border-orange-600 rounded-md hover:bg-orange-50">
+      <button className="button w-full px-4 py-3 mt-4 font-bold text-orange-600 bg-white border border-orange-600 rounded-md hover:bg-orange-50">
         Agregar al carrito
       </button>
     </div>

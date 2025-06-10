@@ -23,10 +23,10 @@ export function ProductInfo() {
       </div>
 
       <div className="flex flex-col gap-2">
-        <button className="w-full px-4 py-3 font-bold text-white bg-orange-600 rounded-md hover:bg-orange-700">
+        <button className="button w-full px-4 py-3 font-bold text-white bg-orange-600 rounded-md hover:bg-orange-700">
           Comprar ahora
         </button>
-        <button className="w-full px-4 py-3 font-bold text-orange-600 bg-white border border-orange-600 rounded-md hover:bg-orange-50">
+        <button className="button w-full px-4 py-3 font-bold text-orange-600 bg-white border border-orange-600 rounded-md hover:bg-orange-50">
           Agregar al carrito
         </button>
       </div>

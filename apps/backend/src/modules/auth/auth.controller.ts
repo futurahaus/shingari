@@ -1,74 +1,218 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, UnauthorizedException, Get, Request as NestRequest } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+  UnauthorizedException,
+  Get,
+  Request as NestRequest,
+  Headers,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+  ApiHeader,
+} from '@nestjs/swagger';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { SimpleMessageResponseDto } from './dto/simple-message-response.dto';
 import { MeResponseDto } from './dto/me-response.dto';
+import { Logger } from '@nestjs/common';
+import {
+  RequestPasswordResetDto,
+  ConfirmPasswordResetDto,
+} from './dto/reset-password.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-    constructor(private readonly authService: AuthService) { }
+  private readonly logger = new Logger(AuthController.name);
 
-    @Post('register')
-    @HttpCode(HttpStatus.CREATED)
-    @ApiOperation({ summary: 'Register a new user' })
-    @ApiBody({ type: RegisterDto })
-    @ApiResponse({ status: HttpStatus.CREATED, description: 'User successfully registered.', type: SimpleMessageResponseDto })
-    @ApiResponse({ status: HttpStatus.CONFLICT, description: 'Email already registered.' })
-    async register(@Body() registerDto: RegisterDto): Promise<SimpleMessageResponseDto> {
-        const result = await this.authService.register(registerDto);
-        return { message: result.message };
-    }
+  constructor(private readonly authService: AuthService) {}
 
-    @Post('login')
-    @HttpCode(HttpStatus.OK)
-    @ApiOperation({ summary: 'User login' })
-    @ApiBody({ type: LoginDto })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Successful login.', type: LoginResponseDto })
-    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Usuario o contraseña incorrectos' })
-    async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
-        const user = await this.authService.validateUser(loginDto.email, loginDto.password);
-        if (!user) {
-            throw new UnauthorizedException('Usuario o contraseña incorrectos');
-        }
-        return this.authService.generateTokens(user);
-    }
+  @Post('register')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiBody({ type: RegisterDto })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'User successfully registered.',
+    type: SimpleMessageResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Email already registered.',
+  })
+  async register(
+    @Body() registerDto: RegisterDto,
+  ): Promise<SimpleMessageResponseDto> {
+    const result = await this.authService.register(registerDto);
+    return { message: result.message };
+  }
 
-    @Post('refresh')
-    @HttpCode(HttpStatus.OK)
-    @ApiOperation({ summary: 'Refresh access token' })
-    @ApiBody({ type: RefreshTokenDto })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Tokens refreshed successfully.', type: LoginResponseDto })
-    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid refresh token.' })
-    async refresh(@Body() refreshTokenDto: RefreshTokenDto): Promise<LoginResponseDto> {
-        return this.authService.refreshTokens(refreshTokenDto.refreshToken);
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'User login' })
+  @ApiBody({ type: LoginDto })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Successful login.',
+    type: LoginResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Usuario o contraseña incorrectos',
+  })
+  async login(@Body() loginDto: LoginDto): Promise<LoginResponseDto> {
+    const user = await this.authService.validateUser(
+      loginDto.email,
+      loginDto.password,
+    );
+    if (!user) {
+      throw new UnauthorizedException('Usuario o contraseña incorrectos');
     }
+    return this.authService.generateTokens(user);
+  }
 
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard)
-    @Get('me')
-    @ApiOperation({ summary: 'Get current authenticated user profile' })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Current user data.', type: MeResponseDto })
-    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
-    getProfile(@NestRequest() req): MeResponseDto {
-        return req.user;
-    }
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh access token' })
+  @ApiBody({ type: RefreshTokenDto })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Tokens refreshed successfully.',
+    type: LoginResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid refresh token.',
+  })
+  async refresh(
+    @Body() refreshTokenDto: RefreshTokenDto,
+  ): Promise<LoginResponseDto> {
+    return this.authService.refreshTokens(refreshTokenDto.refreshToken);
+  }
 
-    @ApiBearerAuth()
-    @UseGuards(JwtAuthGuard)
-    @Post('logout')
-    @HttpCode(HttpStatus.OK)
-    @ApiOperation({ summary: 'User logout' })
-    @ApiResponse({ status: HttpStatus.OK, description: 'Successfully logged out', type: SimpleMessageResponseDto })
-    @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
-    async logout(): Promise<SimpleMessageResponseDto> {
-        await this.authService.signOut();
-        return { message: 'Successfully logged out' };
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  @ApiOperation({ summary: 'Get current authenticated user profile' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Current user data.',
+    type: MeResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized.',
+  })
+  getProfile(@NestRequest() req): MeResponseDto {
+    return req.user;
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'User logout' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Successfully logged out',
+    type: SimpleMessageResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized.',
+  })
+  async logout(): Promise<SimpleMessageResponseDto> {
+    await this.authService.signOut();
+    return { message: 'Successfully logged out' };
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Request password reset' })
+  @ApiBody({ type: RequestPasswordResetDto })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Password reset email sent successfully.',
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          example: 'Se ha enviado un correo electrónico con instrucciones para restablecer tu contraseña.',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Error al solicitar el restablecimiento de contraseña',
+  })
+  async requestPasswordReset(
+    @Body() { email }: RequestPasswordResetDto,
+  ): Promise<{ message: string }> {
+    await this.authService.requestPasswordReset(email);
+    return {
+      message: 'Se ha enviado un correo electrónico con instrucciones para restablecer tu contraseña.',
+    };
+  }
+
+  @Post('reset-password/confirm')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Confirm password reset' })
+  @ApiBody({ type: ConfirmPasswordResetDto })
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'Bearer token received in the password reset email link',
+    required: true,
+    schema: {
+      type: 'string',
+      example: 'Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImNHanA3c0x4ano5RTVDdVQiLCJ0eXAiOiJKV1QifQ...',
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Password reset successful.',
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          example: 'Contraseña restablecida exitosamente.',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Error al restablecer la contraseña',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Token de restablecimiento de contraseña no válido o expirado',
+  })
+  async confirmPasswordReset(
+    @Headers('authorization') authHeader: string,
+    @Body() { password }: ConfirmPasswordResetDto,
+  ): Promise<{ message: string }> {
+    const accessToken = authHeader?.replace('Bearer ', '');
+    if (!accessToken) {
+      throw new UnauthorizedException('Token de restablecimiento de contraseña no válido o expirado');
     }
+    await this.authService.confirmPasswordReset(accessToken, password);
+    return {
+      message: 'Contraseña restablecida exitosamente.',
+    };
+  }
 }
-

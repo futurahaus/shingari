@@ -242,7 +242,7 @@ const ProductsSection = ({
                             <button
                                 onClick={loadMoreProducts}
                                 disabled={loading}
-                                className="bg-red-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-600 transition-colors disabled:bg-gray-400"
+                                className="button bg-red-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-600 transition-colors disabled:bg-gray-400"
                             >
                                 <b>{loading ? 'Cargando...' : 'Mostrar más'}</b>
                             </button>

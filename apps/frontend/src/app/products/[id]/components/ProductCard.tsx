@@ -33,7 +33,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <p className="text-sm text-gray-400 line-through">{product.originalPrice}</p>
         </div>
         <p className="mt-1 text-sm text-gray-500">{product.description}</p>
-        <button className="w-full px-4 py-2 mt-4 font-bold text-white bg-orange-600 rounded-md hover:bg-orange-700">
+        <button className="button w-full px-4 py-2 mt-4 font-bold text-white bg-orange-600 rounded-md hover:bg-orange-700">
           Agregar al carrito
         </button>
       </div>

@@ -50,8 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      // Call the logout API endpoint
-      const response = await fetch('/api/auth/logout', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       });
@@ -72,13 +71,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
 
+      // Clear access token cookie
+      document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict';
+
       router.push('/login');
     }
   };
 
   const refreshAccessToken = async (): Promise<string | null> => {
     try {
-      const response = await fetch('/api/auth/refresh', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

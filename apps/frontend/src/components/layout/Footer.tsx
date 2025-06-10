@@ -47,7 +47,7 @@ const Footer = () => {
                   placeholder="Suscríbete y recibe nuestras ofertas"
                   className="px-4 py-2 rounded bg-gray-800 text-white"
                 />
-                <button className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                <button className="button bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
                   Enviar
                 </button>
               </form>

@@ -19,7 +19,7 @@ export function QuantitySelector({ label }: QuantitySelectorProps) {
       <div className="flex items-center">
         <button
           onClick={decrement}
-          className="p-2 bg-gray-200 rounded-l-md hover:bg-gray-300"
+          className="button p-2 bg-gray-200 rounded-l-md hover:bg-gray-300"
         >
           <Minus className="w-4 h-4" />
         </button>
@@ -31,7 +31,7 @@ export function QuantitySelector({ label }: QuantitySelectorProps) {
         />
         <button
           onClick={increment}
-          className="p-2 bg-gray-200 rounded-r-md hover:bg-gray-300"
+          className="button p-2 bg-gray-200 rounded-r-md hover:bg-gray-300"
         >
           <Plus className="w-4 h-4" />
         </button>

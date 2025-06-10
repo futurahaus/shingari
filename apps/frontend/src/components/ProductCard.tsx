@@ -32,7 +32,7 @@ export const ProductCard = ({ product }: { product: Product }) => (
                 </h5>
             )}
             <p className="mb-4">{product.description}</p>
-            <button className="w-full bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition-colors">
+            <button className="button w-full bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition-colors">
                 <b>Agregar al carrito</b>
             </button>
         </div>

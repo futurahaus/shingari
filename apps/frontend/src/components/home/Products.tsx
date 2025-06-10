@@ -94,7 +94,7 @@ const Products = () => {
           </div>
           <button
             onClick={nextSlide}
-            className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-red-600 text-white p-2 rounded-full z-10"
+            className="button absolute right-0 top-1/2 transform -translate-y-1/2 bg-red-600 text-white p-2 rounded-full z-10"
           >
             &#8250;
           </button>
@@ -102,7 +102,7 @@ const Products = () => {
             {Array.from({ length: Math.ceil(products.length / 4) }).map((_, index) => (
               <button
                 key={index}
-                className={`h-2 w-2 rounded-full mx-1 ${
+                className={`button h-2 w-2 rounded-full mx-1 ${
                   currentSlide === index ? 'bg-red-600' : 'bg-gray-300'
                 }`}
                 onClick={() => setCurrentSlide(index)}
