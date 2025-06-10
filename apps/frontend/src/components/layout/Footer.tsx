@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-[color:var(--footer-background)] text-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
@@ -47,7 +47,7 @@ const Footer = () => {
                   placeholder="Suscríbete y recibe nuestras ofertas"
                   className="px-4 py-2 rounded bg-gray-800 text-white"
                 />
-                <button className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                <button className="button bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
                   Enviar
                 </button>
               </form>

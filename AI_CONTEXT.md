@@ -24,7 +24,8 @@ Aplicación construida con NestJS. **Todas las rutas de la API del backend está
         -   `auth.controller.ts`: Endpoints HTTP.
         -   `auth.module.ts`: Definición del módulo.
         -   `strategies/jwt.strategy.ts`: Estrategia de Passport para JWT.
-        -   `guards/jwt-auth.guard.ts`: Guard para proteger rutas.
+        -   `guards/jwt-auth.guard.ts`: Guard para proteger rutas que requieren autenticación.
+        -   `guards/admin.guard.ts`: Guard para proteger rutas que requieren privilegios de administrador. Verifica el rol del usuario contra la base de datos usando PrismaService.
         -   `dto/`: Data Transfer Objects para validación de entradas.
     -   **`database/`**: Módulo para la gestión de la base de datos.
         -   Probablemente encapsula la conexión y la lógica de acceso a la base de datos (ej. Prisma o Supabase client).
@@ -34,6 +35,17 @@ Aplicación construida con NestJS. **Todas las rutas de la API del backend está
         -   `user.service.ts`: Lógica de negocio.
         -   `user.controller.ts`: Endpoints HTTP.
         -   `user.module.ts`: Definición del módulo.
+    -   **`products/`**: Módulo para la gestión de productos.
+        -   `products.service.ts`: Lógica de negocio para productos, incluyendo CRUD, listado público con filtros/paginación, y gestión de descuentos.
+        -   `products.controller.ts`: Endpoints HTTP para productos.
+            -   `GET /products`: Listado público de productos (paginado, búsqueda por nombre, filtro por categorías, orden por precio).
+            -   `GET /products/:id`: Obtener un producto específico.
+            -   `POST /products`: Crear producto (protegido por AdminGuard).
+            -   `PUT /products/:id`: Actualizar producto (protegido por AdminGuard).
+            -   `DELETE /products/:id`: Eliminar lógicamente un producto (protegido por AdminGuard).
+            -   `GET /products/discounts`: Obtener descuentos de productos para el usuario autenticado (puede filtrar por `productId`).
+        -   `products.module.ts`: Definición del módulo.
+        -   `dto/`: Data Transfer Objects para productos (creación, actualización, consulta, respuesta, descuentos).
 -   **`test/`**: Contiene tests end-to-end (e2e).
 -   **`generated/`**: Posiblemente para artefactos generados (ej. cliente Prisma).
 
@@ -76,7 +88,7 @@ Aplicación construida con Next.js.
 ## Consideraciones Generales
 
 -   **Autenticación**: Flujo de autenticación basado en JWT, con tokens de acceso y refresco. El backend maneja la lógica de Supabase.
--   **Base de Datos**: La interacción con la base de datos parece centralizada a través del `DatabaseModule` en el backend. No se ha especificado si se usa Prisma directamente en el `schema.prisma` o si se interactúa con Supabase a través de su cliente JS. *(Nota: Previamente trabajamos con un `schema.prisma`, pero fue eliminado, por lo que el enfoque actual puede ser completamente basado en el cliente de Supabase)*.
+-   **Base de Datos**: La interacción con la base de datos se realiza principalmente a través de Prisma ORM, utilizando el archivo `schema.prisma` ubicado en `apps/backend/prisma/`. El `DatabaseModule` en el backend probablemente encapsula la lógica de acceso a la base de datos utilizando el cliente Prisma generado.
 -   **Testing**: Ambos proyectos tienen configuraciones de Jest. El backend tiene tests unitarios para servicios y tests e2e. El frontend tiene tests para componentes.
 
 ## Cómo Mantener Actualizado este Archivo
@@ -87,5 +99,6 @@ Aplicación construida con Next.js.
 
 ---
 
-*Este archivo fue generado y actualizado por última vez el 2025-05-31 14:53:00.*
+*Este archivo fue generado y actualizado por última vez el 2025-06-03 20:30:00.*
+
 *Por favor, actualiza la fecha y cualquier información relevante cuando hagas cambios significativos.* 
