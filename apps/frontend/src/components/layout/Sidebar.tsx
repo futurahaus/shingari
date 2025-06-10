@@ -33,7 +33,7 @@ export default function Sidebar({ className = '', children }: SidebarProps) {
         <form action="/logout" method="post">
           <button
             type="submit"
-            className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-red-600 hover:bg-red-100 mt-4 w-full text-left"
+            className="button flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-red-600 hover:bg-red-100 mt-4 w-full text-left"
           >
             Cerrar Sesión
           </button>

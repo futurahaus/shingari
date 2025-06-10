@@ -199,7 +199,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               </div>
               <button
                 type="submit"
-                className="w-full bg-red-600 text-white py-3 px-4 rounded-lg text-base font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="button w-full bg-red-600 text-white py-3 px-4 rounded-lg text-base font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isLoading}
               >
                 Inicia Sesión
@@ -215,7 +215,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               <button
                 onClick={handleRegister}
                 disabled={isLoading}
-                className="block w-full bg-red-600 text-white py-3 px-4 rounded-lg text-base font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 text-center disabled:opacity-50 disabled:cursor-not-allowed"
+                className="button block w-full bg-red-600 text-white py-3 px-4 rounded-lg text-base font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 text-center disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Regístrate
               </button>

@@ -5,8 +5,8 @@ interface RequestOptions extends RequestInit {
 class ApiClient {
   private baseUrl: string;
 
-  constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  constructor(baseUrl: string = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api') {
+    this.baseUrl = baseUrl;
   }
 
   private async getAccessToken(): Promise<string | null> {

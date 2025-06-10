@@ -60,7 +60,7 @@ export default function DashboardPage() {
           <p>{error}</p>
           <button
             onClick={() => router.push('/')}
-            className="mt-4 text-sm font-medium text-red-600 hover:text-red-500"
+            className="button mt-4 text-sm font-medium text-red-600 hover:text-red-500"
           >
             Volver al inicio de sesión
           </button>
@@ -103,7 +103,7 @@ export default function DashboardPage() {
             <div className="mt-6">
               <button
                 onClick={logout}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                className="button inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
               >
                 Cerrar Sesión
               </button>

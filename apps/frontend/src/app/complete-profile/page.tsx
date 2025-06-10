@@ -109,7 +109,7 @@ export default function CompleteProfilePage() {
           <p>{error}</p>
           <button
             onClick={() => router.push('/')}
-            className="mt-4 text-sm font-medium text-red-600 hover:text-red-500"
+            className="button mt-4 text-sm font-medium text-red-600 hover:text-red-500"
           >
             Volver al inicio
           </button>
@@ -369,7 +369,7 @@ export default function CompleteProfilePage() {
           <div>
             <button
               type="submit"
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              className="button w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
             >
               Guardar Perfil
             </button>
