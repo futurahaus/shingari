@@ -33,7 +33,7 @@ export default function RoleSelectionModal({
       onRoleSelected(role);
     } catch (err) {
       console.error('Error assigning role:', err);
-      setError(err instanceof Error ? err.message : 'Failed to assign role');
+      setError(err instanceof Error ? err.message : 'Error al asignar el rol');
     } finally {
       setIsLoading(false);
     }
@@ -46,10 +46,10 @@ export default function RoleSelectionModal({
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Bienvenido! Por favor, selecciona tipo de persona
+            ¡Bienvenido! Por favor selecciona tu rol
           </h2>
           <p className="text-gray-600 mb-6">
-            Esta informacion nos ayuda a brindarte una mejor experiencia de usuario.
+            Esto nos ayudará a personalizar tu experiencia. Puedes cambiar esto más tarde en la configuración de tu perfil.
           </p>
 
           {error && (
@@ -76,8 +76,8 @@ export default function RoleSelectionModal({
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Consumidor final</h3>
-                  <p className="text-sm text-gray-600">Deseo buscar y comprar productos como usuario indivual. </p>
+                  <h3 className="font-semibold text-gray-900">Consumidor Final</h3>
+                  <p className="text-sm text-gray-600">Quiero navegar y comprar productos</p>
                 </div>
               </div>
             </button>
@@ -100,7 +100,7 @@ export default function RoleSelectionModal({
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900">Empresa</h3>
-                  <p className="text-sm text-gray-600">Deseo comprar productos como empresa.</p>
+                  <p className="text-sm text-gray-600">Quiero vender productos y gestionar mi negocio</p>
                 </div>
               </div>
             </button>

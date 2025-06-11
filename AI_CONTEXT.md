@@ -32,6 +32,9 @@ Aplicación construida con NestJS. **Todas las rutas de la API del backend está
             -   Endpoint `POST /auth/assign-role`: Asigna un rol específico a un usuario autenticado.
             -   Los roles se almacenan en la tabla `user_roles` y se actualizan en los metadatos del usuario.
             -   Manejo automático de roles duplicados y creación de roles si no existen.
+            -   **Redirección basada en roles**: 
+                -   Usuarios con rol 'consumer' (Consumidor Final) son redirigidos a `/dashboard`
+                -   Usuarios con rol 'business' (Empresa) son redirigidos a `/complete-profile`
     -   **`database/`**: Módulo para la gestión de la base de datos.
         -   Probablemente encapsula la conexión y la lógica de acceso a la base de datos (ej. Prisma o Supabase client).
         -   `database.service.ts`: Servicio para interactuar con la base de datos.

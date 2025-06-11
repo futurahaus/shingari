@@ -89,10 +89,22 @@ export default function VerifyEmailPage() {
                 // Show role selection modal
                 setShowRoleModal(true);
               } else {
-                // User already has a role, redirect to dashboard
-                setTimeout(() => {
-                  router.push('/dashboard');
-                }, 1000);
+                // User already has a role, redirect based on their role
+                const userRole = user.roles.find((role: string) => role === 'consumer' || role === 'business');
+                if (userRole === 'consumer') {
+                  setTimeout(() => {
+                    router.push('/dashboard');
+                  }, 1000);
+                } else if (userRole === 'business') {
+                  setTimeout(() => {
+                    router.push('/complete-profile');
+                  }, 1000);
+                } else {
+                  // Fallback to dashboard if role is not recognized
+                  setTimeout(() => {
+                    router.push('/dashboard');
+                  }, 1000);
+                }
               }
           } catch {
             throw new Error('Failed to complete authentication. Please try logging in manually.');
@@ -113,10 +125,20 @@ export default function VerifyEmailPage() {
 
   const handleRoleSelected = (role: string) => {
     setShowRoleModal(false);
-    setMessage(`${role} role assigned successfully! Redirecting to dashboard...`);
-    setTimeout(() => {
-      router.push('/dashboard');
-    }, 1000);
+    setMessage(`¡Rol ${role === 'consumer' ? 'Consumidor Final' : 'Empresa'} asignado exitosamente! Redirigiendo...`);
+    
+    // Redirect based on role
+    if (role === 'consumer') {
+      // Consumer goes to dashboard
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 1000);
+    } else if (role === 'business') {
+      // Business goes to complete-profile
+      setTimeout(() => {
+        router.push('/complete-profile');
+      }, 1000);
+    }
   };
 
   return (
