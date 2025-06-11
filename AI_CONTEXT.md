@@ -27,6 +27,11 @@ Aplicación construida con NestJS. **Todas las rutas de la API del backend está
         -   `guards/jwt-auth.guard.ts`: Guard para proteger rutas que requieren autenticación.
         -   `guards/admin.guard.ts`: Guard para proteger rutas que requieren privilegios de administrador. Verifica el rol del usuario contra la base de datos usando PrismaService.
         -   `dto/`: Data Transfer Objects para validación de entradas.
+            -   `assign-role.dto.ts`: DTO para asignación de roles (consumer/business).
+        -   **Funcionalidad de Roles**: Sistema de asignación de roles que permite a los usuarios elegir entre 'consumer' y 'business' después de verificar su email.
+            -   Endpoint `POST /auth/assign-role`: Asigna un rol específico a un usuario autenticado.
+            -   Los roles se almacenan en la tabla `user_roles` y se actualizan en los metadatos del usuario.
+            -   Manejo automático de roles duplicados y creación de roles si no existen.
     -   **`database/`**: Módulo para la gestión de la base de datos.
         -   Probablemente encapsula la conexión y la lógica de acceso a la base de datos (ej. Prisma o Supabase client).
         -   `database.service.ts`: Servicio para interactuar con la base de datos.
@@ -68,8 +73,10 @@ Aplicación construida con Next.js.
 -   **`app/`**: Directorio principal para la estructura de rutas y componentes de Next.js (App Router).
     -   `page.tsx`: Página principal.
     -   `layout.tsx`: Layout principal de la aplicación.
+    -   `auth/verify-email/page.tsx`: Página de verificación de email con integración de selección de roles.
 -   **`components/`**: Componentes reutilizables de React.
     -   Probablemente organizados por funcionalidad o tipo (ej. `ui/`, `common/`, `auth/`).
+    -   `auth/RoleSelectionModal.tsx`: Modal para selección de roles (consumer/business) después de verificación de email.
 -   **`lib/`**: Librerías auxiliares y utilidades.
     -   `api.ts`: Cliente para interactuar con el backend (maneja tokens, refresh, etc.).
 -   **`contexts/`**: React Contexts para gestión de estado global (ej. `AuthContext`).
@@ -89,6 +96,10 @@ Aplicación construida con Next.js.
 
 -   **Autenticación**: Flujo de autenticación basado en JWT, con tokens de acceso y refresco. El backend maneja la lógica de Supabase.
 -   **Base de Datos**: La interacción con la base de datos se realiza principalmente a través de Prisma ORM, utilizando el archivo `schema.prisma` ubicado en `apps/backend/prisma/`. El `DatabaseModule` en el backend probablemente encapsula la lógica de acceso a la base de datos utilizando el cliente Prisma generado.
+-   **Sistema de Roles**: Implementación de roles de usuario (consumer/business) con asignación automática después de la verificación de email.
+    -   Los roles se almacenan en la tabla `roles` y se relacionan con usuarios a través de `user_roles`.
+    -   Flujo de verificación de email mejorado con modal de selección de roles.
+    -   Manejo de roles duplicados y creación automática de roles si no existen.
 -   **Testing**: Ambos proyectos tienen configuraciones de Jest. El backend tiene tests unitarios para servicios y tests e2e. El frontend tiene tests para componentes.
 
 ## Cómo Mantener Actualizado este Archivo
@@ -99,6 +110,6 @@ Aplicación construida con Next.js.
 
 ---
 
-*Este archivo fue generado y actualizado por última vez el 2025-06-03 20:30:00.*
+*Este archivo fue generado y actualizado el 2025-01-03 21:00:00.*
 
 *Por favor, actualiza la fecha y cualquier información relevante cuando hagas cambios significativos.* 

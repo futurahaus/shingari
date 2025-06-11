@@ -12,6 +12,7 @@ import {
   RequestPasswordResetDto,
   ConfirmPasswordResetDto,
 } from './dto/reset-password.dto';
+import { AssignRoleDto, UserRole as UserRoleEnum } from './dto/assign-role.dto';
 
 interface UserRole {
   roles: {
@@ -383,6 +384,88 @@ export class AuthService {
     } catch (error) {
       this.logger.logError('Password Reset Confirmation', error);
       throw new BadRequestException('Error al restablecer la contraseña');
+    }
+  }
+
+  async assignRole(assignRoleDto: AssignRoleDto): Promise<void> {
+    try {
+      const { userId, role } = assignRoleDto;
+
+      // First, check if the role exists in the roles table
+      const { data: existingRole, error: roleError } = await this.databaseService
+        .getAdminClient()
+        .from('roles')
+        .select('id')
+        .eq('name', role)
+        .single();
+
+      if (roleError || !existingRole) {
+        // Role doesn't exist, create it
+        const { data: newRole, error: createRoleError } = await this.databaseService
+          .getAdminClient()
+          .from('roles')
+          .insert({ name: role, description: `${role} role` })
+          .select('id')
+          .single();
+
+        if (createRoleError) {
+          this.logger.logError('Role Creation', createRoleError);
+          throw new BadRequestException('Failed to create role');
+        }
+
+        // Assign the new role to the user
+        const { error: assignError } = await this.databaseService
+          .getAdminClient()
+          .from('user_roles')
+          .insert({
+            user_id: userId,
+            role_id: newRole.id,
+          });
+
+        if (assignError) {
+          this.logger.logError('Role Assignment', assignError);
+          throw new BadRequestException('Failed to assign role to user');
+        }
+      } else {
+        // Role exists, assign it to the user
+        const { error: assignError } = await this.databaseService
+          .getAdminClient()
+          .from('user_roles')
+          .insert({
+            user_id: userId,
+            role_id: existingRole.id,
+          });
+
+        if (assignError) {
+          // Check if it's a duplicate key error (user already has this role)
+          if (assignError.code === '23505') {
+            this.logger.logInfo(`User ${userId} already has role ${role}`);
+            return; // User already has this role, which is fine
+          }
+          
+          this.logger.logError('Role Assignment', assignError);
+          throw new BadRequestException('Failed to assign role to user');
+        }
+      }
+
+      // Update user's app_metadata with the new role
+      const { error: updateError } = await this.databaseService
+        .getAdminClient()
+        .auth.admin.updateUserById(userId, {
+          app_metadata: {
+            roles: [role],
+          },
+        });
+
+      if (updateError) {
+        this.logger.logError('User Metadata Update', updateError);
+        throw new BadRequestException('Failed to update user metadata');
+      }
+
+      this.logger.logInfo(`Role ${role} assigned successfully to user ${userId}`);
+    } catch (error) {
+      this.logger.logError('Role Assignment', error);
+      throw error;
     }
   }
 }

@@ -31,6 +31,7 @@ import {
   RequestPasswordResetDto,
   ConfirmPasswordResetDto,
 } from './dto/reset-password.dto';
+import { AssignRoleDto } from './dto/assign-role.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -214,5 +215,31 @@ export class AuthController {
     return {
       message: 'Contraseña restablecida exitosamente.',
     };
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('assign-role')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Assign role to user' })
+  @ApiBody({ type: AssignRoleDto })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Role assigned successfully.',
+    type: SimpleMessageResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Failed to assign role.',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized.',
+  })
+  async assignRole(
+    @Body() assignRoleDto: AssignRoleDto,
+  ): Promise<SimpleMessageResponseDto> {
+    await this.authService.assignRole(assignRoleDto);
+    return { message: 'Role assigned successfully' };
   }
 }
