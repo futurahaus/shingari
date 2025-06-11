@@ -9,6 +9,7 @@ import {
   Get,
   Request as NestRequest,
   Headers,
+  Put,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -32,6 +33,7 @@ import {
   ConfirmPasswordResetDto,
 } from './dto/reset-password.dto';
 import { AssignRoleDto } from './dto/assign-role.dto';
+import { CompleteProfileDto } from './dto/complete-profile.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -219,6 +221,30 @@ export class AuthController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @Put('profile')
+  @ApiOperation({ summary: 'Update current authenticated user profile' })
+  @ApiBody({ type: CompleteProfileDto })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'User profile updated successfully.',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid input data.',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized.',
+  })
+  async updateProfile(
+    @NestRequest() req,
+    @Body() completeProfileDto: CompleteProfileDto,
+  ) {
+    return this.authService.updateProfile(req.user.id, completeProfileDto);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Post('assign-role')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Assign role to user' })
@@ -230,7 +256,7 @@ export class AuthController {
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Failed to assign role.',
+    description: 'Invalid role or user.',
   })
   @ApiResponse({
     status: HttpStatus.UNAUTHORIZED,

@@ -13,6 +13,7 @@ import {
   ConfirmPasswordResetDto,
 } from './dto/reset-password.dto';
 import { AssignRoleDto, UserRole as UserRoleEnum } from './dto/assign-role.dto';
+import { CompleteProfileDto } from './dto/complete-profile.dto';
 
 interface UserRole {
   roles: {
@@ -442,7 +443,7 @@ export class AuthService {
             this.logger.logInfo(`User ${userId} already has role ${role}`);
             return; // User already has this role, which is fine
           }
-          
+
           this.logger.logError('Role Assignment', assignError);
           throw new BadRequestException('Failed to assign role to user');
         }
@@ -465,6 +466,65 @@ export class AuthService {
       this.logger.logInfo(`Role ${role} assigned successfully to user ${userId}`);
     } catch (error) {
       this.logger.logError('Role Assignment', error);
+      throw error;
+    }
+  }
+
+  async updateProfile(userId: string, completeProfileDto: CompleteProfileDto) {
+    try {
+      // Map the frontend form fields to the database schema fields
+      const profileData = {
+        uuid: userId,
+        first_name: completeProfileDto.nombre,
+        last_name: completeProfileDto.apellidos,
+        city: completeProfileDto.localidad,
+        province: completeProfileDto.provincia,
+        country: completeProfileDto.pais,
+        postal_code: completeProfileDto.cp,
+        phone: completeProfileDto.telefono,
+        profile_is_completed: true,
+        // Store additional business-specific fields in user metadata
+        // These fields are not in the public.users schema, so we'll store them in auth.users metadata
+      };
+
+      // Update the public.users table
+      const { data: userProfile, error: profileError } = await this.databaseService
+        .getAdminClient()
+        .from('users')
+        .upsert(profileData)
+        .select()
+        .single();
+
+      if (profileError) {
+        this.logger.logError('Profile Update', profileError);
+        throw new BadRequestException('Failed to update user profile');
+      }
+
+      // Store additional business-specific fields in auth.users metadata
+      const additionalData = {
+        nombreComercial: completeProfileDto.nombreComercial,
+        nombreFiscal: completeProfileDto.nombreFiscal,
+        nif: completeProfileDto.nif,
+        direccionFiscal: completeProfileDto.direccionFiscal,
+        direccionEntrega: completeProfileDto.direccionEntrega,
+        howDidYouKnowUs: completeProfileDto.howDidYouKnowUs,
+      };
+
+      const { error: metadataError } = await this.databaseService
+        .getAdminClient()
+        .auth.admin.updateUserById(userId, {
+          user_metadata: additionalData,
+        });
+
+      if (metadataError) {
+        this.logger.logError('User Metadata Update', metadataError);
+        throw new BadRequestException('Failed to update user metadata');
+      }
+
+      this.logger.logInfo(`Profile updated successfully for user ${userId}`);
+      return userProfile;
+    } catch (error) {
+      this.logger.logError('Profile Update', error);
       throw error;
     }
   }

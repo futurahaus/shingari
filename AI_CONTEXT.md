@@ -28,6 +28,7 @@ Aplicación construida con NestJS. **Todas las rutas de la API del backend está
         -   `guards/admin.guard.ts`: Guard para proteger rutas que requieren privilegios de administrador. Verifica el rol del usuario contra la base de datos usando PrismaService.
         -   `dto/`: Data Transfer Objects para validación de entradas.
             -   `assign-role.dto.ts`: DTO para asignación de roles (consumer/business).
+            -   `complete-profile.dto.ts`: DTO para completar perfil de usuario con información empresarial.
         -   **Funcionalidad de Roles**: Sistema de asignación de roles que permite a los usuarios elegir entre 'consumer' y 'business' después de verificar su email.
             -   Endpoint `POST /auth/assign-role`: Asigna un rol específico a un usuario autenticado.
             -   Los roles se almacenan en la tabla `user_roles` y se actualizan en los metadatos del usuario.
@@ -35,6 +36,11 @@ Aplicación construida con NestJS. **Todas las rutas de la API del backend está
             -   **Redirección basada en roles**: 
                 -   Usuarios con rol 'consumer' (Consumidor Final) son redirigidos a `/dashboard`
                 -   Usuarios con rol 'business' (Empresa) son redirigidos a `/complete-profile`
+        -   **Funcionalidad de Perfil Completo**: Sistema para completar información empresarial de usuarios.
+            -   Endpoint `PUT /auth/profile`: Actualiza el perfil del usuario autenticado.
+            -   Los datos básicos (nombre, apellidos, ciudad, provincia, país, código postal, teléfono) se almacenan en la tabla `public.users`.
+            -   Los datos específicos de empresa (nombre comercial, nombre fiscal, NIF, direcciones, cómo nos conoció) se almacenan en los metadatos del usuario en `auth.users`.
+            -   Manejo de errores y validación de datos de entrada.
     -   **`database/`**: Módulo para la gestión de la base de datos.
         -   Probablemente encapsula la conexión y la lógica de acceso a la base de datos (ej. Prisma o Supabase client).
         -   `database.service.ts`: Servicio para interactuar con la base de datos.
@@ -77,6 +83,7 @@ Aplicación construida con Next.js.
     -   `page.tsx`: Página principal.
     -   `layout.tsx`: Layout principal de la aplicación.
     -   `auth/verify-email/page.tsx`: Página de verificación de email con integración de selección de roles.
+    -   `complete-profile/page.tsx`: Página para completar perfil empresarial con formulario de datos.
 -   **`components/`**: Componentes reutilizables de React.
     -   Probablemente organizados por funcionalidad o tipo (ej. `ui/`, `common/`, `auth/`).
     -   `auth/RoleSelectionModal.tsx`: Modal para selección de roles (consumer/business) después de verificación de email.
@@ -103,6 +110,10 @@ Aplicación construida con Next.js.
     -   Los roles se almacenan en la tabla `roles` y se relacionan con usuarios a través de `user_roles`.
     -   Flujo de verificación de email mejorado con modal de selección de roles.
     -   Manejo de roles duplicados y creación automática de roles si no existen.
+-   **Sistema de Perfiles**: Implementación de perfiles de usuario con información básica y empresarial.
+    -   Los datos básicos del usuario se almacenan en la tabla `public.users` (nombre, apellidos, ciudad, provincia, país, código postal, teléfono).
+    -   Los datos específicos de empresa se almacenan en los metadatos del usuario en `auth.users` (nombre comercial, nombre fiscal, NIF, direcciones, cómo nos conoció).
+    -   Formulario de completar perfil disponible en `/complete-profile` para usuarios con rol 'business'.
 -   **Testing**: Ambos proyectos tienen configuraciones de Jest. El backend tiene tests unitarios para servicios y tests e2e. El frontend tiene tests para componentes.
 
 ## Cómo Mantener Actualizado este Archivo
@@ -113,6 +124,6 @@ Aplicación construida con Next.js.
 
 ---
 
-*Este archivo fue generado y actualizado el 2025-01-03 21:00:00.*
+*Este archivo fue generado y actualizado el 2025-01-03 21:30:00.*
 
 *Por favor, actualiza la fecha y cualquier información relevante cuando hagas cambios significativos.* 
