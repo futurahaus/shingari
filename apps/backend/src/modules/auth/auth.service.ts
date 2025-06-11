@@ -528,4 +528,59 @@ export class AuthService {
       throw error;
     }
   }
+
+  async getCompleteUserProfile(userId: string) {
+    try {
+      // Get user profile data from public.users table
+      const { data: userProfile, error: profileError } = await this.databaseService
+        .getAdminClient()
+        .from('users')
+        .select('*')
+        .eq('uuid', userId)
+        .single();
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        // PGRST116 is "not found" error, which is fine for new users
+        this.logger.logError('Profile Fetch', profileError);
+        throw new BadRequestException('Failed to fetch user profile');
+      }
+
+      // Get user metadata from auth.users table
+      const { data: { user }, error: userError } = await this.databaseService
+        .getAdminClient()
+        .auth.admin.getUserById(userId);
+
+      if (userError || !user) {
+        this.logger.logError('User Fetch', userError);
+        throw new BadRequestException('Failed to fetch user data');
+      }
+
+      // Combine the data
+      const completeProfile = {
+        id: userId,
+        email: user.email || '',
+        // Map public.users data to frontend field names
+        nombre: userProfile?.first_name || null,
+        apellidos: userProfile?.last_name || null,
+        localidad: userProfile?.city || null,
+        provincia: userProfile?.province || null,
+        pais: userProfile?.country || null,
+        cp: userProfile?.postal_code || null,
+        telefono: userProfile?.phone || null,
+        profile_is_completed: userProfile?.profile_is_completed || false,
+        // Get business-specific data from user metadata
+        nombreComercial: user.user_metadata?.nombreComercial || null,
+        nombreFiscal: user.user_metadata?.nombreFiscal || null,
+        nif: user.user_metadata?.nif || null,
+        direccionFiscal: user.user_metadata?.direccionFiscal || null,
+        direccionEntrega: user.user_metadata?.direccionEntrega || null,
+        howDidYouKnowUs: user.user_metadata?.howDidYouKnowUs || null,
+      };
+
+      return completeProfile;
+    } catch (error) {
+      this.logger.logError('Complete Profile Fetch', error);
+      throw error;
+    }
+  }
 }

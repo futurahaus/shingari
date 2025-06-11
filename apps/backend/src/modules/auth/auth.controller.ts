@@ -118,8 +118,8 @@ export class AuthController {
     status: HttpStatus.UNAUTHORIZED,
     description: 'Unauthorized.',
   })
-  getProfile(@NestRequest() req): MeResponseDto {
-    return req.user;
+  async getProfile(@NestRequest() req): Promise<MeResponseDto> {
+    return this.authService.getCompleteUserProfile(req.user.id);
   }
 
   @ApiBearerAuth()
