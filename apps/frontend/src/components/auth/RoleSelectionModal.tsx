@@ -46,10 +46,10 @@ export default function RoleSelectionModal({
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Welcome! Please select your role
+            Bienvenido! Por favor, selecciona tipo de persona
           </h2>
           <p className="text-gray-600 mb-6">
-            This will help us personalize your experience. You can change this later in your profile settings.
+            Esta informacion nos ayuda a brindarte una mejor experiencia de usuario.
           </p>
 
           {error && (
@@ -76,8 +76,8 @@ export default function RoleSelectionModal({
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Consumer</h3>
-                  <p className="text-sm text-gray-600">I want to browse and purchase products</p>
+                  <h3 className="font-semibold text-gray-900">Consumidor final</h3>
+                  <p className="text-sm text-gray-600">Deseo buscar y comprar productos como usuario indivual. </p>
                 </div>
               </div>
             </button>
@@ -99,8 +99,8 @@ export default function RoleSelectionModal({
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Business</h3>
-                  <p className="text-sm text-gray-600">I want to sell products and manage my business</p>
+                  <h3 className="font-semibold text-gray-900">Empresa</h3>
+                  <p className="text-sm text-gray-600">Deseo comprar productos como empresa.</p>
                 </div>
               </div>
             </button>
@@ -109,7 +109,7 @@ export default function RoleSelectionModal({
           {isLoading && (
             <div className="mt-4 flex items-center justify-center">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-red-500"></div>
-              <span className="ml-2 text-sm text-gray-600">Assigning role...</span>
+              <span className="ml-2 text-sm text-gray-600">Asignando rol...</span>
             </div>
           )}
         </div>
