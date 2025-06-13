@@ -9,6 +9,7 @@ import {
   Get,
   Request as NestRequest,
   Headers,
+  Put,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -31,6 +32,8 @@ import {
   RequestPasswordResetDto,
   ConfirmPasswordResetDto,
 } from './dto/reset-password.dto';
+import { AssignRoleDto } from './dto/assign-role.dto';
+import { CompleteProfileDto } from './dto/complete-profile.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -115,8 +118,8 @@ export class AuthController {
     status: HttpStatus.UNAUTHORIZED,
     description: 'Unauthorized.',
   })
-  getProfile(@NestRequest() req): MeResponseDto {
-    return req.user;
+  async getProfile(@NestRequest() req): Promise<MeResponseDto> {
+    return this.authService.getCompleteUserProfile(req.user.id);
   }
 
   @ApiBearerAuth()
@@ -214,5 +217,55 @@ export class AuthController {
     return {
       message: 'Contraseña restablecida exitosamente.',
     };
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Put('profile')
+  @ApiOperation({ summary: 'Update current authenticated user profile' })
+  @ApiBody({ type: CompleteProfileDto })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'User profile updated successfully.',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid input data.',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized.',
+  })
+  async updateProfile(
+    @NestRequest() req,
+    @Body() completeProfileDto: CompleteProfileDto,
+  ) {
+    return this.authService.updateProfile(req.user.id, completeProfileDto);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Post('assign-role')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Assign role to user' })
+  @ApiBody({ type: AssignRoleDto })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Role assigned successfully.',
+    type: SimpleMessageResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid role or user.',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Unauthorized.',
+  })
+  async assignRole(
+    @Body() assignRoleDto: AssignRoleDto,
+  ): Promise<SimpleMessageResponseDto> {
+    await this.authService.assignRole(assignRoleDto);
+    return { message: 'Role assigned successfully' };
   }
 }

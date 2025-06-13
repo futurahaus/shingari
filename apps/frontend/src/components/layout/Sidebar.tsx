@@ -10,6 +10,7 @@ interface SidebarProps {
 
 const navItems = [
   { label: 'Datos Personales', href: '/dashboard' },
+  { label: 'Mi perfil', href: '/complete-profile' },
   { label: 'Direcciones', href: '/dashboard/direcciones' },
   { label: 'Mis Compras', href: '/dashboard/compras' },
 ];

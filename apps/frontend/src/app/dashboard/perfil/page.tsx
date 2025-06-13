@@ -21,7 +21,7 @@ interface UserProfile extends Record<string, unknown> {
   referral_source: string;
 }
 
-export default function CompleteProfilePage() {
+export default function ProfilePage() {
   const router = useRouter();
   const { accessToken } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -43,10 +43,15 @@ export default function CompleteProfilePage() {
   });
 
   useEffect(() => {
+    // Check if user is authenticated
+    if (!accessToken) {
+      router.push('/login?from=/dashboard/perfil');
+      return;
+    }
+
     const fetchUserData = async () => {
       try {
         const data = await api.get<UserProfile>('/auth/me', { requireAuth: true });
-
         setFormData(prev => ({
           ...prev,
           nombre: data.nombre || prev.nombre,
@@ -66,7 +71,7 @@ export default function CompleteProfilePage() {
         console.error('Error fetching user data:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch user data');
         if (err instanceof Error && err.message === 'Authentication required') {
-          router.push('/login?from=/completar-perfil');
+          router.push('/login?from=/dashboard/perfil');
         }
       } finally {
         setLoading(false);
@@ -82,7 +87,8 @@ export default function CompleteProfilePage() {
 
     try {
       await api.put('/auth/profile', formData, { requireAuth: true });
-      router.push('/dashboard');
+      // Show success message or redirect
+      alert('Perfil actualizado correctamente');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al actualizar el perfil');
     }
@@ -98,23 +104,35 @@ export default function CompleteProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="flex gap-8">
+          <Sidebar />
+          <div className="flex-1 bg-white shadow-sm rounded-lg p-6">
+            <div className="flex items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
-          <p>{error}</p>
-          <button
-            onClick={() => router.push('/')}
-            className="button mt-4 text-sm font-medium text-red-600 hover:text-red-500"
-          >
-            Volver al inicio
-          </button>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="flex gap-8">
+          <Sidebar />
+          <div className="flex-1 bg-white shadow-sm rounded-lg p-6">
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
+              <p>{error}</p>
+              <button
+                onClick={() => router.push('/dashboard')}
+                className="button mt-4 text-sm font-medium text-red-600 hover:text-red-500"
+              >
+                Volver al dashboard
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -130,7 +148,7 @@ export default function CompleteProfilePage() {
               Mi Perfil
             </h3>
             <p className="mt-2 text-sm text-gray-600">
-              Completa tu información personal para continuar
+              Actualiza tu información personal
             </p>
           </div>
 

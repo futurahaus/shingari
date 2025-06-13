@@ -12,6 +12,8 @@ import {
   RequestPasswordResetDto,
   ConfirmPasswordResetDto,
 } from './dto/reset-password.dto';
+import { AssignRoleDto, UserRole as UserRoleEnum } from './dto/assign-role.dto';
+import { CompleteProfileDto } from './dto/complete-profile.dto';
 
 interface UserRole {
   roles: {
@@ -383,6 +385,183 @@ export class AuthService {
     } catch (error) {
       this.logger.logError('Password Reset Confirmation', error);
       throw new BadRequestException('Error al restablecer la contraseña');
+    }
+  }
+
+  async assignRole(assignRoleDto: AssignRoleDto): Promise<void> {
+    try {
+      const { userId, role } = assignRoleDto;
+
+      // First, check if the role exists in the roles table
+      const { data: existingRole, error: roleError } = await this.databaseService
+        .getAdminClient()
+        .from('roles')
+        .select('id')
+        .eq('name', role)
+        .single();
+
+      if (roleError || !existingRole) {
+        // Role doesn't exist, create it
+        const { data: newRole, error: createRoleError } = await this.databaseService
+          .getAdminClient()
+          .from('roles')
+          .insert({ name: role, description: `${role} role` })
+          .select('id')
+          .single();
+
+        if (createRoleError) {
+          this.logger.logError('Role Creation', createRoleError);
+          throw new BadRequestException('Failed to create role');
+        }
+
+        // Assign the new role to the user
+        const { error: assignError } = await this.databaseService
+          .getAdminClient()
+          .from('user_roles')
+          .insert({
+            user_id: userId,
+            role_id: newRole.id,
+          });
+
+        if (assignError) {
+          this.logger.logError('Role Assignment', assignError);
+          throw new BadRequestException('Failed to assign role to user');
+        }
+      } else {
+        // Role exists, assign it to the user
+        const { error: assignError } = await this.databaseService
+          .getAdminClient()
+          .from('user_roles')
+          .insert({
+            user_id: userId,
+            role_id: existingRole.id,
+          });
+
+        if (assignError) {
+          // Check if it's a duplicate key error (user already has this role)
+          if (assignError.code === '23505') {
+            this.logger.logInfo(`User ${userId} already has role ${role}`);
+            return; // User already has this role, which is fine
+          }
+
+          this.logger.logError('Role Assignment', assignError);
+          throw new BadRequestException('Failed to assign role to user');
+        }
+      }
+
+      // Update user's app_metadata with the new role
+      const { error: updateError } = await this.databaseService
+        .getAdminClient()
+        .auth.admin.updateUserById(userId, {
+          app_metadata: {
+            roles: [role],
+          },
+        });
+
+      if (updateError) {
+        this.logger.logError('User Metadata Update', updateError);
+        throw new BadRequestException('Failed to update user metadata');
+      }
+
+      this.logger.logInfo(`Role ${role} assigned successfully to user ${userId}`);
+    } catch (error) {
+      this.logger.logError('Role Assignment', error);
+      throw error;
+    }
+  }
+
+  async updateProfile(userId: string, completeProfileDto: CompleteProfileDto) {
+    try {
+      // Map the frontend form fields to the database schema fields
+      const profileData = {
+        uuid: userId,
+        first_name: completeProfileDto.nombre,
+        last_name: completeProfileDto.apellidos,
+        city: completeProfileDto.localidad,
+        province: completeProfileDto.provincia,
+        country: completeProfileDto.pais,
+        postal_code: completeProfileDto.cp,
+        phone: completeProfileDto.telefono,
+        profile_is_complete: true,
+        trade_name: completeProfileDto.trade_name,
+        tax_name: completeProfileDto.tax_name,
+        tax_id: completeProfileDto.tax_id,
+        billing_address: completeProfileDto.billing_address,
+        shipping_address: completeProfileDto.shipping_address,
+        referral_source: completeProfileDto.referral_source,
+      };
+
+      // Update the public.users table with all the data
+      const { data: userProfile, error: profileError } = await this.databaseService
+        .getAdminClient()
+        .from('users')
+        .upsert(profileData, { onConflict: 'uuid' })
+        .select()
+        .single();
+
+      if (profileError) {
+        this.logger.logError('Profile Update', profileError);
+        throw new BadRequestException('Failed to update user profile');
+      }
+
+      this.logger.logInfo(`Profile updated successfully for user ${userId}`);
+      return userProfile;
+    } catch (error) {
+      this.logger.logError('Profile Update', error);
+      throw error;
+    }
+  }
+
+  async getCompleteUserProfile(userId: string) {
+    try {
+      // Get user profile data from public.users table
+      const { data: userProfile, error: profileError } = await this.databaseService
+        .getAdminClient()
+        .from('users')
+        .select('*')
+        .eq('uuid', userId)
+        .single();
+
+      if (profileError && profileError.code !== 'PGRST116') {
+        // PGRST116 is "not found" error, which is fine for new users
+        this.logger.logError('Profile Fetch', profileError);
+        throw new BadRequestException('Failed to fetch user profile');
+      }
+
+      // Get user email from auth.users table
+      const { data: { user }, error: userError } = await this.databaseService
+        .getAdminClient()
+        .auth.admin.getUserById(userId);
+
+      if (userError || !user) {
+        this.logger.logError('User Fetch', userError);
+        throw new BadRequestException('Failed to fetch user data');
+      }
+
+      const completeProfile = {
+        id: userId,
+        email: user.email || '',
+        // Map public.users data to frontend field names
+        nombre: userProfile?.first_name || null,
+        apellidos: userProfile?.last_name || null,
+        localidad: userProfile?.city || null,
+        provincia: userProfile?.province || null,
+        pais: userProfile?.country || null,
+        cp: userProfile?.postal_code || null,
+        telefono: userProfile?.phone || null,
+        profile_is_complete: userProfile?.profile_is_complete || false,
+        trade_name: userProfile?.trade_name || null,
+        tax_name: userProfile?.tax_name || null,
+        tax_id: userProfile?.tax_id || null,
+        billing_address: userProfile?.billing_address || null,
+        shipping_address: userProfile?.shipping_address || null,
+        referral_source: userProfile?.referral_source || null,
+      };
+
+      return completeProfile;
+    } catch (error) {
+      this.logger.logError('Complete Profile Fetch', error);
+      throw error;
     }
   }
 }
