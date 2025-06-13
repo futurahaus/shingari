@@ -28,6 +28,9 @@ export class ProductResponseDto {
   @ApiProperty({ description: 'Fecha de última actualización del producto' })
   updatedAt: Date;
 
+  @ApiProperty({ description: 'URLs de las imágenes del producto' })
+  images: string[];
+
   @ApiPropertyOptional({ 
     description: 'Categorías a las que pertenece el producto (ej. nombres o slugs)',
     example: ['electronics', 'gaming', 'laptops'],

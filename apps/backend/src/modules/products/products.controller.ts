@@ -23,6 +23,7 @@ import { ProductDiscountResponseDto } from './dto/product-discount-response.dto'
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiQuery, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard'; // Import AdminGuard desde auth/guards
+import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 
 @ApiTags('Products')
 @Controller('products')
@@ -38,10 +39,11 @@ export class ProductsController {
 
   // --- Public Endpoint --- 
   @Get()
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({ summary: 'Obtener lista pública de productos con paginación, búsqueda y filtros' })
   @ApiResponse({ status: 200, description: 'Lista de productos obtenida exitosamente.', type: PaginatedProductResponseDto })
-  async findAllPublic(@Query() queryProductDto: QueryProductDto): Promise<PaginatedProductResponseDto> {
-    return this.productsService.findAllPublic(queryProductDto);
+  async findAllPublic(@Query() queryProductDto: QueryProductDto, @NestRequest() req): Promise<PaginatedProductResponseDto> {
+    return this.productsService.findAllPublic(queryProductDto, req.user?.id);
   }
 
   // --- Admin Endpoints --- 
@@ -99,22 +101,20 @@ export class ProductsController {
   @ApiQuery({ name: 'productId', description: 'ID numérico opcional del producto para filtrar descuentos', required: false, type: 'integer' })
   @ApiResponse({ status: 200, description: 'Lista de descuentos obtenida.', type: [ProductDiscountResponseDto] })
   @ApiResponse({ status: 401, description: 'No autorizado.' })
-  async findDiscountsForUser(
-    @NestRequest() req, // Para obtener req.user.id
-    @Query('productId', new ParseIntPipe({ optional: true })) productId?: number,
-  ): Promise<ProductDiscountResponseDto[]> {
-    const userId = req.user.id;
-    return this.productsService.findDiscountsForUser(userId, productId);
+  async findDiscountsForUser(@NestRequest() req): Promise<ProductDiscountResponseDto[]> {
+    return this.productsService.findDiscountsForUser(req.user.id);
   }
   
   // Endpoint para obtener un producto específico por ID (público)
   // Es buena práctica tener un endpoint para obtener detalles de un solo producto.
   @Get(':id')
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({ summary: 'Obtener detalles de un producto específico por su ID' })
   @ApiParam({ name: 'id', description: 'ID numérico del producto', type: 'integer' })
   @ApiResponse({ status: 200, description: 'Detalles del producto obtenidos.', type: ProductResponseDto })
   @ApiResponse({ status: 404, description: 'Producto no encontrado.' })
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<ProductResponseDto> {
-    return this.productsService.findOne(id);
+  async findOne(@Param('id') id: string, @NestRequest() req): Promise<ProductResponseDto> {
+    console.log('req.user', req.user);
+    return this.productsService.findOne(+id, req.user?.id);
   }
 } 

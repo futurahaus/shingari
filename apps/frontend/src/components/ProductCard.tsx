@@ -1,3 +1,6 @@
+import Image from 'next/image';
+import Link from 'next/link';
+
 export interface Product {
     id: string;
     name: string;
@@ -5,14 +8,23 @@ export interface Product {
     originalPrice?: number;
     discount?: number;
     description: string;
-    image?: string;
+    images: string[];
     categories: string[];
 }
 
 export const ProductCard = ({ product }: { product: Product }) => (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden group">
-        <div className="bg-gray-200 h-48 flex items-center justify-center">
-            {/* Placeholder for image */}
+        <div className="bg-gray-200 h-48 flex items-center justify-center relative">
+            {product.images.length > 0 ? (
+                <Image
+                    src={product.images[0]}
+                    alt={product.name}
+                    fill
+                    className="object-cover"
+                />
+            ) : (
+                <div className="text-gray-400">Sin imagen</div>
+            )}
         </div>
         <div className="p-4">
             <h3 className="text-lg font-bold">{product.name}</h3>
@@ -32,9 +44,11 @@ export const ProductCard = ({ product }: { product: Product }) => (
                 </h5>
             )}
             <p className="mb-4">{product.description}</p>
-            <button className="button w-full bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition-colors">
-                <b>Agregar al carrito</b>
-            </button>
+            <Link href={`/products/${product.id}`} className="block w-full">
+                <button className="button w-full bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition-colors">
+                    <b>Agregar al carrito</b>
+                </button>
+            </Link>
         </div>
     </div>
 ); 

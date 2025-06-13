@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'src/modules/prisma/prisma.service'; // Ajusta si tu ruta es diferente
-import { Prisma, products as ProductPrismaType, product_states, categories as CategoryPrismaType, products_categories as ProductsCategoriesPrismaType, products_discounts as ProductDiscountPrismaType } from '../../../generated/prisma'; // Importar tipos y enums de Prisma
+import { Prisma, products as ProductPrismaType, product_states, categories as CategoryPrismaType, products_categories as ProductsCategoriesPrismaType, products_discounts as ProductDiscountPrismaType, product_images as ProductImagesPrismaType, roles as RolePrismaType } from '../../../generated/prisma'; // Importar tipos y enums de Prisma
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductDto, ProductSortByPrice } from './dto/query-product.dto';
@@ -11,6 +11,7 @@ import { CategoryResponseDto } from './dto/category-response.dto';
 // Tipo para el producto con categorías incluidas, específico para findAllPublic y findOne
 type ProductWithCategoriesForResponse = ProductPrismaType & {
     products_categories: (ProductsCategoriesPrismaType & { categories: CategoryPrismaType })[];
+    product_images: (ProductImagesPrismaType)[];
 };
 
 // Tipo para el descuento con detalles del producto incluidos
@@ -22,8 +23,81 @@ type DiscountWithProductDetails = ProductDiscountPrismaType & {
 export class ProductsService {
     constructor(private readonly prisma: PrismaService) { } // Inyectar PrismaService
 
-    async findAllPublic(queryProductDto: QueryProductDto): Promise<PaginatedProductResponseDto> {
+    private async getUserRole(userId: string): Promise<string | null> {
+        const userRole = await this.prisma.user_roles.findFirst({
+            where: {
+                user_id: userId,
+            },
+            include: {
+                roles: true,
+            },
+        });
 
+        return userRole?.roles.name || null;
+    }
+
+    private async getUserDiscount(userId: string, productId: number): Promise<number | null> {
+        const userDiscount = await this.prisma.products_discounts.findFirst({
+            where: {
+                user_id: userId,
+                product_id: productId,
+                is_active: true,
+                AND: [
+                    {
+                        OR: [
+                            { valid_from: { lte: new Date() } },
+                            { valid_from: null },
+                        ],
+                    },
+                    {
+                        OR: [
+                            { valid_to: { gte: new Date() } },
+                            { valid_to: null },
+                        ],
+                    },
+                ],
+            },
+        });
+
+        return userDiscount ? userDiscount.price.toNumber() : null;
+    }
+
+    private async mapToProductResponseDto(product: ProductWithCategoriesForResponse, userId?: string): Promise<ProductResponseDto> {
+        let price = product.list_price.toNumber();
+        
+        if (userId) {
+            // Primero verificamos si hay un descuento específico para el usuario
+            const userDiscountPrice = await this.getUserDiscount(userId, product.id);
+            
+            if (userDiscountPrice !== null) {
+                // Si hay un descuento específico, usamos ese precio
+                price = userDiscountPrice;
+            } else {
+                // Si no hay descuento específico, verificamos el rol del usuario
+                const userRole = await this.getUserRole(userId);
+                if (userRole === 'business') {
+                    price = product.wholesale_price?.toNumber() || product.list_price.toNumber();
+                }
+            }
+        }
+
+        const discount = Number(((1 - (price / product.list_price.toNumber())) * 100).toFixed(2));
+
+        return {
+            updatedAt: new Date(),
+            id: product.id.toString(),
+            name: product.name,
+            description: product.description || '',
+            price: price,
+            originalPrice: product.list_price.toNumber(),
+            discount: discount,
+            createdAt: product.created_at || new Date(),
+            categories: product.products_categories?.map(pc => pc.categories.name) || [],
+            images: product.product_images?.map(pi => pi.image_url) || [],
+        };
+    }
+
+    async findAllPublic(queryProductDto: QueryProductDto, userId?: string): Promise<PaginatedProductResponseDto> {
         const { page = 1, limit = 10, searchName, categoryFilters, sortByPrice } = queryProductDto;
         const skip = (page - 1) * limit;
 
@@ -68,13 +142,22 @@ export class ProductsService {
                         categories: true,
                     },
                 },
+                product_images: {
+                    include: {
+                        products: true,
+                    },
+                },
             },
         });
 
         const total = await this.prisma.products.count({ where });
 
+        const mappedProducts = await Promise.all(
+            productsData.map(p => this.mapToProductResponseDto(p as ProductWithCategoriesForResponse, userId))
+        );
+
         return {
-            data: productsData.map(p => this.mapToProductResponseDto(p as ProductWithCategoriesForResponse)),
+            data: mappedProducts,
             total,
             page,
             limit,
@@ -82,7 +165,7 @@ export class ProductsService {
         };
     }
 
-    async findOne(id: number): Promise<ProductResponseDto> {
+    async findOne(id: number, userId?: string): Promise<ProductResponseDto> {
         const product = await this.prisma.products.findUnique({
             where: {
                 id: id,
@@ -94,6 +177,11 @@ export class ProductsService {
                         categories: true, // Incluir los datos de la categoría
                     },
                 },
+                product_images: {
+                    include: {
+                        products: true,
+                    },
+                },
             },
         });
 
@@ -101,7 +189,7 @@ export class ProductsService {
             throw new NotFoundException(`Producto con ID "${id}" no encontrado o no está activo.`);
         }
 
-        return this.mapToProductResponseDto(product as ProductWithCategoriesForResponse);
+        return this.mapToProductResponseDto(product as ProductWithCategoriesForResponse, userId);
     }
 
     async create(createProductDto: CreateProductDto): Promise<ProductResponseDto> {
@@ -161,23 +249,6 @@ export class ProductsService {
         });
 
         return discounts.map(d => this.mapToProductDiscountResponseDto(d as DiscountWithProductDetails));
-    }
-
-    private mapToProductResponseDto(product: ProductWithCategoriesForResponse): ProductResponseDto {
-
-        const discount = (1 - ((product.wholesale_price?.toNumber() || 0) / product.list_price.toNumber())) * 100;
-
-        return {
-            updatedAt: new Date(),
-            id: product.id.toString(), // Asumiendo que el DTO espera string y product.id es Int
-            name: product.name,
-            description: product.description || '',
-            price: product.wholesale_price?.toNumber() || 0,
-            originalPrice: product.list_price.toNumber(),
-            discount: discount,
-            createdAt: product.created_at || new Date(),
-            categories: product.products_categories?.map(pc => pc.categories.name) || [],
-        };
     }
 
     private mapToProductDiscountResponseDto(discount: DiscountWithProductDetails): ProductDiscountResponseDto {
