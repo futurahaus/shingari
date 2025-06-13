@@ -336,7 +336,15 @@ exports.Prisma.Public_usersScalarFieldEnum = {
   birth_date: 'birth_date',
   phone: 'phone',
   accepted_terms: 'accepted_terms',
-  uuid: 'uuid'
+  uuid: 'uuid',
+  trade_name: 'trade_name',
+  tax_id: 'tax_id',
+  billing_address: 'billing_address',
+  shipping_address: 'shipping_address',
+  referral_source: 'referral_source',
+  profile_is_complete: 'profile_is_complete',
+  nombrefiscal: 'nombrefiscal',
+  tax_name: 'tax_name'
 };
 
 exports.Prisma.CategoriesScalarFieldEnum = {
@@ -353,7 +361,8 @@ exports.Prisma.ProductsScalarFieldEnum = {
   list_price: 'list_price',
   created_at: 'created_at',
   status: 'status',
-  wholesale_price: 'wholesale_price'
+  wholesale_price: 'wholesale_price',
+  sku: 'sku'
 };
 
 exports.Prisma.Products_categoriesScalarFieldEnum = {
@@ -384,6 +393,16 @@ exports.Prisma.UnitsScalarFieldEnum = {
   code: 'code',
   name: 'name',
   description: 'description',
+  created_at: 'created_at'
+};
+
+exports.Prisma.Product_imagesScalarFieldEnum = {
+  id: 'id',
+  product_id: 'product_id',
+  image_url: 'image_url',
+  alt_text: 'alt_text',
+  is_main: 'is_main',
+  sort_order: 'sort_order',
   created_at: 'created_at'
 };
 
@@ -485,7 +504,8 @@ exports.Prisma.ModelName = {
   products_categories: 'products_categories',
   products_discounts: 'products_discounts',
   products_stock: 'products_stock',
-  units: 'units'
+  units: 'units',
+  product_images: 'product_images'
 };
 
 /**
