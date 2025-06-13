@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useParams } from 'next/navigation';
 import { api } from "@/lib/api";
 import { Product } from "@/components/ProductCard";
+import Link from 'next/link';
 
 export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null);
@@ -36,7 +37,7 @@ export default function ProductDetailPage() {
   return (
     <div className="container mx-auto p-4">
       <div className="text-sm text-gray-500 mb-4">
-        <span>Inicio</span> / <span>Productos</span> / <span className="font-semibold">{product.name}</span>
+        <Link href="/" className="hover:text-gray-700">Inicio</Link> / <Link href="/products" className="hover:text-gray-700">Productos</Link> / <span className="font-semibold">{product.name}</span>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">

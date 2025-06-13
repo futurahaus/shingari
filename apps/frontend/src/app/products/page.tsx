@@ -71,28 +71,12 @@ const Breadcrumb = ({
     selectedCategory: string | null;
     onSelectCategory: (name: string | null) => void;
 }) => (
-    <nav className="flex items-center text-sm text-gray-500 mb-4">
-        <Link href="/" className="hover:text-gray-700 flex items-center">
-            <Home className="h-4 w-4 mr-1" /> Inicio
-        </Link>
-        <ChevronsRight className="h-4 w-4 mx-1" />
-        <a
-            href="#"
-            onClick={(e) => {
-                e.preventDefault();
-                onSelectCategory(null);
-            }}
-            className="hover:text-gray-700 cursor-pointer"
-        >
-            Productos
-        </a>
+    <div className="text-sm text-gray-500 mb-4">
+        <Link href="/" className="hover:text-gray-700">Inicio</Link> / <Link href="/products" className="hover:text-gray-700">Productos</Link>
         {selectedCategory && (
-            <>
-                <ChevronsRight className="h-4 w-4 mx-1" />
-                <span className="font-semibold text-gray-800">{selectedCategory}</span>
-            </>
+            <> / <span className="font-semibold">{selectedCategory}</span></>
         )}
-    </nav>
+    </div>
 );
 
 const ProductFilters = ({ filters, onFilterChange }: ProductFiltersProps) => (
@@ -179,7 +163,7 @@ const ProductsSection = ({
                 params.append('categoryFilters', selectedCategory);
             }
 
-            const response = await api.get<PaginatedProductsResponse>(`/products?${params.toString()}`);
+            const response = await api.get<PaginatedProductsResponse>(`/products?${params.toString()}`, { requireAuth: true });
             const newProducts = response.data;
 
             if (newProducts.length === 0 || response.page >= response.lastPage) {

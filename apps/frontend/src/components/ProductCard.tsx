@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 export interface Product {
     id: string;
@@ -43,9 +44,11 @@ export const ProductCard = ({ product }: { product: Product }) => (
                 </h5>
             )}
             <p className="mb-4">{product.description}</p>
-            <button className="button w-full bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition-colors">
-                <b>Agregar al carrito</b>
-            </button>
+            <Link href={`/products/${product.id}`} className="block w-full">
+                <button className="button w-full bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition-colors">
+                    <b>Agregar al carrito</b>
+                </button>
+            </Link>
         </div>
     </div>
 ); 
