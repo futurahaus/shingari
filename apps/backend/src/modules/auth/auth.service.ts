@@ -482,12 +482,17 @@ export class AuthService {
         country: completeProfileDto.pais,
         postal_code: completeProfileDto.cp,
         phone: completeProfileDto.telefono,
-        profile_is_completed: true,
-        // Store additional business-specific fields in user metadata
-        // These fields are not in the public.users schema, so we'll store them in auth.users metadata
+        profile_is_complete: true,
+        trade_name: completeProfileDto.trade_name,
+        // TODO: Uncomment when database schema is properly synced
+        // nombreFiscal: completeProfileDto.nombreFiscal,
+        tax_id: completeProfileDto.tax_id,
+        billing_address: completeProfileDto.billing_address,
+        shipping_address: completeProfileDto.shipping_address,
+        referral_source: completeProfileDto.referral_source,
       };
 
-      // Update the public.users table
+      // Update the public.users table with all the data
       const { data: userProfile, error: profileError } = await this.databaseService
         .getAdminClient()
         .from('users')
@@ -498,27 +503,6 @@ export class AuthService {
       if (profileError) {
         this.logger.logError('Profile Update', profileError);
         throw new BadRequestException('Failed to update user profile');
-      }
-
-      // Store additional business-specific fields in auth.users metadata
-      const additionalData = {
-        nombreComercial: completeProfileDto.nombreComercial,
-        nombreFiscal: completeProfileDto.nombreFiscal,
-        nif: completeProfileDto.nif,
-        direccionFiscal: completeProfileDto.direccionFiscal,
-        direccionEntrega: completeProfileDto.direccionEntrega,
-        howDidYouKnowUs: completeProfileDto.howDidYouKnowUs,
-      };
-
-      const { error: metadataError } = await this.databaseService
-        .getAdminClient()
-        .auth.admin.updateUserById(userId, {
-          user_metadata: additionalData,
-        });
-
-      if (metadataError) {
-        this.logger.logError('User Metadata Update', metadataError);
-        throw new BadRequestException('Failed to update user metadata');
       }
 
       this.logger.logInfo(`Profile updated successfully for user ${userId}`);
@@ -545,7 +529,7 @@ export class AuthService {
         throw new BadRequestException('Failed to fetch user profile');
       }
 
-      // Get user metadata from auth.users table
+      // Get user email from auth.users table
       const { data: { user }, error: userError } = await this.databaseService
         .getAdminClient()
         .auth.admin.getUserById(userId);
@@ -555,7 +539,7 @@ export class AuthService {
         throw new BadRequestException('Failed to fetch user data');
       }
 
-      // Combine the data
+      console.log(userProfile);
       const completeProfile = {
         id: userId,
         email: user.email || '',
@@ -567,14 +551,15 @@ export class AuthService {
         pais: userProfile?.country || null,
         cp: userProfile?.postal_code || null,
         telefono: userProfile?.phone || null,
-        profile_is_completed: userProfile?.profile_is_completed || false,
-        // Get business-specific data from user metadata
-        nombreComercial: user.user_metadata?.nombreComercial || null,
-        nombreFiscal: user.user_metadata?.nombreFiscal || null,
-        nif: user.user_metadata?.nif || null,
-        direccionFiscal: user.user_metadata?.direccionFiscal || null,
-        direccionEntrega: user.user_metadata?.direccionEntrega || null,
-        howDidYouKnowUs: user.user_metadata?.howDidYouKnowUs || null,
+        profile_is_complete: userProfile?.profile_is_complete || false,
+        // Get business-specific data from the new database fields
+        trade_name: userProfile?.trade_name || null,
+        // TODO: Uncomment when database schema is properly synced
+        // nombreFiscal: userProfile?.nombreFiscal || null,
+        tax_id: userProfile?.tax_id || null,
+        billing_address: userProfile?.billing_address || null,
+        shipping_address: userProfile?.shipping_address || null,
+        referral_source: userProfile?.referral_source || null,
       };
 
       return completeProfile;

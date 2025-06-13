@@ -50,7 +50,7 @@ export class CompleteProfileDto {
   })
   @IsString()
   @Length(1, 150)
-  nombreComercial: string;
+  trade_name: string;
 
   @ApiProperty({
     example: 'España',
@@ -90,7 +90,7 @@ export class CompleteProfileDto {
   })
   @IsString()
   @Length(1, 20)
-  nif: string;
+  tax_id: string;
 
   @ApiProperty({
     example: 'Calle Mayor 123, Madrid',
@@ -100,7 +100,7 @@ export class CompleteProfileDto {
   })
   @IsString()
   @Length(1, 200)
-  direccionFiscal: string;
+  billing_address: string;
 
   @ApiProperty({
     example: 'Calle Comercial 456, Madrid',
@@ -110,7 +110,7 @@ export class CompleteProfileDto {
   })
   @IsString()
   @Length(1, 200)
-  direccionEntrega: string;
+  shipping_address: string;
 
   @ApiProperty({
     example: '28001',
@@ -128,5 +128,5 @@ export class CompleteProfileDto {
     enum: ['redes', 'recomendacion', 'publicidad', 'otros'],
   })
   @IsString()
-  howDidYouKnowUs: string;
+  referral_source: string;
 }

@@ -336,6 +336,13 @@ exports.Prisma.Public_usersScalarFieldEnum = {
   birth_date: 'birth_date',
   phone: 'phone',
   accepted_terms: 'accepted_terms',
+  profile_is_complete: 'profile_is_complete',
+  trade_name: 'trade_name',
+  nombreFiscal: 'nombreFiscal',
+  tax_id: 'tax_id',
+  billing_address: 'billing_address',
+  shipping_address: 'shipping_address',
+  referral_source: 'referral_source',
   uuid: 'uuid'
 };
 

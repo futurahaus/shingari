@@ -351,19 +351,26 @@ model user_roles {
 }
 
 model public_users {
-  id             Int        @id @default(autoincrement())
-  first_name     String?    @db.VarChar(100)
-  last_name      String?    @db.VarChar(100)
-  city           String?    @db.VarChar(100)
-  province       String?    @db.VarChar(100)
-  country        String?    @db.VarChar(100)
-  postal_code    String?    @db.VarChar(10)
-  gender         gender?    @default(M)
-  birth_date     DateTime?  @db.Date
-  phone          String?    @db.VarChar(20)
-  accepted_terms Boolean?   @default(false)
-  uuid           String     @db.Uuid
-  users          auth_users @relation(fields: [uuid], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  id                  Int        @id @default(autoincrement())
+  first_name          String?    @db.VarChar(100)
+  last_name           String?    @db.VarChar(100)
+  city                String?    @db.VarChar(100)
+  province            String?    @db.VarChar(100)
+  country             String?    @db.VarChar(100)
+  postal_code         String?    @db.VarChar(10)
+  gender              gender?    @default(M)
+  birth_date          DateTime?  @db.Date
+  phone               String?    @db.VarChar(20)
+  accepted_terms      Boolean?   @default(false)
+  profile_is_complete Boolean?   @default(false)
+  trade_name          String?    @db.Text
+  nombreFiscal        String?    @db.Text
+  tax_id              String?    @db.VarChar(20)
+  billing_address     String?    @db.Text
+  shipping_address    String?    @db.Text
+  referral_source     String?    @db.Text
+  uuid                String     @db.Uuid
+  users               auth_users @relation(fields: [uuid], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([uuid], map: "idx_users_uuid")
   @@map("users")

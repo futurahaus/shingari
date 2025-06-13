@@ -3,21 +3,22 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
+import { log } from 'node:console';
 
 interface UserProfile extends Record<string, unknown> {
   nombre: string;
   apellidos: string;
   localidad: string;
   provincia: string;
-  nombreComercial: string;
+  trade_name: string;
   pais: string;
   nombreFiscal: string;
   telefono: string;
-  nif: string;
-  direccionFiscal: string;
-  direccionEntrega: string;
+  tax_id: string;
+  billing_address: string;
+  shipping_address: string;
   cp: string;
-  howDidYouKnowUs: string;
+  referral_source: string;
 }
 
 export default function CompleteProfilePage() {
@@ -30,35 +31,37 @@ export default function CompleteProfilePage() {
     apellidos: '',
     localidad: '',
     provincia: '',
-    nombreComercial: '',
+    trade_name: '',
     pais: 'España',
     nombreFiscal: '',
     telefono: '',
-    nif: '',
-    direccionFiscal: '',
-    direccionEntrega: '',
+    tax_id: '',
+    billing_address: '',
+    shipping_address: '',
     cp: '',
-    howDidYouKnowUs: ''
+    referral_source: ''
   });
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const data = await api.get<UserProfile>('/auth/me', { requireAuth: true });
+        console.log(data);
+
         setFormData(prev => ({
           ...prev,
           nombre: data.nombre || prev.nombre,
           apellidos: data.apellidos || prev.apellidos,
           localidad: data.localidad || prev.localidad,
           provincia: data.provincia || prev.provincia,
-          nombreComercial: data.nombreComercial || prev.nombreComercial,
+          trade_name: data.trade_name || prev.trade_name,
           nombreFiscal: data.nombreFiscal || prev.nombreFiscal,
           telefono: data.telefono || prev.telefono,
-          nif: data.nif || prev.nif,
-          direccionFiscal: data.direccionFiscal || prev.direccionFiscal,
-          direccionEntrega: data.direccionEntrega || prev.direccionEntrega,
+          tax_id: data.tax_id || prev.tax_id,
+          billing_address: data.billing_address || prev.billing_address,
+          shipping_address: data.shipping_address || prev.shipping_address,
           cp: data.cp || prev.cp,
-          howDidYouKnowUs: data.howDidYouKnowUs || prev.howDidYouKnowUs
+          referral_source: data.referral_source || prev.referral_source
         }));
       } catch (err) {
         console.error('Error fetching user data:', err);
@@ -194,16 +197,16 @@ export default function CompleteProfilePage() {
             </div>
 
             <div>
-              <label htmlFor="nombreComercial" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="trade_name" className="block text-sm font-medium text-gray-700">
                 Nombre Comercial
               </label>
               <input
                 type="text"
-                id="nombreComercial"
-                name="nombreComercial"
+                id="trade_name"
+                name="trade_name"
                 required
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                value={formData.nombreComercial}
+                value={formData.trade_name}
                 onChange={handleChange}
               />
             </div>
@@ -255,46 +258,46 @@ export default function CompleteProfilePage() {
             </div>
 
             <div>
-              <label htmlFor="nif" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="tax_id" className="block text-sm font-medium text-gray-700">
                 NIF
               </label>
               <input
                 type="text"
-                id="nif"
-                name="nif"
+                id="tax_id"
+                name="tax_id"
                 required
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                value={formData.nif}
+                value={formData.tax_id}
                 onChange={handleChange}
               />
             </div>
 
             <div>
-              <label htmlFor="direccionFiscal" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="billing_address" className="block text-sm font-medium text-gray-700">
                 Dirección Fiscal
               </label>
               <input
                 type="text"
-                id="direccionFiscal"
-                name="direccionFiscal"
+                id="billing_address"
+                name="billing_address"
                 required
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                value={formData.direccionFiscal}
+                value={formData.billing_address}
                 onChange={handleChange}
               />
             </div>
 
             <div>
-              <label htmlFor="direccionEntrega" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="shipping_address" className="block text-sm font-medium text-gray-700">
                 Dirección de Entrega
               </label>
               <input
                 type="text"
-                id="direccionEntrega"
-                name="direccionEntrega"
+                id="shipping_address"
+                name="shipping_address"
                 required
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                value={formData.direccionEntrega}
+                value={formData.shipping_address}
                 onChange={handleChange}
               />
             </div>
@@ -322,10 +325,10 @@ export default function CompleteProfilePage() {
               <label className="flex items-center">
                 <input
                   type="radio"
-                  name="howDidYouKnowUs"
+                  name="referral_source"
                   value="redes"
                   className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
-                  checked={formData.howDidYouKnowUs === 'redes'}
+                  checked={formData.referral_source === 'redes'}
                   onChange={handleChange}
                 />
                 <span className="ml-2 text-sm text-gray-600">Redes Sociales</span>
@@ -333,10 +336,10 @@ export default function CompleteProfilePage() {
               <label className="flex items-center">
                 <input
                   type="radio"
-                  name="howDidYouKnowUs"
+                  name="referral_source"
                   value="recomendacion"
                   className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
-                  checked={formData.howDidYouKnowUs === 'recomendacion'}
+                  checked={formData.referral_source === 'recomendacion'}
                   onChange={handleChange}
                 />
                 <span className="ml-2 text-sm text-gray-600">Recomendación</span>
@@ -344,10 +347,10 @@ export default function CompleteProfilePage() {
               <label className="flex items-center">
                 <input
                   type="radio"
-                  name="howDidYouKnowUs"
+                  name="referral_source"
                   value="publicidad"
                   className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
-                  checked={formData.howDidYouKnowUs === 'publicidad'}
+                  checked={formData.referral_source === 'publicidad'}
                   onChange={handleChange}
                 />
                 <span className="ml-2 text-sm text-gray-600">Publicidad</span>
@@ -355,10 +358,10 @@ export default function CompleteProfilePage() {
               <label className="flex items-center">
                 <input
                   type="radio"
-                  name="howDidYouKnowUs"
+                  name="referral_source"
                   value="otros"
                   className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
-                  checked={formData.howDidYouKnowUs === 'otros'}
+                  checked={formData.referral_source === 'otros'}
                   onChange={handleChange}
                 />
                 <span className="ml-2 text-sm text-gray-600">Otros</span>

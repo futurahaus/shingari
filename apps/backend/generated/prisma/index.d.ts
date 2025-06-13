@@ -23741,6 +23741,13 @@ export namespace Prisma {
     birth_date: Date | null
     phone: string | null
     accepted_terms: boolean | null
+    profile_is_complete: boolean | null
+    trade_name: string | null
+    nombreFiscal: string | null
+    tax_id: string | null
+    billing_address: string | null
+    shipping_address: string | null
+    referral_source: string | null
     uuid: string | null
   }
 
@@ -23756,6 +23763,13 @@ export namespace Prisma {
     birth_date: Date | null
     phone: string | null
     accepted_terms: boolean | null
+    profile_is_complete: boolean | null
+    trade_name: string | null
+    nombreFiscal: string | null
+    tax_id: string | null
+    billing_address: string | null
+    shipping_address: string | null
+    referral_source: string | null
     uuid: string | null
   }
 
@@ -23771,6 +23785,13 @@ export namespace Prisma {
     birth_date: number
     phone: number
     accepted_terms: number
+    profile_is_complete: number
+    trade_name: number
+    nombreFiscal: number
+    tax_id: number
+    billing_address: number
+    shipping_address: number
+    referral_source: number
     uuid: number
     _all: number
   }
@@ -23796,6 +23817,13 @@ export namespace Prisma {
     birth_date?: true
     phone?: true
     accepted_terms?: true
+    profile_is_complete?: true
+    trade_name?: true
+    nombreFiscal?: true
+    tax_id?: true
+    billing_address?: true
+    shipping_address?: true
+    referral_source?: true
     uuid?: true
   }
 
@@ -23811,6 +23839,13 @@ export namespace Prisma {
     birth_date?: true
     phone?: true
     accepted_terms?: true
+    profile_is_complete?: true
+    trade_name?: true
+    nombreFiscal?: true
+    tax_id?: true
+    billing_address?: true
+    shipping_address?: true
+    referral_source?: true
     uuid?: true
   }
 
@@ -23826,6 +23861,13 @@ export namespace Prisma {
     birth_date?: true
     phone?: true
     accepted_terms?: true
+    profile_is_complete?: true
+    trade_name?: true
+    nombreFiscal?: true
+    tax_id?: true
+    billing_address?: true
+    shipping_address?: true
+    referral_source?: true
     uuid?: true
     _all?: true
   }
@@ -23928,6 +23970,13 @@ export namespace Prisma {
     birth_date: Date | null
     phone: string | null
     accepted_terms: boolean | null
+    profile_is_complete: boolean | null
+    trade_name: string | null
+    nombreFiscal: string | null
+    tax_id: string | null
+    billing_address: string | null
+    shipping_address: string | null
+    referral_source: string | null
     uuid: string
     _count: Public_usersCountAggregateOutputType | null
     _avg: Public_usersAvgAggregateOutputType | null
@@ -23962,6 +24011,13 @@ export namespace Prisma {
     birth_date?: boolean
     phone?: boolean
     accepted_terms?: boolean
+    profile_is_complete?: boolean
+    trade_name?: boolean
+    nombreFiscal?: boolean
+    tax_id?: boolean
+    billing_address?: boolean
+    shipping_address?: boolean
+    referral_source?: boolean
     uuid?: boolean
     users?: boolean | auth_usersDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["public_users"]>
@@ -23978,6 +24034,13 @@ export namespace Prisma {
     birth_date?: boolean
     phone?: boolean
     accepted_terms?: boolean
+    profile_is_complete?: boolean
+    trade_name?: boolean
+    nombreFiscal?: boolean
+    tax_id?: boolean
+    billing_address?: boolean
+    shipping_address?: boolean
+    referral_source?: boolean
     uuid?: boolean
     users?: boolean | auth_usersDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["public_users"]>
@@ -23994,6 +24057,13 @@ export namespace Prisma {
     birth_date?: boolean
     phone?: boolean
     accepted_terms?: boolean
+    profile_is_complete?: boolean
+    trade_name?: boolean
+    nombreFiscal?: boolean
+    tax_id?: boolean
+    billing_address?: boolean
+    shipping_address?: boolean
+    referral_source?: boolean
     uuid?: boolean
     users?: boolean | auth_usersDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["public_users"]>
@@ -24010,10 +24080,17 @@ export namespace Prisma {
     birth_date?: boolean
     phone?: boolean
     accepted_terms?: boolean
+    profile_is_complete?: boolean
+    trade_name?: boolean
+    nombreFiscal?: boolean
+    tax_id?: boolean
+    billing_address?: boolean
+    shipping_address?: boolean
+    referral_source?: boolean
     uuid?: boolean
   }
 
-  export type public_usersOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "first_name" | "last_name" | "city" | "province" | "country" | "postal_code" | "gender" | "birth_date" | "phone" | "accepted_terms" | "uuid", ExtArgs["result"]["public_users"]>
+  export type public_usersOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "first_name" | "last_name" | "city" | "province" | "country" | "postal_code" | "gender" | "birth_date" | "phone" | "accepted_terms" | "profile_is_complete" | "trade_name" | "nombreFiscal" | "tax_id" | "billing_address" | "shipping_address" | "referral_source" | "uuid", ExtArgs["result"]["public_users"]>
   export type public_usersInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     users?: boolean | auth_usersDefaultArgs<ExtArgs>
   }
@@ -24041,6 +24118,13 @@ export namespace Prisma {
       birth_date: Date | null
       phone: string | null
       accepted_terms: boolean | null
+      profile_is_complete: boolean | null
+      trade_name: string | null
+      nombreFiscal: string | null
+      tax_id: string | null
+      billing_address: string | null
+      shipping_address: string | null
+      referral_source: string | null
       uuid: string
     }, ExtArgs["result"]["public_users"]>
     composites: {}
@@ -24477,6 +24561,13 @@ export namespace Prisma {
     readonly birth_date: FieldRef<"public_users", 'DateTime'>
     readonly phone: FieldRef<"public_users", 'String'>
     readonly accepted_terms: FieldRef<"public_users", 'Boolean'>
+    readonly profile_is_complete: FieldRef<"public_users", 'Boolean'>
+    readonly trade_name: FieldRef<"public_users", 'String'>
+    readonly nombreFiscal: FieldRef<"public_users", 'String'>
+    readonly tax_id: FieldRef<"public_users", 'String'>
+    readonly billing_address: FieldRef<"public_users", 'String'>
+    readonly shipping_address: FieldRef<"public_users", 'String'>
+    readonly referral_source: FieldRef<"public_users", 'String'>
     readonly uuid: FieldRef<"public_users", 'String'>
   }
     
@@ -31914,6 +32005,13 @@ export namespace Prisma {
     birth_date: 'birth_date',
     phone: 'phone',
     accepted_terms: 'accepted_terms',
+    profile_is_complete: 'profile_is_complete',
+    trade_name: 'trade_name',
+    nombreFiscal: 'nombreFiscal',
+    tax_id: 'tax_id',
+    billing_address: 'billing_address',
+    shipping_address: 'shipping_address',
+    referral_source: 'referral_source',
     uuid: 'uuid'
   };
 
@@ -33593,6 +33691,13 @@ export namespace Prisma {
     birth_date?: DateTimeNullableFilter<"public_users"> | Date | string | null
     phone?: StringNullableFilter<"public_users"> | string | null
     accepted_terms?: BoolNullableFilter<"public_users"> | boolean | null
+    profile_is_complete?: BoolNullableFilter<"public_users"> | boolean | null
+    trade_name?: StringNullableFilter<"public_users"> | string | null
+    nombreFiscal?: StringNullableFilter<"public_users"> | string | null
+    tax_id?: StringNullableFilter<"public_users"> | string | null
+    billing_address?: StringNullableFilter<"public_users"> | string | null
+    shipping_address?: StringNullableFilter<"public_users"> | string | null
+    referral_source?: StringNullableFilter<"public_users"> | string | null
     uuid?: UuidFilter<"public_users"> | string
     users?: XOR<Auth_usersScalarRelationFilter, auth_usersWhereInput>
   }
@@ -33609,6 +33714,13 @@ export namespace Prisma {
     birth_date?: SortOrderInput | SortOrder
     phone?: SortOrderInput | SortOrder
     accepted_terms?: SortOrderInput | SortOrder
+    profile_is_complete?: SortOrderInput | SortOrder
+    trade_name?: SortOrderInput | SortOrder
+    nombreFiscal?: SortOrderInput | SortOrder
+    tax_id?: SortOrderInput | SortOrder
+    billing_address?: SortOrderInput | SortOrder
+    shipping_address?: SortOrderInput | SortOrder
+    referral_source?: SortOrderInput | SortOrder
     uuid?: SortOrder
     users?: auth_usersOrderByWithRelationInput
   }
@@ -33628,6 +33740,13 @@ export namespace Prisma {
     birth_date?: DateTimeNullableFilter<"public_users"> | Date | string | null
     phone?: StringNullableFilter<"public_users"> | string | null
     accepted_terms?: BoolNullableFilter<"public_users"> | boolean | null
+    profile_is_complete?: BoolNullableFilter<"public_users"> | boolean | null
+    trade_name?: StringNullableFilter<"public_users"> | string | null
+    nombreFiscal?: StringNullableFilter<"public_users"> | string | null
+    tax_id?: StringNullableFilter<"public_users"> | string | null
+    billing_address?: StringNullableFilter<"public_users"> | string | null
+    shipping_address?: StringNullableFilter<"public_users"> | string | null
+    referral_source?: StringNullableFilter<"public_users"> | string | null
     uuid?: UuidFilter<"public_users"> | string
     users?: XOR<Auth_usersScalarRelationFilter, auth_usersWhereInput>
   }, "id">
@@ -33644,6 +33763,13 @@ export namespace Prisma {
     birth_date?: SortOrderInput | SortOrder
     phone?: SortOrderInput | SortOrder
     accepted_terms?: SortOrderInput | SortOrder
+    profile_is_complete?: SortOrderInput | SortOrder
+    trade_name?: SortOrderInput | SortOrder
+    nombreFiscal?: SortOrderInput | SortOrder
+    tax_id?: SortOrderInput | SortOrder
+    billing_address?: SortOrderInput | SortOrder
+    shipping_address?: SortOrderInput | SortOrder
+    referral_source?: SortOrderInput | SortOrder
     uuid?: SortOrder
     _count?: public_usersCountOrderByAggregateInput
     _avg?: public_usersAvgOrderByAggregateInput
@@ -33667,6 +33793,13 @@ export namespace Prisma {
     birth_date?: DateTimeNullableWithAggregatesFilter<"public_users"> | Date | string | null
     phone?: StringNullableWithAggregatesFilter<"public_users"> | string | null
     accepted_terms?: BoolNullableWithAggregatesFilter<"public_users"> | boolean | null
+    profile_is_complete?: BoolNullableWithAggregatesFilter<"public_users"> | boolean | null
+    trade_name?: StringNullableWithAggregatesFilter<"public_users"> | string | null
+    nombreFiscal?: StringNullableWithAggregatesFilter<"public_users"> | string | null
+    tax_id?: StringNullableWithAggregatesFilter<"public_users"> | string | null
+    billing_address?: StringNullableWithAggregatesFilter<"public_users"> | string | null
+    shipping_address?: StringNullableWithAggregatesFilter<"public_users"> | string | null
+    referral_source?: StringNullableWithAggregatesFilter<"public_users"> | string | null
     uuid?: UuidWithAggregatesFilter<"public_users"> | string
   }
 
@@ -35511,6 +35644,13 @@ export namespace Prisma {
     birth_date?: Date | string | null
     phone?: string | null
     accepted_terms?: boolean | null
+    profile_is_complete?: boolean | null
+    trade_name?: string | null
+    nombreFiscal?: string | null
+    tax_id?: string | null
+    billing_address?: string | null
+    shipping_address?: string | null
+    referral_source?: string | null
     users: auth_usersCreateNestedOneWithoutUsersInput
   }
 
@@ -35526,6 +35666,13 @@ export namespace Prisma {
     birth_date?: Date | string | null
     phone?: string | null
     accepted_terms?: boolean | null
+    profile_is_complete?: boolean | null
+    trade_name?: string | null
+    nombreFiscal?: string | null
+    tax_id?: string | null
+    billing_address?: string | null
+    shipping_address?: string | null
+    referral_source?: string | null
     uuid: string
   }
 
@@ -35540,6 +35687,13 @@ export namespace Prisma {
     birth_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     accepted_terms?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    profile_is_complete?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    trade_name?: NullableStringFieldUpdateOperationsInput | string | null
+    nombreFiscal?: NullableStringFieldUpdateOperationsInput | string | null
+    tax_id?: NullableStringFieldUpdateOperationsInput | string | null
+    billing_address?: NullableStringFieldUpdateOperationsInput | string | null
+    shipping_address?: NullableStringFieldUpdateOperationsInput | string | null
+    referral_source?: NullableStringFieldUpdateOperationsInput | string | null
     users?: auth_usersUpdateOneRequiredWithoutUsersNestedInput
   }
 
@@ -35555,6 +35709,13 @@ export namespace Prisma {
     birth_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     accepted_terms?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    profile_is_complete?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    trade_name?: NullableStringFieldUpdateOperationsInput | string | null
+    nombreFiscal?: NullableStringFieldUpdateOperationsInput | string | null
+    tax_id?: NullableStringFieldUpdateOperationsInput | string | null
+    billing_address?: NullableStringFieldUpdateOperationsInput | string | null
+    shipping_address?: NullableStringFieldUpdateOperationsInput | string | null
+    referral_source?: NullableStringFieldUpdateOperationsInput | string | null
     uuid?: StringFieldUpdateOperationsInput | string
   }
 
@@ -35570,6 +35731,13 @@ export namespace Prisma {
     birth_date?: Date | string | null
     phone?: string | null
     accepted_terms?: boolean | null
+    profile_is_complete?: boolean | null
+    trade_name?: string | null
+    nombreFiscal?: string | null
+    tax_id?: string | null
+    billing_address?: string | null
+    shipping_address?: string | null
+    referral_source?: string | null
     uuid: string
   }
 
@@ -35584,6 +35752,13 @@ export namespace Prisma {
     birth_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     accepted_terms?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    profile_is_complete?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    trade_name?: NullableStringFieldUpdateOperationsInput | string | null
+    nombreFiscal?: NullableStringFieldUpdateOperationsInput | string | null
+    tax_id?: NullableStringFieldUpdateOperationsInput | string | null
+    billing_address?: NullableStringFieldUpdateOperationsInput | string | null
+    shipping_address?: NullableStringFieldUpdateOperationsInput | string | null
+    referral_source?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type public_usersUncheckedUpdateManyInput = {
@@ -35598,6 +35773,13 @@ export namespace Prisma {
     birth_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     accepted_terms?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    profile_is_complete?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    trade_name?: NullableStringFieldUpdateOperationsInput | string | null
+    nombreFiscal?: NullableStringFieldUpdateOperationsInput | string | null
+    tax_id?: NullableStringFieldUpdateOperationsInput | string | null
+    billing_address?: NullableStringFieldUpdateOperationsInput | string | null
+    shipping_address?: NullableStringFieldUpdateOperationsInput | string | null
+    referral_source?: NullableStringFieldUpdateOperationsInput | string | null
     uuid?: StringFieldUpdateOperationsInput | string
   }
 
@@ -37241,6 +37423,13 @@ export namespace Prisma {
     birth_date?: SortOrder
     phone?: SortOrder
     accepted_terms?: SortOrder
+    profile_is_complete?: SortOrder
+    trade_name?: SortOrder
+    nombreFiscal?: SortOrder
+    tax_id?: SortOrder
+    billing_address?: SortOrder
+    shipping_address?: SortOrder
+    referral_source?: SortOrder
     uuid?: SortOrder
   }
 
@@ -37260,6 +37449,13 @@ export namespace Prisma {
     birth_date?: SortOrder
     phone?: SortOrder
     accepted_terms?: SortOrder
+    profile_is_complete?: SortOrder
+    trade_name?: SortOrder
+    nombreFiscal?: SortOrder
+    tax_id?: SortOrder
+    billing_address?: SortOrder
+    shipping_address?: SortOrder
+    referral_source?: SortOrder
     uuid?: SortOrder
   }
 
@@ -37275,6 +37471,13 @@ export namespace Prisma {
     birth_date?: SortOrder
     phone?: SortOrder
     accepted_terms?: SortOrder
+    profile_is_complete?: SortOrder
+    trade_name?: SortOrder
+    nombreFiscal?: SortOrder
+    tax_id?: SortOrder
+    billing_address?: SortOrder
+    shipping_address?: SortOrder
+    referral_source?: SortOrder
     uuid?: SortOrder
   }
 
@@ -41168,6 +41371,13 @@ export namespace Prisma {
     birth_date?: Date | string | null
     phone?: string | null
     accepted_terms?: boolean | null
+    profile_is_complete?: boolean | null
+    trade_name?: string | null
+    nombreFiscal?: string | null
+    tax_id?: string | null
+    billing_address?: string | null
+    shipping_address?: string | null
+    referral_source?: string | null
   }
 
   export type public_usersUncheckedCreateWithoutUsersInput = {
@@ -41182,6 +41392,13 @@ export namespace Prisma {
     birth_date?: Date | string | null
     phone?: string | null
     accepted_terms?: boolean | null
+    profile_is_complete?: boolean | null
+    trade_name?: string | null
+    nombreFiscal?: string | null
+    tax_id?: string | null
+    billing_address?: string | null
+    shipping_address?: string | null
+    referral_source?: string | null
   }
 
   export type public_usersCreateOrConnectWithoutUsersInput = {
@@ -41406,6 +41623,13 @@ export namespace Prisma {
     birth_date?: DateTimeNullableFilter<"public_users"> | Date | string | null
     phone?: StringNullableFilter<"public_users"> | string | null
     accepted_terms?: BoolNullableFilter<"public_users"> | boolean | null
+    profile_is_complete?: BoolNullableFilter<"public_users"> | boolean | null
+    trade_name?: StringNullableFilter<"public_users"> | string | null
+    nombreFiscal?: StringNullableFilter<"public_users"> | string | null
+    tax_id?: StringNullableFilter<"public_users"> | string | null
+    billing_address?: StringNullableFilter<"public_users"> | string | null
+    shipping_address?: StringNullableFilter<"public_users"> | string | null
+    referral_source?: StringNullableFilter<"public_users"> | string | null
     uuid?: UuidFilter<"public_users"> | string
   }
 
@@ -42882,6 +43106,13 @@ export namespace Prisma {
     birth_date?: Date | string | null
     phone?: string | null
     accepted_terms?: boolean | null
+    profile_is_complete?: boolean | null
+    trade_name?: string | null
+    nombreFiscal?: string | null
+    tax_id?: string | null
+    billing_address?: string | null
+    shipping_address?: string | null
+    referral_source?: string | null
   }
 
   export type identitiesUpdateWithoutUsersInput = {
@@ -43083,6 +43314,13 @@ export namespace Prisma {
     birth_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     accepted_terms?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    profile_is_complete?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    trade_name?: NullableStringFieldUpdateOperationsInput | string | null
+    nombreFiscal?: NullableStringFieldUpdateOperationsInput | string | null
+    tax_id?: NullableStringFieldUpdateOperationsInput | string | null
+    billing_address?: NullableStringFieldUpdateOperationsInput | string | null
+    shipping_address?: NullableStringFieldUpdateOperationsInput | string | null
+    referral_source?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type public_usersUncheckedUpdateWithoutUsersInput = {
@@ -43097,6 +43335,13 @@ export namespace Prisma {
     birth_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     accepted_terms?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    profile_is_complete?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    trade_name?: NullableStringFieldUpdateOperationsInput | string | null
+    nombreFiscal?: NullableStringFieldUpdateOperationsInput | string | null
+    tax_id?: NullableStringFieldUpdateOperationsInput | string | null
+    billing_address?: NullableStringFieldUpdateOperationsInput | string | null
+    shipping_address?: NullableStringFieldUpdateOperationsInput | string | null
+    referral_source?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type public_usersUncheckedUpdateManyWithoutUsersInput = {
@@ -43111,6 +43356,13 @@ export namespace Prisma {
     birth_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     accepted_terms?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    profile_is_complete?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    trade_name?: NullableStringFieldUpdateOperationsInput | string | null
+    nombreFiscal?: NullableStringFieldUpdateOperationsInput | string | null
+    tax_id?: NullableStringFieldUpdateOperationsInput | string | null
+    billing_address?: NullableStringFieldUpdateOperationsInput | string | null
+    shipping_address?: NullableStringFieldUpdateOperationsInput | string | null
+    referral_source?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type user_rolesCreateManyRolesInput = {
