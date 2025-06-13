@@ -82,6 +82,7 @@ export default function SearchHeader() {
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
+        redirectPath={null}
       />
     </>
   );

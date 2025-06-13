@@ -43,6 +43,12 @@ export default function CompleteProfilePage() {
   });
 
   useEffect(() => {
+    // Check if user is authenticated first
+    if (!accessToken) {
+      window.location.hash = '#login?from=/complete-profile';
+      return;
+    }
+
     const fetchUserData = async () => {
       try {
         const data = await api.get<UserProfile>('/auth/me', { requireAuth: true });
@@ -66,7 +72,7 @@ export default function CompleteProfilePage() {
         console.error('Error fetching user data:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch user data');
         if (err instanceof Error && err.message === 'Authentication required') {
-          router.push('/login?from=/completar-perfil');
+          window.location.hash = '#login?from=/complete-profile';
         }
       } finally {
         setLoading(false);
