@@ -495,7 +495,7 @@ export class AuthService {
       const { data: userProfile, error: profileError } = await this.databaseService
         .getAdminClient()
         .from('users')
-        .upsert(profileData)
+        .upsert(profileData, { onConflict: 'uuid' })
         .select()
         .single();
 
