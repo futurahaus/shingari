@@ -12,7 +12,7 @@ interface UserProfile extends Record<string, unknown> {
   provincia: string;
   trade_name: string;
   pais: string;
-  nombreFiscal: string;
+  tax_name: string;
   telefono: string;
   tax_id: string;
   billing_address: string;
@@ -33,7 +33,7 @@ export default function ProfilePage() {
     provincia: '',
     trade_name: '',
     pais: 'España',
-    nombreFiscal: '',
+    tax_name: '',
     telefono: '',
     tax_id: '',
     billing_address: '',
@@ -59,7 +59,7 @@ export default function ProfilePage() {
           localidad: data.localidad || prev.localidad,
           provincia: data.provincia || prev.provincia,
           trade_name: data.trade_name || prev.trade_name,
-          nombreFiscal: data.nombreFiscal || prev.nombreFiscal,
+          tax_name: data.tax_name || prev.tax_name,
           telefono: data.telefono || prev.telefono,
           tax_id: data.tax_id || prev.tax_id,
           billing_address: data.billing_address || prev.billing_address,
@@ -247,16 +247,16 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <label htmlFor="nombreFiscal" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="tax_name" className="block text-sm font-medium text-gray-700">
                     Nombre Fiscal
                   </label>
                   <input
                     type="text"
-                    id="nombreFiscal"
-                    name="nombreFiscal"
+                    id="tax_name"
+                    name="tax_name"
                     required
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                    value={formData.nombreFiscal}
+                    value={formData.tax_name}
                     onChange={handleChange}
                   />
                 </div>

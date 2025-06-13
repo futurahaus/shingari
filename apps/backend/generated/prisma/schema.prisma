@@ -364,7 +364,7 @@ model public_users {
   accepted_terms      Boolean?   @default(false)
   profile_is_complete Boolean?   @default(false)
   trade_name          String?    @db.Text
-  nombreFiscal        String?    @db.Text
+  tax_name            String?    @db.Text
   tax_id              String?    @db.VarChar(20)
   billing_address     String?    @db.Text
   shipping_address    String?    @db.Text

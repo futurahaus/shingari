@@ -33,8 +33,6 @@ export class MeResponseDto {
     @ApiPropertyOptional({ example: 'Mi Empresa S.L.', description: 'Commercial name' })
     nombreComercial?: string;
 
-    @ApiPropertyOptional({ example: 'Mi Empresa Fiscal S.L.', description: 'Fiscal name' })
-    nombreFiscal?: string;
 
     @ApiPropertyOptional({ example: 'B12345678', description: 'Tax identification number' })
     nif?: string;

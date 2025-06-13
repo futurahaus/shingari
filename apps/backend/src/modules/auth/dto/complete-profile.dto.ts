@@ -63,14 +63,14 @@ export class CompleteProfileDto {
   pais: string;
 
   @ApiProperty({
-    example: 'Mi Empresa Fiscal S.L.',
-    description: 'Fiscal name',
+    example: 'Tax Name S.L.',
+    description: 'Tax name',
     minLength: 1,
     maxLength: 150,
   })
   @IsString()
   @Length(1, 150)
-  nombreFiscal: string;
+  tax_name: string;
 
   @ApiProperty({
     example: '+34612345678',

@@ -484,8 +484,7 @@ export class AuthService {
         phone: completeProfileDto.telefono,
         profile_is_complete: true,
         trade_name: completeProfileDto.trade_name,
-        // TODO: Uncomment when database schema is properly synced
-        // nombreFiscal: completeProfileDto.nombreFiscal,
+        tax_name: completeProfileDto.tax_name,
         tax_id: completeProfileDto.tax_id,
         billing_address: completeProfileDto.billing_address,
         shipping_address: completeProfileDto.shipping_address,
@@ -539,7 +538,6 @@ export class AuthService {
         throw new BadRequestException('Failed to fetch user data');
       }
 
-      console.log(userProfile);
       const completeProfile = {
         id: userId,
         email: user.email || '',
@@ -552,10 +550,8 @@ export class AuthService {
         cp: userProfile?.postal_code || null,
         telefono: userProfile?.phone || null,
         profile_is_complete: userProfile?.profile_is_complete || false,
-        // Get business-specific data from the new database fields
         trade_name: userProfile?.trade_name || null,
-        // TODO: Uncomment when database schema is properly synced
-        // nombreFiscal: userProfile?.nombreFiscal || null,
+        tax_name: userProfile?.tax_name || null,
         tax_id: userProfile?.tax_id || null,
         billing_address: userProfile?.billing_address || null,
         shipping_address: userProfile?.shipping_address || null,

@@ -23743,7 +23743,7 @@ export namespace Prisma {
     accepted_terms: boolean | null
     profile_is_complete: boolean | null
     trade_name: string | null
-    nombreFiscal: string | null
+    tax_name: string | null
     tax_id: string | null
     billing_address: string | null
     shipping_address: string | null
@@ -23765,7 +23765,7 @@ export namespace Prisma {
     accepted_terms: boolean | null
     profile_is_complete: boolean | null
     trade_name: string | null
-    nombreFiscal: string | null
+    tax_name: string | null
     tax_id: string | null
     billing_address: string | null
     shipping_address: string | null
@@ -23787,7 +23787,7 @@ export namespace Prisma {
     accepted_terms: number
     profile_is_complete: number
     trade_name: number
-    nombreFiscal: number
+    tax_name: number
     tax_id: number
     billing_address: number
     shipping_address: number
@@ -23819,7 +23819,7 @@ export namespace Prisma {
     accepted_terms?: true
     profile_is_complete?: true
     trade_name?: true
-    nombreFiscal?: true
+    tax_name?: true
     tax_id?: true
     billing_address?: true
     shipping_address?: true
@@ -23841,7 +23841,7 @@ export namespace Prisma {
     accepted_terms?: true
     profile_is_complete?: true
     trade_name?: true
-    nombreFiscal?: true
+    tax_name?: true
     tax_id?: true
     billing_address?: true
     shipping_address?: true
@@ -23863,7 +23863,7 @@ export namespace Prisma {
     accepted_terms?: true
     profile_is_complete?: true
     trade_name?: true
-    nombreFiscal?: true
+    tax_name?: true
     tax_id?: true
     billing_address?: true
     shipping_address?: true
@@ -23972,7 +23972,7 @@ export namespace Prisma {
     accepted_terms: boolean | null
     profile_is_complete: boolean | null
     trade_name: string | null
-    nombreFiscal: string | null
+    tax_name: string | null
     tax_id: string | null
     billing_address: string | null
     shipping_address: string | null
@@ -24013,7 +24013,7 @@ export namespace Prisma {
     accepted_terms?: boolean
     profile_is_complete?: boolean
     trade_name?: boolean
-    nombreFiscal?: boolean
+    tax_name?: boolean
     tax_id?: boolean
     billing_address?: boolean
     shipping_address?: boolean
@@ -24036,7 +24036,7 @@ export namespace Prisma {
     accepted_terms?: boolean
     profile_is_complete?: boolean
     trade_name?: boolean
-    nombreFiscal?: boolean
+    tax_name?: boolean
     tax_id?: boolean
     billing_address?: boolean
     shipping_address?: boolean
@@ -24059,7 +24059,7 @@ export namespace Prisma {
     accepted_terms?: boolean
     profile_is_complete?: boolean
     trade_name?: boolean
-    nombreFiscal?: boolean
+    tax_name?: boolean
     tax_id?: boolean
     billing_address?: boolean
     shipping_address?: boolean
@@ -24082,7 +24082,7 @@ export namespace Prisma {
     accepted_terms?: boolean
     profile_is_complete?: boolean
     trade_name?: boolean
-    nombreFiscal?: boolean
+    tax_name?: boolean
     tax_id?: boolean
     billing_address?: boolean
     shipping_address?: boolean
@@ -24090,7 +24090,7 @@ export namespace Prisma {
     uuid?: boolean
   }
 
-  export type public_usersOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "first_name" | "last_name" | "city" | "province" | "country" | "postal_code" | "gender" | "birth_date" | "phone" | "accepted_terms" | "profile_is_complete" | "trade_name" | "nombreFiscal" | "tax_id" | "billing_address" | "shipping_address" | "referral_source" | "uuid", ExtArgs["result"]["public_users"]>
+  export type public_usersOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "first_name" | "last_name" | "city" | "province" | "country" | "postal_code" | "gender" | "birth_date" | "phone" | "accepted_terms" | "profile_is_complete" | "trade_name" | "tax_name" | "tax_id" | "billing_address" | "shipping_address" | "referral_source" | "uuid", ExtArgs["result"]["public_users"]>
   export type public_usersInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     users?: boolean | auth_usersDefaultArgs<ExtArgs>
   }
@@ -24120,7 +24120,7 @@ export namespace Prisma {
       accepted_terms: boolean | null
       profile_is_complete: boolean | null
       trade_name: string | null
-      nombreFiscal: string | null
+      tax_name: string | null
       tax_id: string | null
       billing_address: string | null
       shipping_address: string | null
@@ -24563,7 +24563,7 @@ export namespace Prisma {
     readonly accepted_terms: FieldRef<"public_users", 'Boolean'>
     readonly profile_is_complete: FieldRef<"public_users", 'Boolean'>
     readonly trade_name: FieldRef<"public_users", 'String'>
-    readonly nombreFiscal: FieldRef<"public_users", 'String'>
+    readonly tax_name: FieldRef<"public_users", 'String'>
     readonly tax_id: FieldRef<"public_users", 'String'>
     readonly billing_address: FieldRef<"public_users", 'String'>
     readonly shipping_address: FieldRef<"public_users", 'String'>
@@ -32007,7 +32007,7 @@ export namespace Prisma {
     accepted_terms: 'accepted_terms',
     profile_is_complete: 'profile_is_complete',
     trade_name: 'trade_name',
-    nombreFiscal: 'nombreFiscal',
+    tax_name: 'tax_name',
     tax_id: 'tax_id',
     billing_address: 'billing_address',
     shipping_address: 'shipping_address',
@@ -33693,7 +33693,7 @@ export namespace Prisma {
     accepted_terms?: BoolNullableFilter<"public_users"> | boolean | null
     profile_is_complete?: BoolNullableFilter<"public_users"> | boolean | null
     trade_name?: StringNullableFilter<"public_users"> | string | null
-    nombreFiscal?: StringNullableFilter<"public_users"> | string | null
+    tax_name?: StringNullableFilter<"public_users"> | string | null
     tax_id?: StringNullableFilter<"public_users"> | string | null
     billing_address?: StringNullableFilter<"public_users"> | string | null
     shipping_address?: StringNullableFilter<"public_users"> | string | null
@@ -33716,7 +33716,7 @@ export namespace Prisma {
     accepted_terms?: SortOrderInput | SortOrder
     profile_is_complete?: SortOrderInput | SortOrder
     trade_name?: SortOrderInput | SortOrder
-    nombreFiscal?: SortOrderInput | SortOrder
+    tax_name?: SortOrderInput | SortOrder
     tax_id?: SortOrderInput | SortOrder
     billing_address?: SortOrderInput | SortOrder
     shipping_address?: SortOrderInput | SortOrder
@@ -33742,7 +33742,7 @@ export namespace Prisma {
     accepted_terms?: BoolNullableFilter<"public_users"> | boolean | null
     profile_is_complete?: BoolNullableFilter<"public_users"> | boolean | null
     trade_name?: StringNullableFilter<"public_users"> | string | null
-    nombreFiscal?: StringNullableFilter<"public_users"> | string | null
+    tax_name?: StringNullableFilter<"public_users"> | string | null
     tax_id?: StringNullableFilter<"public_users"> | string | null
     billing_address?: StringNullableFilter<"public_users"> | string | null
     shipping_address?: StringNullableFilter<"public_users"> | string | null
@@ -33765,7 +33765,7 @@ export namespace Prisma {
     accepted_terms?: SortOrderInput | SortOrder
     profile_is_complete?: SortOrderInput | SortOrder
     trade_name?: SortOrderInput | SortOrder
-    nombreFiscal?: SortOrderInput | SortOrder
+    tax_name?: SortOrderInput | SortOrder
     tax_id?: SortOrderInput | SortOrder
     billing_address?: SortOrderInput | SortOrder
     shipping_address?: SortOrderInput | SortOrder
@@ -33795,7 +33795,7 @@ export namespace Prisma {
     accepted_terms?: BoolNullableWithAggregatesFilter<"public_users"> | boolean | null
     profile_is_complete?: BoolNullableWithAggregatesFilter<"public_users"> | boolean | null
     trade_name?: StringNullableWithAggregatesFilter<"public_users"> | string | null
-    nombreFiscal?: StringNullableWithAggregatesFilter<"public_users"> | string | null
+    tax_name?: StringNullableWithAggregatesFilter<"public_users"> | string | null
     tax_id?: StringNullableWithAggregatesFilter<"public_users"> | string | null
     billing_address?: StringNullableWithAggregatesFilter<"public_users"> | string | null
     shipping_address?: StringNullableWithAggregatesFilter<"public_users"> | string | null
@@ -35646,7 +35646,7 @@ export namespace Prisma {
     accepted_terms?: boolean | null
     profile_is_complete?: boolean | null
     trade_name?: string | null
-    nombreFiscal?: string | null
+    tax_name?: string | null
     tax_id?: string | null
     billing_address?: string | null
     shipping_address?: string | null
@@ -35668,7 +35668,7 @@ export namespace Prisma {
     accepted_terms?: boolean | null
     profile_is_complete?: boolean | null
     trade_name?: string | null
-    nombreFiscal?: string | null
+    tax_name?: string | null
     tax_id?: string | null
     billing_address?: string | null
     shipping_address?: string | null
@@ -35689,7 +35689,7 @@ export namespace Prisma {
     accepted_terms?: NullableBoolFieldUpdateOperationsInput | boolean | null
     profile_is_complete?: NullableBoolFieldUpdateOperationsInput | boolean | null
     trade_name?: NullableStringFieldUpdateOperationsInput | string | null
-    nombreFiscal?: NullableStringFieldUpdateOperationsInput | string | null
+    tax_name?: NullableStringFieldUpdateOperationsInput | string | null
     tax_id?: NullableStringFieldUpdateOperationsInput | string | null
     billing_address?: NullableStringFieldUpdateOperationsInput | string | null
     shipping_address?: NullableStringFieldUpdateOperationsInput | string | null
@@ -35711,7 +35711,7 @@ export namespace Prisma {
     accepted_terms?: NullableBoolFieldUpdateOperationsInput | boolean | null
     profile_is_complete?: NullableBoolFieldUpdateOperationsInput | boolean | null
     trade_name?: NullableStringFieldUpdateOperationsInput | string | null
-    nombreFiscal?: NullableStringFieldUpdateOperationsInput | string | null
+    tax_name?: NullableStringFieldUpdateOperationsInput | string | null
     tax_id?: NullableStringFieldUpdateOperationsInput | string | null
     billing_address?: NullableStringFieldUpdateOperationsInput | string | null
     shipping_address?: NullableStringFieldUpdateOperationsInput | string | null
@@ -35733,7 +35733,7 @@ export namespace Prisma {
     accepted_terms?: boolean | null
     profile_is_complete?: boolean | null
     trade_name?: string | null
-    nombreFiscal?: string | null
+    tax_name?: string | null
     tax_id?: string | null
     billing_address?: string | null
     shipping_address?: string | null
@@ -35754,7 +35754,7 @@ export namespace Prisma {
     accepted_terms?: NullableBoolFieldUpdateOperationsInput | boolean | null
     profile_is_complete?: NullableBoolFieldUpdateOperationsInput | boolean | null
     trade_name?: NullableStringFieldUpdateOperationsInput | string | null
-    nombreFiscal?: NullableStringFieldUpdateOperationsInput | string | null
+    tax_name?: NullableStringFieldUpdateOperationsInput | string | null
     tax_id?: NullableStringFieldUpdateOperationsInput | string | null
     billing_address?: NullableStringFieldUpdateOperationsInput | string | null
     shipping_address?: NullableStringFieldUpdateOperationsInput | string | null
@@ -35775,7 +35775,7 @@ export namespace Prisma {
     accepted_terms?: NullableBoolFieldUpdateOperationsInput | boolean | null
     profile_is_complete?: NullableBoolFieldUpdateOperationsInput | boolean | null
     trade_name?: NullableStringFieldUpdateOperationsInput | string | null
-    nombreFiscal?: NullableStringFieldUpdateOperationsInput | string | null
+    tax_name?: NullableStringFieldUpdateOperationsInput | string | null
     tax_id?: NullableStringFieldUpdateOperationsInput | string | null
     billing_address?: NullableStringFieldUpdateOperationsInput | string | null
     shipping_address?: NullableStringFieldUpdateOperationsInput | string | null
@@ -37425,7 +37425,7 @@ export namespace Prisma {
     accepted_terms?: SortOrder
     profile_is_complete?: SortOrder
     trade_name?: SortOrder
-    nombreFiscal?: SortOrder
+    tax_name?: SortOrder
     tax_id?: SortOrder
     billing_address?: SortOrder
     shipping_address?: SortOrder
@@ -37451,7 +37451,7 @@ export namespace Prisma {
     accepted_terms?: SortOrder
     profile_is_complete?: SortOrder
     trade_name?: SortOrder
-    nombreFiscal?: SortOrder
+    tax_name?: SortOrder
     tax_id?: SortOrder
     billing_address?: SortOrder
     shipping_address?: SortOrder
@@ -37473,7 +37473,7 @@ export namespace Prisma {
     accepted_terms?: SortOrder
     profile_is_complete?: SortOrder
     trade_name?: SortOrder
-    nombreFiscal?: SortOrder
+    tax_name?: SortOrder
     tax_id?: SortOrder
     billing_address?: SortOrder
     shipping_address?: SortOrder
@@ -41373,7 +41373,7 @@ export namespace Prisma {
     accepted_terms?: boolean | null
     profile_is_complete?: boolean | null
     trade_name?: string | null
-    nombreFiscal?: string | null
+    tax_name?: string | null
     tax_id?: string | null
     billing_address?: string | null
     shipping_address?: string | null
@@ -41394,7 +41394,7 @@ export namespace Prisma {
     accepted_terms?: boolean | null
     profile_is_complete?: boolean | null
     trade_name?: string | null
-    nombreFiscal?: string | null
+    tax_name?: string | null
     tax_id?: string | null
     billing_address?: string | null
     shipping_address?: string | null
@@ -41625,7 +41625,7 @@ export namespace Prisma {
     accepted_terms?: BoolNullableFilter<"public_users"> | boolean | null
     profile_is_complete?: BoolNullableFilter<"public_users"> | boolean | null
     trade_name?: StringNullableFilter<"public_users"> | string | null
-    nombreFiscal?: StringNullableFilter<"public_users"> | string | null
+    tax_name?: StringNullableFilter<"public_users"> | string | null
     tax_id?: StringNullableFilter<"public_users"> | string | null
     billing_address?: StringNullableFilter<"public_users"> | string | null
     shipping_address?: StringNullableFilter<"public_users"> | string | null
@@ -43108,7 +43108,7 @@ export namespace Prisma {
     accepted_terms?: boolean | null
     profile_is_complete?: boolean | null
     trade_name?: string | null
-    nombreFiscal?: string | null
+    tax_name?: string | null
     tax_id?: string | null
     billing_address?: string | null
     shipping_address?: string | null
@@ -43316,7 +43316,7 @@ export namespace Prisma {
     accepted_terms?: NullableBoolFieldUpdateOperationsInput | boolean | null
     profile_is_complete?: NullableBoolFieldUpdateOperationsInput | boolean | null
     trade_name?: NullableStringFieldUpdateOperationsInput | string | null
-    nombreFiscal?: NullableStringFieldUpdateOperationsInput | string | null
+    tax_name?: NullableStringFieldUpdateOperationsInput | string | null
     tax_id?: NullableStringFieldUpdateOperationsInput | string | null
     billing_address?: NullableStringFieldUpdateOperationsInput | string | null
     shipping_address?: NullableStringFieldUpdateOperationsInput | string | null
@@ -43337,7 +43337,7 @@ export namespace Prisma {
     accepted_terms?: NullableBoolFieldUpdateOperationsInput | boolean | null
     profile_is_complete?: NullableBoolFieldUpdateOperationsInput | boolean | null
     trade_name?: NullableStringFieldUpdateOperationsInput | string | null
-    nombreFiscal?: NullableStringFieldUpdateOperationsInput | string | null
+    tax_name?: NullableStringFieldUpdateOperationsInput | string | null
     tax_id?: NullableStringFieldUpdateOperationsInput | string | null
     billing_address?: NullableStringFieldUpdateOperationsInput | string | null
     shipping_address?: NullableStringFieldUpdateOperationsInput | string | null
@@ -43358,7 +43358,7 @@ export namespace Prisma {
     accepted_terms?: NullableBoolFieldUpdateOperationsInput | boolean | null
     profile_is_complete?: NullableBoolFieldUpdateOperationsInput | boolean | null
     trade_name?: NullableStringFieldUpdateOperationsInput | string | null
-    nombreFiscal?: NullableStringFieldUpdateOperationsInput | string | null
+    tax_name?: NullableStringFieldUpdateOperationsInput | string | null
     tax_id?: NullableStringFieldUpdateOperationsInput | string | null
     billing_address?: NullableStringFieldUpdateOperationsInput | string | null
     shipping_address?: NullableStringFieldUpdateOperationsInput | string | null
