@@ -14,7 +14,16 @@ export interface Product {
 export const ProductCard = ({ product }: { product: Product }) => (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden group">
         <div className="bg-gray-200 h-48 flex items-center justify-center relative">
-           
+            {product.images.length > 0 ? (
+                <Image
+                    src={product.images[0]}
+                    alt={product.name}
+                    fill
+                    className="object-cover"
+                />
+            ) : (
+                <div className="text-gray-400">Sin imagen</div>
+            )}
         </div>
         <div className="p-4">
             <h3 className="text-lg font-bold">{product.name}</h3>
