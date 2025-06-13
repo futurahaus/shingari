@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'src/modules/prisma/prisma.service'; // Ajusta si tu ruta es diferente
-import { Prisma, products as ProductPrismaType, product_states, categories as CategoryPrismaType, products_categories as ProductsCategoriesPrismaType, products_discounts as ProductDiscountPrismaType } from '../../../generated/prisma'; // Importar tipos y enums de Prisma
+import { Prisma, products as ProductPrismaType, product_states, categories as CategoryPrismaType, products_categories as ProductsCategoriesPrismaType, products_discounts as ProductDiscountPrismaType, product_images as ProductImagesPrismaType } from '../../../generated/prisma'; // Importar tipos y enums de Prisma
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductDto, ProductSortByPrice } from './dto/query-product.dto';
@@ -11,6 +11,7 @@ import { CategoryResponseDto } from './dto/category-response.dto';
 // Tipo para el producto con categorías incluidas, específico para findAllPublic y findOne
 type ProductWithCategoriesForResponse = ProductPrismaType & {
     products_categories: (ProductsCategoriesPrismaType & { categories: CategoryPrismaType })[];
+    product_images: (ProductImagesPrismaType)[];
 };
 
 // Tipo para el descuento con detalles del producto incluidos
@@ -68,6 +69,11 @@ export class ProductsService {
                         categories: true,
                     },
                 },
+                product_images: {
+                    include: {
+                        products: true,
+                    },
+                },
             },
         });
 
@@ -92,6 +98,11 @@ export class ProductsService {
                 products_categories: {
                     include: {
                         categories: true, // Incluir los datos de la categoría
+                    },
+                },
+                product_images: {
+                    include: {
+                        products: true,
                     },
                 },
             },
@@ -177,6 +188,7 @@ export class ProductsService {
             discount: discount,
             createdAt: product.created_at || new Date(),
             categories: product.products_categories?.map(pc => pc.categories.name) || [],
+            images: product.product_images?.map(pi => pi.image_url) || [],
         };
     }
 

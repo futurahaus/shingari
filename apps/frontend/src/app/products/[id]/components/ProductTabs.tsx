@@ -1,8 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { Product } from '@/components/ProductCard';
 
-export function ProductTabs() {
+interface ProductTabsProps {
+  product: Product;
+}
+
+export function ProductTabs({ product }: ProductTabsProps) {
   const [activeTab, setActiveTab] = useState('description');
 
   return (
@@ -19,7 +24,8 @@ export function ProductTabs() {
           >
             Descripción
           </button>
-          <button
+          {/* A modo de ejemplo, podríamos tener otra pestaña si tuviéramos más datos */}
+          {/* <button
             onClick={() => setActiveTab('characteristics')}
             className={`${
               activeTab === 'characteristics'
@@ -28,20 +34,20 @@ export function ProductTabs() {
             } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg`}
           >
             Características
-          </button>
+          </button> */}
         </nav>
       </div>
       <div className="py-6">
         {activeTab === 'description' && (
           <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+            {product.description}
           </p>
         )}
-        {activeTab === 'characteristics' && (
-          <p>
-            Características del producto.
-          </p>
-        )}
+        {/* {activeTab === 'characteristics' && (
+          <div>
+            <p>Aquí podrían ir otras características del producto.</p>
+          </div>
+        )} */}
       </div>
     </div>
   );

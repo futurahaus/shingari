@@ -3,30 +3,27 @@
 import { useState } from 'react';
 import Image from 'next/image';
 
-const images = [
-  '/placeholder.svg',
-  '/placeholder.svg',
-  '/placeholder.svg',
-  '/placeholder.svg',
-  '/placeholder.svg',
-];
+interface ProductImageGalleryProps {
+  images: string[];
+}
 
-export function ProductImageGallery() {
+export function ProductImageGallery({ images }: ProductImageGalleryProps) {
   const [mainImage, setMainImage] = useState(images[0]);
+  const allImages = [images[0], ...images.slice(1)];
 
   return (
     <div className="flex flex-col-reverse md:flex-row gap-4">
       <div className="flex md:flex-col gap-2">
-        {images.map((image, idx) => (
+        {allImages.map((img, idx) => (
           <div
             key={idx}
             className={`relative w-16 h-16 border rounded-md cursor-pointer ${
-              mainImage === image ? 'border-orange-500' : 'border-gray-200'
+              mainImage === img ? 'border-orange-500' : 'border-gray-200'
             }`}
-            onClick={() => setMainImage(image)}
+            onClick={() => setMainImage(img)}
           >
             <Image
-              src={image}
+              src={img}
               alt={`Product thumbnail ${idx + 1}`}
               layout="fill"
               objectFit="cover"

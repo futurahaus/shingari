@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 export interface Product {
     id: string;
     name: string;
@@ -5,14 +7,14 @@ export interface Product {
     originalPrice?: number;
     discount?: number;
     description: string;
-    image?: string;
+    images: string[];
     categories: string[];
 }
 
 export const ProductCard = ({ product }: { product: Product }) => (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden group">
-        <div className="bg-gray-200 h-48 flex items-center justify-center">
-            {/* Placeholder for image */}
+        <div className="bg-gray-200 h-48 flex items-center justify-center relative">
+           
         </div>
         <div className="p-4">
             <h3 className="text-lg font-bold">{product.name}</h3>
