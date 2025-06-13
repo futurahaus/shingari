@@ -88,11 +88,11 @@ describe('AuthService', () => {
 
     it('should throw ConflictException if email is already registered', async () => {
       mockSupabaseAuth.signUp.mockResolvedValueOnce({ data: {}, error: { message: 'User already registered' } });
-      
+
       await expect(service.register(registerDto)).rejects.toThrow(ConflictException);
       expect(mockDatabaseLogger.logError).toHaveBeenCalledWith('User Registration', expect.any(ConflictException));
     });
-    
+
     it('should throw original error if signUp fails for other reasons', async () => {
       const genericError = new Error('Some other signUp error');
       mockSupabaseAuth.signUp.mockResolvedValueOnce({ data: {}, error: genericError });
@@ -125,11 +125,11 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException if email is not confirmed', async () => {
       mockSupabaseAuth.signInWithPassword.mockResolvedValueOnce({ data: { user: null }, error: { message: 'Email not confirmed' } });
-      
+
       await expect(service.validateUser(email, password)).rejects.toThrow(UnauthorizedException);
       expect(mockDatabaseLogger.logError).toHaveBeenCalledWith('User Validation', expect.any(UnauthorizedException));
     });
-    
+
     it('should return null if signInWithPassword returns an error (other than email not confirmed)', async () => {
         mockSupabaseAuth.signInWithPassword.mockResolvedValueOnce({ data: {user: null}, error: { message: 'Invalid login credentials' } });
         const result = await service.validateUser(email, password);
@@ -149,9 +149,9 @@ describe('AuthService', () => {
     const password = 'password123';
 
     it('should handle empty email', async () => {
-      mockSupabaseAuth.signInWithPassword.mockResolvedValueOnce({ 
-        data: { user: null }, 
-        error: { message: 'Invalid email' } 
+      mockSupabaseAuth.signInWithPassword.mockResolvedValueOnce({
+        data: { user: null },
+        error: { message: 'Invalid email' }
       });
       const result = await service.validateUser('', password);
       expect(result).toBeNull();
@@ -159,9 +159,9 @@ describe('AuthService', () => {
     });
 
     it('should handle empty password', async () => {
-      mockSupabaseAuth.signInWithPassword.mockResolvedValueOnce({ 
-        data: { user: null }, 
-        error: { message: 'Invalid password' } 
+      mockSupabaseAuth.signInWithPassword.mockResolvedValueOnce({
+        data: { user: null },
+        error: { message: 'Invalid password' }
       });
       const result = await service.validateUser(email, '');
       expect(result).toBeNull();
@@ -169,9 +169,9 @@ describe('AuthService', () => {
     });
 
     it('should handle malformed email', async () => {
-      mockSupabaseAuth.signInWithPassword.mockResolvedValueOnce({ 
-        data: { user: null }, 
-        error: { message: 'Invalid email format' } 
+      mockSupabaseAuth.signInWithPassword.mockResolvedValueOnce({
+        data: { user: null },
+        error: { message: 'Invalid email format' }
       });
       const result = await service.validateUser('not-an-email', password);
       expect(result).toBeNull();
@@ -181,7 +181,7 @@ describe('AuthService', () => {
     it('should handle network errors', async () => {
       const networkError = new Error('Network error');
       mockSupabaseAuth.signInWithPassword.mockRejectedValueOnce(networkError);
-      
+
       await expect(service.validateUser(email, password)).rejects.toThrow(networkError);
       expect(mockDatabaseLogger.logError).toHaveBeenCalledWith('User Validation', networkError);
     });
@@ -211,7 +211,7 @@ describe('AuthService', () => {
       expect(result).toEqual({ accessToken, refreshToken, user: mockUser });
     });
   });
-  
+
   describe('refreshTokens', () => {
     const mockRefreshToken = 'valid-refresh-token';
     const mockDecodedPayload = { email: 'test@example.com', sub: 'user-id', provider: 'email' };
@@ -240,13 +240,13 @@ describe('AuthService', () => {
       await expect(service.refreshTokens(mockRefreshToken)).rejects.toThrow(UnauthorizedException);
       expect(mockDatabaseLogger.logError).toHaveBeenCalledWith('Token Refresh', expect.objectContaining({ message: 'Verification failed' }));
     });
-    
+
     it('should throw UnauthorizedException if getUser returns an error', async () => {
         mockJwtService.verifyAsync.mockResolvedValueOnce(mockDecodedPayload);
         mockSupabaseAuth.getUser.mockResolvedValueOnce({ data: {user: null}, error: { message: 'GetUser error'} });
         await expect(service.refreshTokens(mockRefreshToken)).rejects.toThrow(UnauthorizedException);
     });
-    
+
     it('should throw UnauthorizedException if user ID from token does not match Supabase user ID', async () => {
         mockJwtService.verifyAsync.mockResolvedValueOnce(mockDecodedPayload);
         mockSupabaseAuth.getUser.mockResolvedValueOnce({ data: { user: { ...mockUser, id: 'different-user-id' } }, error: null });
@@ -259,14 +259,14 @@ describe('AuthService', () => {
 
     it('should handle expired refresh token', async () => {
       mockJwtService.verifyAsync.mockRejectedValueOnce(new Error('Token expired'));
-      
+
       await expect(service.refreshTokens(mockRefreshToken)).rejects.toThrow(UnauthorizedException);
       expect(mockDatabaseLogger.logError).toHaveBeenCalled();
     });
 
     it('should handle malformed refresh token', async () => {
       mockJwtService.verifyAsync.mockRejectedValueOnce(new Error('Invalid token'));
-      
+
       await expect(service.refreshTokens('malformed-token')).rejects.toThrow(UnauthorizedException);
       expect(mockDatabaseLogger.logError).toHaveBeenCalled();
     });
@@ -275,7 +275,7 @@ describe('AuthService', () => {
       mockJwtService.verifyAsync.mockResolvedValueOnce({ sub: 'user-id', email: 'test@example.com' });
       const networkError = new Error('Network error');
       mockSupabaseAuth.getUser.mockRejectedValueOnce(networkError);
-      
+
       await expect(service.refreshTokens(mockRefreshToken)).rejects.toThrow(UnauthorizedException);
       expect(mockDatabaseLogger.logError).toHaveBeenCalled();
     });
@@ -292,7 +292,7 @@ describe('AuthService', () => {
     it('should throw error if signOut fails', async () => {
       const signOutError = new Error('Supabase signout error');
       mockSupabaseAuth.signOut.mockResolvedValueOnce({ error: signOutError });
-      
+
       await expect(service.signOut()).rejects.toThrow(signOutError);
       expect(mockDatabaseLogger.logError).toHaveBeenCalledWith('Sign Out', signOutError);
     });
@@ -302,7 +302,7 @@ describe('AuthService', () => {
     it('should handle network errors', async () => {
       const networkError = new Error('Network error');
       mockSupabaseAuth.signOut.mockRejectedValueOnce(networkError);
-      
+
       await expect(service.signOut()).rejects.toThrow(networkError);
       expect(mockDatabaseLogger.logError).toHaveBeenCalledWith('Sign Out', networkError);
     });
@@ -310,10 +310,10 @@ describe('AuthService', () => {
     it('should handle multiple sign out attempts', async () => {
       mockSupabaseAuth.signOut.mockResolvedValueOnce({ error: null });
       mockSupabaseAuth.signOut.mockResolvedValueOnce({ error: null });
-      
+
       await service.signOut();
       await service.signOut();
-      
+
       expect(mockSupabaseAuth.signOut).toHaveBeenCalledTimes(2);
       expect(mockDatabaseLogger.logInfo).toHaveBeenCalledTimes(2);
     });
@@ -433,4 +433,4 @@ describe('AuthService', () => {
       expect(mockDatabaseLogger.logError).toHaveBeenCalledWith('Token Refresh', expect.objectContaining({ message: 'Simulated rate limit or token verification error' }));
     });
   });
-}); 
+});
