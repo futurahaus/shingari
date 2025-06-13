@@ -108,11 +108,13 @@ export class ProductsController {
   // Endpoint para obtener un producto específico por ID (público)
   // Es buena práctica tener un endpoint para obtener detalles de un solo producto.
   @Get(':id')
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({ summary: 'Obtener detalles de un producto específico por su ID' })
   @ApiParam({ name: 'id', description: 'ID numérico del producto', type: 'integer' })
   @ApiResponse({ status: 200, description: 'Detalles del producto obtenidos.', type: ProductResponseDto })
   @ApiResponse({ status: 404, description: 'Producto no encontrado.' })
   async findOne(@Param('id') id: string, @NestRequest() req): Promise<ProductResponseDto> {
+    console.log('req.user', req.user);
     return this.productsService.findOne(+id, req.user?.id);
   }
 } 
