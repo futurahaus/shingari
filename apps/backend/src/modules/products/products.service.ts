@@ -284,6 +284,7 @@ export class ProductsService {
             select: {
                 id: true,
                 name: true,
+                image_url: true,
             },
             orderBy: {
                 name: 'asc',
@@ -291,6 +292,6 @@ export class ProductsService {
             take: limit,
         });
 
-        return categories.map(c => ({ id: c.id.toString(), name: c.name }));
+        return categories.map(c => ({ id: c.id.toString(), name: c.name, image: c.image_url }));
     }
 } 

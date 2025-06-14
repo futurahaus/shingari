@@ -3423,7 +3423,6 @@ export namespace Prisma {
     sessions: number
     products_discounts: number
     user_roles: number
-    users: number
   }
 
   export type Auth_usersCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3433,7 +3432,6 @@ export namespace Prisma {
     sessions?: boolean | Auth_usersCountOutputTypeCountSessionsArgs
     products_discounts?: boolean | Auth_usersCountOutputTypeCountProducts_discountsArgs
     user_roles?: boolean | Auth_usersCountOutputTypeCountUser_rolesArgs
-    users?: boolean | Auth_usersCountOutputTypeCountUsersArgs
   }
 
   // Custom InputTypes
@@ -3487,13 +3485,6 @@ export namespace Prisma {
    */
   export type Auth_usersCountOutputTypeCountUser_rolesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: user_rolesWhereInput
-  }
-
-  /**
-   * Auth_usersCountOutputType without action
-   */
-  export type Auth_usersCountOutputTypeCountUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: public_usersWhereInput
   }
 
 
@@ -20580,7 +20571,7 @@ export namespace Prisma {
       sessions: Prisma.$sessionsPayload<ExtArgs>[]
       products_discounts: Prisma.$products_discountsPayload<ExtArgs>[]
       user_roles: Prisma.$user_rolesPayload<ExtArgs>[]
-      users: Prisma.$public_usersPayload<ExtArgs>[]
+      users: Prisma.$public_usersPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       instance_id: string | null
@@ -21018,7 +21009,7 @@ export namespace Prisma {
     sessions<T extends auth_users$sessionsArgs<ExtArgs> = {}>(args?: Subset<T, auth_users$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$sessionsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     products_discounts<T extends auth_users$products_discountsArgs<ExtArgs> = {}>(args?: Subset<T, auth_users$products_discountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$products_discountsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     user_roles<T extends auth_users$user_rolesArgs<ExtArgs> = {}>(args?: Subset<T, auth_users$user_rolesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$user_rolesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    users<T extends auth_users$usersArgs<ExtArgs> = {}>(args?: Subset<T, auth_users$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$public_usersPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    users<T extends auth_users$usersArgs<ExtArgs> = {}>(args?: Subset<T, auth_users$usersArgs<ExtArgs>>): Prisma__public_usersClient<$Result.GetResult<Prisma.$public_usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -21631,11 +21622,6 @@ export namespace Prisma {
      */
     include?: public_usersInclude<ExtArgs> | null
     where?: public_usersWhereInput
-    orderBy?: public_usersOrderByWithRelationInput | public_usersOrderByWithRelationInput[]
-    cursor?: public_usersWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: Public_usersScalarFieldEnum | Public_usersScalarFieldEnum[]
   }
 
   /**
@@ -25120,18 +25106,21 @@ export namespace Prisma {
     id: number | null
     name: string | null
     created_at: Date | null
+    image_url: string | null
   }
 
   export type CategoriesMaxAggregateOutputType = {
     id: number | null
     name: string | null
     created_at: Date | null
+    image_url: string | null
   }
 
   export type CategoriesCountAggregateOutputType = {
     id: number
     name: number
     created_at: number
+    image_url: number
     _all: number
   }
 
@@ -25148,18 +25137,21 @@ export namespace Prisma {
     id?: true
     name?: true
     created_at?: true
+    image_url?: true
   }
 
   export type CategoriesMaxAggregateInputType = {
     id?: true
     name?: true
     created_at?: true
+    image_url?: true
   }
 
   export type CategoriesCountAggregateInputType = {
     id?: true
     name?: true
     created_at?: true
+    image_url?: true
     _all?: true
   }
 
@@ -25253,6 +25245,7 @@ export namespace Prisma {
     id: number
     name: string
     created_at: Date | null
+    image_url: string | null
     _count: CategoriesCountAggregateOutputType | null
     _avg: CategoriesAvgAggregateOutputType | null
     _sum: CategoriesSumAggregateOutputType | null
@@ -25278,6 +25271,7 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     created_at?: boolean
+    image_url?: boolean
     products_categories?: boolean | categories$products_categoriesArgs<ExtArgs>
     _count?: boolean | CategoriesCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["categories"]>
@@ -25286,21 +25280,24 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     created_at?: boolean
+    image_url?: boolean
   }, ExtArgs["result"]["categories"]>
 
   export type categoriesSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
     created_at?: boolean
+    image_url?: boolean
   }, ExtArgs["result"]["categories"]>
 
   export type categoriesSelectScalar = {
     id?: boolean
     name?: boolean
     created_at?: boolean
+    image_url?: boolean
   }
 
-  export type categoriesOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "created_at", ExtArgs["result"]["categories"]>
+  export type categoriesOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "created_at" | "image_url", ExtArgs["result"]["categories"]>
   export type categoriesInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     products_categories?: boolean | categories$products_categoriesArgs<ExtArgs>
     _count?: boolean | CategoriesCountOutputTypeDefaultArgs<ExtArgs>
@@ -25317,6 +25314,7 @@ export namespace Prisma {
       id: number
       name: string
       created_at: Date | null
+      image_url: string | null
     }, ExtArgs["result"]["categories"]>
     composites: {}
   }
@@ -25744,6 +25742,7 @@ export namespace Prisma {
     readonly id: FieldRef<"categories", 'Int'>
     readonly name: FieldRef<"categories", 'String'>
     readonly created_at: FieldRef<"categories", 'DateTime'>
+    readonly image_url: FieldRef<"categories", 'String'>
   }
     
 
@@ -33302,7 +33301,8 @@ export namespace Prisma {
   export const CategoriesScalarFieldEnum: {
     id: 'id',
     name: 'name',
-    created_at: 'created_at'
+    created_at: 'created_at',
+    image_url: 'image_url'
   };
 
   export type CategoriesScalarFieldEnum = (typeof CategoriesScalarFieldEnum)[keyof typeof CategoriesScalarFieldEnum]
@@ -34693,7 +34693,7 @@ export namespace Prisma {
     sessions?: SessionsListRelationFilter
     products_discounts?: Products_discountsListRelationFilter
     user_roles?: User_rolesListRelationFilter
-    users?: Public_usersListRelationFilter
+    users?: XOR<Public_usersNullableScalarRelationFilter, public_usersWhereInput> | null
   }
 
   export type auth_usersOrderByWithRelationInput = {
@@ -34738,7 +34738,7 @@ export namespace Prisma {
     sessions?: sessionsOrderByRelationAggregateInput
     products_discounts?: products_discountsOrderByRelationAggregateInput
     user_roles?: user_rolesOrderByRelationAggregateInput
-    users?: public_usersOrderByRelationAggregateInput
+    users?: public_usersOrderByWithRelationInput
   }
 
   export type auth_usersWhereUniqueInput = Prisma.AtLeast<{
@@ -34786,7 +34786,7 @@ export namespace Prisma {
     sessions?: SessionsListRelationFilter
     products_discounts?: Products_discountsListRelationFilter
     user_roles?: User_rolesListRelationFilter
-    users?: Public_usersListRelationFilter
+    users?: XOR<Public_usersNullableScalarRelationFilter, public_usersWhereInput> | null
   }, "id" | "phone">
 
   export type auth_usersOrderByWithAggregationInput = {
@@ -35024,6 +35024,7 @@ export namespace Prisma {
 
   export type public_usersWhereUniqueInput = Prisma.AtLeast<{
     id?: number
+    uuid?: string
     AND?: public_usersWhereInput | public_usersWhereInput[]
     OR?: public_usersWhereInput[]
     NOT?: public_usersWhereInput | public_usersWhereInput[]
@@ -35037,7 +35038,6 @@ export namespace Prisma {
     birth_date?: DateTimeNullableFilter<"public_users"> | Date | string | null
     phone?: StringNullableFilter<"public_users"> | string | null
     accepted_terms?: BoolNullableFilter<"public_users"> | boolean | null
-    uuid?: UuidFilter<"public_users"> | string
     trade_name?: StringNullableFilter<"public_users"> | string | null
     tax_id?: StringNullableFilter<"public_users"> | string | null
     billing_address?: StringNullableFilter<"public_users"> | string | null
@@ -35047,7 +35047,7 @@ export namespace Prisma {
     nombrefiscal?: StringNullableFilter<"public_users"> | string | null
     tax_name?: StringNullableFilter<"public_users"> | string | null
     users?: XOR<Auth_usersScalarRelationFilter, auth_usersWhereInput>
-  }, "id">
+  }, "id" | "uuid">
 
   export type public_usersOrderByWithAggregationInput = {
     id?: SortOrder
@@ -35110,6 +35110,7 @@ export namespace Prisma {
     id?: IntFilter<"categories"> | number
     name?: StringFilter<"categories"> | string
     created_at?: DateTimeNullableFilter<"categories"> | Date | string | null
+    image_url?: StringNullableFilter<"categories"> | string | null
     products_categories?: Products_categoriesListRelationFilter
   }
 
@@ -35117,6 +35118,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     created_at?: SortOrderInput | SortOrder
+    image_url?: SortOrderInput | SortOrder
     products_categories?: products_categoriesOrderByRelationAggregateInput
   }
 
@@ -35127,6 +35129,7 @@ export namespace Prisma {
     OR?: categoriesWhereInput[]
     NOT?: categoriesWhereInput | categoriesWhereInput[]
     created_at?: DateTimeNullableFilter<"categories"> | Date | string | null
+    image_url?: StringNullableFilter<"categories"> | string | null
     products_categories?: Products_categoriesListRelationFilter
   }, "id" | "name">
 
@@ -35134,6 +35137,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     created_at?: SortOrderInput | SortOrder
+    image_url?: SortOrderInput | SortOrder
     _count?: categoriesCountOrderByAggregateInput
     _avg?: categoriesAvgOrderByAggregateInput
     _max?: categoriesMaxOrderByAggregateInput
@@ -35148,6 +35152,7 @@ export namespace Prisma {
     id?: IntWithAggregatesFilter<"categories"> | number
     name?: StringWithAggregatesFilter<"categories"> | string
     created_at?: DateTimeNullableWithAggregatesFilter<"categories"> | Date | string | null
+    image_url?: StringNullableWithAggregatesFilter<"categories"> | string | null
   }
 
   export type productsWhereInput = {
@@ -36673,7 +36678,7 @@ export namespace Prisma {
     sessions?: sessionsCreateNestedManyWithoutUsersInput
     products_discounts?: products_discountsCreateNestedManyWithoutUsersInput
     user_roles?: user_rolesCreateNestedManyWithoutUsersInput
-    users?: public_usersCreateNestedManyWithoutUsersInput
+    users?: public_usersCreateNestedOneWithoutUsersInput
   }
 
   export type auth_usersUncheckedCreateInput = {
@@ -36718,7 +36723,7 @@ export namespace Prisma {
     sessions?: sessionsUncheckedCreateNestedManyWithoutUsersInput
     products_discounts?: products_discountsUncheckedCreateNestedManyWithoutUsersInput
     user_roles?: user_rolesUncheckedCreateNestedManyWithoutUsersInput
-    users?: public_usersUncheckedCreateNestedManyWithoutUsersInput
+    users?: public_usersUncheckedCreateNestedOneWithoutUsersInput
   }
 
   export type auth_usersUpdateInput = {
@@ -36763,7 +36768,7 @@ export namespace Prisma {
     sessions?: sessionsUpdateManyWithoutUsersNestedInput
     products_discounts?: products_discountsUpdateManyWithoutUsersNestedInput
     user_roles?: user_rolesUpdateManyWithoutUsersNestedInput
-    users?: public_usersUpdateManyWithoutUsersNestedInput
+    users?: public_usersUpdateOneWithoutUsersNestedInput
   }
 
   export type auth_usersUncheckedUpdateInput = {
@@ -36808,7 +36813,7 @@ export namespace Prisma {
     sessions?: sessionsUncheckedUpdateManyWithoutUsersNestedInput
     products_discounts?: products_discountsUncheckedUpdateManyWithoutUsersNestedInput
     user_roles?: user_rolesUncheckedUpdateManyWithoutUsersNestedInput
-    users?: public_usersUncheckedUpdateManyWithoutUsersNestedInput
+    users?: public_usersUncheckedUpdateOneWithoutUsersNestedInput
   }
 
   export type auth_usersCreateManyInput = {
@@ -37168,6 +37173,7 @@ export namespace Prisma {
   export type categoriesCreateInput = {
     name: string
     created_at?: Date | string | null
+    image_url?: string | null
     products_categories?: products_categoriesCreateNestedManyWithoutCategoriesInput
   }
 
@@ -37175,12 +37181,14 @@ export namespace Prisma {
     id?: number
     name: string
     created_at?: Date | string | null
+    image_url?: string | null
     products_categories?: products_categoriesUncheckedCreateNestedManyWithoutCategoriesInput
   }
 
   export type categoriesUpdateInput = {
     name?: StringFieldUpdateOperationsInput | string
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image_url?: NullableStringFieldUpdateOperationsInput | string | null
     products_categories?: products_categoriesUpdateManyWithoutCategoriesNestedInput
   }
 
@@ -37188,6 +37196,7 @@ export namespace Prisma {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image_url?: NullableStringFieldUpdateOperationsInput | string | null
     products_categories?: products_categoriesUncheckedUpdateManyWithoutCategoriesNestedInput
   }
 
@@ -37195,17 +37204,20 @@ export namespace Prisma {
     id?: number
     name: string
     created_at?: Date | string | null
+    image_url?: string | null
   }
 
   export type categoriesUpdateManyMutationInput = {
     name?: StringFieldUpdateOperationsInput | string
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image_url?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type categoriesUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image_url?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type productsCreateInput = {
@@ -38598,10 +38610,9 @@ export namespace Prisma {
     none?: user_rolesWhereInput
   }
 
-  export type Public_usersListRelationFilter = {
-    every?: public_usersWhereInput
-    some?: public_usersWhereInput
-    none?: public_usersWhereInput
+  export type Public_usersNullableScalarRelationFilter = {
+    is?: public_usersWhereInput | null
+    isNot?: public_usersWhereInput | null
   }
 
   export type identitiesOrderByRelationAggregateInput = {
@@ -38625,10 +38636,6 @@ export namespace Prisma {
   }
 
   export type user_rolesOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type public_usersOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -38971,6 +38978,7 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     created_at?: SortOrder
+    image_url?: SortOrder
   }
 
   export type categoriesAvgOrderByAggregateInput = {
@@ -38981,12 +38989,14 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     created_at?: SortOrder
+    image_url?: SortOrder
   }
 
   export type categoriesMinOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
     created_at?: SortOrder
+    image_url?: SortOrder
   }
 
   export type categoriesSumOrderByAggregateInput = {
@@ -39883,11 +39893,10 @@ export namespace Prisma {
     connect?: user_rolesWhereUniqueInput | user_rolesWhereUniqueInput[]
   }
 
-  export type public_usersCreateNestedManyWithoutUsersInput = {
-    create?: XOR<public_usersCreateWithoutUsersInput, public_usersUncheckedCreateWithoutUsersInput> | public_usersCreateWithoutUsersInput[] | public_usersUncheckedCreateWithoutUsersInput[]
-    connectOrCreate?: public_usersCreateOrConnectWithoutUsersInput | public_usersCreateOrConnectWithoutUsersInput[]
-    createMany?: public_usersCreateManyUsersInputEnvelope
-    connect?: public_usersWhereUniqueInput | public_usersWhereUniqueInput[]
+  export type public_usersCreateNestedOneWithoutUsersInput = {
+    create?: XOR<public_usersCreateWithoutUsersInput, public_usersUncheckedCreateWithoutUsersInput>
+    connectOrCreate?: public_usersCreateOrConnectWithoutUsersInput
+    connect?: public_usersWhereUniqueInput
   }
 
   export type identitiesUncheckedCreateNestedManyWithoutUsersInput = {
@@ -39932,11 +39941,10 @@ export namespace Prisma {
     connect?: user_rolesWhereUniqueInput | user_rolesWhereUniqueInput[]
   }
 
-  export type public_usersUncheckedCreateNestedManyWithoutUsersInput = {
-    create?: XOR<public_usersCreateWithoutUsersInput, public_usersUncheckedCreateWithoutUsersInput> | public_usersCreateWithoutUsersInput[] | public_usersUncheckedCreateWithoutUsersInput[]
-    connectOrCreate?: public_usersCreateOrConnectWithoutUsersInput | public_usersCreateOrConnectWithoutUsersInput[]
-    createMany?: public_usersCreateManyUsersInputEnvelope
-    connect?: public_usersWhereUniqueInput | public_usersWhereUniqueInput[]
+  export type public_usersUncheckedCreateNestedOneWithoutUsersInput = {
+    create?: XOR<public_usersCreateWithoutUsersInput, public_usersUncheckedCreateWithoutUsersInput>
+    connectOrCreate?: public_usersCreateOrConnectWithoutUsersInput
+    connect?: public_usersWhereUniqueInput
   }
 
   export type NullableIntFieldUpdateOperationsInput = {
@@ -40035,18 +40043,14 @@ export namespace Prisma {
     deleteMany?: user_rolesScalarWhereInput | user_rolesScalarWhereInput[]
   }
 
-  export type public_usersUpdateManyWithoutUsersNestedInput = {
-    create?: XOR<public_usersCreateWithoutUsersInput, public_usersUncheckedCreateWithoutUsersInput> | public_usersCreateWithoutUsersInput[] | public_usersUncheckedCreateWithoutUsersInput[]
-    connectOrCreate?: public_usersCreateOrConnectWithoutUsersInput | public_usersCreateOrConnectWithoutUsersInput[]
-    upsert?: public_usersUpsertWithWhereUniqueWithoutUsersInput | public_usersUpsertWithWhereUniqueWithoutUsersInput[]
-    createMany?: public_usersCreateManyUsersInputEnvelope
-    set?: public_usersWhereUniqueInput | public_usersWhereUniqueInput[]
-    disconnect?: public_usersWhereUniqueInput | public_usersWhereUniqueInput[]
-    delete?: public_usersWhereUniqueInput | public_usersWhereUniqueInput[]
-    connect?: public_usersWhereUniqueInput | public_usersWhereUniqueInput[]
-    update?: public_usersUpdateWithWhereUniqueWithoutUsersInput | public_usersUpdateWithWhereUniqueWithoutUsersInput[]
-    updateMany?: public_usersUpdateManyWithWhereWithoutUsersInput | public_usersUpdateManyWithWhereWithoutUsersInput[]
-    deleteMany?: public_usersScalarWhereInput | public_usersScalarWhereInput[]
+  export type public_usersUpdateOneWithoutUsersNestedInput = {
+    create?: XOR<public_usersCreateWithoutUsersInput, public_usersUncheckedCreateWithoutUsersInput>
+    connectOrCreate?: public_usersCreateOrConnectWithoutUsersInput
+    upsert?: public_usersUpsertWithoutUsersInput
+    disconnect?: public_usersWhereInput | boolean
+    delete?: public_usersWhereInput | boolean
+    connect?: public_usersWhereUniqueInput
+    update?: XOR<XOR<public_usersUpdateToOneWithWhereWithoutUsersInput, public_usersUpdateWithoutUsersInput>, public_usersUncheckedUpdateWithoutUsersInput>
   }
 
   export type identitiesUncheckedUpdateManyWithoutUsersNestedInput = {
@@ -40133,18 +40137,14 @@ export namespace Prisma {
     deleteMany?: user_rolesScalarWhereInput | user_rolesScalarWhereInput[]
   }
 
-  export type public_usersUncheckedUpdateManyWithoutUsersNestedInput = {
-    create?: XOR<public_usersCreateWithoutUsersInput, public_usersUncheckedCreateWithoutUsersInput> | public_usersCreateWithoutUsersInput[] | public_usersUncheckedCreateWithoutUsersInput[]
-    connectOrCreate?: public_usersCreateOrConnectWithoutUsersInput | public_usersCreateOrConnectWithoutUsersInput[]
-    upsert?: public_usersUpsertWithWhereUniqueWithoutUsersInput | public_usersUpsertWithWhereUniqueWithoutUsersInput[]
-    createMany?: public_usersCreateManyUsersInputEnvelope
-    set?: public_usersWhereUniqueInput | public_usersWhereUniqueInput[]
-    disconnect?: public_usersWhereUniqueInput | public_usersWhereUniqueInput[]
-    delete?: public_usersWhereUniqueInput | public_usersWhereUniqueInput[]
-    connect?: public_usersWhereUniqueInput | public_usersWhereUniqueInput[]
-    update?: public_usersUpdateWithWhereUniqueWithoutUsersInput | public_usersUpdateWithWhereUniqueWithoutUsersInput[]
-    updateMany?: public_usersUpdateManyWithWhereWithoutUsersInput | public_usersUpdateManyWithWhereWithoutUsersInput[]
-    deleteMany?: public_usersScalarWhereInput | public_usersScalarWhereInput[]
+  export type public_usersUncheckedUpdateOneWithoutUsersNestedInput = {
+    create?: XOR<public_usersCreateWithoutUsersInput, public_usersUncheckedCreateWithoutUsersInput>
+    connectOrCreate?: public_usersCreateOrConnectWithoutUsersInput
+    upsert?: public_usersUpsertWithoutUsersInput
+    disconnect?: public_usersWhereInput | boolean
+    delete?: public_usersWhereInput | boolean
+    connect?: public_usersWhereUniqueInput
+    update?: XOR<XOR<public_usersUpdateToOneWithWhereWithoutUsersInput, public_usersUpdateWithoutUsersInput>, public_usersUncheckedUpdateWithoutUsersInput>
   }
 
   export type user_rolesCreateNestedManyWithoutRolesInput = {
@@ -41228,7 +41228,7 @@ export namespace Prisma {
     sessions?: sessionsCreateNestedManyWithoutUsersInput
     products_discounts?: products_discountsCreateNestedManyWithoutUsersInput
     user_roles?: user_rolesCreateNestedManyWithoutUsersInput
-    users?: public_usersCreateNestedManyWithoutUsersInput
+    users?: public_usersCreateNestedOneWithoutUsersInput
   }
 
   export type auth_usersUncheckedCreateWithoutIdentitiesInput = {
@@ -41272,7 +41272,7 @@ export namespace Prisma {
     sessions?: sessionsUncheckedCreateNestedManyWithoutUsersInput
     products_discounts?: products_discountsUncheckedCreateNestedManyWithoutUsersInput
     user_roles?: user_rolesUncheckedCreateNestedManyWithoutUsersInput
-    users?: public_usersUncheckedCreateNestedManyWithoutUsersInput
+    users?: public_usersUncheckedCreateNestedOneWithoutUsersInput
   }
 
   export type auth_usersCreateOrConnectWithoutIdentitiesInput = {
@@ -41332,7 +41332,7 @@ export namespace Prisma {
     sessions?: sessionsUpdateManyWithoutUsersNestedInput
     products_discounts?: products_discountsUpdateManyWithoutUsersNestedInput
     user_roles?: user_rolesUpdateManyWithoutUsersNestedInput
-    users?: public_usersUpdateManyWithoutUsersNestedInput
+    users?: public_usersUpdateOneWithoutUsersNestedInput
   }
 
   export type auth_usersUncheckedUpdateWithoutIdentitiesInput = {
@@ -41376,7 +41376,7 @@ export namespace Prisma {
     sessions?: sessionsUncheckedUpdateManyWithoutUsersNestedInput
     products_discounts?: products_discountsUncheckedUpdateManyWithoutUsersNestedInput
     user_roles?: user_rolesUncheckedUpdateManyWithoutUsersNestedInput
-    users?: public_usersUncheckedUpdateManyWithoutUsersNestedInput
+    users?: public_usersUncheckedUpdateOneWithoutUsersNestedInput
   }
 
   export type sessionsCreateWithoutMfa_amr_claimsInput = {
@@ -41600,7 +41600,7 @@ export namespace Prisma {
     sessions?: sessionsCreateNestedManyWithoutUsersInput
     products_discounts?: products_discountsCreateNestedManyWithoutUsersInput
     user_roles?: user_rolesCreateNestedManyWithoutUsersInput
-    users?: public_usersCreateNestedManyWithoutUsersInput
+    users?: public_usersCreateNestedOneWithoutUsersInput
   }
 
   export type auth_usersUncheckedCreateWithoutMfa_factorsInput = {
@@ -41644,7 +41644,7 @@ export namespace Prisma {
     sessions?: sessionsUncheckedCreateNestedManyWithoutUsersInput
     products_discounts?: products_discountsUncheckedCreateNestedManyWithoutUsersInput
     user_roles?: user_rolesUncheckedCreateNestedManyWithoutUsersInput
-    users?: public_usersUncheckedCreateNestedManyWithoutUsersInput
+    users?: public_usersUncheckedCreateNestedOneWithoutUsersInput
   }
 
   export type auth_usersCreateOrConnectWithoutMfa_factorsInput = {
@@ -41733,7 +41733,7 @@ export namespace Prisma {
     sessions?: sessionsUpdateManyWithoutUsersNestedInput
     products_discounts?: products_discountsUpdateManyWithoutUsersNestedInput
     user_roles?: user_rolesUpdateManyWithoutUsersNestedInput
-    users?: public_usersUpdateManyWithoutUsersNestedInput
+    users?: public_usersUpdateOneWithoutUsersNestedInput
   }
 
   export type auth_usersUncheckedUpdateWithoutMfa_factorsInput = {
@@ -41777,7 +41777,7 @@ export namespace Prisma {
     sessions?: sessionsUncheckedUpdateManyWithoutUsersNestedInput
     products_discounts?: products_discountsUncheckedUpdateManyWithoutUsersNestedInput
     user_roles?: user_rolesUncheckedUpdateManyWithoutUsersNestedInput
-    users?: public_usersUncheckedUpdateManyWithoutUsersNestedInput
+    users?: public_usersUncheckedUpdateOneWithoutUsersNestedInput
   }
 
   export type auth_usersCreateWithoutOne_time_tokensInput = {
@@ -41821,7 +41821,7 @@ export namespace Prisma {
     sessions?: sessionsCreateNestedManyWithoutUsersInput
     products_discounts?: products_discountsCreateNestedManyWithoutUsersInput
     user_roles?: user_rolesCreateNestedManyWithoutUsersInput
-    users?: public_usersCreateNestedManyWithoutUsersInput
+    users?: public_usersCreateNestedOneWithoutUsersInput
   }
 
   export type auth_usersUncheckedCreateWithoutOne_time_tokensInput = {
@@ -41865,7 +41865,7 @@ export namespace Prisma {
     sessions?: sessionsUncheckedCreateNestedManyWithoutUsersInput
     products_discounts?: products_discountsUncheckedCreateNestedManyWithoutUsersInput
     user_roles?: user_rolesUncheckedCreateNestedManyWithoutUsersInput
-    users?: public_usersUncheckedCreateNestedManyWithoutUsersInput
+    users?: public_usersUncheckedCreateNestedOneWithoutUsersInput
   }
 
   export type auth_usersCreateOrConnectWithoutOne_time_tokensInput = {
@@ -41925,7 +41925,7 @@ export namespace Prisma {
     sessions?: sessionsUpdateManyWithoutUsersNestedInput
     products_discounts?: products_discountsUpdateManyWithoutUsersNestedInput
     user_roles?: user_rolesUpdateManyWithoutUsersNestedInput
-    users?: public_usersUpdateManyWithoutUsersNestedInput
+    users?: public_usersUpdateOneWithoutUsersNestedInput
   }
 
   export type auth_usersUncheckedUpdateWithoutOne_time_tokensInput = {
@@ -41969,7 +41969,7 @@ export namespace Prisma {
     sessions?: sessionsUncheckedUpdateManyWithoutUsersNestedInput
     products_discounts?: products_discountsUncheckedUpdateManyWithoutUsersNestedInput
     user_roles?: user_rolesUncheckedUpdateManyWithoutUsersNestedInput
-    users?: public_usersUncheckedUpdateManyWithoutUsersNestedInput
+    users?: public_usersUncheckedUpdateOneWithoutUsersNestedInput
   }
 
   export type sessionsCreateWithoutRefresh_tokensInput = {
@@ -42325,7 +42325,7 @@ export namespace Prisma {
     one_time_tokens?: one_time_tokensCreateNestedManyWithoutUsersInput
     products_discounts?: products_discountsCreateNestedManyWithoutUsersInput
     user_roles?: user_rolesCreateNestedManyWithoutUsersInput
-    users?: public_usersCreateNestedManyWithoutUsersInput
+    users?: public_usersCreateNestedOneWithoutUsersInput
   }
 
   export type auth_usersUncheckedCreateWithoutSessionsInput = {
@@ -42369,7 +42369,7 @@ export namespace Prisma {
     one_time_tokens?: one_time_tokensUncheckedCreateNestedManyWithoutUsersInput
     products_discounts?: products_discountsUncheckedCreateNestedManyWithoutUsersInput
     user_roles?: user_rolesUncheckedCreateNestedManyWithoutUsersInput
-    users?: public_usersUncheckedCreateNestedManyWithoutUsersInput
+    users?: public_usersUncheckedCreateNestedOneWithoutUsersInput
   }
 
   export type auth_usersCreateOrConnectWithoutSessionsInput = {
@@ -42487,7 +42487,7 @@ export namespace Prisma {
     one_time_tokens?: one_time_tokensUpdateManyWithoutUsersNestedInput
     products_discounts?: products_discountsUpdateManyWithoutUsersNestedInput
     user_roles?: user_rolesUpdateManyWithoutUsersNestedInput
-    users?: public_usersUpdateManyWithoutUsersNestedInput
+    users?: public_usersUpdateOneWithoutUsersNestedInput
   }
 
   export type auth_usersUncheckedUpdateWithoutSessionsInput = {
@@ -42531,7 +42531,7 @@ export namespace Prisma {
     one_time_tokens?: one_time_tokensUncheckedUpdateManyWithoutUsersNestedInput
     products_discounts?: products_discountsUncheckedUpdateManyWithoutUsersNestedInput
     user_roles?: user_rolesUncheckedUpdateManyWithoutUsersNestedInput
-    users?: public_usersUncheckedUpdateManyWithoutUsersNestedInput
+    users?: public_usersUncheckedUpdateOneWithoutUsersNestedInput
   }
 
   export type sso_providersCreateWithoutSso_domainsInput = {
@@ -42981,11 +42981,6 @@ export namespace Prisma {
     create: XOR<public_usersCreateWithoutUsersInput, public_usersUncheckedCreateWithoutUsersInput>
   }
 
-  export type public_usersCreateManyUsersInputEnvelope = {
-    data: public_usersCreateManyUsersInput | public_usersCreateManyUsersInput[]
-    skipDuplicates?: boolean
-  }
-
   export type identitiesUpsertWithWhereUniqueWithoutUsersInput = {
     where: identitiesWhereUniqueInput
     update: XOR<identitiesUpdateWithoutUsersInput, identitiesUncheckedUpdateWithoutUsersInput>
@@ -43167,46 +43162,58 @@ export namespace Prisma {
     assigned_at?: DateTimeNullableFilter<"user_roles"> | Date | string | null
   }
 
-  export type public_usersUpsertWithWhereUniqueWithoutUsersInput = {
-    where: public_usersWhereUniqueInput
+  export type public_usersUpsertWithoutUsersInput = {
     update: XOR<public_usersUpdateWithoutUsersInput, public_usersUncheckedUpdateWithoutUsersInput>
     create: XOR<public_usersCreateWithoutUsersInput, public_usersUncheckedCreateWithoutUsersInput>
+    where?: public_usersWhereInput
   }
 
-  export type public_usersUpdateWithWhereUniqueWithoutUsersInput = {
-    where: public_usersWhereUniqueInput
+  export type public_usersUpdateToOneWithWhereWithoutUsersInput = {
+    where?: public_usersWhereInput
     data: XOR<public_usersUpdateWithoutUsersInput, public_usersUncheckedUpdateWithoutUsersInput>
   }
 
-  export type public_usersUpdateManyWithWhereWithoutUsersInput = {
-    where: public_usersScalarWhereInput
-    data: XOR<public_usersUpdateManyMutationInput, public_usersUncheckedUpdateManyWithoutUsersInput>
+  export type public_usersUpdateWithoutUsersInput = {
+    first_name?: NullableStringFieldUpdateOperationsInput | string | null
+    last_name?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    province?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    postal_code?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableEnumgenderFieldUpdateOperationsInput | $Enums.gender | null
+    birth_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    accepted_terms?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    trade_name?: NullableStringFieldUpdateOperationsInput | string | null
+    tax_id?: NullableStringFieldUpdateOperationsInput | string | null
+    billing_address?: NullableStringFieldUpdateOperationsInput | string | null
+    shipping_address?: NullableStringFieldUpdateOperationsInput | string | null
+    referral_source?: NullableStringFieldUpdateOperationsInput | string | null
+    profile_is_complete?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    nombrefiscal?: NullableStringFieldUpdateOperationsInput | string | null
+    tax_name?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
-  export type public_usersScalarWhereInput = {
-    AND?: public_usersScalarWhereInput | public_usersScalarWhereInput[]
-    OR?: public_usersScalarWhereInput[]
-    NOT?: public_usersScalarWhereInput | public_usersScalarWhereInput[]
-    id?: IntFilter<"public_users"> | number
-    first_name?: StringNullableFilter<"public_users"> | string | null
-    last_name?: StringNullableFilter<"public_users"> | string | null
-    city?: StringNullableFilter<"public_users"> | string | null
-    province?: StringNullableFilter<"public_users"> | string | null
-    country?: StringNullableFilter<"public_users"> | string | null
-    postal_code?: StringNullableFilter<"public_users"> | string | null
-    gender?: EnumgenderNullableFilter<"public_users"> | $Enums.gender | null
-    birth_date?: DateTimeNullableFilter<"public_users"> | Date | string | null
-    phone?: StringNullableFilter<"public_users"> | string | null
-    accepted_terms?: BoolNullableFilter<"public_users"> | boolean | null
-    uuid?: UuidFilter<"public_users"> | string
-    trade_name?: StringNullableFilter<"public_users"> | string | null
-    tax_id?: StringNullableFilter<"public_users"> | string | null
-    billing_address?: StringNullableFilter<"public_users"> | string | null
-    shipping_address?: StringNullableFilter<"public_users"> | string | null
-    referral_source?: StringNullableFilter<"public_users"> | string | null
-    profile_is_complete?: BoolNullableFilter<"public_users"> | boolean | null
-    nombrefiscal?: StringNullableFilter<"public_users"> | string | null
-    tax_name?: StringNullableFilter<"public_users"> | string | null
+  export type public_usersUncheckedUpdateWithoutUsersInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    first_name?: NullableStringFieldUpdateOperationsInput | string | null
+    last_name?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    province?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
+    postal_code?: NullableStringFieldUpdateOperationsInput | string | null
+    gender?: NullableEnumgenderFieldUpdateOperationsInput | $Enums.gender | null
+    birth_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    accepted_terms?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    trade_name?: NullableStringFieldUpdateOperationsInput | string | null
+    tax_id?: NullableStringFieldUpdateOperationsInput | string | null
+    billing_address?: NullableStringFieldUpdateOperationsInput | string | null
+    shipping_address?: NullableStringFieldUpdateOperationsInput | string | null
+    referral_source?: NullableStringFieldUpdateOperationsInput | string | null
+    profile_is_complete?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    nombrefiscal?: NullableStringFieldUpdateOperationsInput | string | null
+    tax_name?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type user_rolesCreateWithoutRolesInput = {
@@ -43302,7 +43309,7 @@ export namespace Prisma {
     one_time_tokens?: one_time_tokensCreateNestedManyWithoutUsersInput
     sessions?: sessionsCreateNestedManyWithoutUsersInput
     products_discounts?: products_discountsCreateNestedManyWithoutUsersInput
-    users?: public_usersCreateNestedManyWithoutUsersInput
+    users?: public_usersCreateNestedOneWithoutUsersInput
   }
 
   export type auth_usersUncheckedCreateWithoutUser_rolesInput = {
@@ -43346,7 +43353,7 @@ export namespace Prisma {
     one_time_tokens?: one_time_tokensUncheckedCreateNestedManyWithoutUsersInput
     sessions?: sessionsUncheckedCreateNestedManyWithoutUsersInput
     products_discounts?: products_discountsUncheckedCreateNestedManyWithoutUsersInput
-    users?: public_usersUncheckedCreateNestedManyWithoutUsersInput
+    users?: public_usersUncheckedCreateNestedOneWithoutUsersInput
   }
 
   export type auth_usersCreateOrConnectWithoutUser_rolesInput = {
@@ -43428,7 +43435,7 @@ export namespace Prisma {
     one_time_tokens?: one_time_tokensUpdateManyWithoutUsersNestedInput
     sessions?: sessionsUpdateManyWithoutUsersNestedInput
     products_discounts?: products_discountsUpdateManyWithoutUsersNestedInput
-    users?: public_usersUpdateManyWithoutUsersNestedInput
+    users?: public_usersUpdateOneWithoutUsersNestedInput
   }
 
   export type auth_usersUncheckedUpdateWithoutUser_rolesInput = {
@@ -43472,7 +43479,7 @@ export namespace Prisma {
     one_time_tokens?: one_time_tokensUncheckedUpdateManyWithoutUsersNestedInput
     sessions?: sessionsUncheckedUpdateManyWithoutUsersNestedInput
     products_discounts?: products_discountsUncheckedUpdateManyWithoutUsersNestedInput
-    users?: public_usersUncheckedUpdateManyWithoutUsersNestedInput
+    users?: public_usersUncheckedUpdateOneWithoutUsersNestedInput
   }
 
   export type auth_usersCreateWithoutUsersInput = {
@@ -43895,12 +43902,14 @@ export namespace Prisma {
   export type categoriesCreateWithoutProducts_categoriesInput = {
     name: string
     created_at?: Date | string | null
+    image_url?: string | null
   }
 
   export type categoriesUncheckedCreateWithoutProducts_categoriesInput = {
     id?: number
     name: string
     created_at?: Date | string | null
+    image_url?: string | null
   }
 
   export type categoriesCreateOrConnectWithoutProducts_categoriesInput = {
@@ -43956,12 +43965,14 @@ export namespace Prisma {
   export type categoriesUpdateWithoutProducts_categoriesInput = {
     name?: StringFieldUpdateOperationsInput | string
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image_url?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type categoriesUncheckedUpdateWithoutProducts_categoriesInput = {
     id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     created_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    image_url?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type productsUpsertWithoutProducts_categoriesInput = {
@@ -44079,7 +44090,7 @@ export namespace Prisma {
     one_time_tokens?: one_time_tokensCreateNestedManyWithoutUsersInput
     sessions?: sessionsCreateNestedManyWithoutUsersInput
     user_roles?: user_rolesCreateNestedManyWithoutUsersInput
-    users?: public_usersCreateNestedManyWithoutUsersInput
+    users?: public_usersCreateNestedOneWithoutUsersInput
   }
 
   export type auth_usersUncheckedCreateWithoutProducts_discountsInput = {
@@ -44123,7 +44134,7 @@ export namespace Prisma {
     one_time_tokens?: one_time_tokensUncheckedCreateNestedManyWithoutUsersInput
     sessions?: sessionsUncheckedCreateNestedManyWithoutUsersInput
     user_roles?: user_rolesUncheckedCreateNestedManyWithoutUsersInput
-    users?: public_usersUncheckedCreateNestedManyWithoutUsersInput
+    users?: public_usersUncheckedCreateNestedOneWithoutUsersInput
   }
 
   export type auth_usersCreateOrConnectWithoutProducts_discountsInput = {
@@ -44223,7 +44234,7 @@ export namespace Prisma {
     one_time_tokens?: one_time_tokensUpdateManyWithoutUsersNestedInput
     sessions?: sessionsUpdateManyWithoutUsersNestedInput
     user_roles?: user_rolesUpdateManyWithoutUsersNestedInput
-    users?: public_usersUpdateManyWithoutUsersNestedInput
+    users?: public_usersUpdateOneWithoutUsersNestedInput
   }
 
   export type auth_usersUncheckedUpdateWithoutProducts_discountsInput = {
@@ -44267,7 +44278,7 @@ export namespace Prisma {
     one_time_tokens?: one_time_tokensUncheckedUpdateManyWithoutUsersNestedInput
     sessions?: sessionsUncheckedUpdateManyWithoutUsersNestedInput
     user_roles?: user_rolesUncheckedUpdateManyWithoutUsersNestedInput
-    users?: public_usersUncheckedUpdateManyWithoutUsersNestedInput
+    users?: public_usersUncheckedUpdateOneWithoutUsersNestedInput
   }
 
   export type productsCreateWithoutProducts_stockInput = {
@@ -44824,28 +44835,6 @@ export namespace Prisma {
     assigned_at?: Date | string | null
   }
 
-  export type public_usersCreateManyUsersInput = {
-    id?: number
-    first_name?: string | null
-    last_name?: string | null
-    city?: string | null
-    province?: string | null
-    country?: string | null
-    postal_code?: string | null
-    gender?: $Enums.gender | null
-    birth_date?: Date | string | null
-    phone?: string | null
-    accepted_terms?: boolean | null
-    trade_name?: string | null
-    tax_id?: string | null
-    billing_address?: string | null
-    shipping_address?: string | null
-    referral_source?: string | null
-    profile_is_complete?: boolean | null
-    nombrefiscal?: string | null
-    tax_name?: string | null
-  }
-
   export type identitiesUpdateWithoutUsersInput = {
     provider_id?: StringFieldUpdateOperationsInput | string
     identity_data?: JsonNullValueInput | InputJsonValue
@@ -45032,71 +45021,6 @@ export namespace Prisma {
   export type user_rolesUncheckedUpdateManyWithoutUsersInput = {
     role_id?: IntFieldUpdateOperationsInput | number
     assigned_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  }
-
-  export type public_usersUpdateWithoutUsersInput = {
-    first_name?: NullableStringFieldUpdateOperationsInput | string | null
-    last_name?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    province?: NullableStringFieldUpdateOperationsInput | string | null
-    country?: NullableStringFieldUpdateOperationsInput | string | null
-    postal_code?: NullableStringFieldUpdateOperationsInput | string | null
-    gender?: NullableEnumgenderFieldUpdateOperationsInput | $Enums.gender | null
-    birth_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    accepted_terms?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    trade_name?: NullableStringFieldUpdateOperationsInput | string | null
-    tax_id?: NullableStringFieldUpdateOperationsInput | string | null
-    billing_address?: NullableStringFieldUpdateOperationsInput | string | null
-    shipping_address?: NullableStringFieldUpdateOperationsInput | string | null
-    referral_source?: NullableStringFieldUpdateOperationsInput | string | null
-    profile_is_complete?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    nombrefiscal?: NullableStringFieldUpdateOperationsInput | string | null
-    tax_name?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type public_usersUncheckedUpdateWithoutUsersInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    first_name?: NullableStringFieldUpdateOperationsInput | string | null
-    last_name?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    province?: NullableStringFieldUpdateOperationsInput | string | null
-    country?: NullableStringFieldUpdateOperationsInput | string | null
-    postal_code?: NullableStringFieldUpdateOperationsInput | string | null
-    gender?: NullableEnumgenderFieldUpdateOperationsInput | $Enums.gender | null
-    birth_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    accepted_terms?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    trade_name?: NullableStringFieldUpdateOperationsInput | string | null
-    tax_id?: NullableStringFieldUpdateOperationsInput | string | null
-    billing_address?: NullableStringFieldUpdateOperationsInput | string | null
-    shipping_address?: NullableStringFieldUpdateOperationsInput | string | null
-    referral_source?: NullableStringFieldUpdateOperationsInput | string | null
-    profile_is_complete?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    nombrefiscal?: NullableStringFieldUpdateOperationsInput | string | null
-    tax_name?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type public_usersUncheckedUpdateManyWithoutUsersInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    first_name?: NullableStringFieldUpdateOperationsInput | string | null
-    last_name?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    province?: NullableStringFieldUpdateOperationsInput | string | null
-    country?: NullableStringFieldUpdateOperationsInput | string | null
-    postal_code?: NullableStringFieldUpdateOperationsInput | string | null
-    gender?: NullableEnumgenderFieldUpdateOperationsInput | $Enums.gender | null
-    birth_date?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    accepted_terms?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    trade_name?: NullableStringFieldUpdateOperationsInput | string | null
-    tax_id?: NullableStringFieldUpdateOperationsInput | string | null
-    billing_address?: NullableStringFieldUpdateOperationsInput | string | null
-    shipping_address?: NullableStringFieldUpdateOperationsInput | string | null
-    referral_source?: NullableStringFieldUpdateOperationsInput | string | null
-    profile_is_complete?: NullableBoolFieldUpdateOperationsInput | boolean | null
-    nombrefiscal?: NullableStringFieldUpdateOperationsInput | string | null
-    tax_name?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type user_rolesCreateManyRolesInput = {

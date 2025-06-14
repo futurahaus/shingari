@@ -350,7 +350,8 @@ exports.Prisma.Public_usersScalarFieldEnum = {
 exports.Prisma.CategoriesScalarFieldEnum = {
   id: 'id',
   name: 'name',
-  created_at: 'created_at'
+  created_at: 'created_at',
+  image_url: 'image_url'
 };
 
 exports.Prisma.ProductsScalarFieldEnum = {

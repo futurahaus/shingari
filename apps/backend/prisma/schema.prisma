@@ -322,7 +322,7 @@ model auth_users {
   sessions                    sessions[]
   products_discounts          products_discounts[]
   user_roles                  user_roles[]
-  users                       public_users[]
+  users                       public_users?
 
   @@index([instance_id])
   @@index([is_anonymous])
@@ -362,7 +362,7 @@ model public_users {
   birth_date          DateTime?  @db.Date
   phone               String?    @db.VarChar(20)
   accepted_terms      Boolean?   @default(false)
-  uuid                String     @db.Uuid
+  uuid                String     @unique @db.Uuid
   trade_name          String?
   tax_id              String?    @db.VarChar
   billing_address     String?
@@ -382,6 +382,7 @@ model categories {
   id                  Int                   @id @default(autoincrement())
   name                String                @unique @db.VarChar(100)
   created_at          DateTime?             @default(now()) @db.Timestamp(6)
+  image_url           String?               @db.VarChar
   products_categories products_categories[]
 
   @@schema("public")
