@@ -269,7 +269,7 @@ export class ProductsService {
         };
     }
 
-    async findAllCategories(): Promise<CategoryResponseDto[]> {
+    async findAllCategories(limit?: number): Promise<CategoryResponseDto[]> {
         const categories = await this.prisma.categories.findMany({
             where: {
                 // Opcional: filtrar por categorías que tienen productos activos
@@ -288,6 +288,7 @@ export class ProductsService {
             orderBy: {
                 name: 'asc',
             },
+            take: limit,
         });
 
         return categories.map(c => ({ id: c.id.toString(), name: c.name }));

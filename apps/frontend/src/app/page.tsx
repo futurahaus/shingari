@@ -1,10 +1,12 @@
 import { Banner } from '@/components/home/Banner';
 import ProductGrid from '@/components/home/ProductGrid';
+import CategoryGrid from '@/components/home/CategoryGrid';
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50" data-testid="home-container">
       <Banner />
+      <CategoryGrid />
       <ProductGrid />
     </div>
   );

@@ -32,9 +32,10 @@ export class ProductsController {
 
   @Get('categories')
   @ApiOperation({ summary: 'Obtener una lista de todas las categorías de productos' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Número máximo de categorías a retornar' })
   @ApiResponse({ status: 200, description: 'Lista de categorías obtenida exitosamente.', type: [ProductDiscountResponseDto] })
-  async findAllCategories() {
-    return this.productsService.findAllCategories();
+  async findAllCategories(@Query('limit') limit?: number) {
+    return this.productsService.findAllCategories(limit);
   }
 
   // --- Public Endpoint --- 
