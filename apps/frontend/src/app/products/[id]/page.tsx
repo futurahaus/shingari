@@ -3,6 +3,7 @@
 import { ProductImageGallery } from "@/app/products/[id]/components/ProductImageGallery";
 import { ProductInfo } from "@/app/products/[id]/components/ProductInfo";
 import { ProductTabs } from "@/app/products/[id]/components/ProductTabs";
+import { SimilarProducts } from "@/app/products/[id]/components/SimilarProducts";
 import { useEffect, useState } from "react";
 import { useParams } from 'next/navigation';
 import { api } from "@/lib/api";
@@ -47,6 +48,10 @@ export default function ProductDetailPage() {
           <div className="mt-8">
             <ProductTabs product={product} />
           </div>
+
+          <div className="border-t" style={{ borderColor: 'var(--color-gray-200)' }} />
+
+          <SimilarProducts product={product} />
         </div>
         <div className="flex flex-col gap-6">
           <ProductInfo product={product} />

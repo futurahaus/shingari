@@ -24,15 +24,17 @@ export function ProductTabs({ product }: ProductTabsProps) {
           onClick={() => toggle('description')}
         >
           <span className="text-xl font-bold text-black">Descripción</span>
-          <span className="text-2xl text-gray-700">
+          <span className="text-2xl text-gray-700 transition-transform duration-300">
             {open === 'description' ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
           </span>
         </button>
-        {open === 'description' && (
-          <div className="pb-6">
-            <p style={{ color: '#838383' }} className="text-gray-400 text-lg leading-snug">{product.description}</p>
+        <div className={`grid transition-all duration-300 ease-in-out ${open === 'description' ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+          <div className="overflow-hidden">
+            <div className="pb-6">
+              <p style={{ color: '#838383' }} className="text-gray-400 text-lg leading-snug">{product.description}</p>
+            </div>
           </div>
-        )}
+        </div>
       </div>
       {/* Características */}
       <div>
@@ -41,15 +43,17 @@ export function ProductTabs({ product }: ProductTabsProps) {
           onClick={() => toggle('characteristics')}
         >
           <span className="text-xl font-bold text-black">Características</span>
-          <span className="text-2xl text-gray-700">
+          <span className="text-2xl text-gray-700 transition-transform duration-300">
             {open === 'characteristics' ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
           </span>
         </button>
-        {open === 'characteristics' && (
-          <div className="pb-6">
-            <p className="text-gray-400 text-lg leading-snug" style={{ color: '#838383' }}>Aquí podrían ir otras características del producto.</p>
+        <div className={`grid transition-all duration-300 ease-in-out ${open === 'characteristics' ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+          <div className="overflow-hidden">
+            <div className="pb-6">
+              <p className="text-gray-400 text-lg leading-snug" style={{ color: '#838383' }}>Aquí podrían ir otras características del producto.</p>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
