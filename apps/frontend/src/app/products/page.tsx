@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import Link from 'next/link';
 import { ProductCard, Product } from '@/components/ProductCard';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface Category {
     id: string;
@@ -30,18 +31,18 @@ interface ProductFiltersProps {
 
 const CategorySidebar = ({
     categories,
-    selectedCategory,
+    selectedCategoryName,
     onSelectCategory,
 }: {
     categories: Category[];
-    selectedCategory: string | null;
+    selectedCategoryName: string | null;
     onSelectCategory: (name: string | null) => void;
 }) => (
     <aside className="w-64 pr-8">
         <h2 className="text-xl font-bold mb-4">Categorías</h2>
         <ul className="space-y-2">
             {categories.map((category) => {
-                const isSelected = category.name === selectedCategory;
+                const isSelected = category.name === selectedCategoryName;
                 return (
                     <li key={category.id}>
                         <a
@@ -139,13 +140,15 @@ const ProductsSection = ({
         stock: '',
     });
 
+    const searchParams = useSearchParams();
+
     const fetchProducts = async (pageNumber: number, currentProducts: Product[] = []) => {
         setLoading(true);
         setError(null);
         try {
             const params = new URLSearchParams({
                 page: pageNumber.toString(),
-                limit: '8', // Adjust limit as needed
+                limit: '8',
             });
 
             // Append filters if they exist
@@ -159,8 +162,9 @@ const ProductsSection = ({
                 }
             });
 
-            if (selectedCategory) {
-                params.append('categoryFilters', selectedCategory);
+            const categoryFilter = searchParams.get('categoryFilters');
+            if (categoryFilter) {
+                params.append('categoryFilters', categoryFilter);
             }
 
             const response = await api.get<PaginatedProductsResponse>(`/products?${params.toString()}`, { requireAuth: true });
@@ -186,7 +190,7 @@ const ProductsSection = ({
         setPage(1);
         setHasMore(true);
         fetchProducts(1, []);
-    }, [filters, selectedCategory]);
+    }, [filters, searchParams]);
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -253,15 +257,21 @@ const ProductsSection = ({
 
 export default function ProductsPage() {
     const [categories, setCategories] = useState<Category[]>([]);
-    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const categoryFilter = searchParams.get('categoryFilters');
+    const selectedCategory = categoryFilter;
 
     const handleSelectCategory = (categoryName: string | null) => {
-        if (categoryName === null) {
-            setSelectedCategory(null);
-            return;
+        const newParams = new URLSearchParams(searchParams.toString());
+        
+        if (categoryName === null || categoryName === selectedCategory) {
+            newParams.delete('categoryFilters');
+        } else {
+            newParams.set('categoryFilters', categoryName);
         }
-        // If the same category is clicked again, deselect it to show all products
-        setSelectedCategory(prev => (prev === categoryName ? null : categoryName));
+        
+        router.push(`/products?${newParams.toString()}`);
     };
 
     useEffect(() => {
@@ -282,7 +292,7 @@ export default function ProductsPage() {
             <div className="flex">
                 <CategorySidebar
                     categories={categories}
-                    selectedCategory={selectedCategory}
+                    selectedCategoryName={categoryFilter}
                     onSelectCategory={handleSelectCategory}
                 />
                 <ProductsSection

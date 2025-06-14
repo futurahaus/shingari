@@ -86,7 +86,7 @@ export default function CategoryGrid() {
                         key={category.id}
                         className="group rounded-2xl flex flex-col cursor-pointer"
                         style={{ minWidth: 0 }}
-                        onClick={() => router.push(`/products?category=${category.id}`)}
+                        onClick={() => router.push(`/products?categoryFilters=${category.name}`)}
                     >
                         <div className="w-full aspect-square relative overflow-hidden rounded-2xl">
                             {category.image ? (
