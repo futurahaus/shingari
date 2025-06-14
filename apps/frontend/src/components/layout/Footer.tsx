@@ -2,69 +2,36 @@ import Link from 'next/link';
 
 const Footer = () => {
   return (
-    <footer className="bg-[color:var(--footer-background)] text-black">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
-            <h3 className="text-lg font-semibold mb-4">HOME</h3>
-            <ul className="space-y-2">
-              <li><Link href="/contacto" className="hover:text-red-500">Contacto</Link></li>
-              <li><Link href="/preguntas-frecuentes" className="hover:text-red-500">Preguntas Frecuentes</Link></li>
-              <li><Link href="/registrar" className="hover:text-red-500">Registrar hoy</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold mb-4">CATEGORÍAS</h3>
-            <ul className="space-y-2">
-              <li><Link href="/ofertas" className="hover:text-red-500">Ofertas</Link></li>
-              <li><Link href="/productos" className="hover:text-red-500">Productos</Link></li>
-              <li><Link href="/venta-express" className="hover:text-red-500">Venta Cliente Express</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold mb-4">NOVEDADES</h3>
-            <ul className="space-y-2">
-              <li><Link href="/opcion1" className="hover:text-red-500">Opción 1</Link></li>
-              <li><Link href="/opcion2" className="hover:text-red-500">Opción 2</Link></li>
-              <li><Link href="/opcion3" className="hover:text-red-500">Opción 3</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold mb-4">VISITA TAMBIÉN</h3>
-            <ul className="space-y-2">
-              <li><Link href="/opcion1" className="hover:text-red-500">Opción 1</Link></li>
-              <li><Link href="/opcion2" className="hover:text-red-500">Opción 2</Link></li>
-              <li><Link href="/opcion3" className="hover:text-red-500">Opción 3</Link></li>
-            </ul>
-          </div>
+    <footer className="bg-[color:var(--footer-background)] border-t-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col items-center">
+        {/* Menú de navegación */}
+        <nav className="w-full mb-8">
+          <ul className="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-24">
+            <li className="font-normal text-[14px] leading-6 tracking-[0px] text-center" style={{ fontFamily: 'Instrument Sans', color: '#6B7582' }}>Home</li>
+            <li className="font-normal text-[14px] leading-6 tracking-[0px] text-center" style={{ fontFamily: 'Instrument Sans', color: '#6B7582' }}>Ofertas</li>
+            <li className="font-normal text-[14px] leading-6 tracking-[0px] text-center" style={{ fontFamily: 'Instrument Sans', color: '#6B7582' }}>Contacto</li>
+            <li className="font-normal text-[14px] leading-6 tracking-[0px] text-center" style={{ fontFamily: 'Instrument Sans', color: '#6B7582' }}>Otros</li>
+            <li className="font-normal text-[14px] leading-6 tracking-[0px] text-center" style={{ fontFamily: 'Instrument Sans', color: '#6B7582' }}>Marcas</li>
+          </ul>
+        </nav>
+        {/* Redes sociales */}
+        <div className="flex justify-center items-center gap-8 mb-6">
+          {/* Instagram */}
+          <a href="#" aria-label="Instagram" className="text-gray-400 hover:text-gray-600">
+            <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="4" y="4" width="16" height="16" rx="5" strokeWidth="1"/><circle cx="12" cy="12" r="3.5" strokeWidth="1"/><circle cx="17" cy="7" r="1.5" fill="currentColor"/></svg>
+          </a>
+          {/* Twitter */}
+          <a href="#" aria-label="Twitter" className="text-gray-400 hover:text-gray-600">
+            <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M22 5.92a8.38 8.38 0 01-2.36.65A4.13 4.13 0 0021.4 4.1a8.19 8.19 0 01-2.6 1A4.11 4.11 0 0012 8.09v.5A11.65 11.65 0 013 5.13s-4 9 5 13a11.64 11.64 0 01-7 2c9 5.5 20 0 20-11.5a4.1 4.1 0 00-.08-.74A5.94 5.94 0 0022 5.92z" strokeWidth="1"/></svg>
+          </a>
+          {/* Facebook */}
+          <a href="#" aria-label="Facebook" className="text-gray-400 hover:text-gray-600">
+            <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="10" strokeWidth="1"/><path d="M15 8h-2a1 1 0 00-1 1v2h3l-.5 3h-2.5v7" strokeWidth="1"/></svg>
+          </a>
         </div>
-        <div className="mt-8 pt-8 border-t border-gray-700">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
-              <form className="flex gap-2">
-                <input
-                  type="email"
-                  placeholder="Suscríbete y recibe nuestras ofertas"
-                  className="px-4 py-2 rounded bg-gray-800 text-white"
-                />
-                <button className="button bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
-                  Enviar
-                </button>
-              </form>
-            </div>
-            <div className="flex space-x-4">
-              <p className="text-sm">Síguenos en:</p>
-              <Link href="https://facebook.com" className="hover:text-red-500">
-                Facebook
-              </Link>
-              <Link href="https://instagram.com" className="hover:text-red-500">
-                Instagram
-              </Link>
-            </div>
-          </div>
-          <div className="text-center mt-8">
-            <p className="text-sm text-gray-400">Copyright 2025</p>
-          </div>
+        {/* Copyright */}
+        <div className="text-center mt-2">
+          <p className="text-base text-[#6B7582]" style={{ color: '#6B7582' }}>@2025 All rights reserved.</p>
         </div>
       </div>
     </footer>
