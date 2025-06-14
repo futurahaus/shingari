@@ -17,7 +17,7 @@ export default function SearchHeader() {
   return (
     <>
       <div className="bg-white py-4">
-        <div className="mx-auto px-8 sm:px-6 lg:px-16">
+        <div className="mx-auto px-4 sm:px-6 lg:px-16">
           <div className="flex items-center justify-between">
             <Link href="/" className="text-red-600 font-bold text-xl flex items-center gap-2">
               <Image src="/shingari.svg" alt="Shingari logo" width={105} height={24} priority />
@@ -41,10 +41,10 @@ export default function SearchHeader() {
                 <div className="flex items-center space-x-4">
                   <button
                     onClick={() => router.push('/dashboard')} disabled={false}
-                    className="button"
+                    className="button h-12 min-w-12"
                   >
                     <FaUser className="h-4 w-4" />
-                    Mi perfil
+                    <span className="hidden sm:block">Mi perfil</span>
                   </button>
                 </div>
               ) : (

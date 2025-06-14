@@ -30,7 +30,7 @@ export const ProductCard = ({ product }: { product: Product }) => (
             <h3 className="text-lg font-bold">{product.name}</h3>
             <div className="flex items-center mt-2">
                 <h4>
-                    ${new Intl.NumberFormat('es-CO').format(product.price)}
+                    {`€${new Intl.NumberFormat('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(product.price)}`}
                 </h4>
                 {product.discount && (
                     <span className="ml-auto bg-primary text-white text-xs font-bold leading-none tracking-normal align-middle px-2.5 py-0.5 rounded-full">
@@ -40,10 +40,10 @@ export const ProductCard = ({ product }: { product: Product }) => (
             </div>
             {product.discount && product.originalPrice && (
                 <h5 className="text-sm text-gray-500 line-through mb-2">
-                    ${new Intl.NumberFormat('es-CO').format(product.originalPrice)}
+                    €{new Intl.NumberFormat('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(product.originalPrice)}
                 </h5>
             )}
-            <p className="mb-4">{product.description}</p>
+            <p className="mb-4 line-clamp-2">{product.description}</p>
             <Link href={`/products/${product.id}`} className="block w-full">
                 <button className="button w-full bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition-colors">
                     <b>Agregar al carrito</b>

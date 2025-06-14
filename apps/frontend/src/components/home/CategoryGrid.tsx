@@ -59,7 +59,7 @@ export default function CategoryGrid() {
     }
 
     return (
-        <div className="w-full px-16 sm:px-6 lg:px-16 py-8" data-testid="category-grid">
+        <div className="w-full px-4 sm:px-6 lg:px-16 py-8" data-testid="category-grid">
             <h2 className="text-2xl font-bold mb-6">
                 Comprar por categoría
             </h2>

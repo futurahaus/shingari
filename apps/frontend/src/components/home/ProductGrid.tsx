@@ -63,7 +63,7 @@ export default function ProductGrid() {
     }
 
     return (
-        <div className="w-full px-16 sm:px-6 lg:px-16 py-8" data-testid="product-grid">
+        <div className="w-full px-4 sm:px-6 lg:px-16 py-8" data-testid="product-grid">
             <h2 className="text-2xl font-bold mb-6">
                 Productos destacados
             </h2>
