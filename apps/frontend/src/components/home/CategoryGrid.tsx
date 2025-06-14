@@ -38,7 +38,22 @@ export default function CategoryGrid() {
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
                     Descubre nuestras categorías
                 </h2>
-                <p className="text-center">Cargando categorías...</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 animate-pulse">
+                    {[...Array(5)].map((_, i) => (
+                        <div
+                            key={i}
+                            className="rounded-2xl flex flex-col bg-gray-200"
+                            style={{ minWidth: 0 }}
+                        >
+                            <div className="w-full aspect-square relative">
+                                <div className="w-full h-full bg-gray-300 rounded-2xl" />
+                            </div>
+                            <div className="py-2">
+                                <div className="h-5 bg-gray-300 rounded w-3/4 mx-auto" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         );
     }

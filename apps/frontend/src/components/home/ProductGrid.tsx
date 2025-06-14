@@ -42,7 +42,23 @@ export default function ProductGrid() {
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
                     Descubre nuestros productos
                 </h2>
-                <p className="text-center">Cargando productos...</p>
+                <div className="flex gap-6 overflow-x-auto pb-2 animate-pulse">
+                    {[...Array(6)].map((_, i) => (
+                        <div
+                            key={i}
+                            className="rounded-2xl flex-shrink-0 bg-gray-200"
+                            style={{ width: 220, minWidth: 220, maxWidth: 260 }}
+                        >
+                            <div className="w-full h-50 relative">
+                                <div className="w-full h-40 bg-gray-300 rounded-t-2xl" />
+                            </div>
+                            <div className="py-4">
+                                <div className="h-5 bg-gray-300 rounded mb-2 w-3/4 mx-auto" />
+                                <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         );
     }

@@ -10,11 +10,14 @@ interface ProductImageGalleryProps {
 export function ProductImageGallery({ images }: ProductImageGalleryProps) {
   const [mainImage, setMainImage] = useState(images[0]);
   const allImages = [images[0], ...images.slice(1)];
+  const totalThumbnails = 5;
+  const filledImages = allImages.slice(0, totalThumbnails);
+  const emptySlots = totalThumbnails - filledImages.length;
 
   return (
     <div className="flex flex-col-reverse md:flex-row gap-4">
       <div className="flex md:flex-col gap-2">
-        {allImages.map((img, idx) => (
+        {filledImages.map((img, idx) => (
           <div
             key={idx}
             className={`relative w-16 h-16 border rounded-md cursor-pointer ${
@@ -31,8 +34,14 @@ export function ProductImageGallery({ images }: ProductImageGalleryProps) {
             />
           </div>
         ))}
+        {Array.from({ length: emptySlots }).map((_, idx) => (
+          <div
+            key={`empty-${idx}`}
+            className="w-16 h-16 bg-gray-200 border border-gray-200 rounded-md"
+          />
+        ))}
       </div>
-      <div className="relative flex-1 w-full h-96">
+      <div className="relative flex-1 w-full bg-gray-100 rounded-lg" style={{ minHeight: 'calc(5 * 4rem + 4 * 0.5rem)' }}>
         <Image
           src={mainImage}
           alt="Main product image"

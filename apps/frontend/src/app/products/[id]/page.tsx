@@ -8,6 +8,7 @@ import { useParams } from 'next/navigation';
 import { api } from "@/lib/api";
 import { Product } from "@/components/ProductCard";
 import Link from 'next/link';
+import ProductDetailSkeleton from './components/ProductDetailSkeleton';
 
 export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null);
@@ -31,7 +32,7 @@ export default function ProductDetailPage() {
   }, [id]);
 
   if (!product) {
-    return <div>Loading...</div>; // Or a skeleton loader
+    return <ProductDetailSkeleton />;
   }
 
   return (
@@ -41,7 +42,7 @@ export default function ProductDetailPage() {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          {product.images.length > 0 && <ProductImageGallery images={product.images} />}
+          <ProductImageGallery images={product.images} />
         </div>
         <div className="flex flex-col gap-6">
           <ProductInfo product={product} />
