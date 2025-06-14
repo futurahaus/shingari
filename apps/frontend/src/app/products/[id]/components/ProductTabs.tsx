@@ -2,52 +2,54 @@
 
 import { useState } from 'react';
 import { Product } from '@/components/ProductCard';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface ProductTabsProps {
   product: Product;
 }
 
 export function ProductTabs({ product }: ProductTabsProps) {
-  const [activeTab, setActiveTab] = useState('description');
+  const [open, setOpen] = useState<'description' | 'characteristics' | null>('description');
+
+  const toggle = (section: 'description' | 'characteristics') => {
+    setOpen(prev => (prev === section ? null : section));
+  };
 
   return (
-    <div>
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex gap-6" aria-label="Tabs">
-          <button
-            onClick={() => setActiveTab('description')}
-            className={`${
-              activeTab === 'description'
-                ? 'border-orange-500 text-orange-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg`}
-          >
-            Descripción
-          </button>
-          {/* A modo de ejemplo, podríamos tener otra pestaña si tuviéramos más datos */}
-          {/* <button
-            onClick={() => setActiveTab('characteristics')}
-            className={`${
-              activeTab === 'characteristics'
-                ? 'border-orange-500 text-orange-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg`}
-          >
-            Características
-          </button> */}
-        </nav>
-      </div>
-      <div className="py-6">
-        {activeTab === 'description' && (
-          <p>
-            {product.description}
-          </p>
-        )}
-        {/* {activeTab === 'characteristics' && (
-          <div>
-            <p>Aquí podrían ir otras características del producto.</p>
+    <div className="divide-y divide-gray-200">
+      {/* Descripción */}
+      <div>
+        <button
+          className="w-full flex justify-between items-center py-4 focus:outline-none"
+          onClick={() => toggle('description')}
+        >
+          <span className="text-xl font-bold text-black">Descripción</span>
+          <span className="text-2xl text-gray-700">
+            {open === 'description' ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+          </span>
+        </button>
+        {open === 'description' && (
+          <div className="pb-6">
+            <p style={{ color: '#838383' }} className="text-gray-400 text-lg leading-snug">{product.description}</p>
           </div>
-        )} */}
+        )}
+      </div>
+      {/* Características */}
+      <div>
+        <button
+          className="w-full flex justify-between items-center py-4 focus:outline-none"
+          onClick={() => toggle('characteristics')}
+        >
+          <span className="text-xl font-bold text-black">Características</span>
+          <span className="text-2xl text-gray-700">
+            {open === 'characteristics' ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+          </span>
+        </button>
+        {open === 'characteristics' && (
+          <div className="pb-6">
+            <p className="text-gray-400 text-lg leading-snug" style={{ color: '#838383' }}>Aquí podrían ir otras características del producto.</p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -43,13 +43,14 @@ export default function ProductDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           <ProductImageGallery images={product.images} />
+
+          <div className="mt-8">
+            <ProductTabs product={product} />
+          </div>
         </div>
         <div className="flex flex-col gap-6">
           <ProductInfo product={product} />
         </div>
-      </div>
-      <div className="mt-8">
-        <ProductTabs product={product}/>
       </div>
     </div>
   );
