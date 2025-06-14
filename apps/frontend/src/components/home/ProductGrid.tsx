@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Product, ProductCard } from '../ProductCard';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 interface PaginatedProductsResponse {
     data: Product[];
@@ -17,12 +18,13 @@ export default function ProductGrid() {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
 
     useEffect(() => {
         const fetchProducts = async () => {
             try {
                 setLoading(true);
-                const response = await api.get<PaginatedProductsResponse>('/products?limit=8');
+                const response = await api.get<PaginatedProductsResponse>('/products?limit=6');
                 setProducts(response.data);
                 setError(null);
             } catch (error) {
@@ -84,20 +86,20 @@ export default function ProductGrid() {
                 Productos destacados
             </h2>
 
-            <div className="flex gap-6 overflow-x-auto pb-2" style={{ WebkitOverflowScrolling: 'touch', cursor: 'grab' }}>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                 {products.map(product => (
                     <div
                         key={product.id}
-                        className="rounded-2xl flex-shrink-0"
-                        style={{ width: 220, minWidth: 220, maxWidth: 260 }}
+                        className="group rounded-2xl flex flex-col cursor-pointer"
+                        onClick={() => router.push(`/products/${product.id}`)}
                     >
-                        <div className="w-full h-50 relative">
+                        <div className="w-full aspect-square relative overflow-hidden rounded-2xl">
                             {product.images && product.images.length > 0 ? (
                                 <Image
                                     src={product.images[0]}
                                     alt={product.name}
                                     fill
-                                    className="object-cover rounded-2xl"
+                                    className="object-cover rounded-2xl transition-transform duration-300 group-hover:scale-105"
                                 />
                             ) : (
                                 <div className="w-full h-40 flex items-center justify-center text-gray-400 bg-gray-100 rounded-t-2xl">Sin imagen</div>

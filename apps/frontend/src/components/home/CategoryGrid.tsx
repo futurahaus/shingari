@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 interface Category {
     id: string;
@@ -14,6 +15,7 @@ export default function CategoryGrid() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -82,16 +84,17 @@ export default function CategoryGrid() {
                 {categories.map(category => (
                     <div
                         key={category.id}
-                        className="rounded-2xl flex flex-col"
+                        className="group rounded-2xl flex flex-col cursor-pointer"
                         style={{ minWidth: 0 }}
+                        onClick={() => router.push(`/products?category=${category.id}`)}
                     >
-                        <div className="w-full aspect-square relative">
+                        <div className="w-full aspect-square relative overflow-hidden rounded-2xl">
                             {category.image ? (
                                 <Image
                                     src={category.image}
                                     alt={category.name}
                                     fill
-                                    className="object-cover rounded-2xl"
+                                    className="object-cover rounded-2xl transition-transform duration-300 group-hover:scale-105"
                                 />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100 rounded-2xl">Sin imagen</div>
