@@ -265,7 +265,7 @@ export default function ProductsPage() {
     }, []);
 
     return (
-        <div className="container mx-auto px-4 py-8 bg-white">
+        <div className="mx-auto px-16 py-8 bg-white">
             <div className="flex">
                 <CategorySidebar
                     categories={categories}

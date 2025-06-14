@@ -5,7 +5,7 @@ import Newsletter from '@/components/home/Newsletter';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gray-50" data-testid="home-container">
+    <div className="min-h-screen" data-testid="home-container">
       <Banner />
       <CategoryGrid />
       <ProductGrid />
