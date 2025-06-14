@@ -1,4 +1,4 @@
-import Banner from '@/components/home/Banner';
+import { Banner } from '@/components/home/Banner';
 import ProductGrid from '@/components/home/ProductGrid';
 
 export default function Home() {
