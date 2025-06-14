@@ -51,7 +51,7 @@ export default function ProfilePage() {
 
     const fetchUserData = async () => {
       try {
-        const data = await api.get<UserProfile>('/auth/me', { requireAuth: true });
+        const data = await api.get<UserProfile>('/auth/me');
         setFormData(prev => ({
           ...prev,
           nombre: data.nombre || prev.nombre,
@@ -86,7 +86,7 @@ export default function ProfilePage() {
     setError(null);
 
     try {
-      await api.put('/auth/profile', formData, { requireAuth: true });
+      await api.put('/auth/profile', formData);
       // Show success message or redirect
       alert('Perfil actualizado correctamente');
     } catch (err) {

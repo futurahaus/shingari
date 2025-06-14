@@ -45,7 +45,7 @@ export default function CompleteProfilePage() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const data = await api.get<UserProfile>('/auth/me', { requireAuth: true });
+        const data = await api.get<UserProfile>('/auth/me');
 
         setFormData(prev => ({
           ...prev,
@@ -81,7 +81,7 @@ export default function CompleteProfilePage() {
     setError(null);
 
     try {
-      await api.put('/auth/profile', formData, { requireAuth: true });
+      await api.put('/auth/profile', formData);
       router.push('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al actualizar el perfil');

@@ -28,7 +28,7 @@ export default function DashboardPage() {
 
     const fetchUserData = async () => {
       try {
-        const data = await api.get<UserData>('/auth/me', { requireAuth: true });
+        const data = await api.get<UserData>('/auth/me');
         setUserData(data);
       } catch (err) {
         console.error('Error fetching user data:', err);

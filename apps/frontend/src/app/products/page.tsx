@@ -168,7 +168,7 @@ const ProductsSection = ({
                 params.append('categoryFilters', categoryFilter);
             }
 
-            const response = await api.get<PaginatedProductsResponse>(`/products?${params.toString()}`, { requireAuth: true });
+            const response = await api.get<PaginatedProductsResponse>(`/products?${params.toString()}`);
             const newProducts = response.data;
 
             if (newProducts.length === 0 || response.page >= response.lastPage) {

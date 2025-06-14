@@ -28,7 +28,7 @@ export default function RoleSelectionModal({
       await api.post('/auth/assign-role', {
         userId,
         role
-      }, { requireAuth: true });
+      });
 
       onRoleSelected(role);
     } catch (err) {
@@ -63,11 +63,10 @@ export default function RoleSelectionModal({
             <button
               onClick={() => handleRoleSelect('consumer')}
               disabled={isLoading}
-              className={`w-full p-4 border-2 rounded-lg text-left transition-all duration-200 ${
-                selectedRole === 'consumer'
+              className={`w-full p-4 border-2 rounded-lg text-left transition-all duration-200 ${selectedRole === 'consumer'
                   ? 'border-red-500 bg-red-50'
                   : 'border-gray-200 hover:border-gray-300'
-              } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
             >
               <div className="flex items-center space-x-3">
                 <div className="flex-shrink-0">
@@ -86,11 +85,10 @@ export default function RoleSelectionModal({
             <button
               onClick={() => handleRoleSelect('business')}
               disabled={isLoading}
-              className={`w-full p-4 border-2 rounded-lg text-left transition-all duration-200 ${
-                selectedRole === 'business'
+              className={`w-full p-4 border-2 rounded-lg text-left transition-all duration-200 ${selectedRole === 'business'
                   ? 'border-red-500 bg-red-50'
                   : 'border-gray-200 hover:border-gray-300'
-              } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                } ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
             >
               <div className="flex items-center space-x-3">
                 <div className="flex-shrink-0">

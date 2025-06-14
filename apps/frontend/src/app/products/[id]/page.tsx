@@ -20,7 +20,7 @@ export default function ProductDetailPage() {
     if (id) {
       const fetchProduct = async () => {
         try {
-          const data = await api.get<Product>(`/products/${id}`, { requireAuth: true });
+          const data = await api.get<Product>(`/products/${id}`);
           setProduct(data);
         } catch (error) {
           console.error(error);

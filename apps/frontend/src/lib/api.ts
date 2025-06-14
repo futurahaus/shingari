@@ -1,5 +1,4 @@
 interface RequestOptions extends RequestInit {
-  requireAuth?: boolean;
 }
 
 class ApiClient {
@@ -30,8 +29,6 @@ class ApiClient {
 
       const data = await response.json();
       localStorage.setItem('accessToken', data.accessToken);
-      // Update cookie as well
-      document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Strict`;
       return data.accessToken;
     } catch (error) {
       console.error('Error refreshing token:', error);
@@ -39,7 +36,7 @@ class ApiClient {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
-      document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict';
+
       return null;
     }
   }
@@ -48,26 +45,16 @@ class ApiClient {
     endpoint: string,
     options: RequestOptions = {}
   ): Promise<T> {
-    const { requireAuth = false, ...fetchOptions } = options;
+    const { ...fetchOptions } = options;
     const url = `${this.baseUrl}${endpoint}`;
 
     // Add default headers
     const headers = new Headers(fetchOptions.headers);
     headers.set('Content-Type', 'application/json');
 
-    // Add auth header if required
-    if (requireAuth) {
-      let accessToken = await this.getAccessToken();
+    let accessToken = await this.getAccessToken();
 
-      if (!accessToken) {
-        accessToken = await this.refreshToken();
-        if (!accessToken) {
-          throw new Error('Authentication required');
-        }
-      }
-
-      headers.set('Authorization', `Bearer ${accessToken}`);
-    }
+    headers.set('Authorization', `Bearer ${accessToken}`);
 
     const response = await fetch(url, {
       ...fetchOptions,
@@ -76,7 +63,7 @@ class ApiClient {
     });
 
     // Handle 401 with token refresh
-    if (response.status === 401 && requireAuth) {
+    if (response.status === 401) {
       const newAccessToken = await this.refreshToken();
       if (newAccessToken) {
         headers.set('Authorization', `Bearer ${newAccessToken}`);
