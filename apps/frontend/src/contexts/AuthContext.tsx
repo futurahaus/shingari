@@ -71,10 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
 
-      // Clear access token cookie
-      document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict';
-
-      router.push('/login');
+      router.push('/');
     }
   };
 

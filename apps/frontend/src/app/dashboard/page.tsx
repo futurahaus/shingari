@@ -22,7 +22,7 @@ export default function DashboardPage() {
   useEffect(() => {
     // Check if user is authenticated
     if (!accessToken) {
-      router.push('/login?from=/dashboard');
+      window.location.hash = '#login?from=/dashboard';
       return;
     }
 
@@ -35,7 +35,7 @@ export default function DashboardPage() {
         setError(err instanceof Error ? err.message : 'Failed to fetch user data');
         if (err instanceof Error && err.message === 'Authentication required') {
           logout();
-          router.push('/login?from=/dashboard');
+          window.location.hash = '#login?from=/dashboard';
         }
       } finally {
         setLoading(false);

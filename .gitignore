@@ -51,4 +51,7 @@ next-env.d.ts
 
 # Logs
 logs
-*.log 
+*.log
+
+# Generated Prisma client
+apps/backend/generated/ 

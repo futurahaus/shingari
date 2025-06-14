@@ -491,7 +491,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/Users/fernandomariscotti/Desktop/my_projects/shingari/apps/backend/generated/prisma",
+      "value": "/home/one4ll/Desktop/projects/repositories/shingari/apps/backend/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -500,14 +500,14 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "darwin-arm64",
+        "value": "debian-openssl-3.0.x",
         "native": true
       }
     ],
     "previewFeatures": [
       "multiSchema"
     ],
-    "sourceFilePath": "/Users/fernandomariscotti/Desktop/my_projects/shingari/apps/backend/prisma/schema.prisma",
+    "sourceFilePath": "/home/one4ll/Desktop/projects/repositories/shingari/apps/backend/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

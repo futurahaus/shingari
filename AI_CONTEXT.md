@@ -84,9 +84,21 @@ Aplicación construida con Next.js.
     -   `layout.tsx`: Layout principal de la aplicación.
     -   `auth/verify-email/page.tsx`: Página de verificación de email con integración de selección de roles.
     -   `complete-profile/page.tsx`: Página para completar perfil empresarial con formulario de datos.
+    -   `dashboard/page.tsx`: Panel de control del usuario autenticado.
+    -   `dashboard/perfil/page.tsx`: Página de perfil del usuario autenticado.
+    -   `products/page.tsx`: Página pública de productos con filtros y paginación.
+    -   `products/[id]/page.tsx`: Página de detalle de producto específico.
 -   **`components/`**: Componentes reutilizables de React.
     -   Probablemente organizados por funcionalidad o tipo (ej. `ui/`, `common/`, `auth/`).
     -   `auth/RoleSelectionModal.tsx`: Modal para selección de roles (consumer/business) después de verificación de email.
+    -   `auth/LoginModal.tsx`: Modal de inicio de sesión con soporte para redirección post-login.
+    -   `auth/HashBasedLoginModal.tsx`: Componente que maneja la apertura automática del modal de login basado en hash de URL.
+    -   `auth/ForgotPasswordModal.tsx`: Modal para recuperación de contraseña.
+    -   `layout/SearchHeader.tsx`: Header con barra de búsqueda y botón de login.
+    -   `layout/Navbar.tsx`: Barra de navegación.
+    -   `layout/Footer.tsx`: Pie de página.
+    -   `layout/Sidebar.tsx`: Barra lateral para páginas del dashboard.
+    -   `ProductCard.tsx`: Componente para mostrar información de productos.
 -   **`lib/`**: Librerías auxiliares y utilidades.
     -   `api.ts`: Cliente para interactuar con el backend (maneja tokens, refresh, etc.).
 -   **`contexts/`**: React Contexts para gestión de estado global (ej. `AuthContext`).
@@ -105,6 +117,9 @@ Aplicación construida con Next.js.
 ## Consideraciones Generales
 
 -   **Autenticación**: Flujo de autenticación basado en JWT, con tokens de acceso y refresco. El backend maneja la lógica de Supabase.
+    -   **Sistema de Login Modal**: Implementación de modal de login que se abre automáticamente cuando la URL contiene `#login` con parámetros opcionales `?from=/ruta`.
+    -   **Redirección Post-Login**: Después del login exitoso, el usuario es redirigido a la ruta especificada en el parámetro `from` o al dashboard por defecto.
+    -   **Protección de Rutas**: Las páginas protegidas verifican la autenticación antes de hacer llamadas a la API y redirigen al login si es necesario.
 -   **Base de Datos**: La interacción con la base de datos se realiza principalmente a través de Prisma ORM, utilizando el archivo `schema.prisma` ubicado en `apps/backend/prisma/`. El `DatabaseModule` en el backend probablemente encapsula la lógica de acceso a la base de datos utilizando el cliente Prisma generado.
 -   **Sistema de Roles**: Implementación de roles de usuario (consumer/business) con asignación automática después de la verificación de email.
     -   Los roles se almacenan en la tabla `roles` y se relacionan con usuarios a través de `user_roles`.
@@ -114,6 +129,11 @@ Aplicación construida con Next.js.
     -   Los datos básicos del usuario se almacenan en la tabla `public.users` (nombre, apellidos, ciudad, provincia, país, código postal, teléfono).
     -   Los datos específicos de empresa se almacenan en los metadatos del usuario en `auth.users` (nombre comercial, nombre fiscal, NIF, direcciones, cómo nos conoció).
     -   Formulario de completar perfil disponible en `/complete-profile` para usuarios con rol 'business'.
+-   **Sistema de Productos**: Implementación de catálogo de productos con funcionalidades públicas y protegidas.
+    -   **Endpoints Públicos**: Los endpoints `GET /products` y `GET /products/:id` son públicos y no requieren autenticación.
+    -   **Precios Dinámicos**: Los precios se calculan dinámicamente basados en el rol del usuario (precio al por mayor para usuarios 'business').
+    -   **Descuentos Personalizados**: Sistema de descuentos específicos por usuario con fechas de validez.
+    -   **Filtros y Paginación**: Soporte para filtrado por categorías, búsqueda por nombre, ordenamiento por precio y paginación.
 -   **Testing**: Ambos proyectos tienen configuraciones de Jest. El backend tiene tests unitarios para servicios y tests e2e. El frontend tiene tests para componentes.
 
 ## Cómo Mantener Actualizado este Archivo
@@ -124,6 +144,6 @@ Aplicación construida con Next.js.
 
 ---
 
-*Este archivo fue generado y actualizado el 2025-01-03 21:30:00.*
+*Este archivo fue generado y actualizado el 2025-01-03 22:15:00.*
 
 *Por favor, actualiza la fecha y cualquier información relevante cuando hagas cambios significativos.* 

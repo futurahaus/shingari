@@ -45,7 +45,7 @@ export default function ProfilePage() {
   useEffect(() => {
     // Check if user is authenticated
     if (!accessToken) {
-      router.push('/login?from=/dashboard/perfil');
+      window.location.hash = '#login?from=/dashboard/perfil';
       return;
     }
 
@@ -71,7 +71,7 @@ export default function ProfilePage() {
         console.error('Error fetching user data:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch user data');
         if (err instanceof Error && err.message === 'Authentication required') {
-          router.push('/login?from=/dashboard/perfil');
+          window.location.hash = '#login?from=/dashboard/perfil';
         }
       } finally {
         setLoading(false);

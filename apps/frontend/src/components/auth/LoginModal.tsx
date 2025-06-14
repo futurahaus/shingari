@@ -14,9 +14,10 @@ interface LoginFormData extends Record<string, unknown> {
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
+  redirectPath?: string | null;
 }
 
-export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
+export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModalProps) {
   const router = useRouter();
   const { login } = useAuth();
   const [formData, setFormData] = useState<LoginFormData>({
@@ -60,7 +61,10 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       login(data.accessToken, data.refreshToken, data.user);
 
       onClose();
-      router.push('/dashboard');
+
+      // Redirect to the specified path or default to dashboard
+      const redirectTo = redirectPath || '/dashboard';
+      router.push(redirectTo);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
     } finally {

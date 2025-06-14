@@ -76,7 +76,7 @@ export default function RoleSelectionModal({
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900">Consumidor Final</h3>
-                  <p className="text-sm text-gray-600">Quiero navegar y comprar productos</p>
+                  {/* <p className="text-sm text-gray-600">Quiero navegar y comprar productos</p> */}
                 </div>
               </div>
             </button>
@@ -98,7 +98,7 @@ export default function RoleSelectionModal({
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900">Empresa</h3>
-                  <p className="text-sm text-gray-600">Quiero vender productos y gestionar mi negocio</p>
+                  {/* <p className="text-sm text-gray-600">Quiero vender productos y gestionar mi negocio</p> */}
                 </div>
               </div>
             </button>
