@@ -36,7 +36,7 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="mx-auto p-4 sm:px-6 lg:px-16">
       <div className="text-sm text-gray-500 mb-4">
         <Link href="/" className="hover:text-gray-700">Inicio</Link> / <Link href="/products" className="hover:text-gray-700">Productos</Link> / <span className="font-semibold">{product.name}</span>
       </div>

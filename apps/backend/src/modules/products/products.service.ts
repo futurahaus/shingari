@@ -94,6 +94,7 @@ export class ProductsService {
             createdAt: product.created_at || new Date(),
             categories: product.products_categories?.map(pc => pc.categories.name) || [],
             images: product.product_images?.map(pi => pi.image_url) || [],
+            sku: product.sku || '',
         };
     }
 

@@ -31,6 +31,9 @@ export class ProductResponseDto {
   @ApiProperty({ description: 'URLs de las imágenes del producto' })
   images: string[];
 
+  @ApiProperty({ description: 'SKU del producto', example: '123456' })
+  sku: string;
+
   @ApiPropertyOptional({ 
     description: 'Categorías a las que pertenece el producto (ej. nombres o slugs)',
     example: ['electronics', 'gaming', 'laptops'],

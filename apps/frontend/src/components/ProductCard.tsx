@@ -10,6 +10,7 @@ export interface Product {
     description: string;
     images: string[];
     categories: string[];
+    sku?: string;
 }
 
 export const ProductCard = ({ product }: { product: Product }) => (
