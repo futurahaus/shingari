@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter } from 'next/font/google';
 import "./globals.css";
-import Footer from "@/components/layout/Footer";
-import SearchHeader from "@/components/layout/SearchHeader";
-import Navbar from "@/components/layout/Navbar";
 import { Providers } from './providers';
 import HashBasedLoginModal from "@/components/auth/HashBasedLoginModal";
+import ConditionalLayout from "../components/layout/ConditionalLayout";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,15 +21,10 @@ export default function RootLayout({
     <html lang="es">
       <body className={inter.className}>
         <Providers>
-          <div className="min-h-screen flex flex-col">
-            <SearchHeader />
-            <Navbar />
-            <main className="flex-grow">
-              {children}
-            </main>
-            <Footer />
-            <HashBasedLoginModal />
-          </div>
+          <ConditionalLayout>
+            {children}
+          </ConditionalLayout>
+          <HashBasedLoginModal />
         </Providers>
       </body>
     </html>

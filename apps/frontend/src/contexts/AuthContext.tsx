@@ -13,6 +13,7 @@ interface AuthContextType {
   user: User | null;
   accessToken: string | null;
   refreshToken: string | null;
+  isLoading: boolean;
   login: (accessToken: string, refreshToken: string, user: User) => void;
   logout: () => Promise<void>;
   refreshAccessToken: () => Promise<string | null>;
@@ -25,6 +26,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Check for stored auth data on mount
@@ -37,6 +39,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAccessToken(storedAccessToken);
       setRefreshToken(storedRefreshToken);
     }
+    
+    // Mark loading as complete
+    setIsLoading(false);
   }, []);
 
   const login = (newAccessToken: string, newRefreshToken: string, userData: User) => {
@@ -108,6 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         accessToken,
         refreshToken,
+        isLoading,
         login,
         logout,
         refreshAccessToken,

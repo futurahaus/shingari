@@ -2,38 +2,122 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 const sidebarOptions = [
-  { name: 'Dashboard', path: '/admin/dashboard' },
-  { name: 'Usuarios', path: '/admin/usuarios' },
-  { name: 'Productos', path: '/admin/productos' },
+  { name: 'Dashboard', path: '/admin/dashboard', icon: '📊' },
+  { name: 'Configuración', path: '/admin/setup', icon: '⚙️' },
+  { name: 'Usuarios', path: '/admin/usuarios', icon: '👥' },
+  { name: 'Productos', path: '/admin/productos', icon: '📦' },
+  { name: 'Pedidos', path: '/admin/pedidos', icon: '📋' },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { user, logout, isLoading } = useAuth();
+  const router = useRouter();
 
+  useEffect(() => {
+    // Only check authentication after the auth context has finished loading
+    if (!isLoading) {
+      console.log('Admin Layout - Auth Check:', { 
+        user: user ? { id: user.id, email: user.email, roles: user.roles } : null,
+        isLoading 
+      });
+      
+      if (!user) {
+        console.log('Admin Layout - No user found, redirecting to login');
+        router.push(`/#login?from=${encodeURIComponent(pathname)}`);
+        return;
+      }
+
+      // For now, allow business users to access admin panel
+      // TODO: Create proper admin role in the system
+      if (!user.roles || (!user.roles.includes('business') && !user.roles.includes('admin'))) {
+        console.log('Admin Layout - User does not have required roles:', user.roles);
+        router.push('/');
+        return;
+      }
+
+      console.log('Admin Layout - User authenticated, showing admin panel');
+    }
+  }, [user, router, pathname, isLoading]);
+
+  const handleLogout = () => {
+    logout();
+    router.push('/');
+  };
+
+  // Show loading while auth context is loading or user is not authenticated
+  if (isLoading || !user || (!user.roles || (!user.roles.includes('business') && !user.roles.includes('admin')))) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+      </div>
+    );
+  }
+
+  // Render admin layout
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <aside style={{ width: 220, background: '#f5f5f5', padding: 24 }}>
-        <nav>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            {sidebarOptions.map(option => (
-              <li key={option.path} style={{ margin: '16px 0' }}>
-                <Link href={option.path} legacyBehavior>
-                  <a style={{
-                    color: pathname === option.path ? '#1976d2' : '#222',
-                    fontWeight: pathname === option.path ? 'bold' : 'normal',
-                    textDecoration: 'none',
-                  }}>
-                    {option.name}
-                  </a>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </aside>
-      <main style={{ flex: 1, padding: 32 }}>{children}</main>
+    <div className="min-h-screen bg-gray-50">
+      {/* Top Navigation Bar */}
+      <nav className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <h1 className="text-xl font-bold text-gray-900">Shingari Admin</h1>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-700">
+                Bienvenido, {user.email}
+              </span>
+              <button
+                onClick={handleLogout}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Cerrar Sesión
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div className="flex">
+        {/* Sidebar */}
+        <aside className="w-64 bg-white shadow-sm border-r border-gray-200 min-h-screen">
+          <nav className="mt-8">
+            <div className="px-4">
+              <ul className="space-y-2">
+                {sidebarOptions.map(option => (
+                  <li key={option.path}>
+                    <Link href={option.path} legacyBehavior>
+                      <a className={`flex items-center px-4 py-3 text-sm font-medium rounded-md transition-colors ${
+                        pathname === option.path
+                          ? 'bg-red-50 text-red-700 border-r-2 border-red-500'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}>
+                        <span className="mr-3">{option.icon}</span>
+                        {option.name}
+                      </a>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </nav>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 p-8">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
-}
+} 
