@@ -1,8 +1,8 @@
 'use client';
 
-import { ProductImageGallery } from "@/app/products/[id]/components/ProductImageGallery";
-import { ProductInfo } from "@/app/products/[id]/components/ProductInfo";
-import { ProductTabs } from "@/app/products/[id]/components/ProductTabs";
+import { ProductImageGallery } from "@/app/(main)/products/[id]/components/ProductImageGallery";
+import { ProductInfo } from "@/app/(main)/products/[id]/components/ProductInfo";
+import { ProductTabs } from "@/app/(main)/products/[id]/components/ProductTabs";
 import { useEffect, useState } from "react";
 import { useParams } from 'next/navigation';
 import { api } from "@/lib/api";

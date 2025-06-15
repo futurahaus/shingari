@@ -56,7 +56,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
       localStorage.setItem('user', JSON.stringify(data.user));
 
       //TODO review if needed.
-      document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Strict`;
+      // document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Strict`;
 
       login(data.accessToken, data.refreshToken, data.user);
 

@@ -3,7 +3,6 @@ import { Inter } from 'next/font/google';
 import "./globals.css";
 import { Providers } from './providers';
 import HashBasedLoginModal from "@/components/auth/HashBasedLoginModal";
-import ConditionalLayout from "../components/layout/ConditionalLayout";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,9 +20,7 @@ export default function RootLayout({
     <html lang="es">
       <body className={inter.className}>
         <Providers>
-          <ConditionalLayout>
-            {children}
-          </ConditionalLayout>
+          {children}
           <HashBasedLoginModal />
         </Providers>
       </body>

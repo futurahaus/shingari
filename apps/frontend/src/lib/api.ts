@@ -31,7 +31,7 @@ class ApiClient {
       const data = await response.json();
       localStorage.setItem('accessToken', data.accessToken);
       // Update cookie as well
-      document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Strict`;
+      // document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Strict`;
       return data.accessToken;
     } catch (error) {
       console.error('Error refreshing token:', error);
@@ -39,7 +39,7 @@ class ApiClient {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
-      document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict';
+      // document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict';
       return null;
     }
   }
