@@ -93,7 +93,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
                 type="email"
                 autoComplete="email"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
+                className="text-gray-900 w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}

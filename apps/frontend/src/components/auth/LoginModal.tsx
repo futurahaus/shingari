@@ -153,7 +153,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
                   type="email"
                   autoComplete="email"
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
+                  className="text-gray-900 w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
                   value={formData.email}
                   onChange={handleChange}
                   disabled={isLoading}
@@ -170,7 +170,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
                     type={showPassword ? "text" : "password"}
                     autoComplete="current-password"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 pr-10"
+                    className="text-gray-900 w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 pr-10"
                     value={formData.password}
                     onChange={handleChange}
                     disabled={isLoading}
