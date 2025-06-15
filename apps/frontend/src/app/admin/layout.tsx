@@ -8,10 +8,9 @@ import { useEffect } from 'react';
 
 const sidebarOptions = [
   { name: 'Dashboard', path: '/admin/dashboard', icon: '📊' },
-  { name: 'Configuración', path: '/admin/setup', icon: '⚙️' },
   { name: 'Usuarios', path: '/admin/usuarios', icon: '👥' },
   { name: 'Productos', path: '/admin/productos', icon: '📦' },
-  { name: 'Pedidos', path: '/admin/pedidos', icon: '📋' },
+  { name: 'Configuración', path: '/admin/setup', icon: '⚙️' },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -22,11 +21,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     // Only check authentication after the auth context has finished loading
     if (!isLoading) {
-      console.log('Admin Layout - Auth Check:', { 
+      console.log('Admin Layout - Auth Check:', {
         user: user ? { id: user.id, email: user.email, roles: user.roles } : null,
-        isLoading 
+        isLoading
       });
-      
+
       if (!user) {
         console.log('Admin Layout - No user found, redirecting to login');
         router.push(`/#login?from=${encodeURIComponent(pathname)}`);
@@ -120,4 +119,4 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
     </div>
   );
-} 
+}
