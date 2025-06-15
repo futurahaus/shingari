@@ -91,10 +91,10 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="text-center text-3xl font-extrabold text-gray-900">
             Restablecer Contraseña
           </h2>
         </div>
@@ -109,8 +109,8 @@ export default function ResetPasswordPage() {
               <span className="block sm:inline">{successMessage}</span>
             </div>
           )}
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div className="relative">
+          <div className="rounded-md gap-4">
+            <div className="relative mb-4">
               <label htmlFor="password" className="sr-only">
                 Nueva Contraseña
               </label>
@@ -119,7 +119,7 @@ export default function ResetPasswordPage() {
                 name="password"
                 type={showPassword ? 'text' : 'password'}
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md rounded-b-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm"
                 placeholder="Nueva Contraseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -142,7 +142,7 @@ export default function ResetPasswordPage() {
                 name="confirm-password"
                 type={showConfirmPassword ? 'text' : 'password'}
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md rounded-t-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm"
                 placeholder="Confirmar Contraseña"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
