@@ -53,8 +53,6 @@ type Discount = {
   valid_to?: string;
 };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -254,39 +252,6 @@ export default function AdminProductsPage() {
   const openDeleteModal = (product: Product) => {
     setSelectedProduct(product);
     setShowDeleteModal(true);
-  };
-
-  // 4. Add image upload handler (simulate upload, just use URL for now)
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, formType: 'create' | 'edit') => {
-    const files = e.target.files;
-    if (!files) return;
-    const uploadedUrls: string[] = [];
-    for (const file of Array.from(files)) {
-      const formData = new FormData();
-      formData.append('file', file);
-      try {
-        // Get access token for Authorization header
-        const accessToken = localStorage.getItem('accessToken');
-        const res = await fetch(`${API_BASE_URL}/products/upload-image`, {
-          method: 'POST',
-          body: formData,
-          credentials: 'include',
-          headers: {
-            Authorization: accessToken ? `Bearer ${accessToken}` : '',
-          },
-        });
-        if (!res.ok) throw new Error('Error uploading image');
-        const data = await res.json();
-        if (data.url) uploadedUrls.push(data.url);
-      } catch {
-        // Optionally show error notification
-      }
-    }
-    if (formType === 'create') {
-      setCreateForm(prev => ({ ...prev, images: [...(prev.images || []), ...uploadedUrls] }));
-    } else {
-      setEditForm(prev => ({ ...prev, images: [...(prev.images || []), ...uploadedUrls] }));
-    }
   };
 
   if (loading) {
@@ -508,21 +473,6 @@ export default function AdminProductsPage() {
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Imágenes</label>
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={e => handleImageUpload(e, 'create')}
-                    className="mt-1 block w-full"
-                  />
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {(createForm.images || []).map((img, idx) => (
-                      <img key={idx} src={img} alt="preview" className="h-12 w-12 object-cover rounded" />
-                    ))}
-                  </div>
-                </div>
               </div>
               <div className="flex justify-end space-x-3 mt-6">
                 <button
@@ -631,21 +581,6 @@ export default function AdminProductsPage() {
                       <option key={unit.id} value={String(unit.id)}>{unit.name}</option>
                     ))}
                   </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Imágenes</label>
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={e => handleImageUpload(e, 'edit')}
-                    className="mt-1 block w-full"
-                  />
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {(editForm.images || []).map((img, idx) => (
-                      <img key={idx} src={img} alt="preview" className="h-12 w-12 object-cover rounded" />
-                    ))}
-                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Precio</label>
