@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/modules/prisma/prisma.service'; // Ajusta si tu ruta es diferente
 import {
@@ -12,7 +13,6 @@ import {
   products_categories as ProductsCategoriesPrismaType,
   products_discounts as ProductDiscountPrismaType,
   product_images as ProductImagesPrismaType,
-  roles as RolePrismaType,
 } from '../../../generated/prisma'; // Importar tipos y enums de Prisma
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -23,6 +23,7 @@ import {
 } from './dto/product-response.dto';
 import { ProductDiscountResponseDto } from './dto/product-discount-response.dto';
 import { CategoryResponseDto } from './dto/category-response.dto';
+import { supabase } from 'src/config/supabase.config';
 
 // Tipo para el producto con categorías incluidas, específico para findAllPublic y findOne
 type ProductWithCategoriesForResponse = ProductPrismaType & {
@@ -30,6 +31,10 @@ type ProductWithCategoriesForResponse = ProductPrismaType & {
     categories: CategoryPrismaType;
   })[];
   product_images: ProductImagesPrismaType[];
+  products_stock: {
+    unit_id: number;
+    units: { name: string } | null;
+  }[];
 };
 
 // Tipo para el descuento con detalles del producto incluidos
@@ -117,6 +122,10 @@ export class ProductsService {
       categories:
         product.products_categories?.map((pc) => pc.categories.name) || [],
       images: product.product_images?.map((pi) => pi.image_url) || [],
+      wholesale_price: product.wholesale_price?.toNumber() ?? undefined,
+      status: product.status ? String(product.status) : undefined,
+      unit_id: product.products_stock?.[0]?.unit_id,
+      unit_name: product.products_stock?.[0]?.units?.name,
     };
   }
 
@@ -179,6 +188,11 @@ export class ProductsService {
             products: true,
           },
         },
+        products_stock: {
+          include: {
+            units: true,
+          },
+        },
       },
     });
 
@@ -223,6 +237,11 @@ export class ProductsService {
             products: true,
           },
         },
+        products_stock: {
+          include: {
+            units: true,
+          },
+        },
       },
     });
 
@@ -250,6 +269,11 @@ export class ProductsService {
             products: true,
           },
         },
+        products_stock: {
+          include: {
+            units: true,
+          },
+        },
       },
     });
 
@@ -268,27 +292,17 @@ export class ProductsService {
   async create(
     createProductDto: CreateProductDto,
   ): Promise<ProductResponseDto> {
-    const { name, description, price, stock, categoryIds } = createProductDto;
+    const { name, description, price, stock, categoryIds, wholesale_price, status, images, unit_id } = createProductDto;
 
     // Generate a unique SKU
     const generateSKU = async (): Promise<string> => {
       const timestamp = Date.now().toString(36);
       const random = Math.random().toString(36).substring(2, 8);
       const sku = `SKU-${timestamp}-${random}`.toUpperCase();
-
-      // Check if SKU already exists
-      const existingProduct = await this.prisma.products.findUnique({
-        where: { sku },
-      });
-
-      if (existingProduct) {
-        // If SKU exists, generate a new one recursively
-        return generateSKU();
-      }
-
+      const existingProduct = await this.prisma.products.findUnique({ where: { sku } });
+      if (existingProduct) return generateSKU();
       return sku;
     };
-
     const uniqueSKU = await generateSKU();
 
     // Create the product
@@ -297,94 +311,68 @@ export class ProductsService {
         name,
         description,
         list_price: new Prisma.Decimal(price),
-        wholesale_price: null, // Will be set later if needed
+        wholesale_price: wholesale_price !== undefined ? new Prisma.Decimal(wholesale_price) : null,
         sku: uniqueSKU,
-        status: product_states.active,
+        status: status ? (product_states[status as keyof typeof product_states] ?? product_states.active) : product_states.active,
       },
       include: {
-        products_categories: {
-          include: {
-            categories: true,
-          },
-        },
-        product_images: {
-          include: {
-            products: true,
-          },
-        },
+        products_categories: { include: { categories: true } },
+        product_images: { include: { products: true } },
+        products_stock: { include: { units: true } },
       },
     });
 
     // Create category relationships if categories are provided
     if (categoryIds && categoryIds.length > 0) {
       for (const categoryName of categoryIds) {
-        // Find or create category
-        let category = await this.prisma.categories.findUnique({
-          where: { name: categoryName },
-        });
-
+        let category = await this.prisma.categories.findUnique({ where: { name: categoryName } });
         if (!category) {
-          category = await this.prisma.categories.create({
-            data: { name: categoryName },
-          });
+          category = await this.prisma.categories.create({ data: { name: categoryName } });
         }
-
-        // Create product-category relationship
         await this.prisma.products_categories.create({
-          data: {
-            product_id: product.id,
-            category_id: category.id,
-          },
+          data: { product_id: product.id, category_id: category.id },
         });
       }
     }
 
     // Create stock entry if provided
     if (stock && stock > 0) {
-      // First, get or create a default unit
-      let unit = await this.prisma.units.findFirst({
-        where: { code: 'PCS' }, // Default unit code
-      });
-
+      let unit: any = null;
+      if (unit_id) {
+        unit = await this.prisma.units.findUnique({ where: { id: unit_id } });
+      }
       if (!unit) {
-        unit = await this.prisma.units.create({
+        throw new NotFoundException('Unidad no encontrada o inválida.');
+      }
+      await this.prisma.products_stock.create({
+        data: { product_id: product.id, quantity: new Prisma.Decimal(stock), unit_id: unit.id },
+      });
+    }
+
+    // Create product images if provided
+    if (images && images.length > 0) {
+      for (const [idx, imageUrl] of images.entries()) {
+        await this.prisma.product_images.create({
           data: {
-            code: 'PCS',
-            name: 'Pieces',
-            description: 'Individual pieces',
+            product_id: product.id,
+            image_url: imageUrl,
+            is_main: idx === 0,
+            sort_order: idx,
           },
         });
       }
-
-      await this.prisma.products_stock.create({
-        data: {
-          product_id: product.id,
-          quantity: new Prisma.Decimal(stock),
-          unit_id: unit.id,
-        },
-      });
     }
 
     // Fetch the complete product with relationships
     const completeProduct = await this.prisma.products.findUnique({
       where: { id: product.id },
       include: {
-        products_categories: {
-          include: {
-            categories: true,
-          },
-        },
-        product_images: {
-          include: {
-            products: true,
-          },
-        },
+        products_categories: { include: { categories: true } },
+        product_images: { include: { products: true } },
+        products_stock: { include: { units: true } },
       },
     });
-
-    return this.mapToProductResponseDto(
-      completeProduct as ProductWithCategoriesForResponse,
-    );
+    return this.mapToProductResponseDto(completeProduct as ProductWithCategoriesForResponse);
   }
 
   async update(
@@ -392,129 +380,83 @@ export class ProductsService {
     updateProductDto: UpdateProductDto,
   ): Promise<ProductResponseDto> {
     const productId = parseInt(id);
-    const { name, description, price, stock, categoryIds } = updateProductDto;
-
-    // Check if product exists
-    const existingProduct = await this.prisma.products.findUnique({
-      where: { id: productId },
-    });
-
+    const { name, description, price, stock, categoryIds, wholesale_price, status, images, unit_id } = updateProductDto;
+    const existingProduct = await this.prisma.products.findUnique({ where: { id: productId } });
     if (!existingProduct) {
       throw new NotFoundException(`Producto con ID "${id}" no encontrado.`);
     }
-
     // Update the product
     const updatedProduct = await this.prisma.products.update({
       where: { id: productId },
       data: {
         name,
         description,
-        list_price: price ? new Prisma.Decimal(price) : undefined,
+        list_price: price !== undefined ? new Prisma.Decimal(price) : undefined,
+        wholesale_price: wholesale_price !== undefined ? new Prisma.Decimal(wholesale_price) : undefined,
+        status: status ? (product_states[status as keyof typeof product_states] ?? undefined) : undefined,
       },
       include: {
-        products_categories: {
-          include: {
-            categories: true,
-          },
-        },
-        product_images: {
-          include: {
-            products: true,
-          },
-        },
+        products_categories: { include: { categories: true } },
+        product_images: { include: { products: true } },
+        products_stock: { include: { units: true } },
       },
     });
-
     // Update categories if provided
     if (categoryIds !== undefined) {
-      // Remove existing category relationships
-      await this.prisma.products_categories.deleteMany({
-        where: { product_id: productId },
-      });
-
-      // Create new category relationships
+      await this.prisma.products_categories.deleteMany({ where: { product_id: productId } });
       if (categoryIds.length > 0) {
         for (const categoryName of categoryIds) {
-          // Find or create category
-          let category = await this.prisma.categories.findUnique({
-            where: { name: categoryName },
-          });
-
+          let category = await this.prisma.categories.findUnique({ where: { name: categoryName } });
           if (!category) {
-            category = await this.prisma.categories.create({
-              data: { name: categoryName },
-            });
+            category = await this.prisma.categories.create({ data: { name: categoryName } });
           }
-
-          // Create product-category relationship
-          await this.prisma.products_categories.create({
+          await this.prisma.products_categories.create({ data: { product_id: productId, category_id: category.id } });
+        }
+      }
+    }
+    // Update stock if provided
+    if (stock !== undefined) {
+      let unit: any = null;
+      if (unit_id) {
+        unit = await this.prisma.units.findUnique({ where: { id: unit_id } });
+      }
+      if (!unit) {
+        throw new NotFoundException('Unidad no encontrada o inválida.');
+      }
+      const existingStock = await this.prisma.products_stock.findFirst({ where: { product_id: productId } });
+      if (existingStock) {
+        await this.prisma.products_stock.update({ where: { id: existingStock.id }, data: { quantity: new Prisma.Decimal(stock), unit_id: unit.id } });
+      } else if (stock > 0) {
+        await this.prisma.products_stock.create({ data: { product_id: productId, quantity: new Prisma.Decimal(stock), unit_id: unit.id } });
+      }
+    }
+    // Update product images if provided
+    if (images !== undefined) {
+      // Remove existing images
+      await this.prisma.product_images.deleteMany({ where: { product_id: productId } });
+      if (images.length > 0) {
+        for (const [idx, imageUrl] of images.entries()) {
+          await this.prisma.product_images.create({
             data: {
               product_id: productId,
-              category_id: category.id,
+              image_url: imageUrl,
+              is_main: idx === 0,
+              sort_order: idx,
             },
           });
         }
       }
     }
-
-    // Update stock if provided
-    if (stock !== undefined) {
-      // Get or create a default unit
-      let unit = await this.prisma.units.findFirst({
-        where: { code: 'PCS' },
-      });
-
-      if (!unit) {
-        unit = await this.prisma.units.create({
-          data: {
-            code: 'PCS',
-            name: 'Pieces',
-            description: 'Individual pieces',
-          },
-        });
-      }
-
-      // Update or create stock entry
-      const existingStock = await this.prisma.products_stock.findFirst({
-        where: { product_id: productId },
-      });
-
-      if (existingStock) {
-        await this.prisma.products_stock.update({
-          where: { id: existingStock.id },
-          data: { quantity: new Prisma.Decimal(stock) },
-        });
-      } else if (stock > 0) {
-        await this.prisma.products_stock.create({
-          data: {
-            product_id: productId,
-            quantity: new Prisma.Decimal(stock),
-            unit_id: unit.id,
-          },
-        });
-      }
-    }
-
     // Fetch the complete updated product
     const completeProduct = await this.prisma.products.findUnique({
       where: { id: productId },
       include: {
-        products_categories: {
-          include: {
-            categories: true,
-          },
-        },
-        product_images: {
-          include: {
-            products: true,
-          },
-        },
+        products_categories: { include: { categories: true } },
+        product_images: { include: { products: true } },
+        products_stock: { include: { units: true } },
       },
     });
-
-    return this.mapToProductResponseDto(
-      completeProduct as ProductWithCategoriesForResponse,
-    );
+    return this.mapToProductResponseDto(completeProduct as ProductWithCategoriesForResponse);
   }
 
   async removeLogical(id: string): Promise<void> {
@@ -626,4 +568,77 @@ export class ProductsService {
 
     return categories.map((c) => ({ id: c.id.toString(), name: c.name }));
   }
+
+  async uploadImageToSupabase(file: Express.Multer.File): Promise<{ url: string }> {
+    if (!file) {
+      throw new BadRequestException('No se proporcionó ningún archivo.');
+    }
+    // Generate a unique filename
+    const ext = file.originalname.split('.').pop();
+    const filename = `product-${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${ext}`;
+    // Upload to Supabase Storage
+    const { error } = await supabase.storage.from('shingari').upload(filename, file.buffer, {
+      contentType: file.mimetype,
+      upsert: false,
+    });
+    if (error) {
+      throw new InternalServerErrorException('Error al subir la imagen a Supabase Storage: ' + error.message);
+    }
+    // Get public URL
+    const { data } = supabase.storage.from('shingari').getPublicUrl(filename);
+    if (!data || !data.publicUrl) {
+      throw new InternalServerErrorException('No se pudo obtener la URL pública de la imagen.');
+    }
+    return { url: data.publicUrl };
+  }
+
+  async getDiscountsForProduct(productId: number): Promise<ProductDiscountResponseDto[]> {
+    const discounts = await this.prisma.products_discounts.findMany({
+      where: { product_id: productId },
+      include: {
+        products: { select: { list_price: true, name: true } },
+      },
+      orderBy: { id: 'desc' },
+    });
+    return discounts.map((d) => this.mapToProductDiscountResponseDto(d as DiscountWithProductDetails));
+  }
+
+  async createDiscount(productId: number, dto: any): Promise<ProductDiscountResponseDto> {
+    const discount = await this.prisma.products_discounts.create({
+      data: {
+        product_id: productId,
+        price: new Prisma.Decimal(dto.price),
+        is_active: dto.is_active ?? true,
+        valid_from: dto.valid_from ?? null,
+        valid_to: dto.valid_to ?? null,
+        user_id: dto.user_id ?? null,
+      },
+      include: {
+        products: { select: { list_price: true, name: true } },
+      },
+    });
+    return this.mapToProductDiscountResponseDto(discount as DiscountWithProductDetails);
+  }
+
+  async updateDiscount(discountId: number, dto: any): Promise<ProductDiscountResponseDto> {
+    const discount = await this.prisma.products_discounts.update({
+      where: { id: discountId },
+      data: {
+        price: dto.price !== undefined ? new Prisma.Decimal(dto.price) : undefined,
+        is_active: dto.is_active,
+        valid_from: dto.valid_from,
+        valid_to: dto.valid_to,
+        user_id: dto.user_id,
+      },
+      include: {
+        products: { select: { list_price: true, name: true } },
+      },
+    });
+    return this.mapToProductDiscountResponseDto(discount as DiscountWithProductDetails);
+  }
+
+  async deleteDiscount(discountId: number): Promise<void> {
+    await this.prisma.products_discounts.delete({ where: { id: discountId } });
+  }
 }
+

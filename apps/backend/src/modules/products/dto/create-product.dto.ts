@@ -48,6 +48,28 @@ export class CreateProductDto {
   @IsOptional()
   categoryIds?: string[]; // Asumiendo que las categorías se identifican por un string (ID o slug)
 
+  @ApiPropertyOptional({ description: 'Precio mayorista del producto', example: 999.99, type: Number })
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  @IsOptional()
+  wholesale_price?: number;
+
+  @ApiPropertyOptional({ description: 'Estado del producto', example: 'active', enum: ['active', 'draft', 'paused', 'deleted'] })
+  @IsString()
+  @IsOptional()
+  status?: string;
+
+  @ApiPropertyOptional({ description: 'URLs de imágenes del producto', type: [String] })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  images?: string[];
+
+  @ApiPropertyOptional({ description: 'ID de la unidad para el stock', example: 1, type: Number })
+  @IsInt()
+  @IsOptional()
+  unit_id?: number;
+
   // Si tuvieras metadatos o atributos customizables podrías usar algo como:
   // @ApiPropertyOptional({ type: [ProductMetadataDto], description: 'Metadatos adicionales del producto' })
   // @IsArray()

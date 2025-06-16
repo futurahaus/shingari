@@ -1,25 +1,46 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class ProductResponseDto {
-  @ApiProperty({ description: 'ID único del producto', example: 'clxpb2xzo0000a8b4c2defgh1' })
+  @ApiProperty({ 
+    description: 'ID único del producto',
+    example: 'clxpb2xzo0000a8b4c2defgh1',
+  })
   id: string;
 
-  @ApiProperty({ description: 'Nombre del producto', example: 'Laptop Gamer XYZ' })
+  @ApiProperty({ 
+    description: 'Nombre del producto',
+    example: 'Laptop Gamer XYZ',
+  })
   name: string;
 
-  @ApiPropertyOptional({ description: 'Descripción detallada del producto', example: 'Una laptop potente para gaming y trabajo.' })
+  @ApiPropertyOptional({ 
+    description: 'Descripción detallada del producto',
+    example: 'Una laptop potente para gaming y trabajo.',
+  })
   description?: string;
 
-  @ApiProperty({ description: 'Precio del producto (con descuento, si aplica)', example: 1299.99 })
+  @ApiProperty({ 
+    description: 'Precio del producto (con descuento, si aplica)',
+    example: 1299.99,
+  })
   price: number;
 
-  @ApiPropertyOptional({ description: 'Precio original del producto sin descuento', example: 1499.99 })
+  @ApiPropertyOptional({ 
+    description: 'Precio original del producto sin descuento',
+    example: 1499.99,
+  })
   originalPrice?: number;
 
-  @ApiPropertyOptional({ description: 'Porcentaje de descuento aplicado al producto', example: 10 })
+  @ApiPropertyOptional({ 
+    description: 'Porcentaje de descuento aplicado al producto',
+    example: 10,
+  })
   discount: number;
 
-  @ApiPropertyOptional({ description: 'Stock disponible del producto', example: 50 })
+  @ApiPropertyOptional({ 
+    description: 'Stock disponible del producto',
+    example: 50,
+  })
   stock?: number;
 
   @ApiProperty({ description: 'Fecha de creación del producto' })
@@ -37,6 +58,31 @@ export class ProductResponseDto {
     type: [String],
   })
   categories?: string[]; // Esto dependerá de cómo se modele en Prisma (relación o array)
+
+  @ApiPropertyOptional({ 
+    description: 'Precio mayorista del producto',
+    example: 999.99,
+  })
+  wholesale_price?: number;
+
+  @ApiPropertyOptional({ 
+    description: 'Estado del producto',
+    example: 'active',
+    enum: ['active', 'draft', 'paused', 'deleted'],
+  })
+  status?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'ID de la unidad para el stock',
+    example: 1,
+  })
+  unit_id?: number;
+
+  @ApiPropertyOptional({ 
+    description: 'Nombre de la unidad para el stock',
+    example: 'kg',
+  })
+  unit_name?: string;
 
   // Considerar añadir otros campos que sean relevantes desde Prisma, como relaciones cargadas.
 }

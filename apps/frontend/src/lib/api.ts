@@ -1,3 +1,5 @@
+import { File as MulterFile } from 'multer';
+
 interface RequestOptions extends RequestInit {
   requireAuth?: boolean;
 }
@@ -89,7 +91,7 @@ class ApiClient {
         if (!retryResponse.ok) {
           throw new Error(`HTTP error! status: ${retryResponse.status}`);
         }
-        
+
         // Handle 204 No Content for retry response
         if (retryResponse.status === 204) {
           return {} as T;

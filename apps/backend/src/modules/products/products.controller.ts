@@ -13,6 +13,9 @@ import {
   ParseUUIDPipe,
   ParseIntPipe,
   Request as NestRequest,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -35,6 +38,7 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard'; // Import AdminGuard desde auth/guards
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Products')
 @Controller('products')
@@ -210,5 +214,66 @@ export class ProductsController {
   ): Promise<ProductResponseDto> {
     console.log('req.user', req.user);
     return this.productsService.findOne(+id, req.user?.id);
+  }
+
+  @Post('upload-image')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Subir imagen a Supabase Storage (Solo Admin)' })
+  @ApiResponse({ status: 201, description: 'URL de la imagen subida.' })
+  @ApiResponse({ status: 400, description: 'Archivo no válido.' })
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No se proporcionó ningún archivo.');
+    }
+    // Use the productsService to handle the upload
+    return this.productsService.uploadImageToSupabase(file);
+  }
+
+  @Post(':id/discounts')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Crear un descuento para un producto (Solo Admin)' })
+  @ApiResponse({ status: 201, description: 'Descuento creado.', type: ProductDiscountResponseDto })
+  async createDiscount(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: any // Replace with CreateDiscountDto if available
+  ): Promise<ProductDiscountResponseDto> {
+    return this.productsService.createDiscount(id, dto);
+  }
+
+  @Get(':id/discounts')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Listar descuentos de un producto (Solo Admin)' })
+  @ApiResponse({ status: 200, description: 'Lista de descuentos.', type: [ProductDiscountResponseDto] })
+  async getDiscountsForProduct(
+    @Param('id', ParseIntPipe) id: number
+  ): Promise<ProductDiscountResponseDto[]> {
+    return this.productsService.getDiscountsForProduct(id);
+  }
+
+  @Put('discounts/:discountId')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar un descuento (Solo Admin)' })
+  @ApiResponse({ status: 200, description: 'Descuento actualizado.', type: ProductDiscountResponseDto })
+  async updateDiscount(
+    @Param('discountId', ParseIntPipe) discountId: number,
+    @Body() dto: any // Replace with UpdateDiscountDto if available
+  ): Promise<ProductDiscountResponseDto> {
+    return this.productsService.updateDiscount(discountId, dto);
+  }
+
+  @Delete('discounts/:discountId')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Eliminar un descuento (Solo Admin)' })
+  @ApiResponse({ status: 204, description: 'Descuento eliminado.' })
+  async deleteDiscount(
+    @Param('discountId', ParseIntPipe) discountId: number
+  ): Promise<void> {
+    return this.productsService.deleteDiscount(discountId);
   }
 }

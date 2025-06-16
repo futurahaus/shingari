@@ -494,16 +494,6 @@ export default function AdminUsersPage() {
           </div>
         </div>
       )}
-
-      <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 className="text-sm font-medium text-blue-900 mb-2">Instrucciones para crear un Admin:</h3>
-        <ol className="text-sm text-blue-700 space-y-1 list-decimal list-inside">
-          <li>Haz clic en "Crear Usuario" para agregar un nuevo usuario</li>
-          <li>O selecciona un usuario existente y haz clic en "Hacer Admin"</li>
-          <li>El usuario ahora tendrá acceso al panel de administración</li>
-          <li>Puedes acceder a /admin/dashboard con ese usuario</li>
-        </ol>
-      </div>
     </div>
   );
 }

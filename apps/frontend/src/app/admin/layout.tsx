@@ -7,10 +7,10 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 const sidebarOptions = [
-  { name: 'Dashboard', path: '/admin/dashboard', icon: '📊' },
-  { name: 'Usuarios', path: '/admin/usuarios', icon: '👥' },
-  { name: 'Productos', path: '/admin/productos', icon: '📦' },
-  { name: 'Configuración', path: '/admin/setup', icon: '⚙️' },
+  { name: 'Dashboard', path: '/admin/dashboard', icon: '/dashboard_icon.png' },
+  { name: 'Usuarios', path: '/admin/usuarios', icon: '/users_icon.png' },
+  { name: 'Productos', path: '/admin/productos', icon: '/products_icon.png' },
+  { name: 'Configuración', path: '/admin/setup', icon: '/settings_icon.png' },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -64,7 +64,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Navigation Bar */}
-      <nav className="bg-white shadow-sm border-b border-gray-200">
+      {/* <nav className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
@@ -85,7 +85,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           </div>
         </div>
-      </nav>
+      </nav> */}
 
       <div className="flex">
         {/* Sidebar */}
@@ -101,7 +101,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                           ? 'bg-red-50 text-red-700 border-r-2 border-red-500'
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }`}>
-                        <span className="mr-3">{option.icon}</span>
+                        <span className="mr-3">
+                          <img src={option.icon} alt={option.name + ' icon'} className="w-5 h-5" />
+                        </span>
                         {option.name}
                       </a>
                     </Link>
@@ -109,6 +111,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 ))}
               </ul>
             </div>
+            <button
+                onClick={handleLogout}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Cerrar Sesión
+              </button>
           </nav>
         </aside>
 

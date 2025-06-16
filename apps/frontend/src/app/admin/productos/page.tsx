@@ -15,6 +15,10 @@ interface Product {
   createdAt: string;
   updatedAt: string;
   sku?: string;
+  wholesale_price?: number;
+  status?: string;
+  unit_id?: number;
+  unit_name?: string;
 }
 
 interface CreateProductData {
@@ -23,6 +27,10 @@ interface CreateProductData {
   price: number;
   stock?: number;
   categoryIds: string[];
+  wholesale_price?: number;
+  status?: string;
+  images?: string[];
+  unit_id?: number;
 }
 
 interface UpdateProductData {
@@ -31,7 +39,21 @@ interface UpdateProductData {
   price?: number;
   stock?: number;
   categoryIds?: string[];
+  wholesale_price?: number;
+  status?: string;
+  images?: string[];
+  unit_id?: number;
 }
+
+type Discount = {
+  id: number;
+  price: number;
+  is_active: boolean;
+  valid_from?: string;
+  valid_to?: string;
+};
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -66,8 +88,24 @@ export default function AdminProductsPage() {
   // Available categories (you might want to fetch this from the API)
   const availableCategories = ['Electronics', 'Clothing', 'Books', 'Home', 'Sports', 'Food'];
 
+  // 2. Add state for units and status options
+  const [availableUnits, setAvailableUnits] = useState<{id: number, name: string}[]>([]);
+  const statusOptions = [
+    { value: 'active', label: 'Activo' },
+    { value: 'draft', label: 'Borrador' },
+    { value: 'paused', label: 'Pausado' },
+    { value: 'deleted', label: 'Eliminado' },
+  ];
+
+  // 1. Add state for discounts in the edit modal
+  const [discounts, setDiscounts] = useState<Discount[]>([]);
+  const [loadingDiscounts, setLoadingDiscounts] = useState<boolean>(false);
+  const [newDiscount, setNewDiscount] = useState<{ price: string; is_active: boolean; valid_from: string; valid_to: string }>({ price: '', is_active: true, valid_from: '', valid_to: '' });
+  const [editingDiscount, setEditingDiscount] = useState<Discount | null>(null);
+
   useEffect(() => {
     fetchProducts();
+    fetchUnits();
   }, []);
 
   const fetchProducts = async () => {
@@ -79,12 +117,23 @@ export default function AdminProductsPage() {
       const productsData = Array.isArray(response) ? response : [];
       console.log('Products data to set:', productsData);
       setProducts(productsData);
-    } catch (err: any) {
-      setError('Error al cargar productos: ' + (err.message || 'Error desconocido'));
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
+      setError('Error al cargar productos: ' + errorMsg);
       setProducts([]);
-      console.error('Error fetching products:', err);
+      // Optionally log error
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUnits = async () => {
+    try {
+      // You may need to create this endpoint in your backend
+      const units = await api.get<{ id: number; name: string }[]>('/units', { requireAuth: true });
+      setAvailableUnits(units);
+    } catch {
+      setAvailableUnits([]);
     }
   };
 
@@ -101,8 +150,12 @@ export default function AdminProductsPage() {
       });
       await fetchProducts();
       showSuccess('Producto Creado', 'El producto se ha creado exitosamente');
-    } catch (err: any) {
-      showError('Error al Crear', 'Error al crear producto: ' + (err.message || 'Error desconocido'));
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        showError('Error al Crear', 'Error al crear producto: ' + (err.message || 'Error desconocido'));
+      } else {
+        showError('Error al Crear', 'Error al crear producto: Error desconocido');
+      }
     }
   };
 
@@ -122,8 +175,12 @@ export default function AdminProductsPage() {
       });
       await fetchProducts();
       showSuccess('Producto Actualizado', 'El producto se ha actualizado exitosamente');
-    } catch (err: any) {
-      showError('Error al Actualizar', 'Error al actualizar producto: ' + (err.message || 'Error desconocido'));
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        showError('Error al Actualizar', 'Error al actualizar producto: ' + (err.message || 'Error desconocido'));
+      } else {
+        showError('Error al Actualizar', 'Error al actualizar producto: Error desconocido');
+      }
     }
   };
 
@@ -136,21 +193,62 @@ export default function AdminProductsPage() {
       setSelectedProduct(null);
       await fetchProducts();
       showSuccess('Producto Eliminado', 'El producto se ha eliminado exitosamente');
-    } catch (err: any) {
-      showError('Error al Eliminar', 'Error al eliminar producto: ' + (err.message || 'Error desconocido'));
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        showError('Error al Eliminar', 'Error al eliminar producto: ' + (err.message || 'Error desconocido'));
+      } else {
+        showError('Error al Eliminar', 'Error al eliminar producto: Error desconocido');
+      }
     }
   };
 
-  const openEditModal = (product: Product) => {
+  // 2. Fetch discounts when opening the edit modal
+  const openEditModal = async (product: Product) => {
     setSelectedProduct(product);
     setEditForm({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      stock: 0, // You might want to add stock to your Product interface
-      categoryIds: product.categories,
+      name: product.name || '',
+      description: product.description || '',
+      price: product.price ?? 0,
+      stock: 0, // TODO: fetch actual stock if available
+      categoryIds: product.categories || [],
+      wholesale_price: product.wholesale_price ?? undefined,
+      status: product.status ?? 'active',
+      images: product.images || [],
+      unit_id: product.unit_id ?? undefined,
     });
     setShowEditModal(true);
+    setLoadingDiscounts(true);
+    try {
+      const res = await api.get<Discount[]>(`/products/${product.id}/discounts`, { requireAuth: true });
+      setDiscounts(res);
+    } catch {
+      setDiscounts([]);
+    } finally {
+      setLoadingDiscounts(false);
+    }
+  };
+
+  // 3. Add handlers for create, update, delete discount
+  const handleCreateDiscount = async () => {
+    try {
+      const res = await api.post<Discount, typeof newDiscount>(`/products/${selectedProduct?.id}/discounts`, newDiscount, { requireAuth: true });
+      setDiscounts((prev) => [res, ...prev]);
+      setNewDiscount({ price: '', is_active: true, valid_from: '', valid_to: '' });
+    } catch {}
+  };
+  const handleUpdateDiscount = async () => {
+    if (!editingDiscount) return;
+    try {
+      const res = await api.put<Discount, typeof editingDiscount>(`/products/discounts/${editingDiscount.id}`, editingDiscount, { requireAuth: true });
+      setDiscounts((prev) => prev.map((d) => d.id === res.id ? res : d));
+      setEditingDiscount(null);
+    } catch {}
+  };
+  const handleDeleteDiscount = async (id: string | number) => {
+    try {
+      await api.delete(`/products/discounts/${id}`, { requireAuth: true });
+      setDiscounts((prev) => prev.filter((d) => d.id !== Number(id)));
+    } catch {}
   };
 
   const openDeleteModal = (product: Product) => {
@@ -158,21 +256,36 @@ export default function AdminProductsPage() {
     setShowDeleteModal(true);
   };
 
-  const handleCategoryChange = (category: string, checked: boolean, formType: 'create' | 'edit') => {
+  // 4. Add image upload handler (simulate upload, just use URL for now)
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, formType: 'create' | 'edit') => {
+    const files = e.target.files;
+    if (!files) return;
+    const uploadedUrls: string[] = [];
+    for (const file of Array.from(files)) {
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        // Get access token for Authorization header
+        const accessToken = localStorage.getItem('accessToken');
+        const res = await fetch(`${API_BASE_URL}/products/upload-image`, {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
+          headers: {
+            Authorization: accessToken ? `Bearer ${accessToken}` : '',
+          },
+        });
+        if (!res.ok) throw new Error('Error uploading image');
+        const data = await res.json();
+        if (data.url) uploadedUrls.push(data.url);
+      } catch {
+        // Optionally show error notification
+      }
+    }
     if (formType === 'create') {
-      setCreateForm(prev => ({
-        ...prev,
-        categoryIds: checked
-          ? [...prev.categoryIds, category]
-          : prev.categoryIds.filter(c => c !== category)
-      }));
+      setCreateForm(prev => ({ ...prev, images: [...(prev.images || []), ...uploadedUrls] }));
     } else {
-      setEditForm(prev => ({
-        ...prev,
-        categoryIds: checked
-          ? [...(prev.categoryIds || []), category]
-          : (prev.categoryIds || []).filter(c => c !== category)
-      }));
+      setEditForm(prev => ({ ...prev, images: [...(prev.images || []), ...uploadedUrls] }));
     }
   };
 
@@ -236,6 +349,21 @@ export default function AdminProductsPage() {
                           {product.sku && (
                             <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
                               SKU: {product.sku}
+                            </span>
+                          )}
+                          {product.wholesale_price !== undefined && (
+                            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                              Mayorista: ${product.wholesale_price}
+                            </span>
+                          )}
+                          {product.status && (
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                              Estado: {product.status}
+                            </span>
+                          )}
+                          {product.unit_name && (
+                            <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">
+                              Unidad: {product.unit_name}
                             </span>
                           )}
                         </div>
@@ -354,6 +482,47 @@ export default function AdminProductsPage() {
                     ))}
                   </div>
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Estado</label>
+                  <select
+                    value={createForm.status || 'active'}
+                    onChange={e => setCreateForm({ ...createForm, status: e.target.value })}
+                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    {statusOptions.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Unidad</label>
+                  <select
+                    value={createForm.unit_id || ''}
+                    onChange={e => setCreateForm({ ...createForm, unit_id: parseInt(e.target.value) })}
+                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Seleccionar unidad</option>
+                    {availableUnits.map(unit => (
+                      <option key={unit.id} value={String(unit.id)}>{unit.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Imágenes</label>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={e => handleImageUpload(e, 'create')}
+                    className="mt-1 block w-full"
+                  />
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {(createForm.images || []).map((img, idx) => (
+                      <img key={idx} src={img} alt="preview" className="h-12 w-12 object-cover rounded" />
+                    ))}
+                  </div>
+                </div>
               </div>
               <div className="flex justify-end space-x-3 mt-6">
                 <button
@@ -377,7 +546,7 @@ export default function AdminProductsPage() {
       {/* Edit Product Modal */}
       {showEditModal && selectedProduct && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-3xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
             <div className="mt-3">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Editar Producto</h3>
               <div className="space-y-4">
@@ -399,16 +568,7 @@ export default function AdminProductsPage() {
                     rows={3}
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Precio</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={editForm.price}
-                    onChange={(e) => setEditForm({...editForm, price: parseFloat(e.target.value) || 0})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Stock</label>
                   <input
@@ -425,7 +585,7 @@ export default function AdminProductsPage() {
                       <label key={category} className="flex items-center">
                         <input
                           type="checkbox"
-                          checked={editForm.categoryIds?.includes(category)}
+                          checked={editForm.categoryIds?.map(String).includes(String(category))}
                           onChange={(e) => {
                             if (e.target.checked) {
                               setEditForm({
@@ -435,7 +595,7 @@ export default function AdminProductsPage() {
                             } else {
                               setEditForm({
                                 ...editForm,
-                                categoryIds: editForm.categoryIds?.filter(c => c !== category) || []
+                                categoryIds: (editForm.categoryIds || []).filter(c => String(c) !== String(category))
                               });
                             }
                           }}
@@ -445,6 +605,116 @@ export default function AdminProductsPage() {
                       </label>
                     ))}
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Estado</label>
+                  <select
+                    value={editForm.status || 'active'}
+                    onChange={e => setEditForm({ ...editForm, status: e.target.value })}
+                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    {statusOptions.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Unidad</label>
+                  <select
+                    value={editForm.unit_id ? String(editForm.unit_id) : ''}
+                    onChange={e => setEditForm({ ...editForm, unit_id: e.target.value ? parseInt(e.target.value) : undefined })}
+                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Seleccionar unidad</option>
+                    {availableUnits.map(unit => (
+                      <option key={unit.id} value={String(unit.id)}>{unit.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Imágenes</label>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={e => handleImageUpload(e, 'edit')}
+                    className="mt-1 block w-full"
+                  />
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {(editForm.images || []).map((img, idx) => (
+                      <img key={idx} src={img} alt="preview" className="h-12 w-12 object-cover rounded" />
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Precio</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={editForm.price}
+                    onChange={(e) => setEditForm({...editForm, price: parseFloat(e.target.value) || 0})}
+                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Precio Mayorista</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={editForm.wholesale_price || ''}
+                    onChange={e => setEditForm({ ...editForm, wholesale_price: parseFloat(e.target.value) || 0 })}
+                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                {/* Descuentos Section */}
+                <div className="mt-8">
+                  <h4 className="text-md font-semibold mb-2">Descuentos</h4>
+                  {loadingDiscounts ? (
+                    <div>Cargando descuentos...</div>
+                  ) : (
+                    <>
+                      <ul className="mb-4">
+                        {discounts.map(discount => (
+                          <li key={discount.id} className="flex items-center gap-2 mb-2">
+                            <span className="text-sm">Precio: ${discount.price} | Activo: {discount.is_active ? 'Sí' : 'No'} | Desde: {discount.valid_from ? discount.valid_from.split('T')[0] : '-'} | Hasta: {discount.valid_to ? discount.valid_to.split('T')[0] : '-'}</span>
+                            <button onClick={() => setEditingDiscount(discount)} className="text-blue-600 text-xs">Editar</button>
+                            <button onClick={() => handleDeleteDiscount(String(discount.id))} className="text-red-600 text-xs">Eliminar</button>
+                          </li>
+                        ))}
+                      </ul>
+                      {/* New Discount Form */}
+                      <div className="mb-4 p-2 border rounded">
+                        <div className="flex flex-col gap-2">
+                          <input type="number" placeholder="Precio" value={newDiscount.price} onChange={e => setNewDiscount(nd => ({ ...nd, price: e.target.value }))} className="border rounded px-2 py-1" />
+                          <label className="flex items-center gap-2">
+                            <input type="checkbox" checked={newDiscount.is_active} onChange={e => setNewDiscount(nd => ({ ...nd, is_active: e.target.checked }))} /> Activo
+                          </label>
+                          <input type="date" value={newDiscount.valid_from} onChange={e => setNewDiscount(nd => ({ ...nd, valid_from: e.target.value }))} className="border rounded px-2 py-1" />
+                          <input type="date" value={newDiscount.valid_to} onChange={e => setNewDiscount(nd => ({ ...nd, valid_to: e.target.value }))} className="border rounded px-2 py-1" />
+                          <button onClick={handleCreateDiscount} className="bg-green-600 text-white rounded px-3 py-1 mt-2">Agregar Descuento</button>
+                        </div>
+                      </div>
+                      {/* Edit Discount Form */}
+                      {editingDiscount && (
+                        <div className="mb-4 p-2 border rounded bg-gray-50">
+                          <div className="flex flex-col gap-2">
+                            <input type="number" placeholder="Precio" value={editingDiscount.price} onChange={e => setEditingDiscount(ed => ed ? { ...ed, price: Number(e.target.value) } : ed)} className="border rounded px-2 py-1" />
+                            <label className="flex items-center gap-2">
+                              <input type="checkbox" checked={editingDiscount.is_active} onChange={e => setEditingDiscount(ed => ed ? { ...ed, is_active: e.target.checked } : ed)} /> Activo
+                            </label>
+                            <input type="date" value={editingDiscount.valid_from || ''} onChange={e => setEditingDiscount(ed => ed ? { ...ed, valid_from: e.target.value } : ed)} className="border rounded px-2 py-1" />
+                            <input type="date" value={editingDiscount.valid_to || ''} onChange={e => setEditingDiscount(ed => ed ? { ...ed, valid_to: e.target.value } : ed)} className="border rounded px-2 py-1" />
+                            <div className="flex gap-2 mt-2">
+                              <button onClick={handleUpdateDiscount} className="bg-blue-600 text-white rounded px-3 py-1">Guardar</button>
+                              <button onClick={() => setEditingDiscount(null)} className="bg-gray-300 text-gray-800 rounded px-3 py-1">Cancelar</button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
               <div className="flex justify-end space-x-3 mt-6">
@@ -480,7 +750,7 @@ export default function AdminProductsPage() {
                 <h3 className="text-lg font-medium text-gray-900">Eliminar Producto</h3>
                 <div className="mt-2 px-7 py-3">
                   <p className="text-sm text-gray-500">
-                    ¿Estás seguro de que quieres eliminar el producto "{selectedProduct.name}"? Esta acción no se puede deshacer.
+                    ¿Estás seguro de que quieres eliminar el producto &quot;{selectedProduct.name}&quot;? Esta acción no se puede deshacer.
                   </p>
                 </div>
                 <div className="flex justify-center space-x-3 mt-6">
