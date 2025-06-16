@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const sidebarOptions = [
   { name: 'Dashboard', path: '/admin/dashboard', icon: '📊' },
@@ -17,10 +17,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const { user, logout, isLoading } = useAuth();
   const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     // Only check authentication after the auth context has finished loading
-    if (!isLoading) {
+    if (!isLoading && !isLoggingOut) {
       console.log('Admin Layout - Auth Check:', {
         user: user ? { id: user.id, email: user.email, roles: user.roles } : null,
         isLoading
@@ -42,9 +43,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       console.log('Admin Layout - User authenticated, showing admin panel');
     }
-  }, [user, router, pathname, isLoading]);
+  }, [user, router, pathname, isLoading, isLoggingOut]);
 
   const handleLogout = () => {
+    setIsLoggingOut(true);
     logout();
     router.push('/');
   };

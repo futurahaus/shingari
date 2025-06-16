@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAccessToken(storedAccessToken);
       setRefreshToken(storedRefreshToken);
     }
-    
+
     // Mark loading as complete
     setIsLoading(false);
   }, []);
