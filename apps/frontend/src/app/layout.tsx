@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import "./globals.css";
 import { Providers } from './providers';
 import HashBasedLoginModal from "@/components/auth/HashBasedLoginModal";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,10 +20,12 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={inter.className}>
-        <Providers>
-          {children}
-          <HashBasedLoginModal />
-        </Providers>
+        <NotificationProvider position="top-right" maxNotifications={5}>
+          <Providers>
+            {children}
+            <HashBasedLoginModal />
+          </Providers>
+        </NotificationProvider>
       </body>
     </html>
   );
