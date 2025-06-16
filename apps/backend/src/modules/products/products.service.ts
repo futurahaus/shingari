@@ -265,6 +265,27 @@ export class ProductsService {
   ): Promise<ProductResponseDto> {
     const { name, description, price, stock, categoryIds } = createProductDto;
 
+    // Generate a unique SKU
+    const generateSKU = async (): Promise<string> => {
+      const timestamp = Date.now().toString(36);
+      const random = Math.random().toString(36).substring(2, 8);
+      const sku = `SKU-${timestamp}-${random}`.toUpperCase();
+
+      // Check if SKU already exists
+      const existingProduct = await this.prisma.products.findUnique({
+        where: { sku },
+      });
+
+      if (existingProduct) {
+        // If SKU exists, generate a new one recursively
+        return generateSKU();
+      }
+
+      return sku;
+    };
+
+    const uniqueSKU = await generateSKU();
+
     // Create the product
     const product = await this.prisma.products.create({
       data: {
@@ -272,7 +293,7 @@ export class ProductsService {
         description,
         list_price: new Prisma.Decimal(price),
         wholesale_price: null, // Will be set later if needed
-        sku: '', // Will be generated or set later
+        sku: uniqueSKU,
         status: product_states.active,
       },
       include: {

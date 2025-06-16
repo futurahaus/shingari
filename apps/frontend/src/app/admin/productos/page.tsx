@@ -13,6 +13,7 @@ interface Product {
   images: string[];
   createdAt: string;
   updatedAt: string;
+  sku?: string;
 }
 
 interface CreateProductData {
@@ -219,6 +220,9 @@ export default function AdminProductsPage() {
                   Producto
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  SKU
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Precio
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -235,7 +239,7 @@ export default function AdminProductsPage() {
             <tbody className="bg-white divide-y divide-gray-200">
               {products?.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
                     No hay productos registrados
                   </td>
                 </tr>
@@ -264,6 +268,9 @@ export default function AdminProductsPage() {
                           </div>
                         </div>
                       </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-mono">
+                      {product.sku || 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">

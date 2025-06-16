@@ -89,6 +89,11 @@ class ApiClient {
         if (!retryResponse.ok) {
           throw new Error(`HTTP error! status: ${retryResponse.status}`);
         }
+        
+        // Handle 204 No Content for retry response
+        if (retryResponse.status === 204) {
+          return {} as T;
+        }
         return retryResponse.json();
       }
       throw new Error('Authentication required');
@@ -97,6 +102,11 @@ class ApiClient {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    // Handle 204 No Content - no response body to parse
+    if (response.status === 204) {
+      return {} as T;
     }
 
     return response.json();
