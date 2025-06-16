@@ -31,6 +31,11 @@ interface CreateProductData {
   status?: string;
   images?: string[];
   unit_id?: number;
+  points?: number;
+  iva?: string;
+  id?: string;
+  sku?: string;
+  lote?: string;
 }
 
 interface UpdateProductData {
@@ -43,15 +48,12 @@ interface UpdateProductData {
   status?: string;
   images?: string[];
   unit_id?: number;
+  points?: number;
+  iva?: string;
+  id?: string;
+  sku?: string;
+  lote?: string;
 }
-
-type Discount = {
-  id: number;
-  price: number;
-  is_active: boolean;
-  valid_from?: string;
-  valid_to?: string;
-};
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -86,24 +88,8 @@ export default function AdminProductsPage() {
   // Available categories (you might want to fetch this from the API)
   const availableCategories = ['Electronics', 'Clothing', 'Books', 'Home', 'Sports', 'Food'];
 
-  // 2. Add state for units and status options
-  const [availableUnits, setAvailableUnits] = useState<{id: number, name: string}[]>([]);
-  const statusOptions = [
-    { value: 'active', label: 'Activo' },
-    { value: 'draft', label: 'Borrador' },
-    { value: 'paused', label: 'Pausado' },
-    { value: 'deleted', label: 'Eliminado' },
-  ];
-
-  // 1. Add state for discounts in the edit modal
-  const [discounts, setDiscounts] = useState<Discount[]>([]);
-  const [loadingDiscounts, setLoadingDiscounts] = useState<boolean>(false);
-  const [newDiscount, setNewDiscount] = useState<{ price: string; is_active: boolean; valid_from: string; valid_to: string }>({ price: '', is_active: true, valid_from: '', valid_to: '' });
-  const [editingDiscount, setEditingDiscount] = useState<Discount | null>(null);
-
   useEffect(() => {
     fetchProducts();
-    fetchUnits();
   }, []);
 
   const fetchProducts = async () => {
@@ -125,19 +111,18 @@ export default function AdminProductsPage() {
     }
   };
 
-  const fetchUnits = async () => {
-    try {
-      // You may need to create this endpoint in your backend
-      const units = await api.get<{ id: number; name: string }[]>('/units', { requireAuth: true });
-      setAvailableUnits(units);
-    } catch {
-      setAvailableUnits([]);
-    }
-  };
-
   const handleCreateProduct = async () => {
     try {
-      await api.post('/products', createForm as unknown as Record<string, unknown>, { requireAuth: true });
+      // Only include unit_id if valid
+      const payload = { ...createForm };
+      if (!payload.unit_id || isNaN(Number(payload.unit_id))) {
+        delete payload.unit_id;
+      }
+
+      console.log('PAYLOAD');
+      console.log(payload);
+
+      await api.post('/products', payload as unknown as Record<string, unknown>, { requireAuth: true });
       setShowCreateModal(false);
       setCreateForm({
         name: '',
@@ -161,7 +146,13 @@ export default function AdminProductsPage() {
     if (!selectedProduct) return;
 
     try {
-      await api.put(`/products/${selectedProduct.id}`, editForm as unknown as Record<string, unknown>, { requireAuth: true });
+      // Only include unit_id if valid
+      const payload = { ...editForm };
+      if (!payload.unit_id || isNaN(Number(payload.unit_id))) {
+        delete payload.unit_id;
+      }
+      console.log('Payload for update:', payload);
+      await api.put(`/products/${selectedProduct.id}`, payload as unknown as Record<string, unknown>, { requireAuth: true });
       setShowEditModal(false);
       setSelectedProduct(null);
       setEditForm({
@@ -215,38 +206,6 @@ export default function AdminProductsPage() {
       unit_id: product.unit_id ?? undefined,
     });
     setShowEditModal(true);
-    setLoadingDiscounts(true);
-    try {
-      const res = await api.get<Discount[]>(`/products/${product.id}/discounts`, { requireAuth: true });
-      setDiscounts(res);
-    } catch {
-      setDiscounts([]);
-    } finally {
-      setLoadingDiscounts(false);
-    }
-  };
-
-  // 3. Add handlers for create, update, delete discount
-  const handleCreateDiscount = async () => {
-    try {
-      const res = await api.post<Discount, typeof newDiscount>(`/products/${selectedProduct?.id}/discounts`, newDiscount, { requireAuth: true });
-      setDiscounts((prev) => [res, ...prev]);
-      setNewDiscount({ price: '', is_active: true, valid_from: '', valid_to: '' });
-    } catch {}
-  };
-  const handleUpdateDiscount = async () => {
-    if (!editingDiscount) return;
-    try {
-      const res = await api.put<Discount, typeof editingDiscount>(`/products/discounts/${editingDiscount.id}`, editingDiscount, { requireAuth: true });
-      setDiscounts((prev) => prev.map((d) => d.id === res.id ? res : d));
-      setEditingDiscount(null);
-    } catch {}
-  };
-  const handleDeleteDiscount = async (id: string | number) => {
-    try {
-      await api.delete(`/products/discounts/${id}`, { requireAuth: true });
-      setDiscounts((prev) => prev.filter((d) => d.id !== Number(id)));
-    } catch {}
   };
 
   const openDeleteModal = (product: Product) => {
@@ -380,114 +339,152 @@ export default function AdminProductsPage() {
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
           <div className="relative top-20 mx-auto p-5 border w-full max-w-3xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Crear Nuevo Producto</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Nombre</label>
-                  <input
-                    type="text"
-                    value={createForm.name}
-                    onChange={(e) => setCreateForm({...createForm, name: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Descripción</label>
-                  <textarea
-                    value={createForm.description}
-                    onChange={(e) => setCreateForm({...createForm, description: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Precio</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={createForm.price}
-                    onChange={(e) => setCreateForm({...createForm, price: parseFloat(e.target.value) || 0})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Stock</label>
-                  <input
-                    type="number"
-                    value={createForm.stock}
-                    onChange={(e) => setCreateForm({...createForm, stock: parseInt(e.target.value) || 0})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Categorías</label>
-                  <div className="mt-2 space-y-2">
-                    {availableCategories.map((category) => (
-                      <label key={category} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={createForm.categoryIds.includes(category)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setCreateForm({
-                                ...createForm,
-                                categoryIds: [...createForm.categoryIds, category]
-                              });
-                            } else {
-                              setCreateForm({
-                                ...createForm,
-                                categoryIds: createForm.categoryIds.filter(c => c !== category)
-                              });
-                            }
-                          }}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <span className="ml-2 text-sm text-gray-700">{category}</span>
-                      </label>
-                    ))}
+              <h3 className="text-lg font-medium text-center text-gray-900 mb-4">Agregar nuevo producto</h3>
+              <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Column */}
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre de Producto</label>
+                    <input
+                      type="text"
+                      placeholder="Nombre de Producto"
+                      value={createForm.name}
+                      onChange={(e) => setCreateForm({...createForm, name: e.target.value})}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Descripción</label>
+                    <input
+                      type="text"
+                      placeholder="Descripción de Producto"
+                      value={createForm.description}
+                      onChange={(e) => setCreateForm({...createForm, description: e.target.value})}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Puntos</label>
+                    <input
+                      type="number"
+                      placeholder="Puntaje por comprar este producto"
+                      value={createForm.points || ''}
+                      onChange={(e) => setCreateForm({...createForm, points: parseInt(e.target.value) || 0})}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                    />
                   </div>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Estado</label>
-                  <select
-                    value={createForm.status || 'active'}
-                    onChange={e => setCreateForm({ ...createForm, status: e.target.value })}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    {statusOptions.map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
+                {/* Right Column */}
+                <div className="flex flex-col gap-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Stock</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={createForm.stock}
+                        onChange={(e) => setCreateForm({...createForm, stock: parseInt(e.target.value) || 0})}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Iva</label>
+                      <input
+                        type="text"
+                        placeholder="2%"
+                        value={createForm.iva || ''}
+                        onChange={(e) => setCreateForm({...createForm, iva: e.target.value})}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Precio de Lista</label>
+                      <input
+                        type="number"
+                        placeholder="$1234"
+                        value={createForm.price}
+                        onChange={(e) => setCreateForm({...createForm, price: parseFloat(e.target.value) || 0})}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Precio Mayorista</label>
+                      <input
+                        type="number"
+                        placeholder="$123"
+                        value={createForm.wholesale_price || ''}
+                        onChange={e => setCreateForm({ ...createForm, wholesale_price: parseFloat(e.target.value) || 0 })}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">ID</label>
+                      <input
+                        type="text"
+                        placeholder="123456"
+                        value={createForm.id || ''}
+                        onChange={e => setCreateForm({ ...createForm, id: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">SKU</label>
+                      <input
+                        type="text"
+                        placeholder="123456"
+                        value={createForm.sku || ''}
+                        onChange={e => setCreateForm({ ...createForm, sku: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">LOTE</label>
+                      <input
+                        type="text"
+                        placeholder="123456"
+                        value={createForm.lote || ''}
+                        onChange={e => setCreateForm({ ...createForm, lote: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Categoría</label>
+                    <select
+                      value={createForm.categoryIds[0] || ''}
+                      onChange={e => setCreateForm({ ...createForm, categoryIds: [e.target.value] })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                    >
+                      <option value="">Seleccionar categoría</option>
+                      {availableCategories.map(category => (
+                        <option key={category} value={category}>{category}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Unidad</label>
-                  <select
-                    value={createForm.unit_id || ''}
-                    onChange={e => setCreateForm({ ...createForm, unit_id: parseInt(e.target.value) })}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                {/* Buttons */}
+                <div className="col-span-1 md:col-span-2 flex justify-end gap-4 mt-8">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateModal(false)}
+                    className="px-6 py-2 border border-black rounded-full text-black bg-white hover:bg-gray-100 font-semibold cursor-pointer"
                   >
-                    <option value="">Seleccionar unidad</option>
-                    {availableUnits.map(unit => (
-                      <option key={unit.id} value={String(unit.id)}>{unit.name}</option>
-                    ))}
-                  </select>
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCreateProduct}
+                    className="px-6 py-2 rounded-full text-white bg-black hover:bg-gray-900 font-semibold cursor-pointer"
+                  >
+                    Subir Producto
+                  </button>
                 </div>
-              </div>
-              <div className="flex justify-end space-x-3 mt-6">
-                <button
-                  onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 cursor-pointer"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleCreateProduct}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"
-                >
-                  Crear
-                </button>
-              </div>
+              </form>
             </div>
           </div>
         </div>
@@ -498,174 +495,152 @@ export default function AdminProductsPage() {
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
           <div className="relative top-20 mx-auto p-5 border w-full max-w-3xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Editar Producto</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Nombre</label>
-                  <input
-                    type="text"
-                    value={editForm.name}
-                    onChange={(e) => setEditForm({...editForm, name: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Descripción</label>
-                  <textarea
-                    value={editForm.description}
-                    onChange={(e) => setEditForm({...editForm, description: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    rows={3}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Stock</label>
-                  <input
-                    type="number"
-                    value={editForm.stock}
-                    onChange={(e) => setEditForm({...editForm, stock: parseInt(e.target.value) || 0})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Categorías</label>
-                  <div className="mt-2 space-y-2">
-                    {availableCategories.map((category) => (
-                      <label key={category} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={editForm.categoryIds?.map(String).includes(String(category))}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setEditForm({
-                                ...editForm,
-                                categoryIds: [...(editForm.categoryIds || []), category]
-                              });
-                            } else {
-                              setEditForm({
-                                ...editForm,
-                                categoryIds: (editForm.categoryIds || []).filter(c => String(c) !== String(category))
-                              });
-                            }
-                          }}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <span className="ml-2 text-sm text-gray-700">{category}</span>
-                      </label>
-                    ))}
+              <h3 className="text-lg font-medium text-center text-gray-900 mb-4">Editar producto</h3>
+              <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Column */}
+                <div className="flex flex-col gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre de Producto</label>
+                    <input
+                      type="text"
+                      placeholder="Nombre de Producto"
+                      value={editForm.name}
+                      onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Descripción</label>
+                    <input
+                      type="text"
+                      placeholder="Descripción de Producto"
+                      value={editForm.description}
+                      onChange={(e) => setEditForm({...editForm, description: e.target.value})}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Puntos</label>
+                    <input
+                      type="number"
+                      placeholder="Puntaje por comprar este producto"
+                      value={editForm.points || ''}
+                      onChange={(e) => setEditForm({...editForm, points: parseInt(e.target.value) || 0})}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                    />
                   </div>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Estado</label>
-                  <select
-                    value={editForm.status || 'active'}
-                    onChange={e => setEditForm({ ...editForm, status: e.target.value })}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                {/* Right Column */}
+                <div className="flex flex-col gap-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Stock</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={editForm.stock}
+                        onChange={(e) => setEditForm({...editForm, stock: parseInt(e.target.value) || 0})}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Iva</label>
+                      <input
+                        type="text"
+                        placeholder="2%"
+                        value={editForm.iva || ''}
+                        onChange={(e) => setEditForm({...editForm, iva: e.target.value})}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Precio de Lista</label>
+                      <input
+                        type="number"
+                        placeholder="$1234"
+                        value={editForm.price}
+                        onChange={(e) => setEditForm({...editForm, price: parseFloat(e.target.value) || 0})}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Precio Mayorista</label>
+                      <input
+                        type="number"
+                        placeholder="$123"
+                        value={editForm.wholesale_price || ''}
+                        onChange={e => setEditForm({ ...editForm, wholesale_price: parseFloat(e.target.value) || 0 })}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">ID</label>
+                      <input
+                        type="text"
+                        placeholder="123456"
+                        value={editForm.id || ''}
+                        onChange={e => setEditForm({ ...editForm, id: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">SKU</label>
+                      <input
+                        type="text"
+                        placeholder="123456"
+                        value={editForm.sku || ''}
+                        onChange={e => setEditForm({ ...editForm, sku: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">LOTE</label>
+                      <input
+                        type="text"
+                        placeholder="123456"
+                        value={editForm.lote || ''}
+                        onChange={e => setEditForm({ ...editForm, lote: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Categoría</label>
+                    <select
+                      value={editForm.categoryIds && editForm.categoryIds[0] ? editForm.categoryIds[0] : ''}
+                      onChange={e => setEditForm({ ...editForm, categoryIds: [e.target.value] })}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                    >
+                      <option value="">Seleccionar categoría</option>
+                      {availableCategories.map(category => (
+                        <option key={category} value={category}>{category}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                {/* Buttons */}
+                <div className="col-span-1 md:col-span-2 flex justify-end gap-4 mt-8">
+                  <button
+                    type="button"
+                    onClick={() => setShowEditModal(false)}
+                    className="px-6 py-2 border border-black rounded-full text-black bg-white hover:bg-gray-100 font-semibold cursor-pointer"
                   >
-                    {statusOptions.map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Unidad</label>
-                  <select
-                    value={editForm.unit_id ? String(editForm.unit_id) : ''}
-                    onChange={e => setEditForm({ ...editForm, unit_id: e.target.value ? parseInt(e.target.value) : undefined })}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleEditProduct}
+                    className="px-6 py-2 rounded-full text-white bg-black hover:bg-gray-900 font-semibold cursor-pointer"
                   >
-                    <option value="">Seleccionar unidad</option>
-                    {availableUnits.map(unit => (
-                      <option key={unit.id} value={String(unit.id)}>{unit.name}</option>
-                    ))}
-                  </select>
+                    Subir Producto
+                  </button>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Precio</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={editForm.price}
-                    onChange={(e) => setEditForm({...editForm, price: parseFloat(e.target.value) || 0})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Precio Mayorista</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={editForm.wholesale_price || ''}
-                    onChange={e => setEditForm({ ...editForm, wholesale_price: parseFloat(e.target.value) || 0 })}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-
-                {/* Descuentos Section */}
-                <div className="mt-8">
-                  <h4 className="text-md font-semibold mb-2">Descuentos</h4>
-                  {loadingDiscounts ? (
-                    <div>Cargando descuentos...</div>
-                  ) : (
-                    <>
-                      <ul className="mb-4">
-                        {discounts.map(discount => (
-                          <li key={discount.id} className="flex items-center gap-2 mb-2">
-                            <span className="text-sm">Precio: ${discount.price} | Activo: {discount.is_active ? 'Sí' : 'No'} | Desde: {discount.valid_from ? discount.valid_from.split('T')[0] : '-'} | Hasta: {discount.valid_to ? discount.valid_to.split('T')[0] : '-'}</span>
-                            <button onClick={() => setEditingDiscount(discount)} className="text-blue-600 text-xs">Editar</button>
-                            <button onClick={() => handleDeleteDiscount(String(discount.id))} className="text-red-600 text-xs">Eliminar</button>
-                          </li>
-                        ))}
-                      </ul>
-                      {/* New Discount Form */}
-                      <div className="mb-4 p-2 border rounded">
-                        <div className="flex flex-col gap-2">
-                          <input type="number" placeholder="Precio" value={newDiscount.price} onChange={e => setNewDiscount(nd => ({ ...nd, price: e.target.value }))} className="border rounded px-2 py-1" />
-                          <label className="flex items-center gap-2">
-                            <input type="checkbox" checked={newDiscount.is_active} onChange={e => setNewDiscount(nd => ({ ...nd, is_active: e.target.checked }))} /> Activo
-                          </label>
-                          <input type="date" value={newDiscount.valid_from} onChange={e => setNewDiscount(nd => ({ ...nd, valid_from: e.target.value }))} className="border rounded px-2 py-1" />
-                          <input type="date" value={newDiscount.valid_to} onChange={e => setNewDiscount(nd => ({ ...nd, valid_to: e.target.value }))} className="border rounded px-2 py-1" />
-                          <button onClick={handleCreateDiscount} className="bg-green-600 text-white rounded px-3 py-1 mt-2">Agregar Descuento</button>
-                        </div>
-                      </div>
-                      {/* Edit Discount Form */}
-                      {editingDiscount && (
-                        <div className="mb-4 p-2 border rounded bg-gray-50">
-                          <div className="flex flex-col gap-2">
-                            <input type="number" placeholder="Precio" value={editingDiscount.price} onChange={e => setEditingDiscount(ed => ed ? { ...ed, price: Number(e.target.value) } : ed)} className="border rounded px-2 py-1" />
-                            <label className="flex items-center gap-2">
-                              <input type="checkbox" checked={editingDiscount.is_active} onChange={e => setEditingDiscount(ed => ed ? { ...ed, is_active: e.target.checked } : ed)} /> Activo
-                            </label>
-                            <input type="date" value={editingDiscount.valid_from || ''} onChange={e => setEditingDiscount(ed => ed ? { ...ed, valid_from: e.target.value } : ed)} className="border rounded px-2 py-1" />
-                            <input type="date" value={editingDiscount.valid_to || ''} onChange={e => setEditingDiscount(ed => ed ? { ...ed, valid_to: e.target.value } : ed)} className="border rounded px-2 py-1" />
-                            <div className="flex gap-2 mt-2">
-                              <button onClick={handleUpdateDiscount} className="bg-blue-600 text-white rounded px-3 py-1">Guardar</button>
-                              <button onClick={() => setEditingDiscount(null)} className="bg-gray-300 text-gray-800 rounded px-3 py-1">Cancelar</button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-              <div className="flex justify-end space-x-3 mt-6">
-                <button
-                  onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 cursor-pointer"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleEditProduct}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"
-                >
-                  Actualizar
-                </button>
-              </div>
+              </form>
             </div>
           </div>
         </div>
