@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Home, Users, Boxes, Settings, LogOut } from 'lucide-react';
+import Image from 'next/image';
 
 const sidebarOptions = [
   { name: 'Dashboard', path: '/admin/dashboard', icon: <Home className="w-5 h-5 text-gray-400" /> },
@@ -64,36 +65,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // Render admin layout
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Top Navigation Bar */}
-      {/* <nav className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <h1 className="text-xl font-bold text-gray-900">Shingari Admin</h1>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-700">
-                Bienvenido, {user.email}
-              </span>
-              <button
-                onClick={handleLogout}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                Cerrar Sesión
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav> */}
-
       <div className="flex">
         {/* Sidebar */}
         <aside className="w-64 bg-white shadow-sm border-r border-gray-200 min-h-screen flex flex-col justify-between">
           <nav className="mt-8 flex-1 flex flex-col justify-between">
             <div className="px-4">
               <ul className="space-y-2">
+                <li>
+                  <Link href="/">
+                    <div className="flex items-center px-4 py-3 text-sm font-medium rounded-md transition-colors">
+                      <span className="mr-3">
+                        {/* <Image src="/admin_logo.png" alt="Shingari Logo" width={100} height={100} /> */}
+                        <h2>Shingari</h2>
+                      </span>
+                    </div>
+                  </Link>
+                </li>
+
                 {sidebarOptions.map(option => (
                   <li key={option.path}>
                     <Link href={option.path} legacyBehavior>

@@ -218,11 +218,6 @@ export class ProductsService {
 
   async findAllForAdmin(): Promise<ProductResponseDto[]> {
     const productsData = await this.prisma.products.findMany({
-      where: {
-        status: {
-          not: 'deleted',
-        },
-      },
       orderBy: {
         created_at: 'desc',
       },
