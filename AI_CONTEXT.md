@@ -33,7 +33,7 @@ Aplicación construida con NestJS. **Todas las rutas de la API del backend está
             -   Endpoint `POST /auth/assign-role`: Asigna un rol específico a un usuario autenticado.
             -   Los roles se almacenan en la tabla `user_roles` y se actualizan en los metadatos del usuario.
             -   Manejo automático de roles duplicados y creación de roles si no existen.
-            -   **Redirección basada en roles**: 
+            -   **Redirección basada en roles**:
                 -   Usuarios con rol 'consumer' (Consumidor Final) son redirigidos a `/dashboard`
                 -   Usuarios con rol 'business' (Empresa) son redirigidos a `/complete-profile`
         -   **Funcionalidad de Perfil Completo**: Sistema para completar información empresarial de usuarios.
@@ -171,6 +171,7 @@ Aplicación construida con Next.js.
     -   **Descuentos Personalizados**: Sistema de descuentos específicos por usuario con fechas de validez.
     -   **Filtros y Paginación**: Soporte para filtrado por categorías, búsqueda por nombre, ordenamiento por precio y paginación.
 -   **Testing**: Ambos proyectos tienen configuraciones de Jest. El backend tiene tests unitarios para servicios y tests e2e. El frontend tiene tests para componentes.
+- **Endpoints**: Se pueden encontrar los endpoints disponibles para dev en http://localhost:3001/api-docs
 
 ## Cómo Mantener Actualizado este Archivo
 
@@ -182,4 +183,4 @@ Aplicación construida con Next.js.
 
 *Este archivo fue generado y actualizado el 2025-01-03 22:30:00.*
 
-*Por favor, actualiza la fecha y cualquier información relevante cuando hagas cambios significativos.* 
+*Por favor, actualiza la fecha y cualquier información relevante cuando hagas cambios significativos.*

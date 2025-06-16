@@ -151,4 +151,26 @@ export class UserController {
   async deleteUser(@Param('id') id: string) {
     return this.userService.deleteUser(id);
   }
+
+  @Get('admin/:id/orders')
+  @UseGuards(AdminGuard)
+  @ApiOperation({ summary: 'Get order history for a user (Admin only)' })
+  @ApiParam({ name: 'id', description: 'User ID' })
+  @ApiResponse({ status: 200, description: 'Order history retrieved successfully.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required.' })
+  async getUserOrders(@Param('id') id: string) {
+    return this.userService.getUserOrders(id);
+  }
+
+  @Get('admin/:id/special-prices')
+  @UseGuards(AdminGuard)
+  @ApiOperation({ summary: 'Get special prices for a user (Admin only)' })
+  @ApiParam({ name: 'id', description: 'User ID' })
+  @ApiResponse({ status: 200, description: 'Special prices retrieved successfully.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required.' })
+  async getUserSpecialPrices(@Param('id') id: string) {
+    return this.userService.getUserSpecialPrices(id);
+  }
 } 

@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
+import { public_users } from '../../../generated/prisma/index';
 
 @Injectable()
 export class UserService {
@@ -68,22 +69,34 @@ export class UserService {
               roles: true,
             },
           },
+          users: true,
         },
         orderBy: {
           created_at: 'desc',
         },
       });
 
-      return users.map(user => ({
-        id: user.id,
-        email: user.email,
-        created_at: user.created_at,
-        updated_at: user.updated_at,
-        email_confirmed_at: user.email_confirmed_at,
-        last_sign_in_at: user.last_sign_in_at,
-        roles: user.user_roles.map(ur => ur.roles.name),
-        meta_data: user.raw_user_meta_data,
-      }));
+      return users.map((user) => {
+        const publicProfile = user.users?.[0] || {};
+        return {
+          id: user.id,
+          email: user.email,
+          created_at: user.created_at,
+          updated_at: user.updated_at,
+          email_confirmed_at: user.email_confirmed_at,
+          last_sign_in_at: user.last_sign_in_at,
+          roles: user.user_roles.map((ur) => ur.roles.name),
+          meta_data: user.raw_user_meta_data,
+          first_name: publicProfile.first_name,
+          last_name: publicProfile.last_name,
+          trade_name: publicProfile.trade_name,
+          city: publicProfile.city,
+          province: publicProfile.province,
+          country: publicProfile.country,
+          phone: publicProfile.phone,
+          profile_is_complete: publicProfile.profile_is_complete,
+        };
+      });
     } catch (error) {
       throw new Error(`Failed to fetch users: ${error.message}`);
     }
@@ -106,12 +119,15 @@ export class UserService {
               roles: true,
             },
           },
+          users: true,
         },
       });
 
       if (!user) {
         throw new NotFoundException('User not found');
       }
+
+      const publicProfile = user.users?.[0] || {};
 
       return {
         id: user.id,
@@ -120,8 +136,17 @@ export class UserService {
         updated_at: user.updated_at,
         email_confirmed_at: user.email_confirmed_at,
         last_sign_in_at: user.last_sign_in_at,
-        roles: user.user_roles.map(ur => ur.roles.name),
+        roles: user.user_roles.map((ur) => ur.roles.name),
         meta_data: user.raw_user_meta_data,
+        first_name: publicProfile.first_name,
+        last_name: publicProfile.last_name,
+        trade_name: publicProfile.trade_name,
+        city: publicProfile.city,
+        province: publicProfile.province,
+        country: publicProfile.country,
+        phone: publicProfile.phone,
+        profile_is_complete: publicProfile.profile_is_complete,
+        public_profile: publicProfile,
       };
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -241,6 +266,38 @@ export class UserService {
     } catch (error) {
       throw new Error(`Failed to assign roles: ${error.message}`);
     }
+  }
+
+  // Get order history for a user (mock data for now)
+  async getUserOrders(userId: string) {
+    // TODO: Replace with real order data if available
+    return [
+      { id: '123456', date: '2024-07-15', total: '$250.00' },
+      { id: '123456', date: '2024-07-01', total: '$180.00' },
+      { id: '123456', date: '2024-06-15', total: '$320.00' },
+      { id: '123456', date: '2024-06-01', total: '$200.00' },
+      { id: '123456', date: '2024-05-15', total: '$150.00' },
+    ];
+  }
+
+  // Get special prices for a user
+  async getUserSpecialPrices(userId: string) {
+    const discounts = await this.prismaService.products_discounts.findMany({
+      where: {
+        user_id: userId,
+        is_active: true,
+      },
+      include: {
+        products: {
+          select: { name: true, list_price: true },
+        },
+      },
+    });
+    return discounts.map((d) => ({
+      product: d.products?.name || '',
+      priceRetail: d.products?.list_price?.toString() || '',
+      priceClient: d.price?.toString() || '',
+    }));
   }
 }
 
