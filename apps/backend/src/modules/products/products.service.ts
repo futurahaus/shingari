@@ -165,6 +165,30 @@ export class ProductsService {
         };
     }
 
+    async findAllForAdmin(): Promise<ProductResponseDto[]> {
+        const productsData = await this.prisma.products.findMany({
+            orderBy: {
+                created_at: 'desc',
+            },
+            include: {
+                products_categories: {
+                    include: {
+                        categories: true,
+                    },
+                },
+                product_images: {
+                    include: {
+                        products: true,
+                    },
+                },
+            },
+        });
+
+        return Promise.all(
+            productsData.map(p => this.mapToProductResponseDto(p as ProductWithCategoriesForResponse))
+        );
+    }
+
     async findOne(id: number, userId?: string): Promise<ProductResponseDto> {
         const product = await this.prisma.products.findUnique({
             where: {
@@ -193,21 +217,244 @@ export class ProductsService {
     }
 
     async create(createProductDto: CreateProductDto): Promise<ProductResponseDto> {
-        // Placeholder - Implementar con Prisma si es necesario
-        console.log('create called with', createProductDto);
-        throw new BadRequestException('Implementar create en ProductsService');
+        const { name, description, price, stock, categoryIds } = createProductDto;
+
+        // Create the product
+        const product = await this.prisma.products.create({
+            data: {
+                name,
+                description,
+                list_price: new Prisma.Decimal(price),
+                wholesale_price: null, // Will be set later if needed
+                sku: '', // Will be generated or set later
+                status: product_states.active,
+            },
+            include: {
+                products_categories: {
+                    include: {
+                        categories: true,
+                    },
+                },
+                product_images: {
+                    include: {
+                        products: true,
+                    },
+                },
+            },
+        });
+
+        // Create category relationships if categories are provided
+        if (categoryIds && categoryIds.length > 0) {
+            for (const categoryName of categoryIds) {
+                // Find or create category
+                let category = await this.prisma.categories.findUnique({
+                    where: { name: categoryName },
+                });
+
+                if (!category) {
+                    category = await this.prisma.categories.create({
+                        data: { name: categoryName },
+                    });
+                }
+
+                // Create product-category relationship
+                await this.prisma.products_categories.create({
+                    data: {
+                        product_id: product.id,
+                        category_id: category.id,
+                    },
+                });
+            }
+        }
+
+        // Create stock entry if provided
+        if (stock && stock > 0) {
+            // First, get or create a default unit
+            let unit = await this.prisma.units.findFirst({
+                where: { code: 'PCS' }, // Default unit code
+            });
+
+            if (!unit) {
+                unit = await this.prisma.units.create({
+                    data: {
+                        code: 'PCS',
+                        name: 'Pieces',
+                        description: 'Individual pieces',
+                    },
+                });
+            }
+
+            await this.prisma.products_stock.create({
+                data: {
+                    product_id: product.id,
+                    quantity: new Prisma.Decimal(stock),
+                    unit_id: unit.id,
+                },
+            });
+        }
+
+        // Fetch the complete product with relationships
+        const completeProduct = await this.prisma.products.findUnique({
+            where: { id: product.id },
+            include: {
+                products_categories: {
+                    include: {
+                        categories: true,
+                    },
+                },
+                product_images: {
+                    include: {
+                        products: true,
+                    },
+                },
+            },
+        });
+
+        return this.mapToProductResponseDto(completeProduct as ProductWithCategoriesForResponse);
     }
 
     async update(id: string, updateProductDto: UpdateProductDto): Promise<ProductResponseDto> {
-        // Placeholder - Implementar con Prisma si es necesario
-        console.log('update called for id:', id, 'with data:', updateProductDto);
-        throw new BadRequestException('Implementar update en ProductsService');
+        const productId = parseInt(id);
+        const { name, description, price, stock, categoryIds } = updateProductDto;
+
+        // Check if product exists
+        const existingProduct = await this.prisma.products.findUnique({
+            where: { id: productId },
+        });
+
+        if (!existingProduct) {
+            throw new NotFoundException(`Producto con ID "${id}" no encontrado.`);
+        }
+
+        // Update the product
+        const updatedProduct = await this.prisma.products.update({
+            where: { id: productId },
+            data: {
+                name,
+                description,
+                list_price: price ? new Prisma.Decimal(price) : undefined,
+            },
+            include: {
+                products_categories: {
+                    include: {
+                        categories: true,
+                    },
+                },
+                product_images: {
+                    include: {
+                        products: true,
+                    },
+                },
+            },
+        });
+
+        // Update categories if provided
+        if (categoryIds !== undefined) {
+            // Remove existing category relationships
+            await this.prisma.products_categories.deleteMany({
+                where: { product_id: productId },
+            });
+
+            // Create new category relationships
+            if (categoryIds.length > 0) {
+                for (const categoryName of categoryIds) {
+                    // Find or create category
+                    let category = await this.prisma.categories.findUnique({
+                        where: { name: categoryName },
+                    });
+
+                    if (!category) {
+                        category = await this.prisma.categories.create({
+                            data: { name: categoryName },
+                        });
+                    }
+
+                    // Create product-category relationship
+                    await this.prisma.products_categories.create({
+                        data: {
+                            product_id: productId,
+                            category_id: category.id,
+                        },
+                    });
+                }
+            }
+        }
+
+        // Update stock if provided
+        if (stock !== undefined) {
+            // Get or create a default unit
+            let unit = await this.prisma.units.findFirst({
+                where: { code: 'PCS' },
+            });
+
+            if (!unit) {
+                unit = await this.prisma.units.create({
+                    data: {
+                        code: 'PCS',
+                        name: 'Pieces',
+                        description: 'Individual pieces',
+                    },
+                });
+            }
+
+            // Update or create stock entry
+            const existingStock = await this.prisma.products_stock.findFirst({
+                where: { product_id: productId },
+            });
+
+            if (existingStock) {
+                await this.prisma.products_stock.update({
+                    where: { id: existingStock.id },
+                    data: { quantity: new Prisma.Decimal(stock) },
+                });
+            } else if (stock > 0) {
+                await this.prisma.products_stock.create({
+                    data: {
+                        product_id: productId,
+                        quantity: new Prisma.Decimal(stock),
+                        unit_id: unit.id,
+                    },
+                });
+            }
+        }
+
+        // Fetch the complete updated product
+        const completeProduct = await this.prisma.products.findUnique({
+            where: { id: productId },
+            include: {
+                products_categories: {
+                    include: {
+                        categories: true,
+                    },
+                },
+                product_images: {
+                    include: {
+                        products: true,
+                    },
+                },
+            },
+        });
+
+        return this.mapToProductResponseDto(completeProduct as ProductWithCategoriesForResponse);
     }
 
     async removeLogical(id: string): Promise<void> {
-        // Placeholder - Implementar con Prisma si es necesario
-        console.log('removeLogical called for id:', id);
-        return;
+        const productId = parseInt(id);
+
+        // Check if product exists
+        const existingProduct = await this.prisma.products.findUnique({
+            where: { id: productId },
+        });
+
+        if (!existingProduct) {
+            throw new NotFoundException(`Producto con ID "${id}" no encontrado.`);
+        }
+
+        // Update status to deleted (logical deletion)
+        await this.prisma.products.update({
+            where: { id: productId },
+            data: { status: product_states.deleted },
+        });
     }
 
     async findDiscountsForUser(userId: string, productId?: number): Promise<ProductDiscountResponseDto[]> {

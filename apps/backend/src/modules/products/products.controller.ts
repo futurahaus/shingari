@@ -47,6 +47,17 @@ export class ProductsController {
   }
 
   // --- Admin Endpoints --- 
+  @Get('admin/all')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obtener todos los productos (Solo Admin)' })
+  @ApiResponse({ status: 200, description: 'Lista de todos los productos obtenida exitosamente.' })
+  @ApiResponse({ status: 401, description: 'No autorizado.' })
+  @ApiResponse({ status: 403, description: 'Prohibido - Se requiere acceso de administrador.' })
+  async findAllForAdmin(): Promise<ProductResponseDto[]> {
+    return this.productsService.findAllForAdmin();
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard, AdminGuard) // Requiere autenticación y rol de administrador
   @ApiBearerAuth()
