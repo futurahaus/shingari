@@ -216,7 +216,7 @@ export default function AdminUsersPage() {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
         >
           Crear Usuario
         </button>
@@ -318,13 +318,13 @@ export default function AdminUsersPage() {
                           <div className="flex space-x-2">
                             <button
                               onClick={() => openEditModal(user)}
-                              className="text-blue-600 hover:text-blue-900"
+                              className="bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium py-2 px-3 rounded-lg text-sm transition duration-200 cursor-pointer"
                             >
                               Editar
                             </button>
                             <button
                               onClick={() => openDeleteModal(user)}
-                              className="text-red-600 hover:text-red-900"
+                              className="bg-red-100 hover:bg-red-200 text-red-800 font-medium py-2 px-3 rounded-lg text-sm transition duration-200 cursor-pointer"
                             >
                               Eliminar
                             </button>
@@ -332,7 +332,7 @@ export default function AdminUsersPage() {
                               <button
                                 onClick={() => removeAdminRole(user.id)}
                                 disabled={isAssigning}
-                                className="text-orange-600 hover:text-orange-900 disabled:opacity-50"
+                                className="bg-orange-100 hover:bg-orange-200 text-orange-800 font-medium py-2 px-3 rounded-lg text-sm transition duration-200 cursor-pointer"
                               >
                                 {isAssigning ? 'Removiendo...' : 'Remover Admin'}
                               </button>
@@ -340,7 +340,7 @@ export default function AdminUsersPage() {
                               <button
                                 onClick={() => assignAdminRole(user.id)}
                                 disabled={isAssigning}
-                                className="text-green-600 hover:text-green-900 disabled:opacity-50"
+                                className="bg-green-100 hover:bg-green-200 text-green-800 font-medium py-2 px-3 rounded-lg text-sm transition duration-200 cursor-pointer"
                               >
                                 {isAssigning ? 'Asignando...' : 'Hacer Admin'}
                               </button>
@@ -403,13 +403,13 @@ export default function AdminUsersPage() {
             <div className="flex justify-end space-x-2 mt-6">
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 cursor-pointer"
               >
                 Cancelar
               </button>
               <button
                 onClick={handleCreateUser}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer"
               >
                 Crear
               </button>

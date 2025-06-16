@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { FaSearch, FaShoppingCart, FaUser } from 'react-icons/fa';
+import { FaSearch, FaShoppingCart, FaUser, FaCog } from 'react-icons/fa';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import LoginModal from '@/components/auth/LoginModal';
@@ -54,6 +54,12 @@ export default function SearchHeader() {
                     <FaUser className="h-4 w-4" />
                     <span>{user.email}</span>
                   </Link>
+
+                  {user.roles?.includes('admin') && (
+                      <Link href="/admin/dashboard" className="ml-2 text-gray-500 hover:text-red-600" title="Admin Dashboard">
+                        <FaCog className="h-4 w-4" />
+                      </Link>
+                    )}
                   <button
                     onClick={handleLogout}
                     disabled={isLoggingOut}

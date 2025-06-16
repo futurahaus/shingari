@@ -291,8 +291,8 @@ export default function AdminProductsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
       </div>
     );
   }
@@ -304,7 +304,7 @@ export default function AdminProductsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Administrar Productos</h1>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 flex items-center gap-2"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 flex items-center gap-2 cursor-pointer"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -372,13 +372,13 @@ export default function AdminProductsPage() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => openEditModal(product)}
-                        className="bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium py-2 px-3 rounded-lg text-sm transition duration-200"
+                        className="bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium py-2 px-3 rounded-lg text-sm transition duration-200 cursor-pointer"
                       >
                         Editar
                       </button>
                       <button
                         onClick={() => openDeleteModal(product)}
-                        className="bg-red-100 hover:bg-red-200 text-red-800 font-medium py-2 px-3 rounded-lg text-sm transition duration-200"
+                        className="bg-red-100 hover:bg-red-200 text-red-800 font-medium py-2 px-3 rounded-lg text-sm transition duration-200 cursor-pointer"
                       >
                         Eliminar
                       </button>
@@ -527,13 +527,13 @@ export default function AdminProductsPage() {
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleCreateProduct}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"
                 >
                   Crear
                 </button>
@@ -720,13 +720,13 @@ export default function AdminProductsPage() {
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleEditProduct}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"
                 >
                   Actualizar
                 </button>
@@ -756,13 +756,13 @@ export default function AdminProductsPage() {
                 <div className="flex justify-center space-x-3 mt-6">
                   <button
                     onClick={() => setShowDeleteModal(false)}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 cursor-pointer"
                   >
                     Cancelar
                   </button>
                   <button
                     onClick={handleDeleteProduct}
-                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 cursor-pointer"
                   >
                     Eliminar
                   </button>

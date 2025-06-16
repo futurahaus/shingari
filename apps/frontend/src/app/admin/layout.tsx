@@ -5,12 +5,13 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Home, Users, Boxes, Settings, LogOut } from 'lucide-react';
 
 const sidebarOptions = [
-  { name: 'Dashboard', path: '/admin/dashboard', icon: '/dashboard_icon.png' },
-  { name: 'Usuarios', path: '/admin/usuarios', icon: '/users_icon.png' },
-  { name: 'Productos', path: '/admin/productos', icon: '/products_icon.png' },
-  { name: 'Configuración', path: '/admin/setup', icon: '/settings_icon.png' },
+  { name: 'Dashboard', path: '/admin/dashboard', icon: <Home className="w-5 h-5 text-gray-400" /> },
+  { name: 'Usuarios', path: '/admin/usuarios', icon: <Users className="w-5 h-5 text-gray-400" /> },
+  { name: 'Productos', path: '/admin/productos', icon: <Boxes className="w-5 h-5 text-gray-400" /> },
+  { name: 'Configuración', path: '/admin/setup', icon: <Settings className="w-5 h-5 text-gray-400" /> },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -89,8 +90,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-64 bg-white shadow-sm border-r border-gray-200 min-h-screen">
-          <nav className="mt-8">
+        <aside className="w-64 bg-white shadow-sm border-r border-gray-200 min-h-screen flex flex-col justify-between">
+          <nav className="mt-8 flex-1 flex flex-col justify-between">
             <div className="px-4">
               <ul className="space-y-2">
                 {sidebarOptions.map(option => (
@@ -102,7 +103,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                           : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                       }`}>
                         <span className="mr-3">
-                          <img src={option.icon} alt={option.name + ' icon'} className="w-5 h-5" />
+                          {option.icon}
                         </span>
                         {option.name}
                       </a>
@@ -111,12 +112,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 ))}
               </ul>
             </div>
-            <button
+            <div className="px-4 mb-6">
+              <div className="mb-4">
+                <span className="block text-xs text-gray-400 mb-1">Bienvenido,</span>
+                <span className="block text-sm font-semibold text-gray-700">{user.email}</span>
+              </div>
+              <button
                 onClick={handleLogout}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                className="flex items-center w-full px-4 py-3 text-sm font-medium rounded-md transition-colors text-gray-600 hover:bg-red-50 hover:text-red-700"
               >
+                <span className="mr-3">
+                  <LogOut className="w-5 h-5 text-gray-400" />
+                </span>
                 Cerrar Sesión
               </button>
+            </div>
           </nav>
         </aside>
 
