@@ -38,9 +38,7 @@ export default function AdminUsersPage() {
       setLoading(true);
       setError(null);
       const response = await api.get('/user/admin/all', { requireAuth: true });
-      console.log('API Response:', response);
       const usersData = Array.isArray(response) ? response : [];
-      console.log('Users data to set:', usersData);
       setUsers(usersData);
     } catch (err: any) {
       setError('Error al cargar usuarios: ' + (err.message || 'Error desconocido'));
@@ -82,11 +80,6 @@ export default function AdminUsersPage() {
       </div>
     );
   }
-
-  console.log('Current users state:', users);
-  console.log('Users length:', users?.length);
-  console.log('Users type:', typeof users);
-  console.log('Is users array?', Array.isArray(users));
 
   return (
     <div className="p-8">

@@ -22,6 +22,7 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { UserProfileResponseDto } from './dto/user-profile-response.dto';
+import { UserDetailsResponse } from './user.service';
 
 @ApiTags('User Profile')
 @ApiBearerAuth()
@@ -85,9 +86,12 @@ export class UserController {
   @ApiParam({ name: 'id', description: 'User ID' })
   @ApiResponse({ status: 200, description: 'User retrieved successfully.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required.',
+  })
   @ApiResponse({ status: 404, description: 'User not found.' })
-  async getUserById(@Param('id') id: string) {
+  async getUserById(@Param('id') id: string): Promise<UserDetailsResponse> {
     return this.userService.getUserById(id);
   }
 
@@ -108,10 +112,13 @@ export class UserController {
   @ApiResponse({ status: 201, description: 'User created successfully.' })
   @ApiResponse({ status: 400, description: 'Invalid input data.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required.',
+  })
   async createUser(
     @Body() userData: { email: string; password: string; roles?: string[] },
-  ) {
+  ): Promise<UserDetailsResponse> {
     return this.userService.createUser(userData);
   }
 
@@ -131,12 +138,15 @@ export class UserController {
   @ApiResponse({ status: 200, description: 'User updated successfully.' })
   @ApiResponse({ status: 400, description: 'Invalid input data.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin access required.',
+  })
   @ApiResponse({ status: 404, description: 'User not found.' })
   async updateUser(
     @Param('id') id: string,
     @Body() userData: { email?: string; roles?: string[] },
-  ) {
+  ): Promise<UserDetailsResponse> {
     return this.userService.updateUser(id, userData);
   }
 

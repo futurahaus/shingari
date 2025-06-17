@@ -3,6 +3,49 @@ import { DatabaseService } from '../database/database.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 
+interface PublicUser {
+  first_name: string;
+  last_name: string;
+  trade_name: string;
+  city: string;
+  province: string;
+  country: string;
+  phone: string;
+  profile_is_complete: boolean;
+}
+
+interface AdminUser {
+  id: string;
+  email: string;
+  created_at: Date;
+  updated_at: Date;
+  email_confirmed_at: Date | null;
+  last_sign_in_at: Date | null;
+  raw_user_meta_data: any;
+  user_roles: { roles: { name: string } }[];
+  users: Partial<PublicUser>[];
+}
+
+export interface UserDetailsResponse {
+  id: string;
+  email: string;
+  created_at: Date;
+  updated_at: Date;
+  email_confirmed_at: Date | null;
+  last_sign_in_at: Date | null;
+  roles: string[];
+  meta_data: any;
+  first_name: string;
+  last_name: string;
+  trade_name: string;
+  city: string;
+  province: string;
+  country: string;
+  phone: string;
+  profile_is_complete: boolean;
+  public_profile: Partial<PublicUser>;
+}
+
 @Injectable()
 export class UserService {
   constructor(
@@ -104,7 +147,7 @@ export class UserService {
     }
   }
 
-  async getUserById(userId: string) {
+  async getUserById(userId: string): Promise<UserDetailsResponse> {
     try {
       const user = await this.prismaService.auth_users.findUnique({
         where: { id: userId },
@@ -123,13 +166,16 @@ export class UserService {
           },
           users: true,
         },
-      });
+      }) as AdminUser | null;
 
       if (!user) {
         throw new NotFoundException('User not found');
       }
 
-      const publicProfile = user.users?.[0] || {};
+      let publicProfile: Partial<PublicUser> = {};
+      if (user.users && Array.isArray(user.users) && user.users.length > 0 && typeof user.users[0] === 'object' && user.users[0] !== null) {
+        publicProfile = user.users[0] as Partial<PublicUser>;
+      }
 
       return {
         id: user.id,
@@ -138,23 +184,26 @@ export class UserService {
         updated_at: user.updated_at,
         email_confirmed_at: user.email_confirmed_at,
         last_sign_in_at: user.last_sign_in_at,
-        roles: user.user_roles.map((ur) => ur.roles.name),
+        roles: Array.isArray(user.user_roles) ? user.user_roles.map((ur) => ur.roles.name) : [],
         meta_data: user.raw_user_meta_data,
-        first_name: publicProfile.first_name,
-        last_name: publicProfile.last_name,
-        trade_name: publicProfile.trade_name,
-        city: publicProfile.city,
-        province: publicProfile.province,
-        country: publicProfile.country,
-        phone: publicProfile.phone,
-        profile_is_complete: publicProfile.profile_is_complete,
+        first_name: typeof publicProfile.first_name === 'string' ? publicProfile.first_name : '',
+        last_name: typeof publicProfile.last_name === 'string' ? publicProfile.last_name : '',
+        trade_name: typeof publicProfile.trade_name === 'string' ? publicProfile.trade_name : '',
+        city: typeof publicProfile.city === 'string' ? publicProfile.city : '',
+        province: typeof publicProfile.province === 'string' ? publicProfile.province : '',
+        country: typeof publicProfile.country === 'string' ? publicProfile.country : '',
+        phone: typeof publicProfile.phone === 'string' ? publicProfile.phone : '',
+        profile_is_complete: typeof publicProfile.profile_is_complete === 'boolean' ? publicProfile.profile_is_complete : false,
         public_profile: publicProfile,
       };
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new Error(`Failed to fetch user: ${error.message}`);
+      if (error instanceof Error) {
+        throw new Error(`Failed to fetch user: ${error.message}`);
+      }
+      throw new Error('Failed to fetch user: Unknown error');
     }
   }
 
@@ -162,7 +211,7 @@ export class UserService {
     email: string;
     password: string;
     roles?: string[];
-  }) {
+  }): Promise<UserDetailsResponse> {
     try {
       // First, create the user in Supabase auth
       const { data: authData, error: authError } = await this.supabaseService
@@ -191,7 +240,7 @@ export class UserService {
   async updateUser(
     userId: string,
     userData: { email?: string; roles?: string[]; [key: string]: any },
-  ) {
+  ): Promise<UserDetailsResponse> {
     try {
       // Update user in Supabase auth if email is provided
       if (userData.email) {

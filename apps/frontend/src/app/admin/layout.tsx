@@ -6,7 +6,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Home, Users, Boxes, Settings, LogOut } from 'lucide-react';
-import Image from 'next/image';
 
 const sidebarOptions = [
   { name: 'Dashboard', path: '/admin/dashboard', icon: <Home className="w-5 h-5 text-gray-400" /> },
@@ -24,13 +23,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     // Only check authentication after the auth context has finished loading
     if (!isLoading && !isLoggingOut) {
-      console.log('Admin Layout - Auth Check:', {
-        user: user ? { id: user.id, email: user.email, roles: user.roles } : null,
-        isLoading
-      });
-
       if (!user) {
-        console.log('Admin Layout - No user found, redirecting to login');
         router.push(`/#login?from=${encodeURIComponent(pathname)}`);
         return;
       }
@@ -38,12 +31,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       // For now, allow business users to access admin panel
       // TODO: Create proper admin role in the system
       if (!user.roles || (!user.roles.includes('business') && !user.roles.includes('admin'))) {
-        console.log('Admin Layout - User does not have required roles:', user.roles);
         router.push('/');
         return;
       }
-
-      console.log('Admin Layout - User authenticated, showing admin panel');
     }
   }, [user, router, pathname, isLoading, isLoggingOut]);
 

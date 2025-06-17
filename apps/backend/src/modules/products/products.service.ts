@@ -299,9 +299,6 @@ export class ProductsService {
       unit_id,
     } = createProductDto;
 
-    console.log('CREATE PRODUCT');
-    console.log(createProductDto);
-
     // Generate a unique SKU
     const generateSKU = async (): Promise<string> => {
       const timestamp = Date.now().toString(36);
@@ -417,8 +414,7 @@ export class ProductsService {
       images,
       unit_id,
     } = updateProductDto;
-    console.log('UPDATE PRODUCT');
-    console.log(updateProductDto);
+
     const existingProduct = await this.prisma.products.findUnique({
       where: { id: productId },
     });

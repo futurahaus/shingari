@@ -212,7 +212,6 @@ export class ProductsController {
     @Param('id') id: string,
     @NestRequest() req,
   ): Promise<ProductResponseDto> {
-    console.log('req.user', req.user);
     return this.productsService.findOne(+id, req.user?.id);
   }
 

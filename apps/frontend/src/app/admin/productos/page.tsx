@@ -97,9 +97,7 @@ export default function AdminProductsPage() {
       setLoading(true);
       setError(null);
       const response = await api.get('/products/admin/all', { requireAuth: true });
-      console.log('API Response:', response);
       const productsData = Array.isArray(response) ? response : [];
-      console.log('Products data to set:', productsData);
       setProducts(productsData);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
@@ -118,9 +116,6 @@ export default function AdminProductsPage() {
       if (!payload.unit_id || isNaN(Number(payload.unit_id))) {
         delete payload.unit_id;
       }
-
-      console.log('PAYLOAD');
-      console.log(payload);
 
       await api.post('/products', payload as unknown as Record<string, unknown>, { requireAuth: true });
       setShowCreateModal(false);
