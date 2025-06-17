@@ -39,6 +39,10 @@ export default function UserDetailsPage() {
   const [specialPrices, setSpecialPrices] = useState<SpecialPrice[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState<UserDetails | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!userId) return;
@@ -60,6 +64,34 @@ export default function UserDetailsPage() {
       .finally(() => setLoading(false));
   }, [userId]);
 
+  useEffect(() => {
+    if (user) setEditForm(user);
+  }, [user]);
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!editForm) return;
+    setEditForm({ ...editForm, [e.target.name]: e.target.value });
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editForm) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await api.put(`/user/admin/${userId}`, editForm as unknown as Record<string, unknown>, { requireAuth: true });
+      setShowEditModal(false);
+      // Refetch user data
+      setLoading(true);
+      const userRes = await api.get(`/user/admin/${userId}`, { requireAuth: true });
+      setUser(userRes as UserDetails);
+    } catch (err: any) {
+      setSaveError('Error al actualizar usuario: ' + (err.message || 'Error desconocido'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return <div className="p-8">Cargando...</div>;
   }
@@ -78,10 +110,60 @@ export default function UserDetailsPage() {
           <h1 className="text-2xl font-bold mb-1">Detalles</h1>
           <p className="text-gray-500 text-sm">Gestiona Descuentos y Promociones por cliente</p>
         </div>
-        <button className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800">
+        <button className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer" onClick={() => setShowEditModal(true)}>
           + Editar Detalles del Cliente
         </button>
       </div>
+
+      {/* Edit User Modal */}
+      {showEditModal && editForm && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-lg p-6 w-full max-w-lg">
+            <h3 className="text-lg font-medium mb-4">Editar Usuario</h3>
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs text-gray-500">Nombre</label>
+                  <input name="first_name" value={editForm.first_name || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">Apellido</label>
+                  <input name="last_name" value={editForm.last_name || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">Business Name</label>
+                  <input name="trade_name" value={editForm.trade_name || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">Ciudad</label>
+                  <input name="city" value={editForm.city || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">Provincia</label>
+                  <input name="province" value={editForm.province || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">País</label>
+                  <input name="country" value={editForm.country || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">Teléfono</label>
+                  <input name="phone" value={editForm.phone || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">Email</label>
+                  <input name="email" value={editForm.email || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1" />
+                </div>
+              </div>
+              {saveError && <div className="text-red-600 text-sm">{saveError}</div>}
+              <div className="flex justify-end space-x-2 mt-6">
+                <button type="button" onClick={() => setShowEditModal(false)} className="px-4 py-2 text-gray-600 hover:text-gray-800 cursor-pointer">Cancelar</button>
+                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer" disabled={saving}>{saving ? 'Guardando...' : 'Guardar'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Información del Cliente */}
       <div className="mb-8">
@@ -189,4 +271,4 @@ export default function UserDetailsPage() {
       </div>
     </div>
   );
-} 
+}

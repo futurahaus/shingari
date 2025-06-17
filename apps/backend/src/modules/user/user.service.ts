@@ -2,16 +2,18 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
-import { public_users } from '../../../generated/prisma/index';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly supabaseService: DatabaseService,
     private readonly prismaService: PrismaService,
-  ) { }
+  ) {}
 
-  async updateUserProfile(userId: string, updateUserProfileDto: UpdateUserProfileDto) {
+  async updateUserProfile(
+    userId: string,
+    updateUserProfileDto: UpdateUserProfileDto,
+  ) {
     const { data, error } = await this.supabaseService
       .getClient()
       .from('users')
@@ -156,7 +158,11 @@ export class UserService {
     }
   }
 
-  async createUser(userData: { email: string; password: string; roles?: string[] }) {
+  async createUser(userData: {
+    email: string;
+    password: string;
+    roles?: string[];
+  }) {
     try {
       // First, create the user in Supabase auth
       const { data: authData, error: authError } = await this.supabaseService
@@ -182,7 +188,10 @@ export class UserService {
     }
   }
 
-  async updateUser(userId: string, userData: { email?: string; roles?: string[] }) {
+  async updateUser(
+    userId: string,
+    userData: { email?: string; roles?: string[]; [key: string]: any },
+  ) {
     try {
       // Update user in Supabase auth if email is provided
       if (userData.email) {
@@ -206,6 +215,45 @@ export class UserService {
 
         // Then assign new roles
         await this.assignRolesToUser(userId, userData.roles);
+      }
+
+      // Update public.users fields if present
+      const publicFields = [
+        'first_name',
+        'last_name',
+        'trade_name',
+        'city',
+        'province',
+        'country',
+        'phone',
+        'profile_is_complete',
+        'postal_code',
+        'gender',
+        'birth_date',
+        'accepted_terms',
+        'tax_id',
+        'billing_address',
+        'shipping_address',
+        'referral_source',
+        'nombrefiscal',
+        'tax_name',
+      ];
+      const publicData: Record<string, any> = {};
+      for (const key of publicFields) {
+        if (key in userData) {
+          publicData[key] = userData[key];
+        }
+      }
+      if (Object.keys(publicData).length > 0) {
+        // Find the public_users record by uuid
+        const publicUser = await this.prismaService.public_users.findFirst({
+          where: { uuid: userId },
+        });
+        await this.prismaService.public_users.upsert({
+          where: { id: publicUser?.id ?? 0 },
+          create: { uuid: userId, ...publicData },
+          update: publicData,
+        });
       }
 
       return this.getUserById(userId);
@@ -300,4 +348,3 @@ export class UserService {
     }));
   }
 }
-
