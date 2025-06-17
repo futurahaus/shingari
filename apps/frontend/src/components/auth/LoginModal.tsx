@@ -56,15 +56,21 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
       localStorage.setItem('user', JSON.stringify(data.user));
 
       //TODO review if needed.
-      document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Strict`;
+      // document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Strict`;
 
       login(data.accessToken, data.refreshToken, data.user);
 
       onClose();
 
-      // Redirect to the specified path or default to dashboard
-      const redirectTo = redirectPath || '/dashboard';
-      router.push(redirectTo);
+      // Redirect based on user roles and redirectPath
+      const normalizedRedirectPath = redirectPath?.split('?')[0]?.replace(/\/+$/, '');
+      if (normalizedRedirectPath && !['/dashboard', '/dashboard/perfil'].includes(normalizedRedirectPath)) {
+        router.push(redirectPath as string);
+      } else if (data.user && Array.isArray(data.user.roles) && data.user.roles.includes('admin')) {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
     } finally {

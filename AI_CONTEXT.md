@@ -33,7 +33,7 @@ Aplicación construida con NestJS. **Todas las rutas de la API del backend está
             -   Endpoint `POST /auth/assign-role`: Asigna un rol específico a un usuario autenticado.
             -   Los roles se almacenan en la tabla `user_roles` y se actualizan en los metadatos del usuario.
             -   Manejo automático de roles duplicados y creación de roles si no existen.
-            -   **Redirección basada en roles**: 
+            -   **Redirección basada en roles**:
                 -   Usuarios con rol 'consumer' (Consumidor Final) son redirigidos a `/dashboard`
                 -   Usuarios con rol 'business' (Empresa) son redirigidos a `/complete-profile`
         -   **Funcionalidad de Perfil Completo**: Sistema para completar información empresarial de usuarios.
@@ -45,10 +45,28 @@ Aplicación construida con NestJS. **Todas las rutas de la API del backend está
         -   Probablemente encapsula la conexión y la lógica de acceso a la base de datos (ej. Prisma o Supabase client).
         -   `database.service.ts`: Servicio para interactuar con la base de datos.
         -   `database.logger.ts`: Logger específico para la base de datos.
+    -   **`prisma/`**: Módulo para la gestión de Prisma ORM.
+        -   `prisma.service.ts`: Servicio que extiende PrismaClient para interactuar con la base de datos.
+        -   `prisma.module.ts`: Definición del módulo Prisma.
+        -   `prisma.controller.ts`: Controlador simple para Prisma.
     -   **`user/`**: Módulo para la gestión de usuarios (posiblemente perfiles, etc., más allá de la autenticación pura).
-        -   `user.service.ts`: Lógica de negocio.
-        -   `user.controller.ts`: Endpoints HTTP.
+        -   `user.service.ts`: Lógica de negocio para gestión de usuarios, incluyendo CRUD completo y gestión de roles.
+        -   `user.controller.ts`: Endpoints HTTP para gestión de usuarios.
+            -   `PUT /user/profile`: Actualizar perfil del usuario autenticado.
+            -   `GET /user/profile`: Obtener perfil del usuario autenticado.
+            -   **Endpoints de Administración** (protegidos por AdminGuard):
+                -   `GET /user/admin/all`: Obtener todos los usuarios del sistema.
+                -   `GET /user/admin/:id`: Obtener usuario específico por ID.
+                -   `POST /user/admin/create`: Crear nuevo usuario con roles.
+                -   `PUT /user/admin/:id`: Actualizar usuario existente.
+                -   `DELETE /user/admin/:id`: Eliminar usuario del sistema.
         -   `user.module.ts`: Definición del módulo.
+        -   **Funcionalidad de Gestión de Usuarios**: Sistema completo de administración de usuarios.
+            -   **Acceso a auth.users**: Utiliza Prisma para acceder directamente al esquema `auth.users` de Supabase.
+            -   **CRUD Completo**: Crear, leer, actualizar y eliminar usuarios con integración con Supabase Auth.
+            -   **Gestión de Roles**: Asignación y eliminación de roles (admin, business, consumer) con creación automática de roles si no existen.
+            -   **Integración con Supabase**: Creación y actualización de usuarios en Supabase Auth con sincronización de roles en la base de datos local.
+            -   **Datos Enriquecidos**: Incluye información de verificación de email, último acceso, metadatos del usuario y roles asignados.
     -   **`products/`**: Módulo para la gestión de productos.
         -   `products.service.ts`: Lógica de negocio para productos, incluyendo CRUD, listado público con filtros/paginación, y gestión de descuentos.
         -   `products.controller.ts`: Endpoints HTTP para productos.
@@ -68,6 +86,7 @@ Aplicación construida con NestJS. **Todas las rutas de la API del backend está
 -   NestJS
 -   TypeScript
 -   Supabase (para autenticación y posiblemente base de datos)
+-   Prisma ORM (para acceso a base de datos con soporte multi-esquema)
 -   JWT (JSON Web Tokens)
 -   Passport.js (para estrategias de autenticación)
 -   Jest (para testing)
@@ -86,6 +105,14 @@ Aplicación construida con Next.js.
     -   `complete-profile/page.tsx`: Página para completar perfil empresarial con formulario de datos.
     -   `dashboard/page.tsx`: Panel de control del usuario autenticado.
     -   `dashboard/perfil/page.tsx`: Página de perfil del usuario autenticado.
+    -   `admin/usuarios/page.tsx`: Página de administración de usuarios con funcionalidad CRUD completa.
+        -   **Gestión de Usuarios**: Interfaz completa para administrar usuarios del sistema.
+        -   **Tabla de Usuarios**: Muestra todos los usuarios con información detallada (email, roles, estado de verificación, último acceso).
+        -   **CRUD Completo**: Modales para crear, editar y eliminar usuarios con validación de formularios.
+        -   **Gestión de Roles**: Asignación y eliminación de roles directamente desde la interfaz.
+        -   **Integración con API**: Utiliza los endpoints del backend para todas las operaciones.
+        -   **Estados de Carga**: Indicadores de carga y manejo de errores con opción de reintento.
+        -   **Confirmaciones**: Modales de confirmación para acciones destructivas como eliminar usuarios.
     -   `products/page.tsx`: Página pública de productos con filtros y paginación.
     -   `products/[id]/page.tsx`: Página de detalle de producto específico.
 -   **`components/`**: Componentes reutilizables de React.
@@ -121,20 +148,30 @@ Aplicación construida con Next.js.
     -   **Redirección Post-Login**: Después del login exitoso, el usuario es redirigido a la ruta especificada en el parámetro `from` o al dashboard por defecto.
     -   **Protección de Rutas**: Las páginas protegidas verifican la autenticación antes de hacer llamadas a la API y redirigen al login si es necesario.
 -   **Base de Datos**: La interacción con la base de datos se realiza principalmente a través de Prisma ORM, utilizando el archivo `schema.prisma` ubicado en `apps/backend/prisma/`. El `DatabaseModule` en el backend probablemente encapsula la lógica de acceso a la base de datos utilizando el cliente Prisma generado.
--   **Sistema de Roles**: Implementación de roles de usuario (consumer/business) con asignación automática después de la verificación de email.
+    -   **Acceso Multi-Esquema**: Prisma está configurado para acceder tanto al esquema `auth` (usuarios de Supabase) como al esquema `public` (datos de la aplicación).
+    -   **Sincronización de Usuarios**: Los usuarios se crean en Supabase Auth y se sincronizan con roles en la base de datos local.
+-   **Sistema de Roles**: Implementación de roles de usuario (consumer/business/admin) con asignación automática después de la verificación de email.
     -   Los roles se almacenan en la tabla `roles` y se relacionan con usuarios a través de `user_roles`.
     -   Flujo de verificación de email mejorado con modal de selección de roles.
     -   Manejo de roles duplicados y creación automática de roles si no existen.
+    -   **Rol de Administrador**: Nuevo rol 'admin' para acceso completo al sistema de gestión de usuarios.
 -   **Sistema de Perfiles**: Implementación de perfiles de usuario con información básica y empresarial.
     -   Los datos básicos del usuario se almacenan en la tabla `public.users` (nombre, apellidos, ciudad, provincia, país, código postal, teléfono).
     -   Los datos específicos de empresa se almacenan en los metadatos del usuario en `auth.users` (nombre comercial, nombre fiscal, NIF, direcciones, cómo nos conoció).
     -   Formulario de completar perfil disponible en `/complete-profile` para usuarios con rol 'business'.
+-   **Sistema de Gestión de Usuarios**: Sistema completo de administración de usuarios para administradores.
+    -   **Acceso Directo a auth.users**: Utiliza Prisma para acceder directamente a los usuarios de Supabase Auth.
+    -   **CRUD Completo**: Crear, leer, actualizar y eliminar usuarios con integración completa con Supabase.
+    -   **Gestión de Roles**: Asignación y eliminación de roles desde la interfaz de administración.
+    -   **Información Enriquecida**: Muestra estado de verificación de email, último acceso, roles asignados y metadatos del usuario.
+    -   **Interfaz Intuitiva**: Tabla con filtros, modales para operaciones CRUD, y confirmaciones para acciones destructivas.
 -   **Sistema de Productos**: Implementación de catálogo de productos con funcionalidades públicas y protegidas.
     -   **Endpoints Públicos**: Los endpoints `GET /products` y `GET /products/:id` son públicos y no requieren autenticación.
     -   **Precios Dinámicos**: Los precios se calculan dinámicamente basados en el rol del usuario (precio al por mayor para usuarios 'business').
     -   **Descuentos Personalizados**: Sistema de descuentos específicos por usuario con fechas de validez.
     -   **Filtros y Paginación**: Soporte para filtrado por categorías, búsqueda por nombre, ordenamiento por precio y paginación.
 -   **Testing**: Ambos proyectos tienen configuraciones de Jest. El backend tiene tests unitarios para servicios y tests e2e. El frontend tiene tests para componentes.
+- **Endpoints**: Se pueden encontrar los endpoints disponibles para dev en http://localhost:3001/api-docs
 
 ## Cómo Mantener Actualizado este Archivo
 
@@ -144,6 +181,6 @@ Aplicación construida con Next.js.
 
 ---
 
-*Este archivo fue generado y actualizado el 2025-01-03 22:15:00.*
+*Este archivo fue generado y actualizado el 2025-01-03 22:30:00.*
 
-*Por favor, actualiza la fecha y cualquier información relevante cuando hagas cambios significativos.* 
+*Por favor, actualiza la fecha y cualquier información relevante cuando hagas cambios significativos.*
