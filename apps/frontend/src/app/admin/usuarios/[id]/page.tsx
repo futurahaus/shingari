@@ -16,6 +16,11 @@ interface UserDetails {
   profile_is_complete?: boolean;
   name: string;
   restaurant: string;
+  tax_name?: string;
+  tax_id?: string;
+  billing_address?: string;
+  shipping_address?: string;
+  postal_code?: string;
 }
 
 interface Order {
@@ -124,35 +129,55 @@ export default function UserDetailsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs text-gray-500">Nombre</label>
-                  <input name="first_name" value={editForm.first_name || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1" />
+                  <input name="first_name" value={editForm.first_name || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
                 <div>
                   <label className="block text-xs text-gray-500">Apellido</label>
-                  <input name="last_name" value={editForm.last_name || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1" />
+                  <input name="last_name" value={editForm.last_name || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
                 <div>
                   <label className="block text-xs text-gray-500">Business Name</label>
-                  <input name="trade_name" value={editForm.trade_name || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1" />
+                  <input name="trade_name" value={editForm.trade_name || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
                 <div>
                   <label className="block text-xs text-gray-500">Ciudad</label>
-                  <input name="city" value={editForm.city || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1" />
+                  <input name="city" value={editForm.city || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
                 <div>
                   <label className="block text-xs text-gray-500">Provincia</label>
-                  <input name="province" value={editForm.province || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1" />
+                  <input name="province" value={editForm.province || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
                 <div>
                   <label className="block text-xs text-gray-500">País</label>
-                  <input name="country" value={editForm.country || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1" />
+                  <input name="country" value={editForm.country || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
                 <div>
                   <label className="block text-xs text-gray-500">Teléfono</label>
-                  <input name="phone" value={editForm.phone || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1" />
+                  <input name="phone" value={editForm.phone || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
                 <div>
                   <label className="block text-xs text-gray-500">Email</label>
-                  <input name="email" value={editForm.email || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1" />
+                  <input name="email" value={editForm.email || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">Nombre Fiscal</label>
+                  <input name="tax_name" value={editForm.tax_name || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">NIF</label>
+                  <input name="tax_id" value={editForm.tax_id || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">Dirección Fiscal</label>
+                  <input name="billing_address" value={editForm.billing_address || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">Dirección de Entrega</label>
+                  <input name="shipping_address" value={editForm.shipping_address || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">C.P.</label>
+                  <input name="postal_code" value={editForm.postal_code || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
               </div>
               {saveError && <div className="text-red-600 text-sm">{saveError}</div>}
@@ -171,35 +196,35 @@ export default function UserDetailsPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 border-b border-gray-200 pb-6">
           <div>
             <div className="text-xs text-gray-500">ID</div>
-            <div className="font-medium">#{user.id}</div>
+            <div className="font-medium text-gray-900">#{user.id}</div>
           </div>
           <div>
             <div className="text-xs text-gray-500">Nombre</div>
-            <div className="font-medium">{(user.first_name || '') + ' ' + (user.last_name || '')}</div>
+            <div className="font-medium text-gray-900">{(user.first_name || '') + ' ' + (user.last_name || '')}</div>
           </div>
           <div>
             <div className="text-xs text-gray-500">Business Name</div>
-            <div className="font-medium">{user.trade_name || '-'}</div>
+            <div className="font-medium text-gray-900">{user.trade_name || '-'}</div>
           </div>
           <div>
             <div className="text-xs text-gray-500">Ciudad</div>
-            <div className="font-medium">{user.city || '-'}</div>
+            <div className="font-medium text-gray-900">{user.city || '-'}</div>
           </div>
           <div>
             <div className="text-xs text-gray-500">Provincia</div>
-            <div className="font-medium">{user.province || '-'}</div>
+            <div className="font-medium text-gray-900">{user.province || '-'}</div>
           </div>
           <div>
             <div className="text-xs text-gray-500">País</div>
-            <div className="font-medium">{user.country || '-'}</div>
+            <div className="font-medium text-gray-900">{user.country || '-'}</div>
           </div>
           <div>
             <div className="text-xs text-gray-500">Teléfono</div>
-            <div className="font-medium">{user.phone || '-'}</div>
+            <div className="font-medium text-gray-900">{user.phone || '-'}</div>
           </div>
           <div>
             <div className="text-xs text-gray-500">Perfil Completo</div>
-            <div className="font-medium">{user.profile_is_complete ? 'Sí' : 'No'}</div>
+            <div className="font-medium text-gray-900">{user.profile_is_complete ? 'Sí' : 'No'}</div>
           </div>
         </div>
       </div>
@@ -223,9 +248,9 @@ export default function UserDetailsPage() {
               ) : (
                 orders.map((order, idx) => (
                   <tr key={idx} className="border-t border-gray-100">
-                    <td className="px-6 py-4 whitespace-nowrap">#{order.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{order.date}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{order.total}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">#{order.id}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">{order.date}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">{order.total}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer text-sm">Ver Detalles</button>
                     </td>

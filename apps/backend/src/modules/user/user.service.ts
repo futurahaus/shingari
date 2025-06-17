@@ -12,6 +12,11 @@ interface PublicUser {
   country: string;
   phone: string;
   profile_is_complete: boolean;
+  tax_name?: string;
+  tax_id?: string;
+  billing_address?: string;
+  shipping_address?: string;
+  postal_code?: string;
 }
 
 interface AdminUser {
@@ -43,6 +48,11 @@ export interface UserDetailsResponse {
   country: string;
   phone: string;
   profile_is_complete: boolean;
+  tax_name?: string;
+  tax_id?: string;
+  billing_address?: string;
+  shipping_address?: string;
+  postal_code?: string;
   public_profile: Partial<PublicUser>;
 }
 
@@ -173,7 +183,7 @@ export class UserService {
       }
 
       let publicProfile: Partial<PublicUser> = {};
-      if (user.users && Array.isArray(user.users) && user.users.length > 0 && typeof user.users[0] === 'object' && user.users[0] !== null) {
+      if (Array.isArray(user.users) && user.users.length > 0 && typeof user.users[0] === 'object' && user.users[0] !== null) {
         publicProfile = user.users[0] as Partial<PublicUser>;
       }
 
@@ -194,14 +204,19 @@ export class UserService {
         country: typeof publicProfile.country === 'string' ? publicProfile.country : '',
         phone: typeof publicProfile.phone === 'string' ? publicProfile.phone : '',
         profile_is_complete: typeof publicProfile.profile_is_complete === 'boolean' ? publicProfile.profile_is_complete : false,
+        tax_name: typeof publicProfile.tax_name === 'string' ? publicProfile.tax_name : '',
+        tax_id: typeof publicProfile.tax_id === 'string' ? publicProfile.tax_id : '',
+        billing_address: typeof publicProfile.billing_address === 'string' ? publicProfile.billing_address : '',
+        shipping_address: typeof publicProfile.shipping_address === 'string' ? publicProfile.shipping_address : '',
+        postal_code: typeof publicProfile.postal_code === 'string' ? publicProfile.postal_code : '',
         public_profile: publicProfile,
       };
-    } catch (error: unknown) {
-      if (error instanceof NotFoundException) {
-        throw error;
+    } catch (err: unknown) {
+      if (err instanceof NotFoundException) {
+        throw err;
       }
-      if (error instanceof Error) {
-        throw new Error(`Failed to fetch user: ${error.message}`);
+      if (err instanceof Error) {
+        throw new Error(`Failed to fetch user: ${err.message}`);
       }
       throw new Error('Failed to fetch user: Unknown error');
     }

@@ -130,12 +130,12 @@ export default function AdminUsersPage() {
                 filteredUsers.map(user => (
                   <tr key={user.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{(user.first_name || '') + ' ' + (user.last_name || '')}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{user.trade_name || '-'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.trade_name || '-'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-700 underline">{user.email}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{user.city || '-'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">{user.phone || '-'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">{user.compras ?? '-'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">#{user.id.slice(0, 6)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.city || '-'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.phone || '-'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center text-gray-900">{user.compras ?? '-'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">#{user.id.slice(0, 6)}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="inline-block bg-gray-100 px-4 py-1 rounded-full font-semibold text-gray-700">
                         {user.scoring ?? '0'}
