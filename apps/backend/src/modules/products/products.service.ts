@@ -516,6 +516,11 @@ export class ProductsService {
       orderBy: {
         created_at: 'desc',
       },
+      where: {
+        status: {
+          not: product_states.deleted,
+        },
+      },
       include: {
         products_categories: {
           include: {

@@ -54,9 +54,9 @@ export default function UserDetailsPage() {
     setLoading(true);
     setError(null);
     Promise.all([
-      api.get(`/user/admin/${userId}`, { requireAuth: true }),
-      api.get(`/user/admin/${userId}/orders`, { requireAuth: true }),
-      api.get(`/user/admin/${userId}/special-prices`, { requireAuth: true })
+      api.get(`/user/admin/${userId}`),
+      api.get(`/user/admin/${userId}/orders`),
+      api.get(`/user/admin/${userId}/special-prices`)
     ])
       .then(([userRes, ordersRes, pricesRes]) => {
         setUser(userRes as UserDetails);
@@ -84,16 +84,17 @@ export default function UserDetailsPage() {
     setSaving(true);
     setSaveError(null);
     try {
-      await api.put(`/user/admin/${userId}`, editForm as unknown as Record<string, unknown>, { requireAuth: true });
+      await api.put(`/user/admin/${userId}`, editForm as unknown as Record<string, unknown>);
       setShowEditModal(false);
       // Refetch user data
       setLoading(true);
-      const userRes = await api.get(`/user/admin/${userId}`, { requireAuth: true });
+      const userRes = await api.get(`/user/admin/${userId}`);
       setUser(userRes as UserDetails);
     } catch (err: any) {
       setSaveError('Error al actualizar usuario: ' + (err.message || 'Error desconocido'));
     } finally {
       setSaving(false);
+      setLoading(false);
     }
   };
 
@@ -281,9 +282,9 @@ export default function UserDetailsPage() {
               ) : (
                 specialPrices.map((row, idx) => (
                   <tr key={idx} className="border-t border-gray-100">
-                    <td className="px-6 py-4 whitespace-nowrap">{row.product || <span className="inline-block w-6 h-6 bg-black rounded-full mr-2 align-middle"></span>}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{row.priceRetail}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{row.priceClient}</td>
+                    <td className="px-6 py-4 text-gray-900 whitespace-nowrap">{row.product || <span className="inline-block w-6 h-6 bg-black rounded-full mr-2 align-middle"></span>}</td>
+                    <td className="px-6 py-4 text-gray-900 whitespace-nowrap">{row.priceRetail}</td>
+                    <td className="px-6 py-4 text-gray-900 whitespace-nowrap">{row.priceClient}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button className="text-blue-700 underline">Editar</button>
                     </td>

@@ -381,11 +381,11 @@ export class UserService {
   async getUserOrders(userId: string) {
     // TODO: Replace with real order data if available
     return [
-      { id: '123456', date: '2024-07-15', total: '$250.00' },
-      { id: '123456', date: '2024-07-01', total: '$180.00' },
-      { id: '123456', date: '2024-06-15', total: '$320.00' },
-      { id: '123456', date: '2024-06-01', total: '$200.00' },
-      { id: '123456', date: '2024-05-15', total: '$150.00' },
+      // { id: '123456', date: '2024-07-15', total: '$250.00' },
+      // { id: '123456', date: '2024-07-01', total: '$180.00' },
+      // { id: '123456', date: '2024-06-15', total: '$320.00' },
+      // { id: '123456', date: '2024-06-01', total: '$200.00' },
+      // { id: '123456', date: '2024-05-15', total: '$150.00' },
     ];
   }
 

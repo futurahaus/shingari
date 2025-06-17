@@ -14,7 +14,6 @@ interface Product {
   images: string[];
   createdAt: string;
   updatedAt: string;
-  sku?: string;
   wholesale_price?: number;
   status?: string;
   unit_id?: number;
@@ -31,11 +30,6 @@ interface CreateProductData {
   status?: string;
   images?: string[];
   unit_id?: number;
-  points?: number;
-  iva?: string;
-  id?: string;
-  sku?: string;
-  lote?: string;
 }
 
 interface UpdateProductData {
@@ -48,11 +42,6 @@ interface UpdateProductData {
   status?: string;
   images?: string[];
   unit_id?: number;
-  points?: number;
-  iva?: string;
-  id?: string;
-  sku?: string;
-  lote?: string;
 }
 
 export default function AdminProductsPage() {
@@ -96,7 +85,7 @@ export default function AdminProductsPage() {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get('/products/admin/all', { requireAuth: true });
+      const response = await api.get('/products/admin/all');
       const productsData = Array.isArray(response) ? response : [];
       setProducts(productsData);
     } catch (err) {
@@ -117,7 +106,7 @@ export default function AdminProductsPage() {
         delete payload.unit_id;
       }
 
-      await api.post('/products', payload as unknown as Record<string, unknown>, { requireAuth: true });
+      await api.post('/products', payload as unknown as Record<string, unknown>);
       setShowCreateModal(false);
       setCreateForm({
         name: '',
@@ -147,7 +136,7 @@ export default function AdminProductsPage() {
         delete payload.unit_id;
       }
       console.log('Payload for update:', payload);
-      await api.put(`/products/${selectedProduct.id}`, payload as unknown as Record<string, unknown>, { requireAuth: true });
+      await api.put(`/products/${selectedProduct.id}`, payload as unknown as Record<string, unknown>);
       setShowEditModal(false);
       setSelectedProduct(null);
       setEditForm({
@@ -172,7 +161,7 @@ export default function AdminProductsPage() {
     if (!selectedProduct) return;
 
     try {
-      await api.delete(`/products/${selectedProduct.id}`, { requireAuth: true });
+      await api.delete(`/products/${selectedProduct.id}`);
       setShowDeleteModal(false);
       setSelectedProduct(null);
       await fetchProducts();
@@ -265,11 +254,6 @@ export default function AdminProductsPage() {
                         <div className="text-sm text-gray-500">{product.description}</div>
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-sm font-medium text-green-600">${product.price}</span>
-                          {product.sku && (
-                            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                              SKU: {product.sku}
-                            </span>
-                          )}
                           {product.wholesale_price !== undefined && (
                             <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
                               Mayorista: ${product.wholesale_price}
@@ -358,16 +342,6 @@ export default function AdminProductsPage() {
                       className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Puntos</label>
-                    <input
-                      type="number"
-                      placeholder="Puntaje por comprar este producto"
-                      value={createForm.points || ''}
-                      onChange={(e) => setCreateForm({...createForm, points: parseInt(e.target.value) || 0})}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
-                    />
-                  </div>
                 </div>
                 {/* Right Column */}
                 <div className="flex flex-col gap-4">
@@ -380,17 +354,7 @@ export default function AdminProductsPage() {
                         step="1"
                         value={createForm.stock}
                         onChange={(e) => setCreateForm({...createForm, stock: parseInt(e.target.value) || 0})}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">Iva</label>
-                      <input
-                        type="text"
-                        placeholder="2%"
-                        value={createForm.iva || ''}
-                        onChange={(e) => setCreateForm({...createForm, iva: e.target.value})}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-black"
                       />
                     </div>
                   </div>
@@ -402,7 +366,7 @@ export default function AdminProductsPage() {
                         placeholder="$1234"
                         value={createForm.price}
                         onChange={(e) => setCreateForm({...createForm, price: parseFloat(e.target.value) || 0})}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-black"
                       />
                     </div>
                     <div>
@@ -412,39 +376,7 @@ export default function AdminProductsPage() {
                         placeholder="$123"
                         value={createForm.wholesale_price || ''}
                         onChange={e => setCreateForm({ ...createForm, wholesale_price: parseFloat(e.target.value) || 0 })}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">ID</label>
-                      <input
-                        type="text"
-                        placeholder="123456"
-                        value={createForm.id || ''}
-                        onChange={e => setCreateForm({ ...createForm, id: e.target.value })}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">SKU</label>
-                      <input
-                        type="text"
-                        placeholder="123456"
-                        value={createForm.sku || ''}
-                        onChange={e => setCreateForm({ ...createForm, sku: e.target.value })}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">LOTE</label>
-                      <input
-                        type="text"
-                        placeholder="123456"
-                        value={createForm.lote || ''}
-                        onChange={e => setCreateForm({ ...createForm, lote: e.target.value })}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                        className="w-full border border-gray-300 text-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                       />
                     </div>
                   </div>
@@ -514,16 +446,6 @@ export default function AdminProductsPage() {
                       className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Puntos</label>
-                    <input
-                      type="number"
-                      placeholder="Puntaje por comprar este producto"
-                      value={editForm.points || ''}
-                      onChange={(e) => setEditForm({...editForm, points: parseInt(e.target.value) || 0})}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
-                    />
-                  </div>
                 </div>
                 {/* Right Column */}
                 <div className="flex flex-col gap-4">
@@ -536,16 +458,6 @@ export default function AdminProductsPage() {
                         step="1"
                         value={editForm.stock}
                         onChange={(e) => setEditForm({...editForm, stock: parseInt(e.target.value) || 0})}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">Iva</label>
-                      <input
-                        type="text"
-                        placeholder="2%"
-                        value={editForm.iva || ''}
-                        onChange={(e) => setEditForm({...editForm, iva: e.target.value})}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                       />
                     </div>
@@ -568,39 +480,7 @@ export default function AdminProductsPage() {
                         placeholder="$123"
                         value={editForm.wholesale_price || ''}
                         onChange={e => setEditForm({ ...editForm, wholesale_price: parseFloat(e.target.value) || 0 })}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">ID</label>
-                      <input
-                        type="text"
-                        placeholder="123456"
-                        value={editForm.id || ''}
-                        onChange={e => setEditForm({ ...editForm, id: e.target.value })}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">SKU</label>
-                      <input
-                        type="text"
-                        placeholder="123456"
-                        value={editForm.sku || ''}
-                        onChange={e => setEditForm({ ...editForm, sku: e.target.value })}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">LOTE</label>
-                      <input
-                        type="text"
-                        placeholder="123456"
-                        value={editForm.lote || ''}
-                        onChange={e => setEditForm({ ...editForm, lote: e.target.value })}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                        className="w-full border border-gray-300 text-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                       />
                     </div>
                   </div>
