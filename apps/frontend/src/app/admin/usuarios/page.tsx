@@ -87,7 +87,7 @@ export default function AdminUsersPage() {
       const createRes = await api.post('/user/admin/create', {
         email: newClientForm.email,
         password: newClientForm.password,
-        roles: ['client'],
+        // roles: ['client'],
       }) as { id?: string };
       // 2. Update public profile fields
       if (createRes && typeof createRes === 'object' && 'id' in createRes && createRes.id) {
