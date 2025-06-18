@@ -78,7 +78,6 @@ export default function AdminUsersPage() {
     );
   });
 
-  // Refactored handler for creating a new user
   async function handleCreateNewUser(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSavingNewClient(true);
