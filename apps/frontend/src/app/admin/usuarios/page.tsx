@@ -28,6 +28,25 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [showNewClientModal, setShowNewClientModal] = useState(false);
+  const [newClientForm, setNewClientForm] = useState({
+    first_name: '',
+    last_name: '',
+    trade_name: '',
+    city: '',
+    province: '',
+    country: '',
+    phone: '',
+    email: '',
+    password: '',
+    tax_name: '',
+    tax_id: '',
+    billing_address: '',
+    shipping_address: '',
+    postal_code: '',
+  });
+  const [savingNewClient, setSavingNewClient] = useState(false);
+  const [saveNewClientError, setSaveNewClientError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUsers();
@@ -84,10 +103,157 @@ export default function AdminUsersPage() {
   return (
     <div className="p-8">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-1">Clientes</h1>
-        <p className="text-gray-500 text-sm">Gestiona tu cartera de clientes</p>
+      <div className="mb-6 flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold mb-1">Clientes</h1>
+          <p className="text-gray-500 text-sm">Gestiona tu cartera de clientes</p>
+        </div>
+        <button
+          className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer"
+          onClick={() => setShowNewClientModal(true)}
+        >
+          + Nuevo cliente
+        </button>
       </div>
+      {/* New Client Modal */}
+      {showNewClientModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-lg p-6 w-full max-w-lg">
+            <h3 className="text-lg font-medium mb-4">Nuevo Cliente</h3>
+            <form
+              onSubmit={async e => {
+                e.preventDefault();
+                setSavingNewClient(true);
+                setSaveNewClientError(null);
+                try {
+                  // 1. Create user (auth)
+                  const createRes = await api.post('/user/admin/create', {
+                    email: newClientForm.email,
+                    password: newClientForm.password,
+                    roles: ['client'],
+                  }) as { id?: string };
+                  // 2. Update public profile fields
+                  if (createRes && typeof createRes === 'object' && 'id' in createRes && createRes.id) {
+                    await api.put(`/user/admin/${createRes.id}`, {
+                      first_name: newClientForm.first_name,
+                      last_name: newClientForm.last_name,
+                      trade_name: newClientForm.trade_name,
+                      city: newClientForm.city,
+                      province: newClientForm.province,
+                      country: newClientForm.country,
+                      phone: newClientForm.phone,
+                      tax_name: newClientForm.tax_name,
+                      tax_id: newClientForm.tax_id,
+                      billing_address: newClientForm.billing_address,
+                      shipping_address: newClientForm.shipping_address,
+                      postal_code: newClientForm.postal_code,
+                    });
+                  }
+                  setShowNewClientModal(false);
+                  setNewClientForm({
+                    first_name: '',
+                    last_name: '',
+                    trade_name: '',
+                    city: '',
+                    province: '',
+                    country: '',
+                    phone: '',
+                    email: '',
+                    password: '',
+                    tax_name: '',
+                    tax_id: '',
+                    billing_address: '',
+                    shipping_address: '',
+                    postal_code: '',
+                  });
+                  fetchUsers();
+                } catch (err: unknown) {
+                  function isErrorWithMessage(error: unknown): error is { message: string } {
+                    return (
+                      typeof error === 'object' &&
+                      error !== null &&
+                      'message' in error &&
+                      typeof (error as { message: unknown }).message === 'string'
+                    );
+                  }
+                  let message = 'Error desconocido';
+                  if (isErrorWithMessage(err)) {
+                    message = err.message;
+                  }
+                  setSaveNewClientError('Error al crear usuario: ' + message);
+                } finally {
+                  setSavingNewClient(false);
+                }
+              }}
+              className="space-y-4"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs text-gray-500">Nombre</label>
+                  <input name="first_name" value={newClientForm.first_name} onChange={e => setNewClientForm(f => ({ ...f, first_name: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">Apellido</label>
+                  <input name="last_name" value={newClientForm.last_name} onChange={e => setNewClientForm(f => ({ ...f, last_name: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">Business Name</label>
+                  <input name="trade_name" value={newClientForm.trade_name} onChange={e => setNewClientForm(f => ({ ...f, trade_name: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">Ciudad</label>
+                  <input name="city" value={newClientForm.city} onChange={e => setNewClientForm(f => ({ ...f, city: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">Provincia</label>
+                  <input name="province" value={newClientForm.province} onChange={e => setNewClientForm(f => ({ ...f, province: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">País</label>
+                  <input name="country" value={newClientForm.country} onChange={e => setNewClientForm(f => ({ ...f, country: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">Teléfono</label>
+                  <input name="phone" value={newClientForm.phone} onChange={e => setNewClientForm(f => ({ ...f, phone: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">Email</label>
+                  <input name="email" value={newClientForm.email} onChange={e => setNewClientForm(f => ({ ...f, email: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">Contraseña</label>
+                  <input name="password" type="password" value={newClientForm.password} onChange={e => setNewClientForm(f => ({ ...f, password: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">Nombre Fiscal</label>
+                  <input name="tax_name" value={newClientForm.tax_name} onChange={e => setNewClientForm(f => ({ ...f, tax_name: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">NIF</label>
+                  <input name="tax_id" value={newClientForm.tax_id} onChange={e => setNewClientForm(f => ({ ...f, tax_id: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">Dirección Fiscal</label>
+                  <input name="billing_address" value={newClientForm.billing_address} onChange={e => setNewClientForm(f => ({ ...f, billing_address: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">Dirección de Entrega</label>
+                  <input name="shipping_address" value={newClientForm.shipping_address} onChange={e => setNewClientForm(f => ({ ...f, shipping_address: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">C.P.</label>
+                  <input name="postal_code" value={newClientForm.postal_code} onChange={e => setNewClientForm(f => ({ ...f, postal_code: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+              </div>
+              {saveNewClientError && <div className="text-red-600 text-sm">{saveNewClientError}</div>}
+              <div className="flex justify-end space-x-2 mt-6">
+                <button type="button" onClick={() => setShowNewClientModal(false)} className="px-4 py-2 text-gray-600 hover:text-gray-800 cursor-pointer">Cancelar</button>
+                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer" disabled={savingNewClient}>{savingNewClient ? 'Guardando...' : 'Guardar'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       {/* Search Bar */}
       <div className="mb-4 flex items-center relative">
         <input
