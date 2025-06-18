@@ -189,6 +189,14 @@ export default function AdminUsersPage() {
             >
               <div className="grid grid-cols-2 gap-4">
                 <div>
+                  <label className="block text-xs text-gray-500">Email</label>
+                  <input name="email" value={newClientForm.email} onChange={e => setNewClientForm(f => ({ ...f, email: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">Contraseña</label>
+                  <input name="password" type="password" value={newClientForm.password} onChange={e => setNewClientForm(f => ({ ...f, password: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
                   <label className="block text-xs text-gray-500">Nombre</label>
                   <input name="first_name" value={newClientForm.first_name} onChange={e => setNewClientForm(f => ({ ...f, first_name: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
@@ -216,14 +224,7 @@ export default function AdminUsersPage() {
                   <label className="block text-xs text-gray-500">Teléfono</label>
                   <input name="phone" value={newClientForm.phone} onChange={e => setNewClientForm(f => ({ ...f, phone: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
-                <div>
-                  <label className="block text-xs text-gray-500">Email</label>
-                  <input name="email" value={newClientForm.email} onChange={e => setNewClientForm(f => ({ ...f, email: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-500">Contraseña</label>
-                  <input name="password" type="password" value={newClientForm.password} onChange={e => setNewClientForm(f => ({ ...f, password: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
-                </div>
+
                 <div>
                   <label className="block text-xs text-gray-500">Nombre Fiscal</label>
                   <input name="tax_name" value={newClientForm.tax_name} onChange={e => setNewClientForm(f => ({ ...f, tax_name: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
