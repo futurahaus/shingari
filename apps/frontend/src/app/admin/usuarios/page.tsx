@@ -78,6 +78,72 @@ export default function AdminUsersPage() {
     );
   });
 
+  // Refactored handler for creating a new user
+  async function handleCreateNewUser(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSavingNewClient(true);
+    setSaveNewClientError(null);
+    try {
+      // 1. Create user (auth)
+      const createRes = await api.post('/user/admin/create', {
+        email: newClientForm.email,
+        password: newClientForm.password,
+        roles: ['client'],
+      }) as { id?: string };
+      // 2. Update public profile fields
+      if (createRes && typeof createRes === 'object' && 'id' in createRes && createRes.id) {
+        await api.put(`/user/admin/${createRes.id}`, {
+          first_name: newClientForm.first_name,
+          last_name: newClientForm.last_name,
+          trade_name: newClientForm.trade_name,
+          city: newClientForm.city,
+          province: newClientForm.province,
+          country: newClientForm.country,
+          phone: newClientForm.phone,
+          tax_name: newClientForm.tax_name,
+          tax_id: newClientForm.tax_id,
+          billing_address: newClientForm.billing_address,
+          shipping_address: newClientForm.shipping_address,
+          postal_code: newClientForm.postal_code,
+        });
+      }
+      setShowNewClientModal(false);
+      setNewClientForm({
+        first_name: '',
+        last_name: '',
+        trade_name: '',
+        city: '',
+        province: '',
+        country: '',
+        phone: '',
+        email: '',
+        password: '',
+        tax_name: '',
+        tax_id: '',
+        billing_address: '',
+        shipping_address: '',
+        postal_code: '',
+      });
+      fetchUsers();
+    } catch (err: unknown) {
+      function isErrorWithMessage(error: unknown): error is { message: string } {
+        return (
+          typeof error === 'object' &&
+          error !== null &&
+          'message' in error &&
+          typeof (error as { message: unknown }).message === 'string'
+        );
+      }
+      let message = 'Error desconocido';
+      if (isErrorWithMessage(err)) {
+        message = err.message;
+      }
+      setSaveNewClientError('Error al crear usuario: ' + message);
+    } finally {
+      setSavingNewClient(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -121,70 +187,7 @@ export default function AdminUsersPage() {
           <div className="bg-white rounded-lg p-6 w-full max-w-lg">
             <h3 className="text-lg font-medium mb-4">Nuevo Cliente</h3>
             <form
-              onSubmit={async e => {
-                e.preventDefault();
-                setSavingNewClient(true);
-                setSaveNewClientError(null);
-                try {
-                  // 1. Create user (auth)
-                  const createRes = await api.post('/user/admin/create', {
-                    email: newClientForm.email,
-                    password: newClientForm.password,
-                    roles: ['client'],
-                  }) as { id?: string };
-                  // 2. Update public profile fields
-                  if (createRes && typeof createRes === 'object' && 'id' in createRes && createRes.id) {
-                    await api.put(`/user/admin/${createRes.id}`, {
-                      first_name: newClientForm.first_name,
-                      last_name: newClientForm.last_name,
-                      trade_name: newClientForm.trade_name,
-                      city: newClientForm.city,
-                      province: newClientForm.province,
-                      country: newClientForm.country,
-                      phone: newClientForm.phone,
-                      tax_name: newClientForm.tax_name,
-                      tax_id: newClientForm.tax_id,
-                      billing_address: newClientForm.billing_address,
-                      shipping_address: newClientForm.shipping_address,
-                      postal_code: newClientForm.postal_code,
-                    });
-                  }
-                  setShowNewClientModal(false);
-                  setNewClientForm({
-                    first_name: '',
-                    last_name: '',
-                    trade_name: '',
-                    city: '',
-                    province: '',
-                    country: '',
-                    phone: '',
-                    email: '',
-                    password: '',
-                    tax_name: '',
-                    tax_id: '',
-                    billing_address: '',
-                    shipping_address: '',
-                    postal_code: '',
-                  });
-                  fetchUsers();
-                } catch (err: unknown) {
-                  function isErrorWithMessage(error: unknown): error is { message: string } {
-                    return (
-                      typeof error === 'object' &&
-                      error !== null &&
-                      'message' in error &&
-                      typeof (error as { message: unknown }).message === 'string'
-                    );
-                  }
-                  let message = 'Error desconocido';
-                  if (isErrorWithMessage(err)) {
-                    message = err.message;
-                  }
-                  setSaveNewClientError('Error al crear usuario: ' + message);
-                } finally {
-                  setSavingNewClient(false);
-                }
-              }}
+              onSubmit={handleCreateNewUser}
               className="space-y-4"
             >
               <div className="grid grid-cols-2 gap-4">
