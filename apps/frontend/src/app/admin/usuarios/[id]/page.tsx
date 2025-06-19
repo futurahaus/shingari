@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { api } from '@/lib/api';
 
 interface UserDetails {
@@ -38,6 +38,7 @@ interface SpecialPrice {
 export default function UserDetailsPage() {
   const params = useParams();
   const userId = params?.id as string;
+  const router = useRouter();
 
   const [user, setUser] = useState<UserDetails | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -48,6 +49,8 @@ export default function UserDetailsPage() {
   const [editForm, setEditForm] = useState<UserDetails | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!userId) return;
@@ -98,6 +101,25 @@ export default function UserDetailsPage() {
     }
   };
 
+  const handleDeleteUser = async () => {
+    if (!userId) return;
+    if (!window.confirm('¿Estás seguro de que deseas cancelar esta cuenta? Esta acción no se puede deshacer.')) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await api.delete(`/user/admin/${userId}`);
+      router.push('/admin/usuarios');
+    } catch (err: unknown) {
+      let message = 'Error desconocido';
+      if (err && typeof err === 'object' && 'message' in err && typeof (err as { message: unknown }).message === 'string') {
+        message = (err as { message: string }).message;
+      }
+      setDeleteError('Error al cancelar la cuenta: ' + message);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -120,9 +142,14 @@ export default function UserDetailsPage() {
           <h1 className="text-2xl font-bold mb-1">Detalles</h1>
           <p className="text-gray-500 text-sm">Gestiona Descuentos y Promociones por cliente</p>
         </div>
-        <button className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer" onClick={() => setShowEditModal(true)}>
-          + Editar Detalles del Cliente
-        </button>
+        <div>
+          <button className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer" onClick={() => setShowEditModal(true)}>
+            + Editar Detalles del Cliente
+          </button>
+          <button className="ml-2 px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer" onClick={handleDeleteUser} disabled={deleting}>
+            {deleting ? 'Cancelando...' : 'Cancelar cuenta'}
+          </button>
+        </div>
       </div>
 
       {/* Edit User Modal */}
@@ -299,6 +326,8 @@ export default function UserDetailsPage() {
           </table>
         </div>
       </div>
+
+      {deleteError && <div className="text-red-600 text-sm mb-4">{deleteError}</div>}
     </div>
   );
 }
