@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { ProductCard, Product } from '@/components/ProductCard';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ProductCardSkeleton from '@/components/ProductCardSkeleton';
+import { Button } from '@/app/ui/components/Button';
 
 interface Category {
     id: string;
@@ -232,13 +233,13 @@ const ProductsSection = ({
                     </div>
                     <div className="text-center mt-8">
                         {hasMore && (
-                            <button
-                                onClick={loadMoreProducts}
-                                disabled={loading}
-                                className="button bg-red-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-red-600 transition-colors disabled:bg-gray-400"
-                            >
-                                <b>{loading ? 'Cargando...' : 'Mostrar más'}</b>
-                            </button>
+                            <Button
+                                onPress={loadMoreProducts}
+                                type="primary"
+                                text={loading ? 'Cargando...' : 'Mostrar más'}
+                                testID="load-more-button"
+                                icon={loading ? undefined : "FaChevronDown"}
+                            />
                         )}
                     </div>
                 </>

@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { Button } from '@/app/ui/components/Button';
 
 export interface Product {
     id: string;
@@ -46,9 +47,16 @@ export const ProductCard = ({ product }: { product: Product }) => (
                     </h5>
                 )}
                 <p className="mb-4 line-clamp-2">{product.description}</p>
-                <button className="button w-full bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600 transition-colors">
-                    <b>Agregar al carrito</b>
-                </button>
+                <Button
+                    onPress={() => {
+                        // Aquí puedes agregar la lógica para agregar al carrito
+                        console.log('Agregar al carrito:', product.id);
+                    }}
+                    type="primary"
+                    text="Agregar al carrito"
+                    testID={`add-to-cart-${product.id}`}
+                    icon="FaShoppingCart"
+                />
             </div>
         </div>
     </Link>
