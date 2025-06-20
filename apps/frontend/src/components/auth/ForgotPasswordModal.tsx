@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
+import { Button } from '@/app/ui/components/Button';
+import { Text } from '@/app/ui/components/Text';
+import { Input } from '@/app/ui/components/Input';
 
 interface ForgotPasswordModalProps {
   isOpen: boolean;
@@ -12,8 +15,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setError('');
     setSuccessMessage('');
     setIsLoading(true);
@@ -69,44 +71,42 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
           <FaTimes className="w-5 h-5" />
         </button>
         <div className="p-6">
-          <h2 className="text-center text-2xl font-semibold text-gray-900 mb-6">
+          <Text as="h2" size="2xl" weight="semibold" color="primary" className="text-center mb-6">
             Restablecer Contraseña
-          </h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          </Text>
+          <div className="space-y-4">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded relative" role="alert">
-                <span className="block sm:inline">{error}</span>
+              <div className="bg-red-50 border border-red-200 px-4 py-3 rounded relative" role="alert">
+                <Text as="span" size="sm" color="error" className="block sm:inline">
+                  {error}
+                </Text>
               </div>
             )}
             {successMessage && (
-              <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded relative" role="alert">
-                <span className="block sm:inline">{successMessage}</span>
+              <div className="bg-green-50 border border-green-200 px-4 py-3 rounded relative" role="alert">
+                <Text as="span" size="sm" color="success" className="block sm:inline">
+                  {successMessage}
+                </Text>
               </div>
             )}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Correo electrónico
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="text-gray-900 w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
-              />
-            </div>
-            <button
-              type="submit"
-              className="button w-full bg-red-600 text-white py-3 px-4 rounded-lg text-base font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            
+            <Input
+              label="Correo electrónico"
+              value={email}
+              onChangeValue={setEmail}
+              type="email"
+              placeholder="tu@email.com"
               disabled={isLoading}
-            >
-              {isLoading ? 'Enviando...' : 'Enviar instrucciones'}
-            </button>
-          </form>
+              testID="forgot-password-email-input"
+            />
+            
+            <Button
+              onPress={handleSubmit}
+              type="primary"
+              text={isLoading ? "Enviando..." : "Enviar instrucciones"}
+              testID="forgot-password-submit-button"
+            />
+          </div>
         </div>
       </div>
     </div>

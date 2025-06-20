@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { FaEye, FaEyeSlash, FaTimes } from 'react-icons/fa';
 import ForgotPasswordModal from './ForgotPasswordModal';
+import { Button } from '@/app/ui/components/Button';
+import { Text } from '@/app/ui/components/Text';
+import { Input } from '@/app/ui/components/Input';
 
 interface LoginFormData extends Record<string, unknown> {
   email: string;
@@ -30,8 +33,42 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
   const [successMessage, setSuccessMessage] = useState('');
   const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleRegister = async () => {
+    setError('');
+    setSuccessMessage('');
+    setIsLoading(true);
+
+    try {
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error al registrar usuario');
+      }
+
+      setSuccessMessage(data.message);
+      setFormData({ email: '', password: '' });
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError(err instanceof Error ? err.message : 'Error al registrar usuario');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleSubmitClick = async () => {
     setError('');
     setSuccessMessage('');
     setIsLoading(true);
@@ -78,49 +115,6 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
     }
   };
 
-  const handleRegister = async () => {
-    setError('');
-    setSuccessMessage('');
-    setIsLoading(true);
-
-    try {
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Error al registrar usuario');
-      }
-
-      setSuccessMessage(data.message);
-      setFormData({ email: '', password: '' });
-    } catch (err) {
-      console.error('Registration error:', err);
-      setError(err instanceof Error ? err.message : 'Error al registrar usuario');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -135,100 +129,81 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
             <FaTimes className="w-5 h-5" />
           </button>
           <div className="p-6">
-            <h2 className="text-center text-2xl font-semibold text-gray-900 mb-6">
+            <Text as="h2" size="2xl" weight="semibold" color="primary" className="text-center mb-6">
               Inicia sesión
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            </Text>
+            <div className="space-y-4">
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded relative" role="alert">
-                  <span className="block sm:inline">{error}</span>
+                <div className="bg-red-50 border border-red-200 px-4 py-3 rounded relative" role="alert">
+                  <Text as="span" size="sm" color="error" className="block sm:inline">
+                    {error}
+                  </Text>
                 </div>
               )}
               {successMessage && (
-                <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded relative" role="alert">
-                  <span className="block sm:inline">{successMessage}</span>
+                <div className="bg-green-50 border border-green-200 px-4 py-3 rounded relative" role="alert">
+                  <Text as="span" size="sm" color="success" className="block sm:inline">
+                    {successMessage}
+                  </Text>
                 </div>
               )}
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                  Correo electrónico
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="text-gray-900 w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
-                  value={formData.email}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                />
-              </div>
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                  Contraseña
-                </label>
-                <div className="relative">
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="current-password"
-                    required
-                    className="text-gray-900 w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 pr-10"
-                    value={formData.password}
-                    onChange={handleChange}
-                    disabled={isLoading}
-                  />
-                  <button
-                    type="button"
-                    onClick={togglePasswordVisibility}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                  >
-                    {showPassword ? (
-                      <FaEyeSlash className="h-5 w-5" />
-                    ) : (
-                      <FaEye className="h-5 w-5" />
-                    )}
-                  </button>
-                </div>
-              </div>
+              
+              <Input
+                label="Correo electrónico"
+                value={formData.email}
+                onChangeValue={(value) => setFormData(prev => ({ ...prev, email: value }))}
+                type="email"
+                placeholder="tu@email.com"
+                disabled={isLoading}
+                testID="login-email-input"
+              />
+              
+              <Input
+                label="Contraseña"
+                value={formData.password}
+                onChangeValue={(value) => setFormData(prev => ({ ...prev, password: value }))}
+                type={showPassword ? "text" : "password"}
+                placeholder="Tu contraseña"
+                iconRight={showPassword ? "FaEyeSlash" : "FaEye"}
+                iconRightOnPress={togglePasswordVisibility}
+                disabled={isLoading}
+                testID="login-password-input"
+              />
+              
               <div className="text-right">
                 <button
                   type="button"
                   onClick={() => {
-                    // onClose();
                     setIsForgotPasswordModalOpen(true);
                   }}
                   className="text-sm text-gray-600 hover:text-red-500"
                 >
-                  ¿Has olvidado la contraseña?
+                  <Text as="span" size="sm" color="secondary" className="hover:text-primary-main">
+                    ¿Has olvidado la contraseña?
+                  </Text>
                 </button>
               </div>
-              <button
-                type="submit"
-                className="button w-full bg-red-600 text-white py-3 px-4 rounded-lg text-base font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isLoading}
-              >
-                Inicia Sesión
-              </button>
-            </form>
+              
+              <Button
+                onPress={handleSubmitClick}
+                type="primary"
+                text={isLoading ? "Iniciando sesión..." : "Inicia Sesión"}
+                testID="login-submit-button"
+              />
+            </div>
 
             <div className="mt-8 space-y-4">
               <div className="text-center">
-                <p className="text-base text-gray-900">
+                <Text as="p" size="md" color="primary">
                   ¿Aún no estás registrado?
-                </p>
+                </Text>
               </div>
-              <button
-                onClick={handleRegister}
-                disabled={isLoading}
-                className="button block w-full bg-red-600 text-white py-3 px-4 rounded-lg text-base font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 text-center disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Regístrate
-              </button>
+              <Button
+                onPress={handleRegister}
+                type="primary"
+                text={isLoading ? "Registrando..." : "Regístrate"}
+                testID="register-button"
+              />
             </div>
           </div>
         </div>

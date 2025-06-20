@@ -159,7 +159,7 @@ export const Text: React.FC<TextProps> = ({
     className
   ].filter(Boolean).join(' ');
 
-  // Obtener el color como valor
+  // Obtener el color como valor - SIEMPRE se aplica
   const colorValue = getColorValue(color);
 
   return (

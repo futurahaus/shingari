@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
+import { Input } from '@/app/ui/components/Input';
 import { colors } from './colors';
 
 interface ColorSwatchProps {
@@ -435,6 +436,226 @@ export default function ComponentsListPage() {
                 </div>
               </section>
 
+              {/* Sección de Input */}
+              <section className="mb-12">
+                <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b border-gray-200 pb-2">
+                  Componente Input
+                </h2>
+                
+                <div className="space-y-8">
+                  {/* Inputs básicos */}
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-700 mb-4">Inputs Básicos</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <Input
+                        label="Nombre"
+                        value=""
+                        onChangeValue={(value) => console.log('Nombre:', value)}
+                        placeholder="Ingresa tu nombre"
+                        testID="name-input"
+                      />
+                      
+                      <Input
+                        label="Email"
+                        value=""
+                        onChangeValue={(value) => console.log('Email:', value)}
+                        placeholder="ejemplo@email.com"
+                        type="email"
+                        testID="email-input"
+                      />
+                      
+                      <Input
+                        label="Teléfono"
+                        value=""
+                        onChangeValue={(value) => console.log('Teléfono:', value)}
+                        placeholder="+34 123 456 789"
+                        type="tel"
+                        testID="phone-input"
+                      />
+                      
+                      <Input
+                        label="URL"
+                        value=""
+                        onChangeValue={(value) => console.log('URL:', value)}
+                        placeholder="https://ejemplo.com"
+                        type="url"
+                        testID="url-input"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Inputs con iconos */}
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-700 mb-4">Inputs con Iconos</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <Input
+                        label="Contraseña"
+                        value=""
+                        onChangeValue={(value) => console.log('Contraseña:', value)}
+                        type="password"
+                        placeholder="Ingresa tu contraseña"
+                        iconRight="FaEye"
+                        iconRightOnPress={() => console.log('Mostrar/ocultar contraseña')}
+                        testID="password-input"
+                      />
+                      
+                      <Input
+                        label="Buscar"
+                        value=""
+                        onChangeValue={(value) => console.log('Búsqueda:', value)}
+                        placeholder="Buscar productos..."
+                        iconRight="FaSearch"
+                        iconRightOnPress={() => console.log('Ejecutar búsqueda')}
+                        testID="search-input"
+                      />
+                      
+                      <Input
+                        label="Limpiar"
+                        value="texto de ejemplo"
+                        onChangeValue={(value) => console.log('Valor:', value)}
+                        placeholder="Escribe algo..."
+                        iconRight="FaTimes"
+                        iconRightOnPress={() => console.log('Limpiar campo')}
+                        testID="clear-input"
+                      />
+                      
+                      <Input
+                        label="Calendario"
+                        value=""
+                        onChangeValue={(value) => console.log('Fecha:', value)}
+                        placeholder="Seleccionar fecha"
+                        iconRight="FaCalendar"
+                        iconRightOnPress={() => console.log('Abrir calendario')}
+                        testID="calendar-input"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Estados del input */}
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-700 mb-4">Estados del Input</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <Input
+                        label="Campo con Error"
+                        value="valor incorrecto"
+                        onChangeValue={(value) => console.log('Valor:', value)}
+                        placeholder="Campo requerido"
+                        error="Este campo es obligatorio"
+                        testID="error-input"
+                      />
+                      
+                      <Input
+                        label="Campo Deshabilitado"
+                        value="valor fijo"
+                        onChangeValue={(value) => console.log('Valor:', value)}
+                        placeholder="No se puede editar"
+                        disabled={true}
+                        testID="disabled-input"
+                      />
+                      
+                      <Input
+                        label="Campo Normal"
+                        value=""
+                        onChangeValue={(value) => console.log('Valor:', value)}
+                        placeholder="Campo funcional"
+                        testID="normal-input"
+                      />
+                      
+                      <Input
+                        label="Campo con Valor"
+                        value="texto predefinido"
+                        onChangeValue={(value) => console.log('Valor:', value)}
+                        placeholder="Escribe aquí"
+                        testID="filled-input"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Casos de uso específicos */}
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-700 mb-4">Casos de Uso Específicos</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Formulario de login */}
+                      <div className="bg-gray-50 p-6 rounded-lg">
+                        <h4 className="font-medium text-gray-800 mb-4">Formulario de Login</h4>
+                        <div className="space-y-4">
+                          <Input
+                            label="Email"
+                            value=""
+                            onChangeValue={(value) => console.log('Email:', value)}
+                            placeholder="tu@email.com"
+                            type="email"
+                            testID="login-email"
+                          />
+                          <Input
+                            label="Contraseña"
+                            value=""
+                            onChangeValue={(value) => console.log('Password:', value)}
+                            type="password"
+                            placeholder="Tu contraseña"
+                            iconRight="FaEye"
+                            iconRightOnPress={() => console.log('Toggle password')}
+                            testID="login-password"
+                          />
+                          <Button
+                            onPress={() => console.log('Iniciar sesión')}
+                            type="primary"
+                            text="Iniciar Sesión"
+                            testID="login-button"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Formulario de registro */}
+                      <div className="bg-gray-50 p-6 rounded-lg">
+                        <h4 className="font-medium text-gray-800 mb-4">Formulario de Registro</h4>
+                        <div className="space-y-4">
+                          <Input
+                            label="Nombre completo"
+                            value=""
+                            onChangeValue={(value) => console.log('Nombre:', value)}
+                            placeholder="Juan Pérez"
+                            testID="register-name"
+                          />
+                          <Input
+                            label="Email"
+                            value=""
+                            onChangeValue={(value) => console.log('Email:', value)}
+                            placeholder="juan@email.com"
+                            type="email"
+                            testID="register-email"
+                          />
+                          <Input
+                            label="Contraseña"
+                            value=""
+                            onChangeValue={(value) => console.log('Password:', value)}
+                            type="password"
+                            placeholder="Mínimo 8 caracteres"
+                            iconRight="FaEye"
+                            iconRightOnPress={() => console.log('Toggle password')}
+                            testID="register-password"
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              onPress={() => console.log('Registrar')}
+                              type="primary"
+                              text="Registrar"
+                              testID="register-button"
+                            />
+                            <Button
+                              onPress={() => console.log('Cancelar')}
+                              type="secondary"
+                              text="Cancelar"
+                              testID="cancel-register-button"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
               {/* Información del componente */}
               <section className="bg-blue-50 p-6 rounded-lg">
                 <h3 className="text-lg font-medium text-blue-800 mb-4">Información de los Componentes</h3>
@@ -447,6 +668,8 @@ export default function ComponentsListPage() {
                       <li><code>text: string</code> - Texto del botón</li>
                       <li><code>testID: string</code> - Identificador para testing</li>
                       <li><code>icon?: keyof typeof FaIcons</code> - Icono opcional de Font Awesome</li>
+                      <li><code>inline?: boolean</code> - Si el botón debe ocupar todo el ancho</li>
+                      <li><code>textProps?: Omit&lt;TextProps, &apos;children&apos;&gt;</code> - Props para personalizar el texto</li>
                     </ul>
                   </div>
                   
@@ -462,8 +685,24 @@ export default function ComponentsListPage() {
                       <li><code>testID?: string</code> - Identificador para testing</li>
                     </ul>
                   </div>
+
+                  <div>
+                    <p><strong>Componente Input - Propiedades:</strong></p>
+                    <ul className="list-disc list-inside space-y-1 ml-4">
+                      <li><code>label: string</code> - Etiqueta del campo de entrada</li>
+                      <li><code>value: string</code> - Valor actual del input</li>
+                      <li><code>onChangeValue: (value: string) =&gt; void</code> - Función que se ejecuta cuando cambia el valor</li>
+                      <li><code>iconRight?: keyof typeof FaIcons</code> - Icono de FontAwesome que se muestra a la derecha</li>
+                      <li><code>iconRightOnPress?: () =&gt; void</code> - Función que se ejecuta al hacer clic en el icono</li>
+                      <li><code>placeholder?: string</code> - Texto de placeholder</li>
+                      <li><code>type?: &apos;text&apos; | &apos;email&apos; | &apos;password&apos; | &apos;number&apos; | &apos;tel&apos; | &apos;url&apos;</code> - Tipo de input</li>
+                      <li><code>disabled?: boolean</code> - Estado deshabilitado</li>
+                      <li><code>error?: string</code> - Mensaje de error</li>
+                      <li><code>testID?: string</code> - Identificador para testing</li>
+                    </ul>
+                  </div>
                   
-                  <p className="mt-4"><strong>Iconos disponibles:</strong> Cualquier icono de Font Awesome (FaSave, FaSearch, FaPlus, etc.)</p>
+                  <p className="mt-4"><strong>Iconos disponibles:</strong> Cualquier icono de Font Awesome (FaSave, FaSearch, FaPlus, FaEye, FaTimes, etc.)</p>
                 </div>
               </section>
             </>
