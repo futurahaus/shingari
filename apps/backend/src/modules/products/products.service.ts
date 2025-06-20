@@ -98,6 +98,88 @@ export class ProductsService {
     };
   }
 
+  private async mapToProductsResponseDto(products: ProductWithCategoriesForResponse[], userId?: string): Promise<ProductResponseDto[]> {
+    let discountMap: Map<number, number> | null = null;
+    let userRole: string | null = null;
+
+    if (userId) {
+      // Obtener todos los descuentos del usuario en una sola consulta
+      const now = new Date();
+      const userDiscounts = await this.prisma.products_discounts.findMany({
+        where: {
+          user_id: userId,
+          is_active: true,
+          product_id: {
+            in: products.map(p => p.id)
+          },
+          AND: [
+            {
+              OR: [
+                { valid_from: { lte: now } },
+                { valid_from: null },
+              ],
+            },
+            {
+              OR: [
+                { valid_to: { gte: now } },
+                { valid_to: null },
+              ],
+            },
+          ],
+        },
+        select: {
+          product_id: true,
+          price: true,
+        },
+      });
+
+      // Crear un mapa de descuentos por product_id para acceso rápido
+      discountMap = new Map<number, number>();
+      userDiscounts.forEach(discount => {
+        if (discount.product_id !== null) {
+          discountMap!.set(discount.product_id, discount.price.toNumber());
+        }
+      });
+
+      // Obtener el rol del usuario una sola vez
+      userRole = await this.getUserRole(userId);
+    }
+
+    // Mapear productos con descuentos optimizados
+    return products.map(product => {
+      let price = product.list_price.toNumber();
+
+      if (userId && discountMap && userRole) {
+        // Verificar si hay descuento específico para el usuario
+        const userDiscountPrice = discountMap.get(product.id);
+        
+        if (userDiscountPrice !== undefined) {
+          // Si hay un descuento específico, usamos ese precio
+          price = userDiscountPrice;
+        } else if (userRole === 'business') {
+          // Si no hay descuento específico pero es usuario business, usar precio mayorista
+          price = product.wholesale_price?.toNumber() || product.list_price.toNumber();
+        }
+      }
+
+      const discount = Number(((1 - (price / product.list_price.toNumber())) * 100).toFixed(2));
+
+      return {
+        updatedAt: new Date(),
+        id: product.id.toString(),
+        name: product.name,
+        description: product.description || '',
+        price: price,
+        originalPrice: product.list_price.toNumber(),
+        discount: discount,
+        createdAt: product.created_at || new Date(),
+        categories: product.products_categories?.map(pc => pc.categories.name) || [],
+        images: product.product_images?.map(pi => pi.image_url) || [],
+        sku: product.sku || '',
+      };
+    });
+  }
+
   async findAllPublic(queryProductDto: QueryProductDto, userId?: string): Promise<PaginatedProductResponseDto> {
     const { page = 1, limit = 10, searchName, categoryFilters, sortByPrice } = queryProductDto;
     const skip = (page - 1) * limit;
@@ -153,8 +235,9 @@ export class ProductsService {
 
     const total = await this.prisma.products.count({ where });
 
-    const mappedProducts = await Promise.all(
-      productsData.map(p => this.mapToProductResponseDto(p as ProductWithCategoriesForResponse, userId))
+    const mappedProducts = await this.mapToProductsResponseDto(
+      productsData as ProductWithCategoriesForResponse[], 
+      userId
     );
 
     return {
@@ -540,10 +623,8 @@ export class ProductsService {
       },
     });
 
-    return Promise.all(
-      productsData.map((p) =>
-        this.mapToProductResponseDto(p as ProductWithCategoriesForResponse),
-      ),
+    return this.mapToProductsResponseDto(
+      productsData as ProductWithCategoriesForResponse[],
     );
   }
 
