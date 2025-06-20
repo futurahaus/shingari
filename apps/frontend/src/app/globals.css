@@ -2,37 +2,14 @@
 @import "tailwindcss";
 
 :root {
-  --primary: #EA3D15;
-  --neutral-dark: #000000;
-  --neutral-light: #838383;
-  --list-item-color: #121417;
-  --select-background: #EEEEEE;
-  --footer-background: #F7F7F7;
-  --search-background: #F2F2F2;
-  --input-text-color: #757575;
   --background: #FFFFFF;
   --foreground: var(--neutral-dark);
 }
 
-@theme inline {
-  --color-primary: var(--primary);
-  --color-neutral-dark: var(--neutral-dark);
-  --color-neutral-light: var(--neutral-light);
-  --color-list-item: var(--list-item-color);
-  --color-select-background: var(--select-background);
-  --color-footer-background: var(--footer-background);
-  --color-search-background: var(--search-background);
-  --color-input-text: var(--input-text-color);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: var(--background);
-    --foreground: #FFFFFF;
+    --background: #FFFFFF;
+    --foreground: var(--neutral-dark);
   }
 }
 
@@ -40,114 +17,4 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: 'Instrument Sans', sans-serif;
-}
-
-h1 {
-  color: var(--neutral-dark);
-  font-family: 'Instrument Sans', sans-serif;
-  font-weight: 700;
-  font-size: 32px;
-  line-height: 40px;
-  letter-spacing: 0px;
-}
-
-h2 {
-  color: var(--neutral-dark);
-}
-
-h3 {
-  color: var(--neutral-dark);
-  font-family: 'Instrument Sans', sans-serif;
-  font-weight: 700;
-  font-size: 16px;
-  line-height: 1; /* 100% */
-  letter-spacing: 0; /* 0% */
-  vertical-align: middle;
-}
-
-h4 {
-  color: var(--neutral-dark);
-  font-family: 'Instrument Sans', sans-serif;
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 1; /* 100% */
-  letter-spacing: -0.02em; /* -2% */
-  vertical-align: middle;
-}
-
-li {
-  color: var(--list-item-color);
-}
-
-p {
-  font-family: 'Instrument Sans', sans-serif;
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 1; /* 100% */
-  letter-spacing: 0; /* 0% */
-  vertical-align: middle;
-  color: var(--neutral-dark);
-}
-
-select {
-  background-color: var(--select-background);
-  color: var(--list-item-color);
-  border-radius: 12px;
-  border-width: 0px;
-}
-
-button.button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  max-width: 480px;
-  padding: 12px 10px;
-  gap: 8px;
-  border-radius: 8px;
-  background-color: var(--primary);
-  color: #FFFFFF;
-  border: none;
-  cursor: pointer;
-  font-family: 'Instrument Sans', sans-serif;
-  font-weight: 500;
-  font-size: 12px;
-  line-height: 24px;
-  letter-spacing: 0px;
-  transition: filter 0.2s ease-in-out;
-}
-
-button.button:hover {
-  filter: brightness(0.9);
-}
-
-button.button:disabled {
-  background-color: var(--primary);
-  cursor: not-allowed;
-  filter: none;
-  opacity: 0.5;
-}
-
-nav.main-navbar {
-  background-color: var(--primary);
-}
-
-nav a {
-  font-family: 'Instrument Sans', sans-serif;
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 21px;
-  letter-spacing: 0px;
-}
-
-input[type="text"] {
-  font-family: 'Instrument Sans', sans-serif;
-  font-weight: 400;
-  font-size: 16px;
-  line-height: 24px;
-  letter-spacing: 0px;
-  color: var(--input-text-color);
-}
-
-input[type="text"]::placeholder {
-  color: var(--input-text-color);
 }
