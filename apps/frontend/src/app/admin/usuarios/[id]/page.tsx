@@ -99,7 +99,11 @@ export default function UserDetailsPage() {
   };
 
   if (loading) {
-    return <div className="p-8">Cargando...</div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+      </div>
+    );
   }
   if (error) {
     return <div className="p-8 text-red-600">{error}</div>;
