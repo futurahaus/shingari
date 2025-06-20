@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/app/ui/components/Button';
+import { Text } from '@/app/ui/components/Text';
 
 export interface Product {
     id: string;
@@ -26,27 +27,52 @@ export const ProductCard = ({ product }: { product: Product }) => (
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                 ) : (
-                    <div className="text-gray-400">Sin imagen</div>
+                    <Text as="div" size="sm" color="gray-400" className="text-center">
+                        Sin imagen
+                    </Text>
                 )}
             </div>
             <div className="p-4">
-                <h3 className="text-lg font-bold">{product.name}</h3>
+                <Text as="h3" size="lg" weight="bold" color="primary" testID={`product-name-${product.id}`}>
+                    {product.name}
+                </Text>
                 <div className="flex items-center mt-2">
-                    <h4>
+                    <Text as="h4" size="md" weight="semibold" color="gray-900" testID={`product-price-${product.id}`}>
                         {`€${new Intl.NumberFormat('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(product.price)}`}
-                    </h4>
+                    </Text>
                     {product.discount && (
-                        <span className="ml-auto bg-primary text-white text-xs font-bold leading-none tracking-normal align-middle px-2.5 py-0.5 rounded-full">
+                        <Text 
+                            as="span" 
+                            size="xs" 
+                            weight="bold" 
+                            color="primary-contrast" 
+                            className="ml-auto bg-primary text-white leading-none tracking-normal align-middle px-2.5 py-0.5 rounded-full"
+                            testID={`product-discount-${product.id}`}
+                        >
                             -{product.discount.toFixed(2)}%
-                        </span>
+                        </Text>
                     )}
                 </div>
                 {product.discount && product.originalPrice && (
-                    <h5 className="text-sm text-gray-500 line-through mb-2">
+                    <Text 
+                        as="h5" 
+                        size="sm" 
+                        color="tertiary" 
+                        className="line-through mb-2"
+                        testID={`product-original-price-${product.id}`}
+                    >
                         €{new Intl.NumberFormat('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(product.originalPrice)}
-                    </h5>
+                    </Text>
                 )}
-                <p className="mb-4 line-clamp-2">{product.description}</p>
+                <Text 
+                    as="p" 
+                    size="sm" 
+                    color="secondary" 
+                    className="mb-4 line-clamp-2"
+                    testID={`product-description-${product.id}`}
+                >
+                    {product.description}
+                </Text>
                 <Button
                     onPress={() => {
                         // Aquí puedes agregar la lógica para agregar al carrito

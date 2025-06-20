@@ -19,7 +19,7 @@ type TextColor =
   | 'gray-500' | 'gray-600' | 'gray-700' | 'gray-800' | 'gray-900'
   | 'white';
 
-interface TextProps {
+export interface TextProps {
   children: React.ReactNode;
   size?: TextSize;
   weight?: TextWeight;

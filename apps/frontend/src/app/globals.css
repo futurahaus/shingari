@@ -79,52 +79,11 @@ li {
   color: var(--list-item-color);
 }
 
-p {
-  font-family: 'Instrument Sans', sans-serif;
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 1; /* 100% */
-  letter-spacing: 0; /* 0% */
-  vertical-align: middle;
-  color: var(--neutral-dark);
-}
-
 select {
   background-color: var(--select-background);
   color: var(--list-item-color);
   border-radius: 12px;
   border-width: 0px;
-}
-
-button.button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  max-width: 480px;
-  padding: 12px 10px;
-  gap: 8px;
-  border-radius: 8px;
-  background-color: var(--primary);
-  color: #FFFFFF;
-  border: none;
-  cursor: pointer;
-  font-family: 'Instrument Sans', sans-serif;
-  font-weight: 500;
-  font-size: 12px;
-  line-height: 24px;
-  letter-spacing: 0px;
-  transition: filter 0.2s ease-in-out;
-}
-
-button.button:hover {
-  filter: brightness(0.9);
-}
-
-button.button:disabled {
-  background-color: var(--primary);
-  cursor: not-allowed;
-  filter: none;
-  opacity: 0.5;
 }
 
 nav.main-navbar {

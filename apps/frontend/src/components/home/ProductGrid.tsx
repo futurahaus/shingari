@@ -5,6 +5,7 @@ import { api } from '@/lib/api';
 import { Product, ProductCard } from '../ProductCard';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { Text } from '@/app/ui/components/Text';
 
 interface PaginatedProductsResponse {
     data: Product[];
@@ -41,9 +42,9 @@ export default function ProductGrid() {
     if (loading) {
         return (
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                <Text as="h2" size="2xl" weight="bold" color="primary" className="mb-6 text-center">
                     Descubre nuestros productos
-                </h2>
+                </Text>
                 <div className="flex gap-6 overflow-x-auto pb-2 animate-pulse">
                     {[...Array(6)].map((_, i) => (
                         <div
@@ -68,10 +69,12 @@ export default function ProductGrid() {
     if (error) {
         return (
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                <Text as="h2" size="2xl" weight="bold" color="primary" className="mb-6 text-center">
                     Descubre nuestros productos
-                </h2>
-                <p className="text-center text-red-500">{error}</p>
+                </Text>
+                <Text as="p" size="md" color="error" className="text-center" testID="product-grid-error">
+                    {error}
+                </Text>
             </div>
         );
     }
@@ -82,9 +85,9 @@ export default function ProductGrid() {
 
     return (
         <div className="w-full px-4 sm:px-6 lg:px-16 py-8" data-testid="product-grid">
-            <h2 className="text-2xl font-bold mb-6">
+            <Text as="h2" size="2xl" weight="bold" color="primary" className="mb-6">
                 Productos destacados
-            </h2>
+            </Text>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                 {products.map(product => (
@@ -102,12 +105,18 @@ export default function ProductGrid() {
                                     className="object-cover rounded-2xl transition-transform duration-300 group-hover:scale-105"
                                 />
                             ) : (
-                                <div className="w-full h-40 flex items-center justify-center text-gray-400 bg-gray-100 rounded-t-2xl">Sin imagen</div>
+                                <Text as="div" size="sm" color="gray-400" className="w-full h-40 flex items-center justify-center bg-gray-100 rounded-t-2xl">
+                                    Sin imagen
+                                </Text>
                             )}
                         </div>
                         <div className="py-4">
-                            <div className="font-semibold text-lg text-black">{product.name}</div>
-                            <div className="text-gray-600 text-base">€{product.price.toFixed(2)}</div>
+                            <Text as="div" size="lg" weight="semibold" color="primary" className="text-black">
+                                {product.name}
+                            </Text>
+                            <Text as="div" size="md" color="secondary">
+                                €{product.price.toFixed(2)}
+                            </Text>
                         </div>
                     </div>
                 ))}

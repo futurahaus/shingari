@@ -8,6 +8,7 @@ import { ProductCard, Product } from '@/components/ProductCard';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ProductCardSkeleton from '@/components/ProductCardSkeleton';
 import { Button } from '@/app/ui/components/Button';
+import { Text } from '@/app/ui/components/Text';
 
 interface Category {
     id: string;
@@ -41,7 +42,9 @@ const CategorySidebar = ({
     onSelectCategory: (name: string | null) => void;
 }) => (
     <aside className="w-64 pr-8">
-        <h2 className="text-xl font-bold mb-4">Categorías</h2>
+        <Text as="h2" size="xl" weight="bold" color="primary" className="mb-4">
+            Categorías
+        </Text>
         <ul className="space-y-2">
             {categories.map((category) => {
                 const isSelected = category.name === selectedCategoryName;
@@ -53,12 +56,17 @@ const CategorySidebar = ({
                                 e.preventDefault();
                                 onSelectCategory(category.name);
                             }}
-                            className={`font-medium ${isSelected
-                                ? 'text-red-500 font-bold'
-                                : 'text-gray-700 hover:text-black'
-                                }`}
+                            className="block"
                         >
-                            {category.name}
+                            <Text 
+                                as="span" 
+                                size="md" 
+                                weight={isSelected ? "bold" : "medium"}
+                                color={isSelected ? "primary-main" : "secondary"}
+                                className={`hover:text-black transition-colors`}
+                            >
+                                {category.name}
+                            </Text>
                         </a>
                     </li>
                 );
@@ -74,11 +82,23 @@ const Breadcrumb = ({
     selectedCategory: string | null;
     onSelectCategory: (name: string | null) => void;
 }) => (
-    <div className="text-sm text-gray-500 mb-4">
-        <Link href="/" className="hover:text-gray-700">Inicio</Link> / <Link href="/products" className="hover:text-gray-700">Productos</Link>
-        {selectedCategory && (
-            <> / <span className="font-semibold">{selectedCategory}</span></>
-        )}
+    <div className="mb-4">
+        <Text as="div" size="sm" color="tertiary">
+            <Link href="/" className="hover:text-gray-700">
+                <Text as="span" size="sm" color="tertiary" className="hover:text-gray-700">
+                    Inicio
+                </Text>
+            </Link> / <Link href="/products" className="hover:text-gray-700">
+                <Text as="span" size="sm" color="tertiary" className="hover:text-gray-700">
+                    Productos
+                </Text>
+            </Link>
+            {selectedCategory && (
+                <> / <Text as="span" size="sm" weight="semibold" color="secondary">
+                    {selectedCategory}
+                </Text></>
+            )}
+        </Text>
     </div>
 );
 
@@ -214,7 +234,9 @@ const ProductsSection = ({
                 selectedCategory={selectedCategory}
                 onSelectCategory={onSelectCategory}
             />
-            <h1 className="text-4xl font-extrabold mb-6">{selectedCategory || 'Todos los Productos'}</h1>
+            <Text as="h1" size="4xl" weight="extrabold" color="primary" className="mb-6">
+                {selectedCategory || 'Todos los Productos'}
+            </Text>
             <ProductFilters filters={filters} onFilterChange={handleFilterChange} />
             {loading && products.length === 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
@@ -223,7 +245,9 @@ const ProductsSection = ({
                     ))}
                 </div>
             ) : error ? (
-                <p className="text-red-500">{error}</p>
+                <Text as="p" size="md" color="error" testID="error-message">
+                    {error}
+                </Text>
             ) : (
                 <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -236,6 +260,7 @@ const ProductsSection = ({
                             <Button
                                 onPress={loadMoreProducts}
                                 type="primary"
+                                inline={true}
                                 text={loading ? 'Cargando...' : 'Mostrar más'}
                                 testID="load-more-button"
                                 icon={loading ? undefined : "FaChevronDown"}

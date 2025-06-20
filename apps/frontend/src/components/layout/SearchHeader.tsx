@@ -7,6 +7,8 @@ import { useState } from 'react';
 import LoginModal from '@/components/auth/LoginModal';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/app/ui/components/Button';
+import { Text } from '@/app/ui/components/Text';
 
 export default function SearchHeader() {
   const { user, logout } = useAuth();
@@ -38,28 +40,43 @@ export default function SearchHeader() {
 
             <div className="flex items-center space-x-4">
               {user ? (
-                <div className="flex items-center space-x-4">
-                  <button
-                    onClick={() => router.push('/dashboard')} disabled={false}
-                    className="button h-12 min-w-12"
-                  >
-                    <FaUser className="h-4 w-4" />
-                    <span className="hidden sm:block">Mi perfil</span>
-                  </button>
-                </div>
+                <Button
+                  onPress={() => router.push('/dashboard')}
+                  type="primary"
+                  text="Mi perfil"
+                  testID="profile-button"
+                  icon="FaUser"
+                  textProps={{
+                    size: 'sm',
+                  }}
+                  inline={true}
+                />
               ) : (
-                <button
-                  onClick={() => setIsLoginModalOpen(true)}
-                  className="button"
-
-                >
-                  <FaUser className="h-4 w-4" />
-                  Iniciar sesión
-                </button>
+                <Button
+                  onPress={() => setIsLoginModalOpen(true)}
+                  type="primary"
+                  text="Iniciar sesión"
+                  testID="login-button"
+                  icon="FaUser"
+                  textProps={{
+                    size: 'sm',
+                  }}
+                  inline={true}
+                />
               )}
-              <button className="button h-12 w-12" >
-                <FaShoppingCart className="h-4 w-4" />
-              </button>
+              <Button
+                onPress={() => {
+                  // Lógica para abrir el carrito
+                  console.log('Abrir carrito');
+                }}
+                type="primary"
+                testID="cart-button"
+                icon="FaShoppingCart"
+                textProps={{
+                  size: 'sm',
+                }}
+                inline={true}
+              />
             </div>
           </div>
         </div>

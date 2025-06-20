@@ -1,4 +1,8 @@
+'use client';
+
 import Image from 'next/image';
+import { Button } from '@/app/ui/components/Button';
+import { Text } from '@/app/ui/components/Text';
 
 export const Banner = () => {
   return (
@@ -14,19 +18,45 @@ export const Banner = () => {
           />
           <div className="absolute inset-0 bg-black opacity-60"></div>
           <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
-            <h1 className="text-white font-bold text-4xl sm:text-5xl md:text-6xl leading-tight mb-4" style={{ fontSize: 48, lineHeight: 1.2, fontFamily: 'Instrument Sans', color: '#fff' }}>
+            <Text 
+              as="h1" 
+              size="4xl" 
+              weight="bold" 
+              color="primary-contrast" 
+              className="mb-4 leading-tight"
+              testID="banner-title"
+            >
               Venta al por mayor y menor de<br />Alimentos Japoneses.
-            </h1>
-            <p className="text-white text-lg sm:text-xl font-normal mb-10" style={{ fontFamily: 'Instrument Sans', color: '#fff' }}>
+            </Text>
+            <Text 
+              as="p" 
+              size="lg" 
+              weight="normal" 
+              color="primary-contrast" 
+              className="mb-10"
+              testID="banner-subtitle"
+            >
               Productos de alimentación singulares de asia y otros continentes.
-            </p>
+            </Text>
             <div className="flex flex-col sm:flex-row gap-6 w-full max-w-2xl justify-center">
-              <button className="w-full sm:w-[340px] py-4 rounded-xl bg-[#EA3D15] text-white font-semibold text-lg shadow hover:brightness-90 transition-all" style={{ fontFamily: 'Instrument Sans', color: '#fff' }}>
-                Tienda Online Particulares
-              </button>
-              <button className="w-full sm:w-[340px] py-4 rounded-xl bg-[#EA3D15] text-white font-semibold text-lg shadow hover:brightness-90 transition-all" style={{ fontFamily: 'Instrument Sans', color: '#fff' }}>
-                Tienda Online Hosteleros
-              </button>
+              <Button
+                onPress={() => {
+                  // Lógica para navegar a tienda particulares
+                  console.log('Navegar a tienda particulares');
+                }}
+                type="primary"
+                text="Tienda Online Particulares"
+                testID="banner-button-particulares"
+              />
+              <Button
+                onPress={() => {
+                  // Lógica para navegar a tienda hosteleros
+                  console.log('Navegar a tienda hosteleros');
+                }}
+                type="primary"
+                text="Tienda Online Hosteleros"
+                testID="banner-button-hosteleros"
+              />
             </div>
           </div>
         </div>
