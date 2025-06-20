@@ -52,7 +52,7 @@ export class CreateProductDto {
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   @IsOptional()
-  wholesale_price?: number;
+  wholesale_price: number;
 
   @ApiPropertyOptional({ description: 'Estado del producto', example: 'active', enum: ['active', 'draft', 'paused', 'deleted'] })
   @IsString()

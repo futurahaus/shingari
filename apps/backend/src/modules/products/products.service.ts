@@ -62,26 +62,48 @@ export class ProductsService {
     return userDiscount ? userDiscount.price.toNumber() : null;
   }
 
-  private async mapToProductResponseDto(product: ProductWithCategoriesForResponse, userId?: string): Promise<ProductResponseDto> {
-    let price = product.list_price.toNumber();
+  private async calculateProductPrice(
+    product: ProductWithCategoriesForResponse,
+    userId?: string,
+    userDiscountPrice?: number,
+    userRole?: string | null
+  ): Promise<{ price: number; originalPrice: number; discount: number }> {
+    const originalPrice = userRole === 'business' ? product.wholesale_price.toNumber() : product.list_price.toNumber();
+    let price = originalPrice;
 
     if (userId) {
-      // Primero verificamos si hay un descuento específico para el usuario
-      const userDiscountPrice = await this.getUserDiscount(userId, product.id);
-
-      if (userDiscountPrice !== null) {
-        // Si hay un descuento específico, usamos ese precio
+      // Si hay un descuento específico para el usuario, usamos ese precio
+      if (userDiscountPrice !== undefined) {
         price = userDiscountPrice;
-      } else {
-        // Si no hay descuento específico, verificamos el rol del usuario
-        const userRole = await this.getUserRole(userId);
-        if (userRole === 'business') {
-          price = product.wholesale_price?.toNumber() || product.list_price.toNumber();
-        }
       }
     }
 
-    const discount = Number(((1 - (price / product.list_price.toNumber())) * 100).toFixed(2));
+    const discount = Number(((1 - (price / originalPrice)) * 100).toFixed(2));
+
+    return { price, originalPrice, discount };
+  }
+
+  private async mapToProductResponseDto(product: ProductWithCategoriesForResponse, userId?: string): Promise<ProductResponseDto> {
+    let userDiscountPrice: number | undefined;
+    let userRole: string | null = null;
+
+    if (userId) {
+      // Primero verificamos si hay un descuento específico para el usuario
+      const discount = await this.getUserDiscount(userId, product.id);
+      if (discount !== null) {
+        userDiscountPrice = discount;
+      } else {
+        // Si no hay descuento específico, verificamos el rol del usuario
+        userRole = await this.getUserRole(userId);
+      }
+    }
+
+    const { price, originalPrice, discount } = await this.calculateProductPrice(
+      product,
+      userId,
+      userDiscountPrice,
+      userRole
+    );
 
     return {
       updatedAt: new Date(),
@@ -89,7 +111,7 @@ export class ProductsService {
       name: product.name,
       description: product.description || '',
       price: price,
-      originalPrice: product.list_price.toNumber(),
+      originalPrice: originalPrice,
       discount: discount,
       createdAt: product.created_at || new Date(),
       categories: product.products_categories?.map(pc => pc.categories.name) || [],
@@ -146,23 +168,15 @@ export class ProductsService {
     }
 
     // Mapear productos con descuentos optimizados
-    return products.map(product => {
-      let price = product.list_price.toNumber();
+    return Promise.all(products.map(async product => {
+      const userDiscountPrice = discountMap?.get(product.id);
 
-      if (userId && discountMap && userRole) {
-        // Verificar si hay descuento específico para el usuario
-        const userDiscountPrice = discountMap.get(product.id);
-        
-        if (userDiscountPrice !== undefined) {
-          // Si hay un descuento específico, usamos ese precio
-          price = userDiscountPrice;
-        } else if (userRole === 'business') {
-          // Si no hay descuento específico pero es usuario business, usar precio mayorista
-          price = product.wholesale_price?.toNumber() || product.list_price.toNumber();
-        }
-      }
-
-      const discount = Number(((1 - (price / product.list_price.toNumber())) * 100).toFixed(2));
+      const { price, originalPrice, discount } = await this.calculateProductPrice(
+        product,
+        userId,
+        userDiscountPrice,
+        userRole
+      );
 
       return {
         updatedAt: new Date(),
@@ -170,14 +184,14 @@ export class ProductsService {
         name: product.name,
         description: product.description || '',
         price: price,
-        originalPrice: product.list_price.toNumber(),
+        originalPrice: originalPrice,
         discount: discount,
         createdAt: product.created_at || new Date(),
         categories: product.products_categories?.map(pc => pc.categories.name) || [],
         images: product.product_images?.map(pi => pi.image_url) || [],
         sku: product.sku || '',
       };
-    });
+    }));
   }
 
   async findAllPublic(queryProductDto: QueryProductDto, userId?: string): Promise<PaginatedProductResponseDto> {
@@ -236,7 +250,7 @@ export class ProductsService {
     const total = await this.prisma.products.count({ where });
 
     const mappedProducts = await this.mapToProductsResponseDto(
-      productsData as ProductWithCategoriesForResponse[], 
+      productsData as ProductWithCategoriesForResponse[],
       userId
     );
 
@@ -310,10 +324,7 @@ export class ProductsService {
         name,
         description,
         list_price: new Prisma.Decimal(price),
-        wholesale_price:
-          wholesale_price !== undefined
-            ? new Prisma.Decimal(wholesale_price)
-            : null,
+        wholesale_price: new Prisma.Decimal(wholesale_price),
         sku: uniqueSKU,
         status: status
           ? (product_states[status as keyof typeof product_states] ??
