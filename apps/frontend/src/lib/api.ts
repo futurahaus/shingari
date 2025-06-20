@@ -51,7 +51,7 @@ class ApiClient {
     const headers = new Headers(fetchOptions.headers);
     headers.set('Content-Type', 'application/json');
 
-    let accessToken = await this.getAccessToken();
+    const accessToken = await this.getAccessToken();
 
     headers.set('Authorization', `Bearer ${accessToken}`);
 
