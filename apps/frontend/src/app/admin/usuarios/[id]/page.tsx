@@ -232,8 +232,8 @@ export default function UserDetailsPage() {
         <h2 className="text-lg font-semibold mb-4">Información del Cliente</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 border-b border-gray-200 pb-6">
           <div>
-            <div className="text-xs text-gray-500">ID</div>
-            <div className="font-medium text-gray-900">#{user.id}</div>
+            <div className="text-xs text-gray-500">ID Interno</div>
+            <div className="font-medium text-gray-900">#{user.internal_id}</div>
           </div>
           <div>
             <div className="text-xs text-gray-500">Nombre</div>
