@@ -1,6 +1,7 @@
 import SearchHeader from "@/components/layout/SearchHeader";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import WhatsAppBubble from "@/components/ui/WhatsAppBubble";
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -11,6 +12,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {children}
       </main>
       <Footer />
+      <WhatsAppBubble />
     </div>
   );
 }

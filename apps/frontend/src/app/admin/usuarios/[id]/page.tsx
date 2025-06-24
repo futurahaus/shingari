@@ -21,6 +21,7 @@ interface UserDetails {
   billing_address?: string;
   shipping_address?: string;
   postal_code?: string;
+  internal_id?: string;
 }
 
 interface Order {
@@ -210,6 +211,10 @@ export default function UserDetailsPage() {
                 <div>
                   <label className="block text-xs text-gray-500">C.P.</label>
                   <input name="postal_code" value={editForm.postal_code || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">ID Interno</label>
+                  <input name="internal_id" value={editForm.internal_id || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
               </div>
               {saveError && <div className="text-red-600 text-sm">{saveError}</div>}

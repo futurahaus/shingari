@@ -20,7 +20,7 @@ interface User {
   last_sign_in_at?: string;
   email_confirmed_at?: string;
   roles: string[];
-  meta_data?: any;
+  meta_data?: unknown;
 }
 
 export default function AdminUsersPage() {
@@ -44,6 +44,7 @@ export default function AdminUsersPage() {
     billing_address: '',
     shipping_address: '',
     postal_code: '',
+    internal_id: '',
   });
   const [savingNewClient, setSavingNewClient] = useState(false);
   const [saveNewClientError, setSaveNewClientError] = useState<string | null>(null);
@@ -56,11 +57,11 @@ export default function AdminUsersPage() {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get('/user/admin/all', { requireAuth: true });
+      const response = await api.get('/user/admin/all');
       const usersData = Array.isArray(response) ? response : [];
       setUsers(usersData);
-    } catch (err: any) {
-      setError('Error al cargar usuarios: ' + (err.message || 'Error desconocido'));
+    } catch (err: unknown) {
+      setError('Error al cargar usuarios: ' + (err instanceof Error ? err.message : 'Error desconocido'));
       setUsers([]); // Set empty array on error
       console.error('Error fetching users:', err);
     } finally {
@@ -104,6 +105,7 @@ export default function AdminUsersPage() {
           billing_address: newClientForm.billing_address,
           shipping_address: newClientForm.shipping_address,
           postal_code: newClientForm.postal_code,
+          internal_id: newClientForm.internal_id,
         });
       }
       setShowNewClientModal(false);
@@ -122,6 +124,7 @@ export default function AdminUsersPage() {
         billing_address: '',
         shipping_address: '',
         postal_code: '',
+        internal_id: '',
       });
       fetchUsers();
     } catch (err: unknown) {
@@ -246,6 +249,15 @@ export default function AdminUsersPage() {
                 <div>
                   <label className="block text-xs text-gray-500">C.P.</label>
                   <input name="postal_code" value={newClientForm.postal_code} onChange={e => setNewClientForm(f => ({ ...f, postal_code: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500">ID Interno</label>
+                  <input
+                    name="internal_id"
+                    value={newClientForm.internal_id}
+                    onChange={e => setNewClientForm(f => ({ ...f, internal_id: e.target.value }))}
+                    className="w-full border rounded px-2 py-1 text-gray-900"
+                  />
                 </div>
               </div>
               {saveNewClientError && <div className="text-red-600 text-sm">{saveNewClientError}</div>}
