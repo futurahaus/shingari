@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { Text } from '@/app/ui/components/Text';
 
 interface Category {
     id: string;
@@ -37,9 +38,9 @@ export default function CategoryGrid() {
     if (loading) {
         return (
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                <Text as="h2" size="2xl" weight="bold" color="primary" className="mb-6 text-center">
                     Descubre nuestras categorías
-                </h2>
+                </Text>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 animate-pulse">
                     {[...Array(5)].map((_, i) => (
                         <div
@@ -63,10 +64,12 @@ export default function CategoryGrid() {
     if (error) {
         return (
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                <Text as="h2" size="2xl" weight="bold" color="primary" className="mb-6 text-center">
                     Descubre nuestras categorías
-                </h2>
-                <p className="text-center text-red-500">{error}</p>
+                </Text>
+                <Text as="p" size="md" color="error" className="text-center" testID="category-grid-error">
+                    {error}
+                </Text>
             </div>
         );
     }
@@ -77,9 +80,9 @@ export default function CategoryGrid() {
 
     return (
         <div className="w-full px-4 sm:px-6 lg:px-16 py-8" data-testid="category-grid">
-            <h2 className="text-2xl font-bold mb-6">
+            <Text as="h2" size="2xl" weight="bold" color="primary" className="mb-6">
                 Comprar por categoría
-            </h2>
+            </Text>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
                 {categories.map(category => (
                     <div
@@ -97,11 +100,15 @@ export default function CategoryGrid() {
                                     className="object-cover rounded-2xl transition-transform duration-300 group-hover:scale-105"
                                 />
                             ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100 rounded-2xl">Sin imagen</div>
+                                <Text as="div" size="sm" color="gray-400" className="w-full h-full flex items-center justify-center bg-gray-100 rounded-2xl">
+                                    Sin imagen
+                                </Text>
                             )}
                         </div>
                         <div className="py-2">
-                            <p className="font-medium text-base leading-[100%] tracking-[0%] text-[#1C0F0D]">{category.name}</p>
+                            <Text as="p" size="md" weight="medium" color="primary" className="leading-[100%] tracking-[0%]">
+                                {category.name}
+                            </Text>
                         </div>
                     </div>
                 ))}

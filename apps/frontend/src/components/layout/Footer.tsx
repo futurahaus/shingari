@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 const Footer = () => {
   return (
-    <footer className="bg-[color:var(--footer-background)] border-t-8">
+    <footer className="bg-[color:var(--footer-background)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col items-center">
         {/* Menú de navegación */}
         <nav className="w-full mb-8">

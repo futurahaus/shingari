@@ -115,6 +115,13 @@ Aplicación construida con Next.js.
         -   **Confirmaciones**: Modales de confirmación para acciones destructivas como eliminar usuarios.
     -   `products/page.tsx`: Página pública de productos con filtros y paginación.
     -   `products/[id]/page.tsx`: Página de detalle de producto específico.
+    -   `ui/page.tsx`: Página de demostración de componentes UI con ejemplos de uso.
+    -   `ui/`: Directorio del sistema de diseño UI.
+        -   `colors.ts`: Paleta de colores oficial del proyecto con colores principales, secundarios, estados y escala de grises.
+        -   `ColorPalette.tsx`: Componente React que muestra visualmente toda la paleta de colores.
+        -   `README.md`: Documentación completa del sistema de diseño UI.
+        -   `components/`: Componentes UI reutilizables.
+            -   `Button.tsx`: Componente de botón con soporte para tipos primario/secundario e iconos.
 -   **`components/`**: Componentes reutilizables de React.
     -   Probablemente organizados por funcionalidad o tipo (ej. `ui/`, `common/`, `auth/`).
     -   `auth/RoleSelectionModal.tsx`: Modal para selección de roles (consumer/business) después de verificación de email.
