@@ -28,7 +28,8 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
     password: ''
   });
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingLogin, setIsLoadingLogin] = useState(false);
+  const [isLoadingRegister, setIsLoadingRegister] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
@@ -36,7 +37,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
   const handleRegister = async () => {
     setError('');
     setSuccessMessage('');
-    setIsLoading(true);
+    setIsLoadingRegister(true);
 
     try {
 
@@ -60,7 +61,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
       console.error('Registration error:', err);
       setError(err instanceof Error ? err.message : 'Error al registrar usuario');
     } finally {
-      setIsLoading(false);
+      setIsLoadingRegister(false);
     }
   };
 
@@ -71,7 +72,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
   const handleSubmitClick = async () => {
     setError('');
     setSuccessMessage('');
-    setIsLoading(true);
+    setIsLoadingLogin(true);
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
@@ -111,7 +112,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
     } finally {
-      setIsLoading(false);
+      setIsLoadingLogin(false);
     }
   };
 
@@ -154,7 +155,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
                 onChangeValue={(value) => setFormData(prev => ({ ...prev, email: value }))}
                 type="email"
                 placeholder="tu@email.com"
-                disabled={isLoading}
+                disabled={isLoadingLogin || isLoadingRegister}
                 testID="login-email-input"
               />
               
@@ -166,7 +167,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
                 placeholder="Tu contraseña"
                 iconRight={showPassword ? "FaEyeSlash" : "FaEye"}
                 iconRightOnPress={togglePasswordVisibility}
-                disabled={isLoading}
+                disabled={isLoadingLogin || isLoadingRegister}
                 testID="login-password-input"
               />
               
@@ -187,7 +188,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
               <Button
                 onPress={handleSubmitClick}
                 type="primary"
-                text={isLoading ? "Iniciando sesión..." : "Inicia Sesión"}
+                text={isLoadingLogin ? "Iniciando sesión..." : "Inicia Sesión"}
                 testID="login-submit-button"
               />
             </div>
@@ -201,7 +202,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
               <Button
                 onPress={handleRegister}
                 type="primary"
-                text={isLoading ? "Registrando..." : "Regístrate"}
+                text={isLoadingRegister ? "Registrando..." : "Regístrate"}
                 testID="register-button"
               />
             </div>
