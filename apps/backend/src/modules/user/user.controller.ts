@@ -183,4 +183,4 @@ export class UserController {
   async getUserSpecialPrices(@Param('id') id: string) {
     return this.userService.getUserSpecialPrices(id);
   }
-} 
+}

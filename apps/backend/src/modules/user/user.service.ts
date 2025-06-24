@@ -17,6 +17,7 @@ interface PublicUser {
   billing_address?: string;
   shipping_address?: string;
   postal_code?: string;
+  internal_id?: string;
 }
 
 interface AdminUser {
@@ -53,6 +54,7 @@ export interface UserDetailsResponse {
   billing_address?: string;
   shipping_address?: string;
   postal_code?: string;
+  internal_id?: string;
   public_profile: Partial<PublicUser>;
 }
 
@@ -182,7 +184,7 @@ export class UserService {
         throw new NotFoundException('User not found');
       }
 
-      let publicProfile: Partial<PublicUser> = user.users as Partial<PublicUser>;
+      const publicProfile: Partial<PublicUser> = user.users as Partial<PublicUser>;
 
       return {
         id: user.id,
@@ -206,6 +208,7 @@ export class UserService {
         billing_address: publicProfile?.billing_address ?? '',
         shipping_address: publicProfile?.shipping_address ?? '',
         postal_code: publicProfile?.postal_code ?? '',
+        internal_id: publicProfile?.internal_id ?? '',
         public_profile: publicProfile,
       };
     } catch (err: unknown) {
@@ -298,13 +301,17 @@ export class UserService {
         'referral_source',
         'nombrefiscal',
         'tax_name',
+        'internal_id',
       ];
+
       const publicData: Record<string, any> = {};
+
       for (const key of publicFields) {
         if (key in userData) {
           publicData[key] = userData[key];
         }
       }
+
       if (Object.keys(publicData).length > 0) {
         // Find the public_users record by uuid
         const publicUser = await this.prismaService.public_users.findFirst({
