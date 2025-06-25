@@ -49,13 +49,10 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
       {/* Botones */}
       <div className="flex flex-col gap-3 mt-2">
-        <button className="w-full px-4 py-4 font-bold text-white bg-[#F0461C] rounded-xl text-lg hover:bg-orange-700 transition-all">
+        <button className="w-full px-4 py-4 font-bold text-white bg-[#F0461C] rounded-xl text-lg hover:bg-orange-700 transition-all cursor-pointer">
           Comprar ahora
-        </button>
-        <button className="w-full px-4 py-4 font-bold text-[#23272F] bg-white border border-[#23272F] rounded-xl text-lg hover:bg-gray-50 transition-all">
-          Agregar al carrito
         </button>
       </div>
     </div>
   );
-} 
+}

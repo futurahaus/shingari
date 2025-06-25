@@ -24,7 +24,7 @@ export const CartModal = () => {
     <div className="fixed inset-0 z-50 flex items-center justify-end">
       <div className="w-full max-w-md bg-white h-full shadow-lg overflow-y-auto relative">
         <button
-          className="absolute top-4 right-4 text-2xl text-gray-500 hover:text-black"
+          className="absolute top-4 right-4 text-2xl text-gray-500 hover:text-black cursor-pointer"
           onClick={closeCart}
           aria-label="Cerrar"
         >
@@ -33,9 +33,6 @@ export const CartModal = () => {
         <div className="p-6">
           <h2 className="text-xl font-bold mb-2">
             Mi Carrito <span className="font-normal text-base">({cart.length} producto{cart.length !== 1 ? 's' : ''})</span>
-            <span className="ml-2 text-gray-400 cursor-pointer" onClick={closeCart}>
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </span>
           </h2>
           <div className="divide-y divide-gray-200">
             {cart.length === 0 ? (
@@ -68,7 +65,7 @@ export const CartModal = () => {
                       <span className="ml-2 text-xs text-gray-500">{item.unitType || 'Unidades'}</span>
                     </div>
                     <button
-                      className="text-xs text-red-500 hover:underline"
+                      className="text-xs text-red-500 hover:underline cursor-pointer"
                       onClick={() => removeFromCart(item.id)}
                     >Eliminar</button>
                   </div>
@@ -93,7 +90,7 @@ export const CartModal = () => {
               <span>€{total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
             </div>
           </div>
-          <button className="w-full bg-[#F24E1E] text-white py-3 rounded-md font-semibold text-lg hover:bg-[#d43e0e] transition">
+          <button className="w-full bg-[#F24E1E] text-white py-3 rounded-md font-semibold text-lg hover:bg-[#d43e0e] transition cursor-pointer">
             Ir al carrito
           </button>
         </div>

@@ -58,7 +58,7 @@ export default function ProductDetailPage() {
         <div className="flex flex-col gap-6">
           <ProductInfo product={product} />
           <button
-            className="bg-[#F24E1E] text-white py-3 rounded-md font-semibold text-lg hover:bg-[#d43e0e] transition"
+            className="w-full px-4 py-4 font-bold text-[#23272F] bg-white border border-[#23272F] rounded-xl text-lg hover:bg-gray-50 transition-all cursor-pointer"
             onClick={() => addToCart({
               id: product.id,
               name: product.name,
@@ -74,4 +74,4 @@ export default function ProductDetailPage() {
       </div>
     </div>
   );
-} 
+}
