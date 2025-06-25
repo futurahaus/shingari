@@ -233,16 +233,23 @@ export class ProductsService {
       orderBy,
       skip,
       take: limit,
-      include: {
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        list_price: true,
+        wholesale_price: true,
+        sku: true,
+        created_at: true,
         products_categories: {
-          include: {
-            categories: true,
-          },
+          select: {
+            categories: {
+              select: { name: true },
+            }
+          }
         },
         product_images: {
-          include: {
-            products: true,
-          },
+          select: { image_url: true },
         },
       },
     });
@@ -251,7 +258,7 @@ export class ProductsService {
 
     const mappedProducts = await this.mapToProductsResponseDto(
       productsData as ProductWithCategoriesForResponse[],
-      userId
+      userId,
     );
 
     return {
@@ -664,4 +671,4 @@ export class ProductsService {
 
     return categories.map(c => ({ id: c.id.toString(), name: c.name, image: c.image_url }));
   }
-} 
+}
