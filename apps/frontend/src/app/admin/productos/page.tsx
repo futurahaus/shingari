@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
+import Image from 'next/image';
 
 interface Product {
   id: string;
@@ -236,10 +237,12 @@ export default function AdminProductsPage() {
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
                         {product.images && product.images.length > 0 ? (
-                          <img
+                          <Image
                             className="h-10 w-10 rounded-full object-cover"
                             src={product.images[0]}
                             alt={product.name}
+                            width={40}
+                            height={40}
                           />
                         ) : (
                           <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">

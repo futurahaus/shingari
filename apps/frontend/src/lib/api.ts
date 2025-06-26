@@ -1,6 +1,3 @@
-interface RequestOptions extends RequestInit {
-}
-
 class ApiClient {
   private baseUrl: string;
 
@@ -42,7 +39,7 @@ class ApiClient {
 
   private async request<T>(
     endpoint: string,
-    options: RequestOptions = {}
+    options: RequestInit = {}
   ): Promise<T> {
     const { ...fetchOptions } = options;
     const url = `${this.baseUrl}${endpoint}`;
@@ -99,14 +96,14 @@ class ApiClient {
   }
 
   // HTTP method wrappers
-  async get<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+  async get<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     return this.request<T>(endpoint, { ...options, method: 'GET' });
   }
 
   async post<T, D extends Record<string, unknown>>(
     endpoint: string,
     data: D,
-    options: RequestOptions = {}
+    options: RequestInit = {}
   ): Promise<T> {
     return this.request<T>(endpoint, {
       ...options,
@@ -118,7 +115,7 @@ class ApiClient {
   async put<T, D extends Record<string, unknown>>(
     endpoint: string,
     data: D,
-    options: RequestOptions = {}
+    options: RequestInit = {}
   ): Promise<T> {
     return this.request<T>(endpoint, {
       ...options,
@@ -127,7 +124,7 @@ class ApiClient {
     });
   }
 
-  async delete<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+  async delete<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     return this.request<T>(endpoint, { ...options, method: 'DELETE' });
   }
 }

@@ -1,7 +1,7 @@
 'use client';
 
-import { ChevronDown, ChevronsRight, Home } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
 import { api } from '@/lib/api';
 import Link from 'next/link';
 import { ProductCard, Product } from '@/components/ProductCard';
@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import ProductCardSkeleton from '@/components/ProductCardSkeleton';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
+import { Suspense } from 'react';
 
 interface Category {
     id: string;
@@ -77,10 +78,8 @@ const CategorySidebar = ({
 
 const Breadcrumb = ({
     selectedCategory,
-    onSelectCategory,
 }: {
     selectedCategory: string | null;
-    onSelectCategory: (name: string | null) => void;
 }) => (
     <div className="mb-4">
         <Text as="div" size="sm" color="tertiary">
@@ -146,10 +145,8 @@ const ProductFilters = ({ filters, onFilterChange }: ProductFiltersProps) => (
 
 const ProductsSection = ({
     selectedCategory,
-    onSelectCategory,
 }: {
     selectedCategory: string | null;
-    onSelectCategory: (name: string | null) => void;
 }) => {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
@@ -164,7 +161,7 @@ const ProductsSection = ({
 
     const searchParams = useSearchParams();
 
-    const fetchProducts = async (pageNumber: number, currentProducts: Product[] = []) => {
+    const fetchProducts = useCallback(async (pageNumber: number, currentProducts: Product[] = []) => {
         setLoading(true);
         setError(null);
         try {
@@ -200,19 +197,19 @@ const ProductsSection = ({
 
             setProducts(pageNumber === 1 ? newProducts : [...currentProducts, ...newProducts]);
 
-        } catch (e: any) {
-            setError(e.message);
+        } catch (e: unknown) {
+            setError(e instanceof Error ? e.message : 'Unknown error');
         } finally {
             setLoading(false);
         }
-    };
+    }, [filters, searchParams]);
 
     useEffect(() => {
         setProducts([]);
         setPage(1);
         setHasMore(true);
         fetchProducts(1, []);
-    }, [filters, searchParams]);
+    }, [filters, searchParams, fetchProducts]);
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -232,7 +229,6 @@ const ProductsSection = ({
         <main className="flex-1">
             <Breadcrumb
                 selectedCategory={selectedCategory}
-                onSelectCategory={onSelectCategory}
             />
             <Text as="h1" size="4xl" weight="extrabold" color="primary" className="mb-6">
                 {selectedCategory || 'Todos los Productos'}
@@ -273,7 +269,7 @@ const ProductsSection = ({
     );
 };
 
-export default function ProductsPage() {
+function ProductsPageContent() {
     const [categories, setCategories] = useState<Category[]>([]);
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -315,9 +311,16 @@ export default function ProductsPage() {
                 />
                 <ProductsSection
                     selectedCategory={selectedCategory}
-                    onSelectCategory={handleSelectCategory}
                 />
             </div>
         </div>
+    );
+}
+
+export default function ProductsPage() {
+    return (
+        <Suspense fallback={<div>Cargando productos...</div>}>
+            <ProductsPageContent />
+        </Suspense>
     );
 }

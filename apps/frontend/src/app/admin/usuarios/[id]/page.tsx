@@ -68,7 +68,8 @@ export default function UserDetailsPage() {
         setSpecialPrices(Array.isArray(pricesRes) ? pricesRes : []);
       })
       .catch((err) => {
-        setError('Error al cargar los datos: ' + (err.message || 'Error desconocido'));
+        const error = err instanceof Error ? err.message : 'Unknown error';
+        setError('Error al cargar los datos: ' + error);
       })
       .finally(() => setLoading(false));
   }, [userId]);
@@ -94,8 +95,9 @@ export default function UserDetailsPage() {
       setLoading(true);
       const userRes = await api.get(`/user/admin/${userId}`);
       setUser(userRes as UserDetails);
-    } catch (err: any) {
-      setSaveError('Error al actualizar usuario: ' + (err.message || 'Error desconocido'));
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err.message : 'Unknown error';
+      setSaveError('Error al actualizar usuario: ' + error);
     } finally {
       setSaving(false);
       setLoading(false);
@@ -111,11 +113,8 @@ export default function UserDetailsPage() {
       await api.delete(`/user/admin/${userId}`);
       router.push('/admin/usuarios');
     } catch (err: unknown) {
-      let message = 'Error desconocido';
-      if (err && typeof err === 'object' && 'message' in err && typeof (err as { message: unknown }).message === 'string') {
-        message = (err as { message: string }).message;
-      }
-      setDeleteError('Error al cancelar la cuenta: ' + message);
+      const error = err instanceof Error ? err.message : 'Unknown error';
+      setDeleteError('Error al cancelar la cuenta: ' + error);
     } finally {
       setDeleting(false);
     }

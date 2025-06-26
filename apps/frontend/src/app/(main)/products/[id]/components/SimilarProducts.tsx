@@ -32,14 +32,14 @@ export function SimilarProducts({ product }: SimilarProductsProps) {
         const response = await api.get<PaginatedProductsResponse>(`/products?${params.toString()}`);
         const products = response.data.filter((p: Product) => p.id !== product.id).slice(0, 3);
         setSimilarProducts(products);
-      } catch (error) {
+      } catch {
         setSimilarProducts([]);
       } finally {
         setLoading(false);
       }
     };
     fetchSimilarProducts();
-  }, []);
+  }, [product]);
 
   return (
     <div className="gap-4">

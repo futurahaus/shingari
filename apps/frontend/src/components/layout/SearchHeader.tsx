@@ -1,18 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import { FaSearch, FaShoppingCart, FaUser, FaCog } from 'react-icons/fa';
+import { FaSearch } from 'react-icons/fa';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import LoginModal from '@/components/auth/LoginModal';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/app/ui/components/Button';
-import { Text } from '@/app/ui/components/Text';
 
 export default function SearchHeader() {
-  const { user, logout } = useAuth();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { user } = useAuth();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const router = useRouter();
 

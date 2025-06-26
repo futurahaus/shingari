@@ -34,7 +34,7 @@ const ColorSwatch: React.FC<ColorSwatchProps> = ({ name, color, textColor = '#ff
   );
 };
 
-const ColorSection: React.FC<{ title: string; colors: Record<string, any>; description?: string }> = ({ 
+const ColorSection: React.FC<{ title: string; colors: Record<string, string | { main: string; contrast?: string }>; description?: string }> = ({ 
   title, 
   colors, 
   description 
@@ -798,10 +798,10 @@ export default function ComponentsListPage() {
                 <div className="mt-8 p-6 bg-blue-50 rounded-lg">
                   <h3 className="text-lg font-semibold text-blue-900 mb-3">Cómo Usar Esta Paleta</h3>
                   <div className="space-y-2 text-sm text-blue-800">
-                    <p><strong>Importar:</strong> <code className="bg-blue-100 px-2 py-1 rounded">import {'{ colors }'} from '@/app/ui/colors'</code></p>
+                    <p><strong>Importar:</strong> <code className="bg-blue-100 px-2 py-1 rounded">import {'{ colors }'} from &apos;@/app/ui/colors&apos;</code></p>
                     <p><strong>Uso directo:</strong> <code className="bg-blue-100 px-2 py-1 rounded">style={'{ backgroundColor: colors.primary.main }'}</code></p>
-                    <p><strong>Con Tailwind:</strong> <code className="bg-blue-100 px-2 py-1 rounded">className="bg-[#EA3D15]"</code></p>
-                    <p><strong>Clases predefinidas:</strong> <code className="bg-blue-100 px-2 py-1 rounded">import {'{ tailwindClasses }'} from '@/app/ui/colors'</code></p>
+                    <p><strong>Con Tailwind:</strong> <code className="bg-blue-100 px-2 py-1 rounded">className=&quot;bg-[#EA3D15]&quot;</code></p>
+                    <p><strong>Clases predefinidas:</strong> <code className="bg-blue-100 px-2 py-1 rounded">import {'{ tailwindClasses }'} from &apos;@/app/ui/colors&apos;</code></p>
                   </div>
                 </div>
 
