@@ -6,7 +6,7 @@ interface ProductInfoProps {
 }
 
 export function ProductInfo({ product }: ProductInfoProps) {
-  const hasDiscount = product.discount && product.originalPrice;
+  const hasDiscount = typeof product.discount === 'number' && product.discount > 0 && product.originalPrice;
 
   return (
     <div className="flex flex-col gap-4">
@@ -25,7 +25,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
         <span className="text-3xl font-bold text-black">
           €{new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(product.price)}
         </span>
-        {hasDiscount && product.originalPrice && (
+        {hasDiscount && typeof product.originalPrice === 'number' && (
           <span className="text-gray-400 text-xl line-through">
             €{new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(product.originalPrice)}
           </span>
@@ -58,4 +58,4 @@ export function ProductInfo({ product }: ProductInfoProps) {
       </div>
     </div>
   );
-} 
+}
