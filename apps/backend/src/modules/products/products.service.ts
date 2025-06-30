@@ -1,27 +1,49 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { PrismaService } from 'src/modules/prisma/prisma.service'; // Ajusta si tu ruta es diferente
-import { Prisma, products as ProductPrismaType, product_states, categories as CategoryPrismaType, products_categories as ProductsCategoriesPrismaType, products_discounts as ProductDiscountPrismaType, product_images as ProductImagesPrismaType, roles as RolePrismaType } from '../../../generated/prisma'; // Importar tipos y enums de Prisma
+import {
+  Injectable,
+  NotFoundException,
+  Inject,
+} from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { PrismaService } from 'src/modules/prisma/prisma.service';
+import {
+  Prisma,
+  products as ProductPrismaType,
+  product_states,
+  categories as CategoryPrismaType,
+  products_categories as ProductsCategoriesPrismaType,
+  products_discounts as ProductDiscountPrismaType,
+  product_images as ProductImagesPrismaType,
+} from '../../../generated/prisma';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductDto, ProductSortByPrice } from './dto/query-product.dto';
-import { ProductResponseDto, PaginatedProductResponseDto } from './dto/product-response.dto';
+import {
+  ProductResponseDto,
+  PaginatedProductResponseDto,
+} from './dto/product-response.dto';
 import { ProductDiscountResponseDto } from './dto/product-discount-response.dto';
 import { CategoryResponseDto } from './dto/category-response.dto';
+import { Cache } from 'cache-manager';
 
 // Tipo para el producto con categorías incluidas, específico para findAllPublic y findOne
 type ProductWithCategoriesForResponse = ProductPrismaType & {
-  products_categories: (ProductsCategoriesPrismaType & { categories: CategoryPrismaType })[];
-  product_images: (ProductImagesPrismaType)[];
+  products_categories: (ProductsCategoriesPrismaType & {
+    categories: CategoryPrismaType;
+  })[];
+  product_images: ProductImagesPrismaType[];
 };
 
 // Tipo para el descuento con detalles del producto incluidos
 type DiscountWithProductDetails = ProductDiscountPrismaType & {
-  products?: { list_price: Prisma.Decimal, name: string | null } | null;
+  products?: { list_price: Prisma.Decimal; name: string | null } | null;
 };
 
 @Injectable()
 export class ProductsService {
-  constructor(private readonly prisma: PrismaService) { } // Inyectar PrismaService
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) { } // Inyectar PrismaService
 
   private async getUserRole(userId: string): Promise<string | null> {
     const userRole = await this.prisma.user_roles.findFirst({
@@ -194,7 +216,18 @@ export class ProductsService {
     }));
   }
 
+  private getFindAllPublicCacheKey(queryProductDto: QueryProductDto, userId?: string): string {
+    return `products:public:${JSON.stringify(queryProductDto)}:user:${userId || 'anon'}`;
+  }
+
+  private getFindOneCacheKey(id: number, userId?: string): string {
+    return `products:one:${id}:user:${userId || 'anon'}`;
+  }
+
   async findAllPublic(queryProductDto: QueryProductDto, userId?: string): Promise<PaginatedProductResponseDto> {
+    const cacheKey = this.getFindAllPublicCacheKey(queryProductDto, userId);
+    const cached = await this.cacheManager.get<PaginatedProductResponseDto>(cacheKey);
+    if (cached) return cached;
     const { page = 1, limit = 10, searchName, categoryFilters, sortByPrice } = queryProductDto;
     const skip = (page - 1) * limit;
 
@@ -261,16 +294,21 @@ export class ProductsService {
       userId,
     );
 
-    return {
+    const result: PaginatedProductResponseDto = {
       data: mappedProducts,
       total,
       page,
       limit,
       lastPage: Math.ceil(total / limit) || 1,
     };
+    await this.cacheManager.set(cacheKey, result, 300);
+    return result;
   }
 
   async findOne(id: number, userId?: string): Promise<ProductResponseDto> {
+    const cacheKey = this.getFindOneCacheKey(id, userId);
+    const cached = await this.cacheManager.get<ProductResponseDto>(cacheKey);
+    if (cached) return cached;
     const product = await this.prisma.products.findUnique({
       where: {
         id: id,
@@ -294,12 +332,27 @@ export class ProductsService {
       throw new NotFoundException(`Producto con ID "${id}" no encontrado o no está activo.`);
     }
 
-    return this.mapToProductResponseDto(product as ProductWithCategoriesForResponse, userId);
+    const result = await this.mapToProductResponseDto(product as ProductWithCategoriesForResponse, userId);
+    await this.cacheManager.set(cacheKey, result, 300);
+    return result;
+  }
+
+  // Helper to clear all product-related cache keys
+  private async clearProductCache(): Promise<void> {
+    // @ts-ignore
+    const redis = this.cacheManager.store.getClient?.();
+    if (redis) {
+      const keys = await redis.keys('products:*');
+      if (keys.length > 0) {
+        await redis.del(keys);
+      }
+    }
   }
 
   async create(
     createProductDto: CreateProductDto,
   ): Promise<ProductResponseDto> {
+    await this.clearProductCache();
     const {
       name,
       description,
@@ -412,6 +465,7 @@ export class ProductsService {
     id: string,
     updateProductDto: UpdateProductDto,
   ): Promise<ProductResponseDto> {
+    await this.clearProductCache();
     const productId = parseInt(id);
     const {
       name,
@@ -534,6 +588,7 @@ export class ProductsService {
   }
 
   async removeLogical(id: string): Promise<void> {
+    await this.clearProductCache();
     const productId = parseInt(id);
 
     // Check if product exists
