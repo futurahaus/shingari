@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useRef, useCallback } from 'react';
-import { useNotificationContext } from '@/contexts/NotificationContext';
 import { EditionModal } from './components/EditionModal';
 import { CreationModal } from './components/CreationModal';
 import { DeleteModal } from './components/DeleteModal';
@@ -15,7 +14,7 @@ import { FaSearch } from 'react-icons/fa';
 export default function AdminProductsPage() {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
-  const { showSuccess, showError } = useNotificationContext();
+  const [searchQuery, setSearchQuery] = useState(''); // Estado para la búsqueda real
 
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -23,19 +22,16 @@ export default function AdminProductsPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  // Ref para el observer
-  const observerRef = useRef<IntersectionObserver | null>(null);
   const lastProductRef = useRef<HTMLTableRowElement | null>(null);
 
-  // Usar el hook para obtener productos
+  // Usar el hook para obtener productos con searchQuery (no searchTerm)
   const {
     products,
     loading,
     error,
-    currentPage,
     lastPage,
     refetch
-  } = useAdminProducts({ page, search: searchTerm });
+  } = useAdminProducts({ page, search: searchQuery });
 
   const openEditModal = (product: Product) => {
     setSelectedProduct(product);
@@ -65,11 +61,23 @@ export default function AdminProductsPage() {
     }
   };
 
-  // Función para manejar la búsqueda con debounce
+  // Función para manejar cambios en el input (solo actualiza el estado local)
   const handleSearchChange = useCallback((value: string) => {
     setSearchTerm(value);
-    setPage(1); // Resetear a la primera página cuando se busca
   }, []);
+
+  // Función para ejecutar la búsqueda (cuando se quita el foco o se presiona Enter)
+  const handleSearchSubmit = useCallback(() => {
+    setSearchQuery(searchTerm);
+    setPage(1); // Resetear a la primera página cuando se busca
+  }, [searchTerm]);
+
+  // Función para manejar el evento de presionar Enter
+  const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearchSubmit();
+    }
+  }, [handleSearchSubmit]);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -113,6 +121,8 @@ export default function AdminProductsPage() {
               placeholder="Buscar por SKU, nombre o ID..."
               value={searchTerm}
               onChange={(e) => handleSearchChange(e.target.value)}
+              onBlur={handleSearchSubmit}
+              onKeyPress={handleKeyPress}
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-black focus:border-black"
             />
           </div>
@@ -218,11 +228,21 @@ export default function AdminProductsPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
             </svg>
             <h3 className="mt-2 text-sm font-medium text-gray-900">
-              {searchTerm ? 'No se encontraron productos' : 'No hay productos'}
+              {searchQuery ? 'No se encontraron productos' : 'No hay productos'}
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              {searchTerm ? 'Intenta con otros términos de búsqueda.' : 'Comienza creando tu primer producto.'}
+              {searchQuery ? 'Intenta con otros términos de búsqueda.' : 'Comienza creando tu primer producto.'}
             </p>
+            <div className="mt-6">
+              <Button
+                onPress={() => setShowCreateModal(true)}
+                type="primary-admin"
+                text="Nuevo Producto"
+                testID="create-product-empty-button"
+                icon="FaPlus"
+                inline
+              />
+            </div>
           </div>
         )}
       </div>
