@@ -18,7 +18,8 @@ export const EditionModal: React.FC<EditionModalProps> = ({
   const [editForm, setEditForm] = useState<UpdateProductData>({
     name: '',
     description: '',
-    price: 0,
+    listPrice: 0,
+    wholesalePrice: 0,
     stock: 0,
     categoryIds: [],
   });
@@ -29,10 +30,10 @@ export const EditionModal: React.FC<EditionModalProps> = ({
       setEditForm({
         name: product.name || '',
         description: product.description || '',
-        price: product.price ?? 0,
-        stock: 0, // TODO: fetch actual stock if available
+        listPrice: product.listPrice ?? 0,
+        wholesalePrice: product.wholesalePrice ?? 0,
+        stock: product.stock ?? 0,
         categoryIds: product.categories || [],
-        wholesale_price: product.wholesalePrice ?? undefined,
         status: product.status ?? 'active',
         images: product.images || [],
         unit_id: product.unit_id ?? undefined,
@@ -55,7 +56,8 @@ export const EditionModal: React.FC<EditionModalProps> = ({
       setEditForm({
         name: '',
         description: '',
-        price: 0,
+        listPrice: 0,
+        wholesalePrice: 0,
         stock: 0,
         categoryIds: [],
       });
@@ -110,6 +112,7 @@ export const EditionModal: React.FC<EditionModalProps> = ({
                     type="number"
                     min="0"
                     step="1"
+                    placeholder="0"
                     value={editForm.stock}
                     onChange={(e) => setEditForm({...editForm, stock: parseInt(e.target.value) || 0})}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
@@ -122,8 +125,8 @@ export const EditionModal: React.FC<EditionModalProps> = ({
                   <input
                     type="number"
                     placeholder="$1234"
-                    value={editForm.price}
-                    onChange={(e) => setEditForm({...editForm, price: parseFloat(e.target.value) || 0})}
+                    value={editForm.listPrice}
+                    onChange={(e) => setEditForm({...editForm, listPrice: parseFloat(e.target.value) || 0})}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
@@ -132,8 +135,8 @@ export const EditionModal: React.FC<EditionModalProps> = ({
                   <input
                     type="number"
                     placeholder="$123"
-                    value={editForm.wholesale_price || ''}
-                    onChange={e => setEditForm({ ...editForm, wholesale_price: parseFloat(e.target.value) || 0 })}
+                    value={editForm.wholesalePrice || ''}
+                    onChange={e => setEditForm({ ...editForm, wholesalePrice: parseFloat(e.target.value) || 0 })}
                     className="w-full border border-gray-300 text-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>

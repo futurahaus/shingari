@@ -237,7 +237,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                     type="number"
                     min="0"
                     step="1"
-                    value={createForm.stock}
+                    value={createForm.stock || ''}
                     onChange={(e) => setCreateForm({ ...createForm, stock: parseInt(e.target.value) || 0 })}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-black"
                   />
@@ -249,7 +249,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                   <input
                     type="number"
                     placeholder="$1234"
-                    value={createForm.listPrice}
+                    value={createForm.listPrice || ''}
                     onChange={(e) => setCreateForm({ ...createForm, listPrice: parseFloat(e.target.value) || 0 })}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-black"
                   />

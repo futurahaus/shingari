@@ -43,10 +43,10 @@ export interface CreateProductData {
 export interface UpdateProductData {
   name?: string;
   description?: string;
-  price?: number;
+  listPrice?: number;
   stock?: number;
   categoryIds?: string[];
-  wholesale_price?: number;
+  wholesalePrice?: number;
   status?: string;
   images?: string[];
   unit_id?: number;
