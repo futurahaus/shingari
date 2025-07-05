@@ -11,6 +11,7 @@ interface ButtonProps {
   icon?: keyof typeof FaIcons;
   inline?: boolean;
   textProps?: Omit<TextProps, 'children'>;
+  htmlType?: 'button' | 'submit' | 'reset';
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -21,6 +22,7 @@ export const Button: React.FC<ButtonProps> = ({
   icon,
   inline = false,
   textProps = {},
+  htmlType = 'button',
 }) => {
   const baseClasses = `px-6 py-3 rounded-[10px] font-medium text-base text-center min-h-[44px] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 flex items-center justify-center gap-2 cursor-pointer ${inline ? '' : 'w-full'}`;
   
@@ -52,6 +54,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
+      type={htmlType}
       className={buttonClasses}
       onClick={onPress}
       data-testid={testID}

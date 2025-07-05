@@ -1,10 +1,11 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { useCategories } from '../hooks/useCategories.hook';
 import { Button } from '@/app/ui/components/Button';
 import { CreateProductData, CreationModalProps } from '../interfaces/product.interfaces';
+import { FaTimes } from 'react-icons/fa';
 
 export const CreationModal: React.FC<CreationModalProps> = ({
   isOpen,
@@ -22,6 +23,63 @@ export const CreationModal: React.FC<CreationModalProps> = ({
     stock: 0,
     categoryIds: [],
   });
+
+  // Estado para archivos seleccionados
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileButtonClick = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    setActiveImageIndex(null); // Para selección múltiple normal
+    fileInputRef.current?.click();
+  };
+
+  // Al hacer click en un recuadro específico
+  const handleBoxClick = (idx: number) => {
+    setActiveImageIndex(idx);
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const filesArr = Array.from(e.target.files);
+      // Si se seleccionó un recuadro específico, solo se permite 1 archivo
+      if (activeImageIndex !== null) {
+        const file = filesArr[0];
+        if (!file) return;
+        const newFiles = [...selectedFiles];
+        const newPreviews = [...previewUrls];
+        newFiles[activeImageIndex] = file;
+        newPreviews[activeImageIndex] = URL.createObjectURL(file);
+        setSelectedFiles(newFiles.slice(0, 5));
+        setPreviewUrls(newPreviews.slice(0, 5));
+      } else {
+        // Selección múltiple normal (botón)
+        const limitedFiles = filesArr.slice(0, 5);
+        setSelectedFiles(limitedFiles);
+        setPreviewUrls(limitedFiles.map(file => URL.createObjectURL(file)));
+      }
+    }
+  };
+
+  // Limpiar los object URLs al desmontar o cambiar archivos
+  React.useEffect(() => {
+    return () => {
+      previewUrls.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [previewUrls]);
+
+  // Eliminar imagen de un recuadro
+  const handleRemoveImage = (idx: number) => {
+    const newFiles = [...selectedFiles];
+    const newPreviews = [...previewUrls];
+    newFiles.splice(idx, 1);
+    newPreviews.splice(idx, 1);
+    setSelectedFiles(newFiles);
+    setPreviewUrls(newPreviews);
+  };
 
   const handleCreateProduct = async () => {
     try {
@@ -98,21 +156,74 @@ export const CreationModal: React.FC<CreationModalProps> = ({
               <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-2">
                 <label className="block text-lg font-semibold text-gray-900 mb-4">Subir fotos</label>
                 <div className="flex items-center gap-4 mb-6">
-                  <label className="inline-block cursor-pointer bg-black text-white font-semibold px-8 py-3 rounded-2xl text-base transition hover:bg-gray-900">
-                    Seleccionar Archivos
-                    <input type="file" multiple className="hidden" disabled />
-                  </label>
-                  <span className="text-gray-400 text-base">Ningún archivo seleccionado</span>
+                  <Button
+                    onPress={handleFileButtonClick}
+                    type="primary-admin"
+                    text="Seleccionar Archivos"
+                    testID="select-files-button"
+                    inline
+                    htmlType="button"
+                  />
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple={activeImageIndex === null}
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                  <span className="text-gray-400 text-base">
+                    {selectedFiles.length === 0
+                      ? 'Ningún archivo seleccionado'
+                      : selectedFiles.length === 1
+                        ? selectedFiles[0].name
+                        : `${selectedFiles.length} archivos seleccionados`}
+                  </span>
                 </div>
                 <div className="flex gap-4">
                   {/* Imagen principal */}
                   <div className="flex flex-col items-center">
-                    <div className="w-24 h-24 border-2 border-black rounded-lg bg-white flex items-center justify-center"></div>
+                    <div
+                      className="w-24 h-24 border-2 border-black rounded-lg bg-white flex items-center justify-center overflow-hidden cursor-pointer relative"
+                      onClick={() => handleBoxClick(0)}
+                    >
+                      {previewUrls[0] && (
+                        <>
+                          <img src={previewUrls[0]} alt="Preview" className="object-cover w-full h-full" />
+                          <button
+                            type="button"
+                            className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-black hover:text-white text-gray-700 text-xs z-10 cursor-pointer"
+                            onClick={e => { e.stopPropagation(); handleRemoveImage(0); }}
+                            title="Eliminar imagen"
+                          >
+                            <FaTimes size={12} />
+                          </button>
+                        </>
+                      )}
+                    </div>
                     <span className="mt-2 text-sm text-black font-medium text-center leading-tight">Imagen<br/>Principal</span>
                   </div>
                   {/* Otras imágenes */}
                   {Array.from({ length: 4 }).map((_, idx) => (
-                    <div key={idx} className="w-24 h-24 border border-gray-300 rounded-lg bg-white flex items-center justify-center"></div>
+                    <div
+                      key={idx}
+                      className="w-24 h-24 border border-gray-300 rounded-lg bg-white flex items-center justify-center overflow-hidden cursor-pointer relative"
+                      onClick={() => handleBoxClick(idx + 1)}
+                    >
+                      {previewUrls[idx + 1] && (
+                        <>
+                          <img src={previewUrls[idx + 1]} alt={`Preview ${idx + 2}`} className="object-cover w-full h-full" />
+                          <button
+                            type="button"
+                            className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-500 hover:text-white text-gray-700 text-xs z-10"
+                            onClick={e => { e.stopPropagation(); handleRemoveImage(idx + 1); }}
+                            title="Eliminar imagen"
+                          >
+                            <FaTimes size={12} />
+                          </button>
+                        </>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
