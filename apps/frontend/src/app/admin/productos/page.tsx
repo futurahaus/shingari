@@ -7,31 +7,7 @@ import { EditionModal } from './components/EditionModal';
 import { CreationModal } from './components/CreationModal';
 import { DeleteModal } from './components/DeleteModal';
 import { AdminProductRow } from './components/AdminProductRow';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  originalPrice: number;
-  discount: number;
-  categories: string[];
-  images: string[];
-  createdAt: string;
-  updatedAt: string;
-  wholesale_price?: number;
-  status?: string;
-  unit_id?: number;
-  unit_name?: string;
-}
-
-interface PaginatedProductsResponse {
-  data: Product[];
-  total: number;
-  page: number;
-  limit: number;
-  lastPage: number;
-}
+import { Product, PaginatedProductsResponse } from './interfaces/product.interfaces';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);

@@ -2,42 +2,8 @@
 import React, { useState } from 'react';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  originalPrice: number;
-  discount: number;
-  categories: string[];
-  images: string[];
-  createdAt: string;
-  updatedAt: string;
-  wholesale_price?: number;
-  status?: string;
-  unit_id?: number;
-  unit_name?: string;
-}
-
-interface UpdateProductData {
-  name?: string;
-  description?: string;
-  price?: number;
-  stock?: number;
-  categoryIds?: string[];
-  wholesale_price?: number;
-  status?: string;
-  images?: string[];
-  unit_id?: number;
-}
-
-interface EditionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  product: Product | null;
-  onProductUpdated: () => void;
-}
+import { useCategories } from '../hooks/useCategories.hook';
+import { Product, UpdateProductData, EditionModalProps } from '../interfaces/product.interfaces';
 
 export const EditionModal: React.FC<EditionModalProps> = ({
   isOpen,
@@ -46,6 +12,7 @@ export const EditionModal: React.FC<EditionModalProps> = ({
   onProductUpdated
 }) => {
   const { showSuccess, showError } = useNotificationContext();
+  const { categories, loading: loadingCategories } = useCategories();
   
   const [editForm, setEditForm] = useState<UpdateProductData>({
     name: '',
@@ -54,9 +21,6 @@ export const EditionModal: React.FC<EditionModalProps> = ({
     stock: 0,
     categoryIds: [],
   });
-
-  // Available categories (you might want to fetch this from the API)
-  const availableCategories = ['Electronics', 'Clothing', 'Books', 'Home', 'Sports', 'Food'];
 
   // Initialize form when product changes
   React.useEffect(() => {
@@ -179,10 +143,13 @@ export const EditionModal: React.FC<EditionModalProps> = ({
                   value={editForm.categoryIds && editForm.categoryIds[0] ? editForm.categoryIds[0] : ''}
                   onChange={e => setEditForm({ ...editForm, categoryIds: [e.target.value] })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                  disabled={loadingCategories}
                 >
-                  <option value="">Seleccionar categoría</option>
-                  {availableCategories.map(category => (
-                    <option key={category} value={category}>{category}</option>
+                  <option value="">
+                    {loadingCategories ? 'Cargando categorías...' : 'Seleccionar categoría'}
+                  </option>
+                  {categories.map(category => (
+                    <option key={category.id} value={category.name}>{category.name}</option>
                   ))}
                 </select>
               </div>

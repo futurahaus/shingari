@@ -2,24 +2,8 @@
 import React, { useState } from 'react';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
-
-interface CreateProductData {
-  name: string;
-  description: string;
-  price: number;
-  stock?: number;
-  categoryIds: string[];
-  wholesale_price?: number;
-  status?: string;
-  images?: string[];
-  unit_id?: number;
-}
-
-interface CreationModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onProductCreated: () => void;
-}
+import { useCategories } from '../hooks/useCategories.hook';
+import { CreateProductData, CreationModalProps } from '../interfaces/product.interfaces';
 
 export const CreationModal: React.FC<CreationModalProps> = ({
   isOpen,
@@ -27,6 +11,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
   onProductCreated
 }) => {
   const { showSuccess, showError } = useNotificationContext();
+  const { categories, loading: loadingCategories } = useCategories();
   
   const [createForm, setCreateForm] = useState<CreateProductData>({
     name: '',
@@ -35,9 +20,6 @@ export const CreationModal: React.FC<CreationModalProps> = ({
     stock: 0,
     categoryIds: [],
   });
-
-  // Available categories (you might want to fetch this from the API)
-  const availableCategories = ['Electronics', 'Clothing', 'Books', 'Home', 'Sports', 'Food'];
 
   const handleCreateProduct = async () => {
     try {
@@ -152,10 +134,13 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                   value={createForm.categoryIds[0] || ''}
                   onChange={e => setCreateForm({ ...createForm, categoryIds: [e.target.value] })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                  disabled={loadingCategories}
                 >
-                  <option value="">Seleccionar categoría</option>
-                  {availableCategories.map(category => (
-                    <option key={category} value={category}>{category}</option>
+                  <option value="">
+                    {loadingCategories ? 'Cargando categorías...' : 'Seleccionar categoría'}
+                  </option>
+                  {categories.map(category => (
+                    <option key={category.id} value={category.name}>{category.name}</option>
                   ))}
                 </select>
               </div>

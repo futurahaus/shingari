@@ -2,30 +2,7 @@
 import React from 'react';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  originalPrice: number;
-  discount: number;
-  categories: string[];
-  images: string[];
-  createdAt: string;
-  updatedAt: string;
-  wholesale_price?: number;
-  status?: string;
-  unit_id?: number;
-  unit_name?: string;
-}
-
-interface DeleteModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  product: Product | null;
-  onProductDeleted: () => void;
-}
+import { Product, DeleteModalProps } from '../interfaces/product.interfaces';
 
 export const DeleteModal: React.FC<DeleteModalProps> = ({
   isOpen,
