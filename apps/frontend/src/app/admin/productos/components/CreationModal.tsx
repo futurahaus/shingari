@@ -68,7 +68,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
-      <div className="relative top-20 mx-auto p-5 border w-full max-w-3xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+      <div className="relative top-20 mx-auto p-5 border w-auto shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
         <div className="mt-3">
           <h3 className="text-lg font-medium text-center text-gray-900 mb-4">Agregar nuevo producto</h3>
           <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -93,6 +93,28 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                   onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                 />
+              </div>
+              {/* Sección de subida de imágenes */}
+              <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-2">
+                <label className="block text-lg font-semibold text-gray-900 mb-4">Subir fotos</label>
+                <div className="flex items-center gap-4 mb-6">
+                  <label className="inline-block cursor-pointer bg-black text-white font-semibold px-8 py-3 rounded-2xl text-base transition hover:bg-gray-900">
+                    Seleccionar Archivos
+                    <input type="file" multiple className="hidden" disabled />
+                  </label>
+                  <span className="text-gray-400 text-base">Ningún archivo seleccionado</span>
+                </div>
+                <div className="flex gap-4">
+                  {/* Imagen principal */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-24 h-24 border-2 border-black rounded-lg bg-white flex items-center justify-center"></div>
+                    <span className="mt-2 text-sm text-black font-medium text-center leading-tight">Imagen<br/>Principal</span>
+                  </div>
+                  {/* Otras imágenes */}
+                  {Array.from({ length: 4 }).map((_, idx) => (
+                    <div key={idx} className="w-24 h-24 border border-gray-300 rounded-lg bg-white flex items-center justify-center"></div>
+                  ))}
+                </div>
               </div>
             </div>
             {/* Right Column */}
