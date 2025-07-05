@@ -2,6 +2,7 @@
 import React from 'react';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
+import { Button } from '@/app/ui/components/Button';
 import { Product, DeleteModalProps } from '../interfaces/product.interfaces';
 
 export const DeleteModal: React.FC<DeleteModalProps> = ({
@@ -48,18 +49,20 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
               </p>
             </div>
             <div className="flex justify-center space-x-3 mt-6">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleDeleteProduct}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 cursor-pointer"
-              >
-                Eliminar
-              </button>
+              <Button
+                onPress={onClose}
+                type="secondary"
+                text="Cancelar"
+                testID="cancel-delete-button"
+                inline
+              />
+              <Button
+                onPress={handleDeleteProduct}
+                type="primary-admin"
+                text="Eliminar"
+                testID="confirm-delete-button"
+                inline
+              />
             </div>
           </div>
         </div>

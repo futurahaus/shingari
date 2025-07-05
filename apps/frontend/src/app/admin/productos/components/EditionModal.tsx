@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { useCategories } from '../hooks/useCategories.hook';
+import { Button } from '@/app/ui/components/Button';
 import { Product, UpdateProductData, EditionModalProps } from '../interfaces/product.interfaces';
 
 export const EditionModal: React.FC<EditionModalProps> = ({
@@ -156,20 +157,20 @@ export const EditionModal: React.FC<EditionModalProps> = ({
             </div>
             {/* Buttons */}
             <div className="col-span-1 md:col-span-2 flex justify-end gap-4 mt-8">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-6 py-2 border border-black rounded-full text-black bg-white hover:bg-gray-100 font-semibold cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleEditProduct}
-                className="px-6 py-2 rounded-full text-white bg-black hover:bg-gray-900 font-semibold cursor-pointer"
-              >
-                Subir Producto
-              </button>
+              <Button
+                onPress={onClose}
+                type="secondary"
+                text="Cancelar"
+                testID="cancel-edit-button"
+                inline
+              />
+              <Button
+                onPress={handleEditProduct}
+                type="primary-admin"
+                text="Actualizar Producto"
+                testID="update-product-button"
+                inline
+              />
             </div>
           </form>
         </div>

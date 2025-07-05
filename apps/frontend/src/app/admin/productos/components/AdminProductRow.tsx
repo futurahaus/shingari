@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 import { Product, AdminProductRowProps } from '../interfaces/product.interfaces';
 
 export const AdminProductRow: React.FC<AdminProductRowProps> = ({
@@ -57,18 +58,20 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
                         </div>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                     <button
                         onClick={() => onEdit(product)}
-                        className="bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium py-2 px-3 rounded-lg text-sm transition duration-200 cursor-pointer"
+                        className="p-2 text-black rounded-lg transition duration-200 cursor-pointer"
+                        title="Editar producto"
                     >
-                        Editar
+                        <FaEdit size={16} />
                     </button>
                     <button
                         onClick={() => onDelete(product)}
-                        className="bg-red-100 hover:bg-red-200 text-red-800 font-medium py-2 px-3 rounded-lg text-sm transition duration-200 cursor-pointer"
+                        className="p-2 text-black rounded-lg transition duration-200 cursor-pointer"
+                        title="Eliminar producto"
                     >
-                        Eliminar
+                        <FaTrash size={16} />
                     </button>
                 </div>
             </div>

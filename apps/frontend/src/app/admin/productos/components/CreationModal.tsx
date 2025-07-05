@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { useCategories } from '../hooks/useCategories.hook';
+import { Button } from '@/app/ui/components/Button';
 import { CreateProductData, CreationModalProps } from '../interfaces/product.interfaces';
 
 export const CreationModal: React.FC<CreationModalProps> = ({
@@ -150,20 +151,20 @@ export const CreationModal: React.FC<CreationModalProps> = ({
             </div>
             {/* Buttons */}
             <div className="col-span-1 md:col-span-2 flex justify-end gap-4 mt-8">
-              <button
-                type="button"
-                onClick={handleClose}
-                className="px-6 py-2 border border-black rounded-full text-black bg-white hover:bg-gray-100 font-semibold cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleCreateProduct}
-                className="px-6 py-2 rounded-full text-white bg-black hover:bg-gray-900 font-semibold cursor-pointer"
-              >
-                Subir Producto
-              </button>
+              <Button
+                onPress={handleClose}
+                type="secondary"
+                text="Cancelar"
+                testID="cancel-create-button"
+                inline
+              />
+              <Button
+                onPress={handleCreateProduct}
+                type="primary-admin"
+                text="Subir Producto"
+                testID="create-product-button"
+                inline
+              />
             </div>
           </form>
         </div>
