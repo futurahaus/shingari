@@ -13,6 +13,8 @@ export interface Product {
   updatedAt: string;
   listPrice: number;
   wholesalePrice: number;
+  sku: string;
+  stock?: number;
   status?: string;
   unit_id?: number;
   unit_name?: string;
@@ -56,7 +58,7 @@ export interface AdminProductRowProps {
   onEdit: (product: Product) => void;
   onDelete: (product: Product) => void;
   isLast?: boolean;
-  lastProductRef?: React.Ref<HTMLLIElement>;
+  lastProductRef?: React.Ref<HTMLTableRowElement>;
 }
 
 export interface CreationModalProps {

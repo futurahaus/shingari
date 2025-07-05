@@ -25,7 +25,7 @@ export default function AdminProductsPage() {
 
   // Ref para el observer
   const observerRef = useRef<IntersectionObserver | null>(null);
-  const lastProductRef = useRef<HTMLLIElement | null>(null);
+  const lastProductRef = useRef<HTMLTableRowElement | null>(null);
 
   // Usar el hook para obtener productos
   const {
@@ -127,19 +127,48 @@ export default function AdminProductsPage() {
         {loading ? (
           <ProductsListSkeleton rowsCount={20} />
         ) : products && products.length > 0 ? (
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
-            <ul className="divide-y divide-gray-200">
-              {products.map((product, index) => (
-                <AdminProductRow
-                  key={product.id}
-                  product={product}
-                  onEdit={openEditModal}
-                  onDelete={openDeleteModal}
-                  isLast={index === products.length - 1}
-                  lastProductRef={lastProductRef}
-                />
-              ))}
-            </ul>
+          <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Producto
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Stock
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Precio Minorista
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Precio Mayorista
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Precio con Descuento
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Unidades Vendidas
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {products.map((product, index) => (
+                    <AdminProductRow
+                      key={product.id}
+                      product={product}
+                      onEdit={openEditModal}
+                      onDelete={openDeleteModal}
+                      isLast={index === products.length - 1}
+                      lastProductRef={lastProductRef}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
             {/* Paginador */}
             <div className="flex justify-center items-center gap-2 py-6">
               <Button
