@@ -11,7 +11,8 @@ export interface Product {
   images: string[];
   createdAt: string;
   updatedAt: string;
-  wholesale_price?: number;
+  listPrice: number;
+  wholesalePrice: number;
   status?: string;
   unit_id?: number;
   unit_name?: string;
@@ -28,10 +29,10 @@ export interface PaginatedProductsResponse {
 export interface CreateProductData {
   name: string;
   description: string;
-  price: number;
+  listPrice: number;
+  wholesalePrice: number;
   stock?: number;
   categoryIds: string[];
-  wholesale_price?: number;
   status?: string;
   images?: string[];
   unit_id?: number;

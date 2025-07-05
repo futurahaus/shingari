@@ -12,11 +12,12 @@ export const CreationModal: React.FC<CreationModalProps> = ({
 }) => {
   const { showSuccess, showError } = useNotificationContext();
   const { categories, loading: loadingCategories } = useCategories();
-  
+
   const [createForm, setCreateForm] = useState<CreateProductData>({
     name: '',
     description: '',
-    price: 0,
+    listPrice: 0,
+    wholesalePrice: 0,
     stock: 0,
     categoryIds: [],
   });
@@ -34,7 +35,8 @@ export const CreationModal: React.FC<CreationModalProps> = ({
       setCreateForm({
         name: '',
         description: '',
-        price: 0,
+        listPrice: 0,
+        wholesalePrice: 0,
         stock: 0,
         categoryIds: [],
       });
@@ -53,7 +55,8 @@ export const CreationModal: React.FC<CreationModalProps> = ({
     setCreateForm({
       name: '',
       description: '',
-      price: 0,
+      listPrice: 0,
+      wholesalePrice: 0,
       stock: 0,
       categoryIds: [],
     });
@@ -76,7 +79,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                   type="text"
                   placeholder="Nombre de Producto"
                   value={createForm.name}
-                  onChange={(e) => setCreateForm({...createForm, name: e.target.value})}
+                  onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                 />
               </div>
@@ -86,7 +89,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                   type="text"
                   placeholder="Descripción de Producto"
                   value={createForm.description}
-                  onChange={(e) => setCreateForm({...createForm, description: e.target.value})}
+                  onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                 />
               </div>
@@ -101,7 +104,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                     min="0"
                     step="1"
                     value={createForm.stock}
-                    onChange={(e) => setCreateForm({...createForm, stock: parseInt(e.target.value) || 0})}
+                    onChange={(e) => setCreateForm({ ...createForm, stock: parseInt(e.target.value) || 0 })}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
@@ -112,8 +115,8 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                   <input
                     type="number"
                     placeholder="$1234"
-                    value={createForm.price}
-                    onChange={(e) => setCreateForm({...createForm, price: parseFloat(e.target.value) || 0})}
+                    value={createForm.listPrice}
+                    onChange={(e) => setCreateForm({ ...createForm, listPrice: parseFloat(e.target.value) || 0 })}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
@@ -122,8 +125,8 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                   <input
                     type="number"
                     placeholder="$123"
-                    value={createForm.wholesale_price || ''}
-                    onChange={e => setCreateForm({ ...createForm, wholesale_price: parseFloat(e.target.value) || 0 })}
+                    value={createForm.wholesalePrice || ''}
+                    onChange={e => setCreateForm({ ...createForm, wholesalePrice: parseFloat(e.target.value) || 0 })}
                     className="w-full border border-gray-300 text-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>

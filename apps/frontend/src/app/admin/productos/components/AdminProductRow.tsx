@@ -38,10 +38,10 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
                         <div className="text-sm font-medium text-gray-900">{product.name}</div>
                         <div className="text-sm text-gray-500">{product.description}</div>
                         <div className="flex items-center gap-2 mt-1">
-                            <span className="text-sm font-medium text-green-600">${product.price}</span>
-                            {product.wholesale_price !== undefined && (
+                            <span className="text-sm font-medium text-green-600">${product.listPrice}</span>
+                            {product.wholesalePrice !== undefined && (
                                 <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                                    Mayorista: ${product.wholesale_price}
+                                    Mayorista: ${product.wholesalePrice}
                                 </span>
                             )}
                             {product.status && (

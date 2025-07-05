@@ -31,7 +31,7 @@ export const EditionModal: React.FC<EditionModalProps> = ({
         price: product.price ?? 0,
         stock: 0, // TODO: fetch actual stock if available
         categoryIds: product.categories || [],
-        wholesale_price: product.wholesale_price ?? undefined,
+        wholesale_price: product.wholesalePrice ?? undefined,
         status: product.status ?? 'active',
         images: product.images || [],
         unit_id: product.unit_id ?? undefined,

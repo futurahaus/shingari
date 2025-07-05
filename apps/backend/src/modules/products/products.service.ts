@@ -185,6 +185,8 @@ export class ProductsService {
         description: product.description || '',
         price: price,
         originalPrice: originalPrice,
+        listPrice: product.list_price.toNumber(),
+        wholesalePrice: product.wholesale_price.toNumber(),
         discount: discount,
         createdAt: product.created_at || new Date(),
         categories: product.products_categories?.map(pc => pc.categories.name) || [],
