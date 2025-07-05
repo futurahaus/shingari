@@ -5,6 +5,8 @@ import { useNotificationContext } from '@/contexts/NotificationContext';
 import Image from 'next/image';
 import { EditionModal } from './components/EditionModal';
 import { CreationModal } from './components/CreationModal';
+import { DeleteModal } from './components/DeleteModal';
+import { AdminProductRow } from './components/AdminProductRow';
 
 interface Product {
   id: string;
@@ -76,24 +78,6 @@ export default function AdminProductsPage() {
     fetchProducts(page);
   }, [fetchProducts, page]);
 
-  const handleDeleteProduct = async () => {
-    if (!selectedProduct) return;
-
-    try {
-      await api.delete(`/products/${selectedProduct.id}`);
-      setShowDeleteModal(false);
-      setSelectedProduct(null);
-      await fetchProducts(1);
-      showSuccess('Producto Eliminado', 'El producto se ha eliminado exitosamente');
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        showError('Error al Eliminar', 'Error al eliminar producto: ' + (err.message || 'Error desconocido'));
-      } else {
-        showError('Error al Eliminar', 'Error al eliminar producto: Error desconocido');
-      }
-    }
-  };
-
   const openEditModal = (product: Product) => {
     setSelectedProduct(product);
     setShowEditModal(true);
@@ -109,6 +93,10 @@ export default function AdminProductsPage() {
   };
 
   const handleProductCreated = () => {
+    fetchProducts(1);
+  };
+
+  const handleProductDeleted = () => {
     fetchProducts(1);
   };
 
@@ -152,69 +140,14 @@ export default function AdminProductsPage() {
           <div className="bg-white shadow overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200">
               {products.map((product, index) => (
-                <li
+                <AdminProductRow
                   key={product.id}
-                  className="px-6 py-4"
-                  ref={index === products.length - 1 ? lastProductRef : null}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10">
-                        {product.images && product.images.length > 0 ? (
-                          <Image
-                            className="h-10 w-10 rounded-full object-cover"
-                            src={product.images[0]}
-                            alt={product.name}
-                            width={40}
-                            height={40}
-                          />
-                        ) : (
-                          <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                            <svg className="h-6 w-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                        <div className="text-sm text-gray-500">{product.description}</div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-sm font-medium text-green-600">${product.price}</span>
-                          {product.wholesale_price !== undefined && (
-                            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                              Mayorista: ${product.wholesale_price}
-                            </span>
-                          )}
-                          {product.status && (
-                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                              Estado: {product.status}
-                            </span>
-                          )}
-                          {product.unit_name && (
-                            <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">
-                              Unidad: {product.unit_name}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => openEditModal(product)}
-                        className="bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium py-2 px-3 rounded-lg text-sm transition duration-200 cursor-pointer"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => openDeleteModal(product)}
-                        className="bg-red-100 hover:bg-red-200 text-red-800 font-medium py-2 px-3 rounded-lg text-sm transition duration-200 cursor-pointer"
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  </div>
-                </li>
+                  product={product}
+                  onEdit={openEditModal}
+                  onDelete={openDeleteModal}
+                  isLast={index === products.length - 1}
+                  lastProductRef={lastProductRef}
+                />
               ))}
             </ul>
             {/* Paginador */}
@@ -286,41 +219,15 @@ export default function AdminProductsPage() {
       />
 
       {/* Delete Product Modal */}
-      {showDeleteModal && selectedProduct && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-                <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-              </div>
-              <div className="mt-3 text-center">
-                <h3 className="text-lg font-medium text-gray-900">Eliminar Producto</h3>
-                <div className="mt-2 px-7 py-3">
-                  <p className="text-sm text-gray-500">
-                    ¿Estás seguro de que quieres eliminar el producto &quot;{selectedProduct.name}&quot;? Esta acción no se puede deshacer.
-                  </p>
-                </div>
-                <div className="flex justify-center space-x-3 mt-6">
-                  <button
-                    onClick={() => setShowDeleteModal(false)}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 cursor-pointer"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleDeleteProduct}
-                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 cursor-pointer"
-                  >
-                    Eliminar
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setSelectedProduct(null);
+        }}
+        product={selectedProduct}
+        onProductDeleted={handleProductDeleted}
+      />
     </div>
   );
 }
