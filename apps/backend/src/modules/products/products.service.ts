@@ -608,7 +608,7 @@ export class ProductsService {
   }
 
   async findAllForAdmin(queryProductDto: QueryProductDto): Promise<PaginatedProductResponseDto> {
-    const { page = 1, limit = 20 } = queryProductDto;
+    const { page = 1, limit = 20, search } = queryProductDto;
     const skip = (page - 1) * limit;
 
     const where: Prisma.productsWhereInput = {
@@ -617,9 +617,34 @@ export class ProductsService {
       },
     };
 
+    // Agregar filtro de búsqueda si se proporciona
+    if (search && search.trim()) {
+      const searchTerm = search.trim();
+      where.OR = [
+        // Buscar por nombre
+        {
+          name: {
+            contains: searchTerm,
+            mode: 'insensitive', // Búsqueda case-insensitive
+          },
+        },
+        // Buscar por SKU
+        {
+          sku: {
+            contains: searchTerm,
+            mode: 'insensitive',
+          },
+        },
+        // Buscar por ID (si el término de búsqueda es numérico)
+        ...(isNaN(Number(searchTerm)) ? [] : [{
+          id: parseInt(searchTerm),
+        }]),
+      ];
+    }
+
     const productsData = await this.prisma.products.findMany({
       orderBy: {
-        created_at: 'desc',
+        created_at: 'desc', // Ordenar por fecha de creación descendente (más nuevos primero)
       },
       where,
       skip,

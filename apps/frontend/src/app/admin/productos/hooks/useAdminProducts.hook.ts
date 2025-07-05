@@ -5,11 +5,17 @@ import { useNotificationContext } from '@/contexts/NotificationContext';
 import { Product, PaginatedProductsResponse } from '../interfaces/product.interfaces';
 
 // Función para obtener productos paginados
-const fetchAdminProducts = async (page: number, limit: number = 20): Promise<PaginatedProductsResponse> => {
+const fetchAdminProducts = async (page: number, limit: number = 20, search?: string): Promise<PaginatedProductsResponse> => {
   const params = new URLSearchParams({
     page: page.toString(),
     limit: limit.toString(),
   });
+  
+  // Agregar parámetro de búsqueda si existe
+  if (search && search.trim()) {
+    params.append('search', search.trim());
+  }
+  
   const response = await api.get<PaginatedProductsResponse>(`/products/admin/all?${params.toString()}`);
   return response;
 };
@@ -17,10 +23,11 @@ const fetchAdminProducts = async (page: number, limit: number = 20): Promise<Pag
 interface UseAdminProductsOptions {
   page: number;
   limit?: number;
+  search?: string;
   enabled?: boolean;
 }
 
-export const useAdminProducts = ({ page, limit = 20, enabled = true }: UseAdminProductsOptions) => {
+export const useAdminProducts = ({ page, limit = 20, search = '', enabled = true }: UseAdminProductsOptions) => {
   const { showError } = useNotificationContext();
 
   const {
@@ -29,8 +36,8 @@ export const useAdminProducts = ({ page, limit = 20, enabled = true }: UseAdminP
     error,
     refetch
   } = useQuery({
-    queryKey: ['admin-products', page, limit],
-    queryFn: () => fetchAdminProducts(page, limit),
+    queryKey: ['admin-products', page, limit, search],
+    queryFn: () => fetchAdminProducts(page, limit, search),
     staleTime: 2 * 60 * 1000, // 2 minutos - los productos pueden cambiar
     gcTime: 5 * 60 * 1000, // 5 minutos en cache
     retry: 2,

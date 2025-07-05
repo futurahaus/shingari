@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { EditionModal } from './components/EditionModal';
 import { CreationModal } from './components/CreationModal';
@@ -9,9 +9,12 @@ import { ProductsListSkeleton } from './components/ProductsListSkeleton';
 import { Button } from '@/app/ui/components/Button';
 import { Product } from './interfaces/product.interfaces';
 import { useAdminProducts } from './hooks/useAdminProducts.hook';
+import { Text } from '@/app/ui/components/Text';
+import { FaSearch } from 'react-icons/fa';
 
 export default function AdminProductsPage() {
   const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
   const { showSuccess, showError } = useNotificationContext();
 
   // Modal states
@@ -32,7 +35,7 @@ export default function AdminProductsPage() {
     currentPage,
     lastPage,
     refetch
-  } = useAdminProducts({ page });
+  } = useAdminProducts({ page, search: searchTerm });
 
   const openEditModal = (product: Product) => {
     setSelectedProduct(product);
@@ -62,19 +65,57 @@ export default function AdminProductsPage() {
     }
   };
 
+  // Función para manejar la búsqueda con debounce
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchTerm(value);
+    setPage(1); // Resetear a la primera página cuando se busca
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Administrar Productos</h1>
-          <Button
-            onPress={() => setShowCreateModal(true)}
-            type="primary-admin"
-            text="Nuevo Producto"
-            testID="create-product-button"
-            icon="FaPlus"
-            inline
-          />
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-2">
+            <Text
+              size="3xl"
+              weight="bold"
+              color="gray-900"
+              as="h1"
+            >
+              Control de Stock
+            </Text>
+            <Button
+              onPress={() => setShowCreateModal(true)}
+              type="primary-admin"
+              text="Nuevo Producto"
+              testID="create-product-button"
+              icon="FaPlus"
+              inline
+            />
+          </div>
+          <Text
+            size="sm"
+            weight="normal"
+            color="gray-500"
+            as="p"
+            className="mb-4"
+          >
+            Gestiona control de mercadería
+          </Text>
+          
+          {/* Buscador */}
+          <div className="relative max-w-md">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FaSearch className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Buscar por SKU, nombre o ID..."
+              value={searchTerm}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-black focus:border-black"
+            />
+          </div>
         </div>
 
         {error && (
@@ -147,18 +188,12 @@ export default function AdminProductsPage() {
             <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
             </svg>
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No hay productos</h3>
-            <p className="mt-1 text-sm text-gray-500">Comienza creando tu primer producto.</p>
-            <div className="mt-6">
-              <Button
-                onPress={() => setShowCreateModal(true)}
-                type="primary-admin"
-                text="Nuevo Producto"
-                testID="create-product-empty-button"
-                icon="FaPlus"
-                inline
-              />
-            </div>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">
+              {searchTerm ? 'No se encontraron productos' : 'No hay productos'}
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              {searchTerm ? 'Intenta con otros términos de búsqueda.' : 'Comienza creando tu primer producto.'}
+            </p>
           </div>
         )}
       </div>

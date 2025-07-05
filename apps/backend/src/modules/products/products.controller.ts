@@ -77,6 +77,9 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener productos paginados (Solo Admin)' })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Número de página', example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Cantidad de productos por página', example: 20 })
+  @ApiQuery({ name: 'search', required: false, type: String, description: 'Término de búsqueda (SKU, nombre, ID)', example: 'laptop' })
   @ApiResponse({
     status: 200,
     description: 'Lista de productos paginada obtenida exitosamente.',
