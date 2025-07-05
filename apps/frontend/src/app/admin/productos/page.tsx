@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import Image from 'next/image';
@@ -23,10 +23,20 @@ interface Product {
   unit_name?: string;
 }
 
+interface PaginatedProductsResponse {
+  data: Product[];
+  total: number;
+  page: number;
+  limit: number;
+  lastPage: number;
+}
+
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
 
   // Use the global notification context
   const { showSuccess, showError } = useNotificationContext();
@@ -37,26 +47,34 @@ export default function AdminProductsPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  // Ref para el observer
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const lastProductRef = useRef<HTMLLIElement | null>(null);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async (pageNumber: number) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get('/products/admin/all');
-      const productsData = Array.isArray(response) ? response : [];
-      setProducts(productsData);
+      const params = new URLSearchParams({
+        page: pageNumber.toString(),
+        limit: '20',
+      });
+      const response = await api.get<PaginatedProductsResponse>(`/products/admin/all?${params.toString()}`);
+      setProducts(response.data);
+      setPage(response.page);
+      setLastPage(response.lastPage);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
       setError('Error al cargar productos: ' + errorMsg);
       setProducts([]);
-      // Optionally log error
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchProducts(page);
+  }, [fetchProducts, page]);
 
   const handleDeleteProduct = async () => {
     if (!selectedProduct) return;
@@ -65,7 +83,7 @@ export default function AdminProductsPage() {
       await api.delete(`/products/${selectedProduct.id}`);
       setShowDeleteModal(false);
       setSelectedProduct(null);
-      await fetchProducts();
+      await fetchProducts(1);
       showSuccess('Producto Eliminado', 'El producto se ha eliminado exitosamente');
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -87,11 +105,17 @@ export default function AdminProductsPage() {
   };
 
   const handleProductUpdated = () => {
-    fetchProducts();
+    fetchProducts(1);
   };
 
   const handleProductCreated = () => {
-    fetchProducts();
+    fetchProducts(1);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage !== page && newPage > 0 && newPage <= lastPage) {
+      setPage(newPage);
+    }
   };
 
   if (loading) {
@@ -127,8 +151,12 @@ export default function AdminProductsPage() {
         {products && products.length > 0 ? (
           <div className="bg-white shadow overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200">
-              {products.map((product) => (
-                <li key={product.id} className="px-6 py-4">
+              {products.map((product, index) => (
+                <li
+                  key={product.id}
+                  className="px-6 py-4"
+                  ref={index === products.length - 1 ? lastProductRef : null}
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
@@ -189,6 +217,33 @@ export default function AdminProductsPage() {
                 </li>
               ))}
             </ul>
+            {/* Paginador */}
+            <div className="flex justify-center items-center gap-2 py-6">
+              <button
+                onClick={() => handlePageChange(page - 1)}
+                disabled={page === 1}
+                className="px-3 py-1 rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+              >
+                Anterior
+              </button>
+              {Array.from({ length: lastPage }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => handlePageChange(p)}
+                  className={`px-3 py-1 rounded border ${p === page ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
+                  disabled={p === page}
+                >
+                  {p}
+                </button>
+              ))}
+              <button
+                onClick={() => handlePageChange(page + 1)}
+                disabled={page === lastPage}
+                className="px-3 py-1 rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+              >
+                Siguiente
+              </button>
+            </div>
           </div>
         ) : (
           <div className="text-center py-12">

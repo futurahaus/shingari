@@ -605,16 +605,23 @@ export class ProductsService {
     };
   }
 
-  async findAllForAdmin(): Promise<ProductResponseDto[]> {
+  async findAllForAdmin(queryProductDto: QueryProductDto): Promise<PaginatedProductResponseDto> {
+    const { page = 1, limit = 20 } = queryProductDto;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.productsWhereInput = {
+      status: {
+        not: product_states.deleted,
+      },
+    };
+
     const productsData = await this.prisma.products.findMany({
       orderBy: {
         created_at: 'desc',
       },
-      where: {
-        status: {
-          not: product_states.deleted,
-        },
-      },
+      where,
+      skip,
+      take: limit,
       include: {
         products_categories: {
           include: {
@@ -634,9 +641,19 @@ export class ProductsService {
       },
     });
 
-    return this.mapToProductsResponseDto(
+    const total = await this.prisma.products.count({ where });
+
+    const mappedProducts = await this.mapToProductsResponseDto(
       productsData as ProductWithCategoriesForResponse[],
     );
+
+    return {
+      data: mappedProducts,
+      total,
+      page,
+      limit,
+      lastPage: Math.ceil(total / limit) || 1,
+    };
   }
 
   async findAllCategories(limit?: number): Promise<CategoryResponseDto[]> {
