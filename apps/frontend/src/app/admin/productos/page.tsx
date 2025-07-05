@@ -1,22 +1,15 @@
 "use client";
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { api } from '@/lib/api';
+import React, { useState, useRef } from 'react';
 import { useNotificationContext } from '@/contexts/NotificationContext';
-import Image from 'next/image';
 import { EditionModal } from './components/EditionModal';
 import { CreationModal } from './components/CreationModal';
 import { DeleteModal } from './components/DeleteModal';
 import { AdminProductRow } from './components/AdminProductRow';
-import { Product, PaginatedProductsResponse } from './interfaces/product.interfaces';
+import { Product } from './interfaces/product.interfaces';
+import { useAdminProducts } from './hooks/useAdminProducts.hook';
 
 export default function AdminProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [lastPage, setLastPage] = useState(1);
-
-  // Use the global notification context
   const { showSuccess, showError } = useNotificationContext();
 
   // Modal states
@@ -29,30 +22,15 @@ export default function AdminProductsPage() {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastProductRef = useRef<HTMLLIElement | null>(null);
 
-  const fetchProducts = useCallback(async (pageNumber: number) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const params = new URLSearchParams({
-        page: pageNumber.toString(),
-        limit: '20',
-      });
-      const response = await api.get<PaginatedProductsResponse>(`/products/admin/all?${params.toString()}`);
-      setProducts(response.data);
-      setPage(response.page);
-      setLastPage(response.lastPage);
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
-      setError('Error al cargar productos: ' + errorMsg);
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchProducts(page);
-  }, [fetchProducts, page]);
+  // Usar el hook para obtener productos
+  const {
+    products,
+    loading,
+    error,
+    currentPage,
+    lastPage,
+    refetch
+  } = useAdminProducts({ page });
 
   const openEditModal = (product: Product) => {
     setSelectedProduct(product);
@@ -65,15 +43,15 @@ export default function AdminProductsPage() {
   };
 
   const handleProductUpdated = () => {
-    fetchProducts(1);
+    refetch();
   };
 
   const handleProductCreated = () => {
-    fetchProducts(1);
+    refetch();
   };
 
   const handleProductDeleted = () => {
-    fetchProducts(1);
+    refetch();
   };
 
   const handlePageChange = (newPage: number) => {

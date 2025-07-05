@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 
@@ -8,36 +9,40 @@ export interface Category {
   image?: string;
 }
 
+// Función para obtener categorías
+const fetchCategories = async (): Promise<Category[]> => {
+  const response = await api.get<Category[]>('/products/categories');
+  return response;
+};
+
 export const useCategories = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const { showError } = useNotificationContext();
 
-  const fetchCategories = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await api.get<Category[]>('/products/categories');
-      setCategories(response);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-      setError(errorMessage);
-      showError('Error', 'No se pudieron cargar las categorías');
-      console.error('Error fetching categories:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    data: categories = [],
+    isLoading: loading,
+    error,
+    refetch
+  } = useQuery({
+    queryKey: ['categories'],
+    queryFn: fetchCategories,
+    staleTime: 10 * 60 * 1000, // 10 minutos - las categorías no cambian frecuentemente
+    gcTime: 30 * 60 * 1000, // 30 minutos en cache
+    retry: 2,
+  });
 
+  // Manejar errores con useEffect
   useEffect(() => {
-    fetchCategories();
-  }, []);
+    if (error) {
+      showError('Error', 'No se pudieron cargar las categorías');
+      console.error('Error fetching categories:', error);
+    }
+  }, [error, showError]);
 
   return {
     categories,
     loading,
-    error,
-    refetch: fetchCategories
+    error: error ? (error instanceof Error ? error.message : 'Error desconocido') : null,
+    refetch
   };
 }; 
