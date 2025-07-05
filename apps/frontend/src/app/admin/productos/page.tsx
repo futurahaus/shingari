@@ -5,6 +5,8 @@ import { EditionModal } from './components/EditionModal';
 import { CreationModal } from './components/CreationModal';
 import { DeleteModal } from './components/DeleteModal';
 import { AdminProductRow } from './components/AdminProductRow';
+import { ProductsListSkeleton } from './components/ProductsListSkeleton';
+import { Button } from '@/app/ui/components/Button';
 import { Product } from './interfaces/product.interfaces';
 import { useAdminProducts } from './hooks/useAdminProducts.hook';
 
@@ -60,28 +62,19 @@ export default function AdminProductsPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Administrar Productos</h1>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200 flex items-center gap-2 cursor-pointer"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Nuevo Producto
-          </button>
+          <Button
+            onPress={() => setShowCreateModal(true)}
+            type="primary-admin"
+            text="Nuevo Producto"
+            testID="create-product-button"
+            icon="FaPlus"
+            inline
+          />
         </div>
 
         {error && (
@@ -90,7 +83,9 @@ export default function AdminProductsPage() {
           </div>
         )}
 
-        {products && products.length > 0 ? (
+        {loading ? (
+          <ProductsListSkeleton rowsCount={20} />
+        ) : products && products.length > 0 ? (
           <div className="bg-white shadow overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200">
               {products.map((product, index) => (
@@ -106,30 +101,45 @@ export default function AdminProductsPage() {
             </ul>
             {/* Paginador */}
             <div className="flex justify-center items-center gap-2 py-6">
-              <button
-                onClick={() => handlePageChange(page - 1)}
-                disabled={page === 1}
-                className="px-3 py-1 rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50"
-              >
-                Anterior
-              </button>
+              <Button
+                onPress={() => handlePageChange(page - 1)}
+                type="secondary"
+                text="Anterior"
+                testID="prev-page-button"
+                inline
+                textProps={{
+                  size: 'sm',
+                  weight: 'medium',
+                  color: page === 1 ? 'gray-400' : 'secondary-main'
+                }}
+              />
               {Array.from({ length: lastPage }, (_, i) => i + 1).map((p) => (
-                <button
+                <Button
                   key={p}
-                  onClick={() => handlePageChange(p)}
-                  className={`px-3 py-1 rounded border ${p === page ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
-                  disabled={p === page}
-                >
-                  {p}
-                </button>
+                  onPress={() => handlePageChange(p)}
+                  type={p === page ? 'primary' : 'secondary'}
+                  text={p.toString()}
+                  testID={`page-${p}-button`}
+                  inline
+                  textProps={{
+                    size: 'sm',
+                    weight: 'medium',
+                    color: p === page ? 'primary-contrast' : 'secondary-main'
+                  }}
+                />
               ))}
-              <button
-                onClick={() => handlePageChange(page + 1)}
-                disabled={page === lastPage}
-                className="px-3 py-1 rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50"
-              >
-                Siguiente
-              </button>
+              <Button
+                onPress={() => handlePageChange(page + 1)}
+                type="secondary"
+                text="Siguiente"
+                testID="next-page-button"
+                inline
+                textProps={{
+                  size: 'sm',
+                  weight: 'medium',
+                  color: page === lastPage ? 'gray-400' : 'secondary-main'
+                }}
+              />
             </div>
           </div>
         ) : (
@@ -140,15 +150,14 @@ export default function AdminProductsPage() {
             <h3 className="mt-2 text-sm font-medium text-gray-900">No hay productos</h3>
             <p className="mt-1 text-sm text-gray-500">Comienza creando tu primer producto.</p>
             <div className="mt-6">
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                <svg className="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-                Nuevo Producto
-              </button>
+              <Button
+                onPress={() => setShowCreateModal(true)}
+                type="primary-admin"
+                text="Nuevo Producto"
+                testID="create-product-empty-button"
+                icon="FaPlus"
+                inline
+              />
             </div>
           </div>
         )}
