@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { api } from '@/lib/api';
 import Link from 'next/link';
-import { useAdminUsers, User } from './hooks/useAdminUsers.hook';
+import { useAdminUsers } from './hooks/useAdminUsers.hook';
 import { UsersTableSkeleton } from './components/UsersTableSkeleton';
 
 export default function AdminUsersPage() {

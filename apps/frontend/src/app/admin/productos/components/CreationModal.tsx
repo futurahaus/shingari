@@ -6,6 +6,7 @@ import { useCategories } from '../hooks/useCategories.hook';
 import { Button } from '@/app/ui/components/Button';
 import { CreateProductData, CreationModalProps } from '../interfaces/product.interfaces';
 import { FaTimes } from 'react-icons/fa';
+import Image from 'next/image';
 
 export const CreationModal: React.FC<CreationModalProps> = ({
   isOpen,
@@ -189,7 +190,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                     >
                       {previewUrls[0] && (
                         <>
-                          <img src={previewUrls[0]} alt="Preview" className="object-cover w-full h-full" />
+                          <Image src={previewUrls[0]} alt="Preview" className="object-cover w-full h-full" fill />
                           <button
                             type="button"
                             className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-black hover:text-white text-gray-700 text-xs z-10 cursor-pointer"
@@ -201,7 +202,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                         </>
                       )}
                     </div>
-                    <span className="mt-2 text-sm text-black font-medium text-center leading-tight">Imagen<br/>Principal</span>
+                    <span className="mt-2 text-sm text-black font-medium text-center leading-tight">Imagen<br />Principal</span>
                   </div>
                   {/* Otras imágenes */}
                   {Array.from({ length: 4 }).map((_, idx) => (
@@ -212,7 +213,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                     >
                       {previewUrls[idx + 1] && (
                         <>
-                          <img src={previewUrls[idx + 1]} alt={`Preview ${idx + 2}`} className="object-cover w-full h-full" />
+                          <Image src={previewUrls[idx + 1]} alt={`Preview ${idx + 2}`} className="object-cover w-full h-full" fill />
                           <button
                             type="button"
                             className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-500 hover:text-white text-gray-700 text-xs z-10"

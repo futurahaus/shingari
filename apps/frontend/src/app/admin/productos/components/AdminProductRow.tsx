@@ -1,7 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { FaEdit, FaTrash } from 'react-icons/fa';
-import { Product, AdminProductRowProps } from '../interfaces/product.interfaces';
+import { AdminProductRowProps } from '../interfaces/product.interfaces';
 
 export const AdminProductRow: React.FC<AdminProductRowProps> = ({
     product,

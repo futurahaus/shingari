@@ -7,7 +7,7 @@ import { UserInfo } from './components/UserInfo';
 import { UserOrders } from './components/UserOrders';
 import { UserSpecialPrices } from './components/UserSpecialPrices';
 
-interface UserDetails {
+export interface UserDetails {
   id: string;
   email: string;
   first_name?: string;
@@ -28,26 +28,12 @@ interface UserDetails {
   internal_id?: string;
 }
 
-interface Order {
-  id: string;
-  date: string;
-  total: string;
-}
-
-interface SpecialPrice {
-  product: string;
-  priceRetail: string;
-  priceClient: string;
-}
-
 export default function UserDetailsPage() {
   const params = useParams();
   const userId = params?.id as string;
   const router = useRouter();
 
   const [user, setUser] = useState<UserDetails | null>(null);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [specialPrices, setSpecialPrices] = useState<SpecialPrice[]>([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState<UserDetails | null>(null);
   const [saving, setSaving] = useState(false);
@@ -130,21 +116,19 @@ export default function UserDetailsPage() {
       />
 
       {/* Información del Cliente */}
-      <UserInfo 
-        userId={userId} 
+      <UserInfo
+        userId={userId}
         onUserLoaded={setUser}
       />
 
       {/* Historial de compras */}
-      <UserOrders 
+      <UserOrders
         userId={userId}
-        onOrdersLoaded={setOrders}
       />
 
       {/* Lista de Precios especial */}
-      <UserSpecialPrices 
+      <UserSpecialPrices
         userId={userId}
-        onSpecialPricesLoaded={setSpecialPrices}
       />
 
       {deleteError && <div className="text-red-600 text-sm mb-4">{deleteError}</div>}

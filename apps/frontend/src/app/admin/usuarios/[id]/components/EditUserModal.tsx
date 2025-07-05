@@ -1,10 +1,11 @@
 import React from "react";
+import { UserDetails } from "../page";
 
 interface EditUserModalProps {
   showEditModal: boolean;
   setShowEditModal: (show: boolean) => void;
-  editForm: any;
-  setEditForm: (form: any) => void;
+  editForm: UserDetails | null;
+  setEditForm: (form: UserDetails) => void;
   handleEditChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleEditSubmit: (e: React.FormEvent) => void;
   saveError: string | null;

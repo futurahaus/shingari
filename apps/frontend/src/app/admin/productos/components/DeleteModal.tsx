@@ -3,7 +3,7 @@ import React from 'react';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { Button } from '@/app/ui/components/Button';
-import { Product, DeleteModalProps } from '../interfaces/product.interfaces';
+import { DeleteModalProps } from '../interfaces/product.interfaces';
 
 export const DeleteModal: React.FC<DeleteModalProps> = ({
   isOpen,

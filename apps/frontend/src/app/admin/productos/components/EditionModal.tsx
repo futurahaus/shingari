@@ -4,7 +4,7 @@ import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { useCategories } from '../hooks/useCategories.hook';
 import { Button } from '@/app/ui/components/Button';
-import { Product, UpdateProductData, EditionModalProps } from '../interfaces/product.interfaces';
+import { UpdateProductData, EditionModalProps } from '../interfaces/product.interfaces';
 
 export const EditionModal: React.FC<EditionModalProps> = ({
   isOpen,
@@ -14,7 +14,7 @@ export const EditionModal: React.FC<EditionModalProps> = ({
 }) => {
   const { showSuccess, showError } = useNotificationContext();
   const { categories, loading: loadingCategories } = useCategories();
-  
+
   const [editForm, setEditForm] = useState<UpdateProductData>({
     name: '',
     description: '',
@@ -88,7 +88,7 @@ export const EditionModal: React.FC<EditionModalProps> = ({
                   type="text"
                   placeholder="Nombre de Producto"
                   value={editForm.name}
-                  onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                 />
               </div>
@@ -98,7 +98,7 @@ export const EditionModal: React.FC<EditionModalProps> = ({
                   type="text"
                   placeholder="Descripción de Producto"
                   value={editForm.description}
-                  onChange={(e) => setEditForm({...editForm, description: e.target.value})}
+                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                 />
               </div>
@@ -114,7 +114,7 @@ export const EditionModal: React.FC<EditionModalProps> = ({
                     step="1"
                     placeholder="0"
                     value={editForm.stock}
-                    onChange={(e) => setEditForm({...editForm, stock: parseInt(e.target.value) || 0})}
+                    onChange={(e) => setEditForm({ ...editForm, stock: parseInt(e.target.value) || 0 })}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
@@ -126,7 +126,7 @@ export const EditionModal: React.FC<EditionModalProps> = ({
                     type="number"
                     placeholder="$1234"
                     value={editForm.listPrice}
-                    onChange={(e) => setEditForm({...editForm, listPrice: parseFloat(e.target.value) || 0})}
+                    onChange={(e) => setEditForm({ ...editForm, listPrice: parseFloat(e.target.value) || 0 })}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
