@@ -1,32 +1,10 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { api } from '@/lib/api';
 import Link from 'next/link';
-
-interface User {
-  id: string;
-  email: string;
-  name?: string;
-  first_name?: string;
-  last_name?: string;
-  trade_name?: string;
-  city?: string;
-  province?: string;
-  country?: string;
-  phone?: string;
-  profile_is_complete?: boolean;
-  compras?: number;
-  scoring?: number;
-  last_sign_in_at?: string;
-  email_confirmed_at?: string;
-  roles: string[];
-  meta_data?: unknown;
-}
+import { useAdminUsers, User } from './hooks/useAdminUsers.hook';
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [showNewClientModal, setShowNewClientModal] = useState(false);
   const [newClientForm, setNewClientForm] = useState({
@@ -49,25 +27,8 @@ export default function AdminUsersPage() {
   const [savingNewClient, setSavingNewClient] = useState(false);
   const [saveNewClientError, setSaveNewClientError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await api.get('/user/admin/all');
-      const usersData = Array.isArray(response) ? response : [];
-      setUsers(usersData);
-    } catch (err: unknown) {
-      setError('Error al cargar usuarios: ' + (err instanceof Error ? err.message : 'Error desconocido'));
-      setUsers([]); // Set empty array on error
-      console.error('Error fetching users:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Usar el hook para obtener usuarios
+  const { users, loading, error, refetch } = useAdminUsers();
 
   // Filtered users based on search
   const filteredUsers = users.filter(user => {
@@ -126,7 +87,7 @@ export default function AdminUsersPage() {
         postal_code: '',
         internal_id: '',
       });
-      fetchUsers();
+      refetch();
     } catch (err: unknown) {
       function isErrorWithMessage(error: unknown): error is { message: string } {
         return (
@@ -159,7 +120,7 @@ export default function AdminUsersPage() {
       <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
         <p>{error}</p>
         <button
-          onClick={fetchUsers}
+          onClick={() => refetch()}
           className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
         >
           Reintentar
