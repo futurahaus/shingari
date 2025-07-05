@@ -29,7 +29,7 @@ export class CreateProductDto {
   @ApiProperty({ description: 'Precio del producto', example: 1299.99, type: Number })
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
-  price: number;
+  listPrice: number;
 
   @ApiPropertyOptional({ description: 'Stock inicial del producto', example: 50, type: Number })
   @IsInt()
@@ -52,7 +52,7 @@ export class CreateProductDto {
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   @IsOptional()
-  wholesale_price: number;
+  wholesalePrice: number;
 
   @ApiPropertyOptional({ description: 'Estado del producto', example: 'active', enum: ['active', 'draft', 'paused', 'deleted'] })
   @IsString()

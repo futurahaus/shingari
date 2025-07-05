@@ -76,18 +76,24 @@ export class ProductsController {
   @Get('admin/all')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Obtener todos los productos (Solo Admin)' })
+  @ApiOperation({ summary: 'Obtener productos paginados (Solo Admin)' })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Número de página', example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Cantidad de productos por página', example: 20 })
+  @ApiQuery({ name: 'search', required: false, type: String, description: 'Término de búsqueda (SKU, nombre, ID)', example: 'laptop' })
   @ApiResponse({
     status: 200,
-    description: 'Lista de todos los productos obtenida exitosamente.',
+    description: 'Lista de productos paginada obtenida exitosamente.',
+    type: PaginatedProductResponseDto,
   })
   @ApiResponse({ status: 401, description: 'No autorizado.' })
   @ApiResponse({
     status: 403,
     description: 'Prohibido - Se requiere acceso de administrador.',
   })
-  async findAllForAdmin(): Promise<ProductResponseDto[]> {
-    return this.productsService.findAllForAdmin();
+  async findAllForAdmin(
+    @Query() queryProductDto: QueryProductDto,
+  ): Promise<PaginatedProductResponseDto> {
+    return this.productsService.findAllForAdmin(queryProductDto);
   }
 
   @Post()

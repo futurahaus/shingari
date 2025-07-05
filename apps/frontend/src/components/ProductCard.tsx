@@ -16,7 +16,6 @@ export interface Product {
 }
 
 export const ProductCard = ({ product }: { product: Product }) => {
-    console.log('ProductCard product:', product);
     return (
         <Link href={`/products/${product.id}`} className="block h-full">
             <div className="bg-white rounded-lg shadow-sm overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col">

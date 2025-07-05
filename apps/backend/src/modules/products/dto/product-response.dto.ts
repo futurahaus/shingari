@@ -66,7 +66,7 @@ export class ProductResponseDto {
     description: 'Precio mayorista del producto',
     example: 999.99,
   })
-  wholesale_price?: number;
+  wholesalePrice?: number;
 
   @ApiPropertyOptional({ 
     description: 'Estado del producto',
