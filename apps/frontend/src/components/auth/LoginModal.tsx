@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { FaEye, FaEyeSlash, FaTimes } from 'react-icons/fa';
+import { FaTimes } from 'react-icons/fa';
 import ForgotPasswordModal from './ForgotPasswordModal';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';

@@ -13,7 +13,7 @@ interface ColorSwatchProps {
 const ColorSwatch: React.FC<ColorSwatchProps> = ({ name, color, textColor = '#ffffff', description }) => {
   return (
     <div className="flex flex-col">
-      <div 
+      <div
         className="w-20 h-20 rounded-lg border border-gray-200 mb-2 flex items-center justify-center"
         style={{ backgroundColor: color }}
       >
@@ -31,10 +31,10 @@ const ColorSwatch: React.FC<ColorSwatchProps> = ({ name, color, textColor = '#ff
   );
 };
 
-const ColorSection: React.FC<{ title: string; colors: Record<string, any>; description?: string }> = ({ 
-  title, 
-  colors, 
-  description 
+const ColorSection: React.FC<{ title: string; colors: Record<string, string | { main: string; contrast?: string }>; description?: string }> = ({
+  title,
+  colors,
+  description
 }) => {
   return (
     <div className="mb-8">
@@ -101,7 +101,7 @@ export default function ColorPalette() {
           <div className="mb-8">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Colores de Estado</h3>
             <p className="text-sm text-gray-600 mb-4">Colores para diferentes estados y feedback del usuario</p>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {Object.entries(colors.status).map(([statusName, statusColors]) => (
                 <div key={statusName} className="space-y-3">
@@ -162,10 +162,10 @@ export default function ColorPalette() {
           <div className="mt-12 p-6 bg-blue-50 rounded-lg">
             <h3 className="text-lg font-semibold text-blue-900 mb-3">Cómo Usar Esta Paleta</h3>
             <div className="space-y-2 text-sm text-blue-800">
-              <p><strong>Importar:</strong> <code className="bg-blue-100 px-2 py-1 rounded">import {'{ colors }'} from '@/app/ui/colors'</code></p>
+              <p><strong>Importar:</strong> <code className="bg-blue-100 px-2 py-1 rounded">import {'{ colors }'} from &apos;@/app/ui/colors&apos;</code></p>
               <p><strong>Uso directo:</strong> <code className="bg-blue-100 px-2 py-1 rounded">style={'{ backgroundColor: colors.primary.main }'}</code></p>
-              <p><strong>Con Tailwind:</strong> <code className="bg-blue-100 px-2 py-1 rounded">className="bg-[#EA3D15]"</code></p>
-              <p><strong>Clases predefinidas:</strong> <code className="bg-blue-100 px-2 py-1 rounded">import {'{ tailwindClasses }'} from '@/app/ui/colors'</code></p>
+              <p><strong>Con Tailwind:</strong> <code className="bg-blue-100 px-2 py-1 rounded">className=&quot;bg-[#EA3D15]&quot;</code></p>
+              <p><strong>Clases predefinidas:</strong> <code className="bg-blue-100 px-2 py-1 rounded">import {'{ tailwindClasses }'} from &apos;@/app/ui/colors&apos;</code></p>
             </div>
           </div>
 
@@ -199,4 +199,4 @@ export default function ColorPalette() {
       </div>
     </div>
   );
-} 
+}

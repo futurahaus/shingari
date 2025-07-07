@@ -23,7 +23,7 @@ export default function AdminSetupPage() {
       await api.post('/auth/assign-role', {
         userId: user.id,
         role: 'admin'
-      }, { requireAuth: true });
+      });
 
       setMessage('¡Rol de administrador asignado exitosamente! Ahora puedes acceder al panel de administración.');
       

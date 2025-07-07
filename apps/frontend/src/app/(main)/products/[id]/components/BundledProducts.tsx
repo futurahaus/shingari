@@ -21,7 +21,7 @@ export function BundledProducts({ bundledProducts }: BundledProductsProps) {
           const hasDiscount = product.discount && product.originalPrice;
           return (
             <div key={product.id} className={`flex items-center gap-4 p-2 rounded-lg`}>
-              <Image src={product.image || '/placeholder.svg'} alt={product.name} width={48} height={48} className="rounded-md" />
+              <Image src={product.images?.[0] || '/placeholder.svg'} alt={product.name} width={48} height={48} className="rounded-md" />
               <div className="flex-1">
                 <p className="font-semibold">{product.name}</p>
                 {/* <p className="text-sm text-gray-500">{product.brand.name}</p> */}

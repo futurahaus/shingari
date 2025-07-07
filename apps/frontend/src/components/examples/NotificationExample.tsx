@@ -45,7 +45,7 @@ export const NotificationExample: React.FC = () => {
           <li>Import <code>useNotificationContext</code> from <code>@/contexts/NotificationContext</code></li>
           <li>Use <code>showSuccess</code>, <code>showError</code>, <code>showInfo</code>, or <code>showWarning</code></li>
           <li>Each method takes: <code>(title, message, duration?)</code></li>
-          <li>If duration is not provided, notification won't auto-dismiss</li>
+          <li>If duration is not provided, notification won&apos;t auto-dismiss</li>
           <li>Notifications can be positioned: top-right, top-left, bottom-right, bottom-left, top-center, bottom-center</li>
         </ul>
       </div>

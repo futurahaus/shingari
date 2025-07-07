@@ -53,8 +53,8 @@ export const ProductCard = ({ product }: { product: Product }) => {
 
     return (
         <Link href={`/products/${product.id}`} className="block">
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointer">
-                <div className="bg-gray-200 h-48 flex items-center justify-center relative overflow-hidden">
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointe h-full flex flex-col">
+                <div className="bg-gray-200 h-48 flex items-center justify-center relative overflow-hidden flex-shrink-0">
                     {product.images.length > 0 ? (
                         <Image
                             src={product.images[0]}
@@ -86,15 +86,15 @@ export const ProductCard = ({ product }: { product: Product }) => {
                         </button>
                     </div>
                 </div>
-                <div className="p-4">
-                    <Text as="h3" size="lg" weight="bold" color="primary" testID={`product-name-${product.id}`}>
+                <div className="p-4 flex flex-col flex-1">
+                    <Text as="h3" size="lg" weight="bold" color="primary" testID={`product-name-${product.id}`} className="line-clamp-2 mb-2">
                         {product.name}
                     </Text>
-                    <div className="flex items-center mt-2">
+                    <div className="flex items-center mt-2 mb-2">
                         <Text as="h4" size="md" weight="semibold" color="gray-900" testID={`product-price-${product.id}`}>
                             {`€${new Intl.NumberFormat('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(product.price)}`}
                         </Text>
-                        {product.discount && (
+                        {(typeof product.discount === 'number' && product.discount > 0) && (
                             <Text
                                 as="span"
                                 size="xs"
@@ -107,7 +107,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
                             </Text>
                         )}
                     </div>
-                    {product.discount && product.originalPrice && (
+                    {(typeof product.discount === 'number' && product.discount > 0 && product.originalPrice) && (
                         <Text
                             as="h5"
                             size="sm"
@@ -122,20 +122,23 @@ export const ProductCard = ({ product }: { product: Product }) => {
                         as="p"
                         size="sm"
                         color="secondary"
-                        className="mb-4 line-clamp-2"
+                        className="mb-4 line-clamp-2 flex-1"
                         testID={`product-description-${product.id}`}
                     >
                         {product.description}
                     </Text>
-                    <Button
-                        onPress={() => {
-                            // Aquí puedes agregar la lógica para agregar al carrito
-                            console.log('Agregar al carrito:', product.id);
-                        }}
-                        type="primary"
-                        text="Ver Producto"
-                        testID={`add-to-cart-${product.id}`}
-                    />
+                    <div className="mt-auto">
+                        <Button
+                            onPress={() => {
+                                // Aquí puedes agregar la lógica para agregar al carrito
+                                console.log('Agregar al carrito:', product.id);
+                            }}
+                            type="primary"
+                            text="Ver Producto"
+                            testID={`add-to-cart-${product.id}`}
+                            icon="FaShoppingCart"
+                        />
+                    </div>
                 </div>
             </div>
         </Link>
