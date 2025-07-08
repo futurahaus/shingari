@@ -2,6 +2,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
+import { useState } from 'react';
+import { useCart } from '@/contexts/CartContext';
 
 export interface Product {
     id: string;
@@ -16,9 +18,42 @@ export interface Product {
 }
 
 export const ProductCard = ({ product }: { product: Product }) => {
+    const { cart, addToCart, updateQuantity, removeFromCart } = useCart();
+    // Find current quantity in cart
+    const cartItem = cart.find((item) => item.id === product.id);
+    const [quantity, setQuantity] = useState(cartItem ? cartItem.quantity : 0);
+
+    const handleAdd = () => {
+        const newQty = quantity + 1;
+        setQuantity(newQty);
+        if (cartItem) {
+            updateQuantity(product.id, newQty);
+        } else {
+            addToCart({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image: product.images[0],
+                quantity: 1,
+            });
+        }
+    };
+
+    const handleRemove = () => {
+        if (quantity > 0) {
+            const newQty = quantity - 1;
+            setQuantity(newQty);
+            if (newQty === 0) {
+                removeFromCart(product.id);
+            } else {
+                updateQuantity(product.id, newQty);
+            }
+        }
+    };
+
     return (
-        <Link href={`/products/${product.id}`} className="block h-full">
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col">
+        <Link href={`/products/${product.id}`} className="block">
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointe h-full flex flex-col">
                 <div className="bg-gray-200 h-48 flex items-center justify-center relative overflow-hidden flex-shrink-0">
                     {product.images.length > 0 ? (
                         <Image
@@ -32,6 +67,24 @@ export const ProductCard = ({ product }: { product: Product }) => {
                             Sin imagen
                         </Text>
                     )}
+                    {/* Quantity controls */}
+                    <div className="absolute bottom-2 right-2 flex items-center bg-white/90 rounded-full shadow px-2 py-1 gap-2 z-10">
+                        <button
+                            type="button"
+                            className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-lg font-bold"
+                            onClick={e => { e.preventDefault(); e.stopPropagation(); handleRemove(); }}
+                        >
+                            -
+                        </button>
+                        <span className="w-4 text-center text-sm select-none">{quantity}</span>
+                        <button
+                            type="button"
+                            className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-lg font-bold"
+                            onClick={e => { e.preventDefault(); e.stopPropagation(); handleAdd(); }}
+                        >
+                            +
+                        </button>
+                    </div>
                 </div>
                 <div className="p-4 flex flex-col flex-1">
                     <Text as="h3" size="lg" weight="bold" color="primary" testID={`product-name-${product.id}`} className="line-clamp-2 mb-2">
@@ -81,7 +134,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
                                 console.log('Agregar al carrito:', product.id);
                             }}
                             type="primary"
-                            text="Agregar al carrito"
+                            text="Ver Producto"
                             testID={`add-to-cart-${product.id}`}
                             icon="FaShoppingCart"
                         />

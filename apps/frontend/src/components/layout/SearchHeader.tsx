@@ -8,11 +8,13 @@ import LoginModal from '@/components/auth/LoginModal';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/app/ui/components/Button';
+import { useCart } from '@/contexts/CartContext';
 
 export default function SearchHeader() {
   const { user } = useAuth();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const router = useRouter();
+  const { openCart, cart } = useCart();
 
   return (
     <>
@@ -62,19 +64,23 @@ export default function SearchHeader() {
                   inline={true}
                 />
               )}
-              <Button
-                onPress={() => {
-                  // Lógica para abrir el carrito
-                  console.log('Abrir carrito');
-                }}
-                type="primary"
-                testID="cart-button"
-                icon="FaShoppingCart"
-                textProps={{
-                  size: 'sm',
-                }}
-                inline={true}
-              />
+              <div className="relative">
+                <Button
+                  onPress={openCart}
+                  type="primary"
+                  testID="cart-button"
+                  icon="FaShoppingCart"
+                  textProps={{
+                    size: 'sm',
+                  }}
+                  inline={true}
+                />
+                {cart.length > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
+                    {cart.length}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>

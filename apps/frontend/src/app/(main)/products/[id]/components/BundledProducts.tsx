@@ -9,7 +9,7 @@ interface BundledProductsProps {
 export function BundledProducts({ bundledProducts }: BundledProductsProps) {
   const totalOriginalPrice = bundledProducts.reduce((sum, product) => sum + (product.originalPrice || product.price), 0);
   const totalCurrentPrice = bundledProducts.reduce((sum, product) => sum + product.price, 0);
-  const totalDiscountPercentage = totalOriginalPrice > totalCurrentPrice 
+  const totalDiscountPercentage = totalOriginalPrice > totalCurrentPrice
     ? Math.round(((totalOriginalPrice - totalCurrentPrice) / totalOriginalPrice) * 100)
     : 0;
 
@@ -63,4 +63,4 @@ export function BundledProducts({ bundledProducts }: BundledProductsProps) {
       </button>
     </div>
   );
-} 
+}
