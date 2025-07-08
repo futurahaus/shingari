@@ -1,6 +1,5 @@
 import React from 'react';
 import * as FaIcons from 'react-icons/fa';
-import { colors } from '../colors';
 import { Text } from './Text';
 
 interface InputProps {

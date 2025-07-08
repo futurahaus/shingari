@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 
 const WHATSAPP_NUMBER = '34600000000'; // Replace with your number
 const DEFAULT_MESSAGE = 'Hola, me gustaría obtener más información.';
@@ -33,10 +34,12 @@ export default function WhatsAppBubble() {
         padding: 0,
       }}
     >
-      <img
+      <Image
         src="/whatsapp.png"
         alt="WhatsApp"
-        style={{ width: 36, height: 36, objectFit: 'contain' }}
+        width={36}
+        height={36}
+        style={{ objectFit: 'contain' }}
       />
     </button>
   );

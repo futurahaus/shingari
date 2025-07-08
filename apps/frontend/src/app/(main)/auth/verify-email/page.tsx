@@ -121,7 +121,7 @@ export default function VerifyEmailPage() {
     };
 
     verifyEmail();
-  }, []);
+  }, [login, router]);
 
   const handleRoleSelected = (role: string) => {
     setShowRoleModal(false);

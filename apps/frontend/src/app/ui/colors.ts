@@ -22,6 +22,14 @@ export const colors = {
     contrast: '#ffffff',  // Color de texto sobre el fondo secundario
   },
 
+  // Colores de Admin (Negro)
+  admin: {
+    main: '#000000',      // Negro principal (usado en botones de admin)
+    light: '#1f2937',     // Versión más clara para hover
+    dark: '#000000',      // Versión más oscura para hover
+    contrast: '#ffffff',  // Color de texto sobre el fondo admin
+  },
+
   // Colores Neutros
   neutral: {
     white: '#ffffff',
@@ -108,6 +116,7 @@ export const tailwindClasses = {
   // Botones
   button: {
     primary: 'bg-[#EA3D15] text-white hover:bg-[#c53211] focus:ring-[#EA3D15]',
+    'primary-admin': 'bg-[#000000] text-white hover:bg-[#1f2937] focus:ring-[#000000]',
     secondary: 'bg-transparent text-[#363F45] border border-[#363F45] hover:bg-gray-100 focus:ring-[#363F45]',
     success: 'bg-[#10b981] text-white hover:bg-[#059669] focus:ring-[#10b981]',
     warning: 'bg-[#f59e0b] text-white hover:bg-[#d97706] focus:ring-[#f59e0b]',

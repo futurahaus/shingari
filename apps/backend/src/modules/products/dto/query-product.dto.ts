@@ -22,6 +22,11 @@ export class QueryProductDto {
   @Min(1)
   limit?: number = 10;
 
+  @ApiPropertyOptional({ description: 'Término de búsqueda general (SKU, nombre, ID)' })
+  @IsOptional()
+  @IsString()
+  search?: string;
+
   @ApiPropertyOptional({ description: 'Término de búsqueda por nombre de producto' })
   @IsOptional()
   @IsString()
