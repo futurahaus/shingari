@@ -2,15 +2,19 @@
 import React from 'react';
 import { useCart } from '@/contexts/CartContext';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 export const CartModal = () => {
   const {
     cart,
     removeFromCart,
     updateQuantity,
+    removeAllFromCart,
     isCartOpen,
     closeCart,
   } = useCart();
+
+  const router = useRouter();
 
   // Calculate totals
   const total = cart.reduce((sum, p) => sum + p.price * p.quantity, 0);
@@ -21,7 +25,7 @@ export const CartModal = () => {
   if (!isCartOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-end">
+    <div className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-md bg-white shadow-lg overflow-y-auto">
       <div className="w-full max-w-md bg-white h-full shadow-lg overflow-y-auto relative">
         <button
           className="absolute top-4 right-4 text-2xl text-gray-500 hover:text-black cursor-pointer"
@@ -53,13 +57,13 @@ export const CartModal = () => {
                     <div className="text-lg font-semibold mb-2">€ {item.price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</div>
                     <div className="flex items-center gap-2 mb-2">
                       <button
-                        className="px-2 py-1 bg-gray-100 rounded"
+                        className="px-2 py-1 bg-gray-100 rounded cursor-pointer"
                         onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                         disabled={item.quantity <= 1}
                       >-</button>
                       <span className="mx-1">{item.quantity}</span>
                       <button
-                        className="px-2 py-1 bg-gray-100 rounded"
+                        className="px-2 py-1 bg-gray-100 rounded cursor-pointer"
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
                       >+</button>
                       <span className="ml-2 text-xs text-gray-500">{item.unitType || 'Unidades'}</span>
@@ -73,6 +77,11 @@ export const CartModal = () => {
               ))
             )}
           </div>
+          {/* removeAllFromCart */}
+          <button
+            className="text-xs text-red-500 hover:underline cursor-pointer"
+            onClick={() => removeAllFromCart()}
+          >Eliminar todos</button>
           <div className="my-6 text-sm flex items-center gap-2">
             <span role="img" aria-label="gift">🎁</span> Con ésta compra sumas 100 puntos!
           </div>
@@ -90,7 +99,12 @@ export const CartModal = () => {
               <span>€{total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
             </div>
           </div>
-          <button className="w-full bg-[#F24E1E] text-white py-3 rounded-md font-semibold text-lg hover:bg-[#d43e0e] transition cursor-pointer">
+          <button className="w-full bg-[#F24E1E] text-white py-3 rounded-md font-semibold text-lg hover:bg-[#d43e0e] transition cursor-pointer"
+            onClick={() => {
+              router.push('/carrito');
+              closeCart();
+            }}
+          >
             Ir al carrito
           </button>
         </div>

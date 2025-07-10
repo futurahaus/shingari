@@ -65,7 +65,6 @@ export default function ProductDetailPage() {
               price: product.price,
               image: product.images?.[0] || undefined,
               quantity: 1,
-              unitType: 'Unidades',
             })}
           >
             Agregar al carrito
