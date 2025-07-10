@@ -8,6 +8,7 @@ export const CartModal = () => {
     cart,
     removeFromCart,
     updateQuantity,
+    removeAllFromCart,
     isCartOpen,
     closeCart,
   } = useCart();
@@ -73,6 +74,11 @@ export const CartModal = () => {
               ))
             )}
           </div>
+          {/* removeAllFromCart */}
+          <button
+            className="text-xs text-red-500 hover:underline cursor-pointer"
+            onClick={() => removeAllFromCart()}
+          >Eliminar todos</button>
           <div className="my-6 text-sm flex items-center gap-2">
             <span role="img" aria-label="gift">🎁</span> Con ésta compra sumas 100 puntos!
           </div>
