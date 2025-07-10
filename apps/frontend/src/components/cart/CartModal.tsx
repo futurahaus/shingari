@@ -2,6 +2,7 @@
 import React from 'react';
 import { useCart } from '@/contexts/CartContext';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 export const CartModal = () => {
   const {
@@ -12,6 +13,8 @@ export const CartModal = () => {
     isCartOpen,
     closeCart,
   } = useCart();
+
+  const router = useRouter();
 
   // Calculate totals
   const total = cart.reduce((sum, p) => sum + p.price * p.quantity, 0);
@@ -54,13 +57,13 @@ export const CartModal = () => {
                     <div className="text-lg font-semibold mb-2">€ {item.price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</div>
                     <div className="flex items-center gap-2 mb-2">
                       <button
-                        className="px-2 py-1 bg-gray-100 rounded"
+                        className="px-2 py-1 bg-gray-100 rounded cursor-pointer"
                         onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                         disabled={item.quantity <= 1}
                       >-</button>
                       <span className="mx-1">{item.quantity}</span>
                       <button
-                        className="px-2 py-1 bg-gray-100 rounded"
+                        className="px-2 py-1 bg-gray-100 rounded cursor-pointer"
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
                       >+</button>
                       <span className="ml-2 text-xs text-gray-500">{item.unitType || 'Unidades'}</span>
@@ -96,7 +99,12 @@ export const CartModal = () => {
               <span>€{total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
             </div>
           </div>
-          <button className="w-full bg-[#F24E1E] text-white py-3 rounded-md font-semibold text-lg hover:bg-[#d43e0e] transition cursor-pointer">
+          <button className="w-full bg-[#F24E1E] text-white py-3 rounded-md font-semibold text-lg hover:bg-[#d43e0e] transition cursor-pointer"
+            onClick={() => {
+              router.push('/carrito');
+              closeCart();
+            }}
+          >
             Ir al carrito
           </button>
         </div>
