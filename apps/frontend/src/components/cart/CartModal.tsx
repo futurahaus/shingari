@@ -21,7 +21,7 @@ export const CartModal = () => {
   if (!isCartOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-end">
+    <div className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-md bg-white shadow-lg overflow-y-auto">
       <div className="w-full max-w-md bg-white h-full shadow-lg overflow-y-auto relative">
         <button
           className="absolute top-4 right-4 text-2xl text-gray-500 hover:text-black cursor-pointer"

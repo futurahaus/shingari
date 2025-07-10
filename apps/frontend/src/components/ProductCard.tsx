@@ -71,7 +71,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
                     <div className="absolute bottom-2 right-2 flex items-center bg-white/90 rounded-full shadow px-2 py-1 gap-2 z-10">
                         <button
                             type="button"
-                            className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-lg font-bold"
+                            className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-lg font-bold cursor-pointer"
                             onClick={e => { e.preventDefault(); e.stopPropagation(); handleRemove(); }}
                         >
                             -
@@ -79,7 +79,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
                         <span className="w-4 text-center text-sm select-none">{quantity}</span>
                         <button
                             type="button"
-                            className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-lg font-bold"
+                            className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-lg font-bold cursor-pointer"
                             onClick={e => { e.preventDefault(); e.stopPropagation(); handleAdd(); }}
                         >
                             +
