@@ -313,7 +313,7 @@ const ProductsSection = ({
                 {selectedCategory || 'Todos los Productos'}
             </Text>
             <ProductFilters filters={filters} onFilterChange={handleFilterChange} />
-            {loading && products.length === 0 ? (
+            {loading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
                     {[...Array(8)].map((_, i) => (
                         <ProductCardSkeleton key={i} />
