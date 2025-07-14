@@ -58,7 +58,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }
       return [...prev, product];
     });
-    setIsCartOpen(true);
+    // setIsCartOpen(true);
   };
 
   const removeFromCart = (id: string) => {
@@ -71,7 +71,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const updateQuantity = (id: string, quantity: number) => {
     setCart(prev => prev.map(p => (p.id === id ? { ...p, quantity } : p)));
-    setIsCartOpen(true);
+    // setIsCartOpen(true);
   };
 
   const clearCart = () => setCart([]);

@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -16,6 +16,20 @@ export const CartModal = () => {
 
   const router = useRouter();
 
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!isCartOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeCart();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isCartOpen, closeCart]);
+
   // Calculate totals
   const total = cart.reduce((sum, p) => sum + p.price * p.quantity, 0);
   // For now, no discounts
@@ -25,8 +39,18 @@ export const CartModal = () => {
   if (!isCartOpen) return null;
 
   return (
-    <div className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-md bg-white shadow-lg overflow-y-auto">
-      <div className="w-full max-w-md bg-white h-full shadow-lg overflow-y-auto relative">
+    <>
+      {/* Overlay for click outside */}
+      <div
+        className="fixed inset-0 z-40"
+        onClick={closeCart}
+        style={{ background: 'transparent' }}
+      />
+      {/* Modal */}
+      <div
+        className="fixed right-0 top-0 bottom-0 z-50 w-full max-w-md bg-white shadow-lg overflow-y-auto"
+        ref={modalRef}
+      >
         <button
           className="absolute top-4 right-4 text-2xl text-gray-500 hover:text-black cursor-pointer"
           onClick={closeCart}
@@ -82,9 +106,6 @@ export const CartModal = () => {
             className="text-xs text-red-500 hover:underline cursor-pointer"
             onClick={() => removeAllFromCart()}
           >Eliminar todos</button>
-          <div className="my-6 text-sm flex items-center gap-2">
-            <span role="img" aria-label="gift">🎁</span> Con ésta compra sumas 100 puntos!
-          </div>
           <div className="text-sm space-y-1 mb-6">
             <div className="flex justify-between">
               <span>Precio de mis productos:</span>
@@ -109,6 +130,6 @@ export const CartModal = () => {
           </button>
         </div>
       </div>
-    </div>
+    </>
   );
 };
