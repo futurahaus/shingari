@@ -53,6 +53,25 @@ export class ProductsController {
     return this.productsService.findAllCategories(limit);
   }
 
+  @Get('categories/parents')
+  @ApiOperation({
+    summary: 'Obtener solo las categorías padre (parent_id = null)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Número máximo de categorías padre a retornar',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de categorías padre obtenida exitosamente.',
+    type: [ProductDiscountResponseDto],
+  })
+  async findAllParentCategories(@Query('limit') limit?: number) {
+    return this.productsService.findAllParentCategories(limit);
+  }
+
   // --- Public Endpoint ---
   @Get()
   @UseGuards(OptionalJwtAuthGuard)
