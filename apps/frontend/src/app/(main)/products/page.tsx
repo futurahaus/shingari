@@ -78,24 +78,36 @@ const CategorySidebar = ({
                                         const isChildSelected = child.name === selectedCategoryName;
                                         return (
                                             <li key={child.id}>
-                                                <a
-                                                    href="#"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        onSelectCategory(child.name);
-                                                    }}
-                                                    className="block"
-                                                >
+                                                {isChildSelected ? (
                                                     <Text
                                                         as="span"
                                                         size="sm"
-                                                        weight={isChildSelected ? "bold" : "medium"}
-                                                        color={isChildSelected ? "primary-main" : "secondary"}
-                                                        className={`hover:text-black transition-colors`}
+                                                        weight="bold"
+                                                        color="primary-main"
+                                                        className={`transition-colors cursor-default`}
                                                     >
                                                         {child.name}
                                                     </Text>
-                                                </a>
+                                                ) : (
+                                                    <a
+                                                        href="#"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            onSelectCategory(child.name);
+                                                        }}
+                                                        className="block"
+                                                    >
+                                                        <Text
+                                                            as="span"
+                                                            size="sm"
+                                                            weight="medium"
+                                                            color="secondary"
+                                                            className={`hover:text-black transition-colors`}
+                                                        >
+                                                            {child.name}
+                                                        </Text>
+                                                    </a>
+                                                )}
                                             </li>
                                         );
                                     })}
