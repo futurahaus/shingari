@@ -1,7 +1,22 @@
 import { PrismaService } from 'src/modules/prisma/prisma.service';
-import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Inject,
+} from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Prisma, products as ProductPrismaType, product_states, categories as CategoryPrismaType, products_categories as ProductsCategoriesPrismaType, products_discounts as ProductDiscountPrismaType, product_images as ProductImagesPrismaType, roles as RolePrismaType, products_stock as ProductsStockPrismaType } from '../../../generated/prisma'; // Importar tipos y enums de Prisma
+import {
+  Prisma,
+  products as ProductPrismaType,
+  product_states,
+  categories as CategoryPrismaType,
+  products_categories as ProductsCategoriesPrismaType,
+  products_discounts as ProductDiscountPrismaType,
+  product_images as ProductImagesPrismaType,
+  roles as RolePrismaType,
+  products_stock as ProductsStockPrismaType,
+} from '../../../generated/prisma'; // Importar tipos y enums de Prisma
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductDto, ProductSortByPrice } from './dto/query-product.dto';
@@ -15,7 +30,9 @@ import { Cache } from 'cache-manager';
 
 // Tipo para el producto con categorías incluidas, específico para findAllPublic y findOne
 type ProductWithCategoriesForResponse = Omit<ProductPrismaType, 'image_url'> & {
-  products_categories: (ProductsCategoriesPrismaType & { categories: CategoryPrismaType })[];
+  products_categories: (ProductsCategoriesPrismaType & {
+    categories: CategoryPrismaType;
+  })[];
   product_images: ProductImagesPrismaType[];
   products_stock: ProductsStockPrismaType[];
 };
@@ -30,7 +47,7 @@ export class ProductsService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) { } // Inyectar PrismaService
+  ) {} // Inyectar PrismaService
 
   private async getUserRole(userId: string): Promise<string | null> {
     const userRole = await this.prisma.user_roles.findFirst({
@@ -45,7 +62,10 @@ export class ProductsService {
     return userRole?.roles.name || null;
   }
 
-  private async getUserDiscount(userId: string, productId: number): Promise<number | null> {
+  private async getUserDiscount(
+    userId: string,
+    productId: number,
+  ): Promise<number | null> {
     const userDiscount = await this.prisma.products_discounts.findFirst({
       where: {
         user_id: userId,
@@ -53,16 +73,10 @@ export class ProductsService {
         is_active: true,
         AND: [
           {
-            OR: [
-              { valid_from: { lte: new Date() } },
-              { valid_from: null },
-            ],
+            OR: [{ valid_from: { lte: new Date() } }, { valid_from: null }],
           },
           {
-            OR: [
-              { valid_to: { gte: new Date() } },
-              { valid_to: null },
-            ],
+            OR: [{ valid_to: { gte: new Date() } }, { valid_to: null }],
           },
         ],
       },
@@ -75,9 +89,12 @@ export class ProductsService {
     product: ProductWithCategoriesForResponse,
     userId?: string,
     userDiscountPrice?: number,
-    userRole?: string | null
+    userRole?: string | null,
   ): Promise<{ price: number; originalPrice: number; discount: number }> {
-    const originalPrice = userRole === 'business' ? product.wholesale_price.toNumber() : product.list_price.toNumber();
+    const originalPrice =
+      userRole === 'business'
+        ? product.wholesale_price.toNumber()
+        : product.list_price.toNumber();
     let price = originalPrice;
 
     if (userId) {
@@ -87,12 +104,15 @@ export class ProductsService {
       }
     }
 
-    const discount = Number(((1 - (price / originalPrice)) * 100).toFixed(2));
+    const discount = Number(((1 - price / originalPrice) * 100).toFixed(2));
 
     return { price, originalPrice, discount };
   }
 
-  private async mapToProductResponseDto(product: ProductWithCategoriesForResponse, userId?: string): Promise<ProductResponseDto> {
+  private async mapToProductResponseDto(
+    product: ProductWithCategoriesForResponse,
+    userId?: string,
+  ): Promise<ProductResponseDto> {
     let userDiscountPrice: number | undefined;
     let userRole: string | null = null;
 
@@ -111,7 +131,7 @@ export class ProductsService {
       product,
       userId,
       userDiscountPrice,
-      userRole
+      userRole,
     );
 
     return {
@@ -123,13 +143,17 @@ export class ProductsService {
       originalPrice: originalPrice,
       discount: discount,
       createdAt: product.created_at || new Date(),
-      categories: product.products_categories?.map(pc => pc.categories.name) || [],
-      images: product.product_images?.map(pi => pi.image_url) || [],
+      categories:
+        product.products_categories?.map((pc) => pc.categories.name) || [],
+      images: product.product_images?.map((pi) => pi.image_url) || [],
       sku: product.sku || '',
     };
   }
 
-  private async mapToProductsResponseDto(products: ProductWithCategoriesForResponse[], userId?: string): Promise<ProductResponseDto[]> {
+  private async mapToProductsResponseDto(
+    products: ProductWithCategoriesForResponse[],
+    userId?: string,
+  ): Promise<ProductResponseDto[]> {
     let discountMap: Map<number, number> | null = null;
     let userRole: string | null = null;
 
@@ -141,20 +165,14 @@ export class ProductsService {
           user_id: userId,
           is_active: true,
           product_id: {
-            in: products.map(p => p.id)
+            in: products.map((p) => p.id),
           },
           AND: [
             {
-              OR: [
-                { valid_from: { lte: now } },
-                { valid_from: null },
-              ],
+              OR: [{ valid_from: { lte: now } }, { valid_from: null }],
             },
             {
-              OR: [
-                { valid_to: { gte: now } },
-                { valid_to: null },
-              ],
+              OR: [{ valid_to: { gte: now } }, { valid_to: null }],
             },
           ],
         },
@@ -166,7 +184,7 @@ export class ProductsService {
 
       // Crear un mapa de descuentos por product_id para acceso rápido
       discountMap = new Map<number, number>();
-      userDiscounts.forEach(discount => {
+      userDiscounts.forEach((discount) => {
         if (discount.product_id !== null) {
           discountMap!.set(discount.product_id, discount.price.toNumber());
         }
@@ -177,36 +195,43 @@ export class ProductsService {
     }
 
     // Mapear productos con descuentos optimizados
-    return Promise.all(products.map(async product => {
-      const userDiscountPrice = discountMap?.get(product.id);
+    return Promise.all(
+      products.map(async (product) => {
+        const userDiscountPrice = discountMap?.get(product.id);
 
-      const { price, originalPrice, discount } = await this.calculateProductPrice(
-        product,
-        userId,
-        userDiscountPrice,
-        userRole
-      );
+        const { price, originalPrice, discount } =
+          await this.calculateProductPrice(
+            product,
+            userId,
+            userDiscountPrice,
+            userRole,
+          );
 
-      return {
-        updatedAt: new Date(),
-        id: product.id.toString(),
-        name: product.name,
-        description: product.description || '',
-        price: price,
-        stock: product.products_stock[0]?.quantity.toNumber() || 0,
-        originalPrice: originalPrice,
-        listPrice: product.list_price.toNumber(),
-        wholesalePrice: product.wholesale_price.toNumber(),
-        discount: discount,
-        createdAt: product.created_at || new Date(),
-        categories: product.products_categories?.map(pc => pc.categories.name) || [],
-        images: product.product_images?.map(pi => pi.image_url) || [],
-        sku: product.sku || '',
-      };
-    }));
+        return {
+          updatedAt: new Date(),
+          id: product.id.toString(),
+          name: product.name,
+          description: product.description || '',
+          price: price,
+          stock: product.products_stock[0]?.quantity.toNumber() || 0,
+          originalPrice: originalPrice,
+          listPrice: product.list_price.toNumber(),
+          wholesalePrice: product.wholesale_price.toNumber(),
+          discount: discount,
+          createdAt: product.created_at || new Date(),
+          categories:
+            product.products_categories?.map((pc) => pc.categories.name) || [],
+          images: product.product_images?.map((pi) => pi.image_url) || [],
+          sku: product.sku || '',
+        };
+      }),
+    );
   }
 
-  private getFindAllPublicCacheKey(queryProductDto: QueryProductDto, userId?: string): string {
+  private getFindAllPublicCacheKey(
+    queryProductDto: QueryProductDto,
+    userId?: string,
+  ): string {
     return `products:public:${JSON.stringify(queryProductDto)}:user:${userId || 'anon'}`;
   }
 
@@ -214,11 +239,21 @@ export class ProductsService {
     return `products:one:${id}:user:${userId || 'anon'}`;
   }
 
-  async findAllPublic(queryProductDto: QueryProductDto, userId?: string): Promise<PaginatedProductResponseDto> {
+  async findAllPublic(
+    queryProductDto: QueryProductDto,
+    userId?: string,
+  ): Promise<PaginatedProductResponseDto> {
     const cacheKey = this.getFindAllPublicCacheKey(queryProductDto, userId);
-    const cached = await this.cacheManager.get<PaginatedProductResponseDto>(cacheKey);
+    const cached =
+      await this.cacheManager.get<PaginatedProductResponseDto>(cacheKey);
     if (cached) return cached;
-    const { page = 1, limit = 10, searchName, categoryFilters, sortByPrice } = queryProductDto;
+    const {
+      page = 1,
+      limit = 10,
+      searchName,
+      categoryFilters,
+      sortByPrice,
+    } = queryProductDto;
     const skip = (page - 1) * limit;
 
     const where: Prisma.productsWhereInput = {
@@ -229,7 +264,6 @@ export class ProductsService {
     if (searchName) {
       where.name = { contains: searchName, mode: 'insensitive' };
     }
-
 
     if (categoryFilters && categoryFilters.length > 0) {
       where.products_categories = {
@@ -246,7 +280,8 @@ export class ProductsService {
 
     const orderBy: Prisma.productsOrderByWithRelationInput = {};
     if (sortByPrice) {
-      orderBy.list_price = sortByPrice === ProductSortByPrice.ASC ? 'asc' : 'desc';
+      orderBy.list_price =
+        sortByPrice === ProductSortByPrice.ASC ? 'asc' : 'desc';
     } else {
       orderBy.created_at = 'desc'; // Orden por defecto
     }
@@ -275,6 +310,7 @@ export class ProductsService {
                 name: true,
                 image_url: true,
                 created_at: true,
+                parent_id: true, // <-- Added for type compatibility
               },
             },
           },
@@ -345,10 +381,15 @@ export class ProductsService {
     });
 
     if (!product) {
-      throw new NotFoundException(`Producto con ID "${id}" no encontrado o no está activo.`);
+      throw new NotFoundException(
+        `Producto con ID "${id}" no encontrado o no está activo.`,
+      );
     }
 
-    const result = await this.mapToProductResponseDto(product as ProductWithCategoriesForResponse, userId);
+    const result = await this.mapToProductResponseDto(
+      product as ProductWithCategoriesForResponse,
+      userId,
+    );
     await this.cacheManager.set(cacheKey, result, 300);
     return result;
   }
@@ -507,7 +548,8 @@ export class ProductsService {
       data: {
         name,
         description,
-        list_price: listPrice !== undefined ? new Prisma.Decimal(listPrice) : undefined,
+        list_price:
+          listPrice !== undefined ? new Prisma.Decimal(listPrice) : undefined,
         wholesale_price:
           wholesalePrice !== undefined
             ? new Prisma.Decimal(wholesalePrice)
@@ -623,8 +665,10 @@ export class ProductsService {
     });
   }
 
-
-  async findDiscountsForUser(userId: string, productId?: number): Promise<ProductDiscountResponseDto[]> {
+  async findDiscountsForUser(
+    userId: string,
+    productId?: number,
+  ): Promise<ProductDiscountResponseDto[]> {
     const now = new Date();
     const where: Prisma.products_discountsWhereInput = {
       user_id: userId,
@@ -652,20 +696,25 @@ export class ProductsService {
     const discounts = await this.prisma.products_discounts.findMany({
       where,
       include: {
-        products: { // Incluir el producto para obtener su precio original y nombre
+        products: {
+          // Incluir el producto para obtener su precio original y nombre
           select: { list_price: true, name: true },
         },
       },
       orderBy: {
         // Opcional: ordenar los descuentos, por ejemplo, por fecha de creación o por producto
         // id: 'desc' // Ejemplo
-      }
+      },
     });
 
-    return discounts.map(d => this.mapToProductDiscountResponseDto(d as DiscountWithProductDetails));
+    return discounts.map((d) =>
+      this.mapToProductDiscountResponseDto(d as DiscountWithProductDetails),
+    );
   }
 
-  private mapToProductDiscountResponseDto(discount: DiscountWithProductDetails): ProductDiscountResponseDto {
+  private mapToProductDiscountResponseDto(
+    discount: DiscountWithProductDetails,
+  ): ProductDiscountResponseDto {
     const originalPrice = discount.products?.list_price?.toNumber() || 0;
     const discountedPrice = discount.price?.toNumber() || 0;
 
@@ -683,7 +732,9 @@ export class ProductsService {
     };
   }
 
-  async findAllForAdmin(queryProductDto: QueryProductDto): Promise<PaginatedProductResponseDto> {
+  async findAllForAdmin(
+    queryProductDto: QueryProductDto,
+  ): Promise<PaginatedProductResponseDto> {
     const { page = 1, limit = 20, search } = queryProductDto;
     const skip = (page - 1) * limit;
 
@@ -712,9 +763,13 @@ export class ProductsService {
           },
         },
         // Buscar por ID (si el término de búsqueda es numérico)
-        ...(isNaN(Number(searchTerm)) ? [] : [{
-          id: parseInt(searchTerm),
-        }]),
+        ...(isNaN(Number(searchTerm))
+          ? []
+          : [
+              {
+                id: parseInt(searchTerm),
+              },
+            ]),
       ];
     }
 
@@ -761,20 +816,11 @@ export class ProductsService {
 
   async findAllCategories(limit?: number): Promise<CategoryResponseDto[]> {
     const categories = await this.prisma.categories.findMany({
-      where: {
-        // Opcional: filtrar por categorías que tienen productos activos
-        products_categories: {
-          some: {
-            products: {
-              status: product_states.active,
-            },
-          },
-        },
-      },
       select: {
         id: true,
         name: true,
         image_url: true,
+        parent_id: true,
       },
       orderBy: {
         name: 'asc',
@@ -782,6 +828,39 @@ export class ProductsService {
       take: limit,
     });
 
-    return categories.map(c => ({ id: c.id.toString(), name: c.name, image: c.image_url }));
+    return categories.map((c) => ({
+      id: c.id.toString(),
+      name: c.name,
+      image: c.image_url,
+      parentId: c.parent_id?.toString() || '',
+    }));
+  }
+
+  async findAllParentCategories(
+    limit?: number,
+  ): Promise<CategoryResponseDto[]> {
+    const categories = await this.prisma.categories.findMany({
+      where: {
+        parent_id: null, // Only parent categories
+      },
+      select: {
+        id: true,
+        name: true,
+        image_url: true,
+        parent_id: true,
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+    console.log('categories');
+    console.log(categories);
+
+    return categories.map((c) => ({
+      id: c.id.toString(),
+      name: c.name,
+      image: c.image_url,
+      parentId: c.parent_id?.toString() || '',
+    }));
   }
 }

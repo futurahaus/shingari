@@ -22,7 +22,7 @@ export default function CategoryGrid() {
         const fetchCategories = async () => {
             try {
                 setLoading(true);
-                const response = await api.get<Category[]>('/products/categories?limit=5');
+                const response = await api.get<Category[]>('/products/categories/parents?limit=5');
                 setCategories(response);
                 setError(null);
             } catch (error) {
@@ -115,4 +115,4 @@ export default function CategoryGrid() {
             </div>
         </div>
     );
-} 
+}
