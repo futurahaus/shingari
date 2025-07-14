@@ -60,17 +60,39 @@ const CategorySidebar = ({
             </Text>
             <ul className="space-y-2">
                 {parentCategories.map((parent) => {
+                    const isParentSelected = parent.name === selectedCategoryName;
                     return (
                         <li key={parent.id}>
-                            <Text
-                                as="span"
-                                size="md"
-                                weight="bold"
-                                color="primary"
-                                className={`transition-colors`}
-                            >
-                                {parent.name}
-                            </Text>
+                            {isParentSelected ? (
+                                <Text
+                                    as="span"
+                                    size="md"
+                                    weight="bold"
+                                    color="primary-main"
+                                    className="transition-colors cursor-default"
+                                >
+                                    {parent.name}
+                                </Text>
+                            ) : (
+                                <a
+                                    href="#"
+                                    onClick={e => {
+                                        e.preventDefault();
+                                        onSelectCategory(parent.name);
+                                    }}
+                                    className="block"
+                                >
+                                    <Text
+                                        as="span"
+                                        size="md"
+                                        weight="bold"
+                                        color="primary"
+                                        className="transition-colors hover:text-black"
+                                    >
+                                        {parent.name}
+                                    </Text>
+                                </a>
+                            )}
                             {/* Render children if any */}
                             {childrenByParent[parent.id]?.length > 0 && (
                                 <ul className="ml-4 mt-1 space-y-1">
@@ -190,8 +212,12 @@ const ProductFilters = ({ filters, onFilterChange }: ProductFiltersProps) => (
 
 const ProductsSection = ({
     selectedCategory,
+    selectedParent,
+    childNamesOfSelectedParent,
 }: {
     selectedCategory: string | null;
+    selectedParent?: Category | null;
+    childNamesOfSelectedParent?: string[];
 }) => {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
@@ -226,9 +252,17 @@ const ProductsSection = ({
                 }
             });
 
-            const categoryFilter = searchParams.get('categoryFilters');
-            if (categoryFilter) {
-                params.append('categoryFilters', categoryFilter);
+            // New: If a parent is selected, filter by all its child names
+            if (selectedParent && childNamesOfSelectedParent && childNamesOfSelectedParent.length > 0) {
+                childNamesOfSelectedParent.forEach(childName => {
+                    params.append('categoryFilters', childName);
+                });
+            } else {
+                // Otherwise, use the single selected category (child)
+                const categoryFilter = searchParams.get('categoryFilters');
+                if (categoryFilter) {
+                    params.append('categoryFilters', categoryFilter);
+                }
             }
 
             const response = await api.get<PaginatedProductsResponse>(`/products?${params.toString()}`);
@@ -247,7 +281,7 @@ const ProductsSection = ({
         } finally {
             setLoading(false);
         }
-    }, [filters, searchParams]);
+    }, [filters, searchParams, selectedParent, childNamesOfSelectedParent]);
 
     useEffect(() => {
         setProducts([]);
@@ -327,6 +361,15 @@ function ProductsPageContent() {
     const categoryFilter = searchParams.get('categoryFilters');
     const selectedCategory = categoryFilter;
 
+    // New: Find if selectedCategory is a parent or child
+    const parentCategories = categories.filter(cat => !cat.parentId || cat.parentId === '');
+    const childCategories = categories.filter(cat => cat.parentId && cat.parentId !== '');
+    const selectedParent = parentCategories.find(cat => cat.name === selectedCategory);
+    // New: Get all child names for selected parent
+    const childNamesOfSelectedParent = selectedParent
+        ? childCategories.filter(cat => cat.parentId === selectedParent.id).map(cat => cat.name)
+        : [];
+
     const handleSelectCategory = (categoryName: string | null) => {
         const newParams = new URLSearchParams(searchParams.toString());
 
@@ -343,8 +386,6 @@ function ProductsPageContent() {
         const fetchCategories = async () => {
             try {
                 const data = await api.get<Category[]>('/products/categories');
-                // Order categories: parents first, then children under each parent
-                // (the sidebar now handles the display, so just pass the flat list)
                 setCategories(data);
             } catch (error) {
                 console.error('Failed to fetch categories:', error);
@@ -364,6 +405,8 @@ function ProductsPageContent() {
                 />
                 <ProductsSection
                     selectedCategory={selectedCategory}
+                    selectedParent={selectedParent}
+                    childNamesOfSelectedParent={childNamesOfSelectedParent}
                 />
             </div>
         </div>
