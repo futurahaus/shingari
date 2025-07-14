@@ -853,8 +853,6 @@ export class ProductsService {
         name: 'asc',
       },
     });
-    console.log('categories');
-    console.log(categories);
 
     return categories.map((c) => ({
       id: c.id.toString(),

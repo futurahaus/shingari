@@ -1,13 +1,12 @@
 'use client';
 
 import { ChevronDown } from 'lucide-react';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { api } from '@/lib/api';
 import Link from 'next/link';
 import { ProductCard, Product } from '@/components/ProductCard';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ProductCardSkeleton from '@/components/ProductCardSkeleton';
-import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
 import { Suspense } from 'react';
 
@@ -214,10 +213,12 @@ const ProductsSection = ({
     selectedCategory,
     selectedParent,
     childNamesOfSelectedParent,
+    categoryFilter,
 }: {
     selectedCategory: string | null;
     selectedParent?: Category | null;
     childNamesOfSelectedParent?: string[];
+    categoryFilter: string | null;
 }) => {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
@@ -229,66 +230,116 @@ const ProductsSection = ({
         price: '',
         stock: '',
     });
+    // Buffer for next page
+    const [bufferedProducts, setBufferedProducts] = useState<Product[]>([]);
+    const [bufferLoading, setBufferLoading] = useState(false);
+    const observerRef = useRef<HTMLDivElement | null>(null);
+    // Remove: const searchParams = useSearchParams();
 
-    const searchParams = useSearchParams();
+    // Helper to build params
+    const buildParams = (pageNumber: number) => {
+        const params = new URLSearchParams({
+            page: pageNumber.toString(),
+            limit: '8',
+        });
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value) {
+                if (key === 'price') {
+                    params.append('sortByPrice', value);
+                } else {
+                    params.append(key, value);
+                }
+            }
+        });
+        if (selectedParent && childNamesOfSelectedParent && childNamesOfSelectedParent.length > 0) {
+            childNamesOfSelectedParent.forEach(childName => {
+                params.append('categoryFilters', childName);
+            });
+        } else {
+            if (categoryFilter) {
+                params.append('categoryFilters', categoryFilter);
+            }
+        }
+        return params;
+    };
 
-    const fetchProducts = useCallback(async (pageNumber: number, currentProducts: Product[] = []) => {
+    // Fetch products for a given page
+    const fetchProducts = useCallback(async (pageNumber: number) => {
         setLoading(true);
         setError(null);
         try {
-            const params = new URLSearchParams({
-                page: pageNumber.toString(),
-                limit: '8',
-            });
-
-            // Append filters if they exist
-            Object.entries(filters).forEach(([key, value]) => {
-                if (value) {
-                    if (key === 'price') {
-                        params.append('sortByPrice', value);
-                    } else {
-                        params.append(key, value);
-                    }
-                }
-            });
-
-            // New: If a parent is selected, filter by all its child names
-            if (selectedParent && childNamesOfSelectedParent && childNamesOfSelectedParent.length > 0) {
-                childNamesOfSelectedParent.forEach(childName => {
-                    params.append('categoryFilters', childName);
-                });
-            } else {
-                // Otherwise, use the single selected category (child)
-                const categoryFilter = searchParams.get('categoryFilters');
-                if (categoryFilter) {
-                    params.append('categoryFilters', categoryFilter);
-                }
-            }
-
+            const params = buildParams(pageNumber);
             const response = await api.get<PaginatedProductsResponse>(`/products?${params.toString()}`);
             const newProducts = response.data;
-
             if (newProducts.length === 0 || response.page >= response.lastPage) {
                 setHasMore(false);
             } else {
                 setHasMore(true);
             }
-
-            setProducts(pageNumber === 1 ? newProducts : [...currentProducts, ...newProducts]);
-
+            setProducts(pageNumber === 1 ? newProducts : prev => [...prev, ...newProducts]);
         } catch (e: unknown) {
             setError(e instanceof Error ? e.message : 'Unknown error');
         } finally {
             setLoading(false);
         }
-    }, [filters, searchParams, selectedParent, childNamesOfSelectedParent]);
+    }, [filters, categoryFilter, selectedParent, childNamesOfSelectedParent]);
 
+    // Buffer the next page
+    const bufferNextPage = useCallback(async (nextPage: number) => {
+        setBufferLoading(true);
+        try {
+            const params = buildParams(nextPage);
+            const response = await api.get<PaginatedProductsResponse>(`/products?${params.toString()}`);
+            setBufferedProducts(response.data);
+        } catch {
+            setBufferedProducts([]);
+        } finally {
+            setBufferLoading(false);
+        }
+    }, [filters, categoryFilter, selectedParent, childNamesOfSelectedParent]);
+
+    // Initial load and when filters/searchParams change
     useEffect(() => {
         setProducts([]);
         setPage(1);
         setHasMore(true);
-        fetchProducts(1, []);
-    }, [filters, searchParams, fetchProducts]);
+        setBufferedProducts([]);
+        fetchProducts(1);
+    }, [filters, categoryFilter, fetchProducts]);
+
+    // Buffer next page after main load
+    useEffect(() => {
+        if (page === 1 && hasMore) {
+            bufferNextPage(2);
+        }
+    }, [page, hasMore, bufferNextPage]);
+
+    // When products or page changes, buffer the next page
+    useEffect(() => {
+        if (page > 1 && hasMore) {
+            bufferNextPage(page + 1);
+        }
+    }, [page, hasMore, bufferNextPage]);
+
+    // IntersectionObserver for infinite scroll
+    useEffect(() => {
+        if (!hasMore || loading || bufferLoading) return;
+        const observer = new window.IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && bufferedProducts.length > 0) {
+                    setProducts(prev => [...prev, ...bufferedProducts]);
+                    setPage(prev => prev + 1);
+                    setBufferedProducts([]);
+                }
+            },
+            { root: null, rootMargin: '200px', threshold: 0.1 }
+        );
+        const sentinel = observerRef.current;
+        if (sentinel) observer.observe(sentinel);
+        return () => {
+            if (sentinel) observer.unobserve(sentinel);
+        };
+    }, [bufferedProducts, hasMore, loading, bufferLoading]);
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -296,12 +347,6 @@ const ProductsSection = ({
             ...prevFilters,
             [name]: value,
         }));
-    };
-
-    const loadMoreProducts = () => {
-        const nextPage = page + 1;
-        setPage(nextPage);
-        fetchProducts(nextPage, products);
     };
 
     return (
@@ -313,7 +358,7 @@ const ProductsSection = ({
                 {selectedCategory || 'Todos los Productos'}
             </Text>
             <ProductFilters filters={filters} onFilterChange={handleFilterChange} />
-            {loading ? (
+            {loading && products.length === 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
                     {[...Array(8)].map((_, i) => (
                         <ProductCardSkeleton key={i} />
@@ -336,16 +381,12 @@ const ProductsSection = ({
                             <ProductCard key={product.id} product={product} />
                         ))}
                     </div>
+                    <div ref={observerRef} className="h-8 w-full" />
                     <div className="text-center mt-8">
-                        {hasMore && (
-                            <Button
-                                onPress={loadMoreProducts}
-                                type="primary"
-                                inline={true}
-                                text={loading ? 'Cargando...' : 'Mostrar más'}
-                                testID="load-more-button"
-                                icon={loading ? undefined : "FaChevronDown"}
-                            />
+                        {bufferLoading && hasMore && (
+                            <Text as="span" size="md" color="secondary">
+                                Cargando más productos...
+                            </Text>
                         )}
                     </div>
                 </>
@@ -407,6 +448,7 @@ function ProductsPageContent() {
                     selectedCategory={selectedCategory}
                     selectedParent={selectedParent}
                     childNamesOfSelectedParent={childNamesOfSelectedParent}
+                    categoryFilter={categoryFilter}
                 />
             </div>
         </div>
