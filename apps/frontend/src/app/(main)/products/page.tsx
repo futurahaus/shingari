@@ -277,6 +277,12 @@ const ProductsSection = ({
                 <Text as="p" size="md" color="error" testID="error-message">
                     {error}
                 </Text>
+            ) : products.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16">
+                    <Text as="p" size="xl" color="secondary" className="mb-2" testID="empty-category-message">
+                        No se han encontrado productos para esta categoría.
+                    </Text>
+                </div>
             ) : (
                 <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
