@@ -14,6 +14,8 @@ import { Suspense } from 'react';
 interface Category {
     id: string;
     name: string;
+    parentId?: string;
+    image?: string;
 }
 
 interface PaginatedProductsResponse {
@@ -41,40 +43,71 @@ const CategorySidebar = ({
     categories: Category[];
     selectedCategoryName: string | null;
     onSelectCategory: (name: string | null) => void;
-}) => (
-    <aside className="w-64 pr-8">
-        <Text as="h2" size="xl" weight="bold" color="primary" className="mb-4">
-            Categorías
-        </Text>
-        <ul className="space-y-2">
-            {categories.map((category) => {
-                const isSelected = category.name === selectedCategoryName;
-                return (
-                    <li key={category.id}>
-                        <a
-                            href="#"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                onSelectCategory(category.name);
-                            }}
-                            className="block"
-                        >
-                            <Text 
-                                as="span" 
-                                size="md" 
-                                weight={isSelected ? "bold" : "medium"}
-                                color={isSelected ? "primary-main" : "secondary"}
-                                className={`hover:text-black transition-colors`}
+}) => {
+    // Build a parent-children map
+    const parentCategories = categories.filter(cat => !cat.parentId || cat.parentId === '');
+    const childCategories = categories.filter(cat => cat.parentId && cat.parentId !== '');
+    const childrenByParent: Record<string, Category[]> = {};
+    childCategories.forEach(child => {
+        if (!childrenByParent[child.parentId!]) childrenByParent[child.parentId!] = [];
+        childrenByParent[child.parentId!].push(child);
+    });
+
+    return (
+        <aside className="w-64 pr-8">
+            <Text as="h2" size="xl" weight="bold" color="primary" className="mb-4">
+                Categorías
+            </Text>
+            <ul className="space-y-2">
+                {parentCategories.map((parent) => {
+                    return (
+                        <li key={parent.id}>
+                            <Text
+                                as="span"
+                                size="md"
+                                weight="bold"
+                                color="primary"
+                                className={`transition-colors`}
                             >
-                                {category.name}
+                                {parent.name}
                             </Text>
-                        </a>
-                    </li>
-                );
-            })}
-        </ul>
-    </aside>
-);
+                            {/* Render children if any */}
+                            {childrenByParent[parent.id]?.length > 0 && (
+                                <ul className="ml-4 mt-1 space-y-1">
+                                    {childrenByParent[parent.id].map(child => {
+                                        const isChildSelected = child.name === selectedCategoryName;
+                                        return (
+                                            <li key={child.id}>
+                                                <a
+                                                    href="#"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        onSelectCategory(child.name);
+                                                    }}
+                                                    className="block"
+                                                >
+                                                    <Text
+                                                        as="span"
+                                                        size="sm"
+                                                        weight={isChildSelected ? "bold" : "medium"}
+                                                        color={isChildSelected ? "primary-main" : "secondary"}
+                                                        className={`hover:text-black transition-colors`}
+                                                    >
+                                                        {child.name}
+                                                    </Text>
+                                                </a>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            )}
+                        </li>
+                    );
+                })}
+            </ul>
+        </aside>
+    );
+};
 
 const Breadcrumb = ({
     selectedCategory,
@@ -278,13 +311,13 @@ function ProductsPageContent() {
 
     const handleSelectCategory = (categoryName: string | null) => {
         const newParams = new URLSearchParams(searchParams.toString());
-        
+
         if (categoryName === null || categoryName === selectedCategory) {
             newParams.delete('categoryFilters');
         } else {
             newParams.set('categoryFilters', categoryName);
         }
-        
+
         router.push(`/products?${newParams.toString()}`);
     };
 
@@ -292,6 +325,8 @@ function ProductsPageContent() {
         const fetchCategories = async () => {
             try {
                 const data = await api.get<Category[]>('/products/categories');
+                // Order categories: parents first, then children under each parent
+                // (the sidebar now handles the display, so just pass the flat list)
                 setCategories(data);
             } catch (error) {
                 console.error('Failed to fetch categories:', error);
