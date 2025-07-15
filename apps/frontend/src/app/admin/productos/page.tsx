@@ -81,7 +81,7 @@ export default function AdminProductsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="">
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
             <Text
@@ -110,7 +110,7 @@ export default function AdminProductsPage() {
           >
             Gestiona control de mercadería
           </Text>
-          
+
           {/* Buscador */}
           <div className="relative max-w-md">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
