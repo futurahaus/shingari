@@ -9,16 +9,18 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/app/ui/components/Button';
 import { useCart } from '@/contexts/CartContext';
+import { useRef } from 'react';
 
 export default function SearchHeader() {
   const { user } = useAuth();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const router = useRouter();
   const { openCart, cart } = useCart();
+  const searchBarRef = useRef<HTMLDivElement>(null);
 
   return (
     <>
-      <div className="bg-white py-4">
+      <div className="bg-white py-4" ref={searchBarRef}>
         <div className="mx-auto px-4 sm:px-6 lg:px-16">
           <div className="flex items-center justify-between">
             <Link href="/" className="text-red-600 font-bold text-xl flex items-center gap-2">
