@@ -60,7 +60,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
                             src={product.images[0]}
                             alt={product.name}
                             fill
-                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            className="bg-white p-4 object-cover transition-transform duration-300 group-hover:scale-105"
                         />
                     ) : (
                         <Text as="div" size="sm" color="gray-400" className="text-center">

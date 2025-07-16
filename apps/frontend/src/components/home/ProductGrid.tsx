@@ -25,7 +25,7 @@ export default function ProductGrid() {
         const fetchProducts = async () => {
             try {
                 setLoading(true);
-                const response = await api.get<PaginatedProductsResponse>('/products?limit=6');
+                const response = await api.get<PaginatedProductsResponse>('/products?limit=7');
                 setProducts(response.data);
                 setError(null);
             } catch (error) {
@@ -46,7 +46,7 @@ export default function ProductGrid() {
                     Descubre nuestros productos
                 </Text>
                 <div className="flex gap-6 overflow-x-auto pb-2 animate-pulse">
-                    {[...Array(6)].map((_, i) => (
+                    {[...Array(7)].map((_, i) => (
                         <div
                             key={i}
                             className="rounded-2xl flex-shrink-0 bg-gray-200"
@@ -89,7 +89,7 @@ export default function ProductGrid() {
                 Productos destacados
             </Text>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-6">
                 {products.map(product => (
                     <div
                         key={product.id}
