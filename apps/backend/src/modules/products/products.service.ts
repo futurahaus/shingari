@@ -47,7 +47,7 @@ export class ProductsService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) {} // Inyectar PrismaService
+  ) { } // Inyectar PrismaService
 
   private async getUserRole(userId: string): Promise<string | null> {
     const userRole = await this.prisma.user_roles.findFirst({
@@ -298,6 +298,8 @@ export class ProductsService {
         list_price: true,
         wholesale_price: true,
         sku: true,
+        iva: true,
+        grammage: true,
         created_at: true,
         status: true, // <-- Added to match ProductWithCategoriesForResponse
         products_categories: {
@@ -766,10 +768,10 @@ export class ProductsService {
         ...(isNaN(Number(searchTerm))
           ? []
           : [
-              {
-                id: parseInt(searchTerm),
-              },
-            ]),
+            {
+              id: parseInt(searchTerm),
+            },
+          ]),
       ];
     }
 
