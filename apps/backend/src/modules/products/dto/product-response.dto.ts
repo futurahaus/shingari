@@ -1,5 +1,19 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
+export class ProductUnitDto {
+  @ApiProperty({ description: 'ID de la unidad', example: 1 })
+  unitId: number;
+
+  @ApiProperty({ description: 'Nombre de la unidad', example: 'Caja' })
+  unitName: string;
+
+  @ApiProperty({ description: 'Cantidad en stock de esta unidad', example: 10 })
+  stock: number;
+
+  @ApiProperty({ description: 'Precio de esta unidad', example: 1200.50 })
+  unitPrice: number;
+}
+
 export class ProductResponseDto {
   @ApiProperty({ 
     description: 'ID único del producto',
@@ -75,17 +89,8 @@ export class ProductResponseDto {
   })
   status?: string;
 
-  @ApiPropertyOptional({ 
-    description: 'ID de la unidad para el stock',
-    example: 1,
-  })
-  unit_id?: number;
-
-  @ApiPropertyOptional({ 
-    description: 'Nombre de la unidad para el stock',
-    example: 'kg',
-  })
-  unit_name?: string;
+  @ApiProperty({ description: 'Unidades disponibles para este producto', type: [ProductUnitDto] })
+  units: ProductUnitDto[];
 
   // Considerar añadir otros campos que sean relevantes desde Prisma, como relaciones cargadas.
 }

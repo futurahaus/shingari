@@ -1,5 +1,9 @@
 import { QuantitySelector } from "./QuantitySelector";
 import { Product } from "@/components/ProductCard";
+import { Button } from '@/app/ui/components/Button';
+import { useCart } from '@/contexts/CartContext';
+import { useRouter } from 'next/navigation';
+// No necesitamos useState ni useEffect
 
 interface ProductInfoProps {
   product: Product;
@@ -7,6 +11,34 @@ interface ProductInfoProps {
 
 export function ProductInfo({ product }: ProductInfoProps) {
   const hasDiscount = typeof product.discount === 'number' && product.discount > 0 && product.originalPrice;
+  const { addToCart, updateQuantity, cart } = useCart();
+  
+  const router = useRouter();
+
+  const handleQuantityChange = (unitId: number, value: number) => {
+    updateQuantity(product.id, unitId, value);
+  };
+
+
+  const handleAddToCart = () => {
+    product.units.forEach(unit => {
+      const cartProduct = cart.find(c => c.id === product.id);
+      const qty = cartProduct?.units.find(u => u.unitId === unit.unitId)?.quantity || 0;
+      if (qty > 0) {
+        addToCart(
+          {
+            id: product.id,
+            name: product.name,
+            price: unit.unitPrice,
+            image: product.images[0],
+            units: [], // se ignora, el contexto lo maneja
+          },
+          unit.unitId,
+          qty
+        );
+      }
+    });
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -39,19 +71,39 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
       {/* Selectores de cantidad */}
       <div className="flex flex-row gap-8 py-4">
-        <div className="flex items-center gap-2">
-          <QuantitySelector label="Unidades" />
-        </div>
-        <div className="flex items-center gap-2">
-          <QuantitySelector label="Cajas" />
-        </div>
+        {product.units && product.units.length > 0 && product.units.map((unit) => {
+          const cartProduct = cart.find(c => c.id === product.id);
+          const cartUnit = cartProduct?.units.find(u => u.unitId === unit.unitId);
+          return (
+            <div className="flex items-center gap-2" key={unit.unitId}>
+              <QuantitySelector
+                label={unit.unitName}
+                max={unit.stock}
+                value={cartUnit?.quantity || 0}
+                onChange={value => handleQuantityChange(unit.unitId, value)}
+              />
+            </div>
+          );
+        })}
       </div>
 
       {/* Botones */}
       <div className="flex flex-col gap-3 mt-2">
-        <button className="w-full px-4 py-4 font-bold text-white bg-[#F0461C] rounded-xl text-lg hover:bg-orange-700 transition-all cursor-pointer">
-          Comprar ahora
-        </button>
+        <Button
+          onPress={() => {
+            router.push('/carrito');
+          }}
+          type="primary"
+          testID="add-to-cart"
+          text="Comprar ahora"
+        />
+        <Button
+          onPress={handleAddToCart}
+          type="secondary"
+          icon="FaCartPlus"
+          testID="add-to-cart"
+          text="Agregar al carrito"
+        />
       </div>
     </div>
   );

@@ -5,13 +5,18 @@ import { Minus, Plus } from 'lucide-react';
 
 interface QuantitySelectorProps {
   label: string;
+  max?: number;
+  value: number;
+  onChange: (value: number) => void;
 }
 
-export function QuantitySelector({ label }: QuantitySelectorProps) {
-  const [quantity, setQuantity] = useState(0);
-
-  const increment = () => setQuantity((prev) => prev + 1);
-  const decrement = () => setQuantity((prev) => (prev > 0 ? prev - 1 : 0));
+export function QuantitySelector({ label, max = Infinity, value, onChange }: QuantitySelectorProps) {
+  const increment = () => {
+    if (value < max) onChange(value + 1);
+  };
+  const decrement = () => {
+    if (value > 0) onChange(value - 1);
+  };
 
   return (
     <div className="flex items-center justify-between w-full gap-2">
@@ -25,7 +30,7 @@ export function QuantitySelector({ label }: QuantitySelectorProps) {
         </button>
         <input
           type="text"
-          value={quantity}
+          value={value}
           readOnly
           className="w-12 text-center border-t border-b border-gray-200 focus:outline-none focus:border-none"
         />
@@ -33,6 +38,7 @@ export function QuantitySelector({ label }: QuantitySelectorProps) {
           onClick={increment}
           style={{ borderTopRightRadius: '10px', borderBottomRightRadius: '10px', borderTopLeftRadius: '0px', borderBottomLeftRadius: '0px' }}
           className="button p-2 bg-gray-200 hover:bg-gray-300"
+          disabled={value >= max}
         >
           <Plus className="w-4 h-4" />
         </button>

@@ -2,21 +2,25 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
+export interface CartProductUnit {
+  quantity: number;
+  unitId: number;
+}
+
 export interface CartProduct {
   id: string;
   name: string;
   price: number;
   image?: string;
-  quantity: number;
-  unitType?: string; // e.g., 'Unidades', 'Cajas'
+  units: CartProductUnit[];
 }
 
 interface CartContextType {
   cart: CartProduct[];
-  addToCart: (product: CartProduct) => void;
-  removeFromCart: (id: string) => void;
+  addToCart: (product: CartProduct, unitId: number, quantity: number) => void;
+  removeFromCart: (id: string, unitId?: number) => void;
   removeAllFromCart: () => void;
-  updateQuantity: (id: string, quantity: number) => void;
+  updateQuantity: (id: string, unitId: number, quantity: number) => void;
   clearCart: () => void;
   isCartOpen: boolean;
   openCart: () => void;
@@ -46,31 +50,52 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product: CartProduct) => {
+  const addToCart = (product: CartProduct, unitId: number, quantity: number) => {
     setCart(prev => {
-      const existing = prev.find(p => p.id === product.id && p.unitType === product.unitType);
+      const existing = prev.find(p => p.id === product.id);
       if (existing) {
-        return prev.map(p =>
-          p.id === product.id && p.unitType === product.unitType
-            ? { ...p, quantity: p.quantity + product.quantity }
-            : p
-        );
+        const unitExists = existing.units.find(u => u.unitId === unitId);
+        if (unitExists) {
+          return prev.map(p =>
+            p.id === product.id
+              ? { ...p, units: p.units.map(u => u.unitId === unitId ? { ...u, quantity: u.quantity + quantity } : u) }
+              : p
+          );
+        } else {
+          return prev.map(p =>
+            p.id === product.id
+              ? { ...p, units: [...p.units, { unitId, quantity }] }
+              : p
+          );
+        }
       }
-      return [...prev, product];
+      return [...prev, { ...product, units: [{ unitId, quantity }] }];
     });
     // setIsCartOpen(true);
   };
 
-  const removeFromCart = (id: string) => {
-    setCart(prev => prev.filter(p => p.id !== id));
+  const removeFromCart = (id: string, unitId?: number) => {
+    if (unitId) {
+      setCart(prev => prev.map(p =>
+        p.id === id
+          ? { ...p, units: p.units.filter(u => u.unitId !== unitId) }
+          : p
+      ).filter(p => p.units.length > 0));
+    } else {
+      setCart(prev => prev.filter(p => p.id !== id));
+    }
   };
 
   const removeAllFromCart = () => {
     setCart([]);
   };
 
-  const updateQuantity = (id: string, quantity: number) => {
-    setCart(prev => prev.map(p => (p.id === id ? { ...p, quantity } : p)));
+  const updateQuantity = (id: string, unitId: number, quantity: number) => {
+    setCart(prev => prev.map(p =>
+      p.id === id
+        ? { ...p, units: p.units.map(u => u.unitId === unitId ? { ...u, quantity } : u) }
+        : p
+    ));
     // setIsCartOpen(true);
   };
 

@@ -34,7 +34,7 @@ type ProductWithCategoriesForResponse = Omit<ProductPrismaType, 'image_url'> & {
     categories: CategoryPrismaType;
   })[];
   product_images: ProductImagesPrismaType[];
-  products_stock: ProductsStockPrismaType[];
+  products_stock: (ProductsStockPrismaType & { units: any })[];
 };
 
 // Tipo para el descuento con detalles del producto incluidos
@@ -147,6 +147,12 @@ export class ProductsService {
         product.products_categories?.map((pc) => pc.categories.name) || [],
       images: product.product_images?.map((pi) => pi.image_url) || [],
       sku: product.sku || '',
+      units: product.products_stock?.map(stock => ({
+        unitId: stock.units?.id,
+        unitName: stock.units?.name || '',
+        stock: stock.quantity?.toNumber() || 0,
+        unitPrice: product.list_price?.toNumber() || 0, // Usar list_price como precio de unidad por ahora
+      })) || [],
     };
   }
 
@@ -223,6 +229,12 @@ export class ProductsService {
             product.products_categories?.map((pc) => pc.categories.name) || [],
           images: product.product_images?.map((pi) => pi.image_url) || [],
           sku: product.sku || '',
+          units: product.products_stock?.map(stock => ({
+            unitId: stock.units?.id,
+            unitName: stock.units?.name || '',
+            stock: stock.quantity?.toNumber() || 0,
+            unitPrice: product.list_price?.toNumber() || 0, // Usar list_price como precio de unidad por ahora
+          })) || [],
         };
       }),
     );

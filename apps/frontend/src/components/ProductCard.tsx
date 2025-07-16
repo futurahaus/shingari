@@ -5,6 +5,13 @@ import { Text } from '@/app/ui/components/Text';
 import { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
 
+export interface ProductUnit {
+    unitName: string;
+    stock: number;
+    unitPrice: number;
+    unitId: number;
+}
+
 export interface Product {
     id: string;
     name: string;
@@ -15,28 +22,40 @@ export interface Product {
     images: string[];
     categories: string[];
     sku?: string;
+    units: ProductUnit[];
 }
 
 export const ProductCard = ({ product }: { product: Product }) => {
     const { cart, addToCart, updateQuantity, removeFromCart } = useCart();
     // Find current quantity in cart
     const cartItem = cart.find((item) => item.id === product.id);
-    const [quantity, setQuantity] = useState(cartItem ? cartItem.quantity : 0);
+    const [quantity, setQuantity] = useState(cartItem?.units[0]?.quantity || 0);
 
     const handleAdd = () => {
+        // Obtener el stock máximo de la unidad seleccionada (aquí solo se usa la primera unidad)
+        const maxStock = product.units?.[0]?.stock ?? 0;
+        if (quantity >= maxStock) {
+            // Opcional: mostrar un aviso de stock máximo alcanzado
+            return;
+        }
         const newQty = quantity + 1;
         setQuantity(newQty);
         if (cartItem) {
-            updateQuantity(product.id, newQty);
+            updateQuantity(product.id, product.units[0].unitName, newQty);
         } else {
             addToCart({
                 id: product.id,
                 name: product.name,
                 price: product.price,
                 image: product.images[0],
-                quantity: 1,
-            });
-        }
+                units: [
+                    {
+                        unitType: product.units?.[0]?.unitName || '',
+                        quantity: 1,
+                    },
+                ],
+            }, product.units?.[0]?.unitName || '', 1);
+        }   
     };
 
     const handleRemove = () => {
@@ -46,7 +65,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
             if (newQty === 0) {
                 removeFromCart(product.id);
             } else {
-                updateQuantity(product.id, newQty);
+                updateQuantity(product.id, product.units[0].unitName, newQty);
             }
         }
     };

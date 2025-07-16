@@ -31,7 +31,14 @@ export const CartModal = () => {
   }, [isCartOpen, closeCart]);
 
   // Calculate totals
-  const total = cart.reduce((sum, p) => sum + p.price * p.quantity, 0);
+  const total = cart.reduce(
+    (sum, p) =>
+      sum +
+      (Array.isArray(p.units)
+        ? p.units.reduce((uSum, u) => uSum + p.price * u.quantity, 0)
+        : 0),
+    0
+  );
   // For now, no discounts
   const discount = 0;
   const discountedTotal = total - discount;
@@ -66,39 +73,41 @@ export const CartModal = () => {
             {cart.length === 0 ? (
               <div className="py-8 text-center text-gray-500">Tu carrito está vacío.</div>
             ) : (
-              cart.map((item) => (
-                <div key={item.id + (item.unitType || '')} className="py-4 flex gap-4">
-                  <div className="w-24 h-24 bg-gray-200 flex items-center justify-center">
-                    {item.image ? (
-                      <Image src={item.image} alt={item.name} width={96} height={96} className="object-cover" />
-                    ) : (
-                      <div className="w-20 h-20 bg-gray-300" />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-xs text-gray-500">Producto</div>
-                    <div className="font-bold text-sm mb-1">{item.name}</div>
-                    <div className="text-lg font-semibold mb-2">€ {item.price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <button
-                        className="px-2 py-1 bg-gray-100 rounded cursor-pointer"
-                        onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                        disabled={item.quantity <= 1}
-                      >-</button>
-                      <span className="mx-1">{item.quantity}</span>
-                      <button
-                        className="px-2 py-1 bg-gray-100 rounded cursor-pointer"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      >+</button>
-                      <span className="ml-2 text-xs text-gray-500">{item.unitType || 'Unidades'}</span>
+              cart.flatMap((item) =>
+                item.units.map((unit) => (
+                  <div key={item.id + unit.unitId} className="py-4 flex gap-4">
+                    <div className="w-24 h-24 bg-gray-200 flex items-center justify-center">
+                      {item.image ? (
+                        <Image src={item.image} alt={item.name} width={96} height={96} className="object-cover" />
+                      ) : (
+                        <div className="w-20 h-20 bg-gray-300" />
+                      )}
                     </div>
-                    <button
-                      className="text-xs text-red-500 hover:underline cursor-pointer"
-                      onClick={() => removeFromCart(item.id)}
-                    >Eliminar</button>
+                    <div className="flex-1">
+                      <div className="text-xs text-gray-500">Producto</div>
+                      <div className="font-bold text-sm mb-1">{item.name}</div>
+                      <div className="text-lg font-semibold mb-2">€ {item.price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <button
+                          className="px-2 py-1 bg-gray-100 rounded cursor-pointer"
+                          onClick={() => updateQuantity(item.id, unit.unitId, Math.max(1, unit.quantity - 1))}
+                          disabled={unit.quantity <= 1}
+                        >-</button>
+                        <span className="mx-1">{unit.quantity}</span>
+                        <button
+                          className="px-2 py-1 bg-gray-100 rounded cursor-pointer"
+                          onClick={() => updateQuantity(item.id, unit.unitId, unit.quantity + 1)}
+                        >+</button>
+                        <span className="ml-2 text-xs text-gray-500">{unit.unitId || 'Unidades'}</span>
+                      </div>
+                      <button
+                        className="text-xs text-red-500 hover:underline cursor-pointer"
+                        onClick={() => removeFromCart(item.id, unit.unitId)}
+                      >Eliminar</button>
+                    </div>
                   </div>
-                </div>
-              ))
+                ))
+              )
             )}
           </div>
           {/* removeAllFromCart */}

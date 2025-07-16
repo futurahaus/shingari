@@ -8,7 +8,14 @@ const CarritoPage = () => {
   const { cart, updateQuantity, removeFromCart, removeAllFromCart } = useCart();
   const router = useRouter();
   // Calculate totals
-  const total = cart.reduce((sum, p) => sum + p.price * p.quantity, 0);
+  const total = cart.reduce(
+    (sum, p) =>
+      sum +
+      (Array.isArray(p.units)
+        ? p.units.reduce((uSum, u) => uSum + p.price * u.quantity, 0)
+        : 0),
+    0
+  );
   const discount = 0; // Placeholder for discounts
   const discountedTotal = total - discount;
   const shipping = 0; // Placeholder shipping `cost`
@@ -33,41 +40,43 @@ const CarritoPage = () => {
           {cart.length === 0 ? (
             <div className="py-8 text-center text-gray-500">Tu carrito está vacío.</div>
           ) : (
-            cart.map((item) => (
-              <div key={item.id + (item.unitType || "")}
-                className="flex items-center gap-4 py-4">
-                <div className="w-16 h-16 bg-gray-200 flex items-center justify-center rounded">
-                  {item.image ? (
-                    <Image src={item.image} alt={item.name} width={64} height={64} className="object-cover rounded" />
-                  ) : (
-                    <div className="w-14 h-14 bg-gray-300 rounded" />
-                  )}
-                </div>
-                <div className="flex-1">
-                  <div className="font-semibold text-base">{item.name}</div>
-                  <div className="text-xs text-gray-500">{item.unitType || "Unidades"}</div>
-                </div>
-                <div className="w-32 flex items-center justify-center gap-2">
+            cart.flatMap((item) =>
+              item.units.map((unit) => (
+                  <div key={item.id + unit.unitId}
+                  className="flex items-center gap-4 py-4">
+                  <div className="w-16 h-16 bg-gray-200 flex items-center justify-center rounded">
+                    {item.image ? (
+                      <Image src={item.image} alt={item.name} width={64} height={64} className="object-cover rounded" />
+                    ) : (
+                      <div className="w-14 h-14 bg-gray-300 rounded" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold text-base">{item.name}</div>
+                    <div className="text-xs text-gray-500">{unit.unitId || "Unidades"}</div>
+                  </div>
+                  <div className="w-32 flex items-center justify-center gap-2">
+                    <button
+                      className="px-2 py-1 bg-gray-100 rounded cursor-pointer"
+                      onClick={() => updateQuantity(item.id, unit.unitId, Math.max(1, unit.quantity - 1))}
+                      disabled={unit.quantity <= 1}
+                    >-</button>
+                    <span className="mx-1">{unit.quantity}</span>
+                    <button
+                      className="px-2 py-1 bg-gray-100 rounded cursor-pointer"
+                      onClick={() => updateQuantity(item.id, unit.unitId, unit.quantity + 1)}
+                    >+</button>
+                  </div>
+                  <div className="w-32 text-right font-semibold">
+                    € {(item.price * unit.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                  </div>
                   <button
-                    className="px-2 py-1 bg-gray-100 rounded cursor-pointer"
-                    onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                    disabled={item.quantity <= 1}
-                  >-</button>
-                  <span className="mx-1">{item.quantity}</span>
-                  <button
-                    className="px-2 py-1 bg-gray-100 rounded cursor-pointer"
-                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                  >+</button>
+                    className="ml-4 text-xs text-red-500 hover:underline"
+                    onClick={() => removeFromCart(item.id, unit.unitId)}
+                  >Eliminar</button>
                 </div>
-                <div className="w-32 text-right font-semibold">
-                  € { (item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2 }) }
-                </div>
-                <button
-                  className="ml-4 text-xs text-red-500 hover:underline"
-                  onClick={() => removeFromCart(item.id)}
-                >Eliminar</button>
-              </div>
-            ))
+              ))
+            )
           )}
         </section>
         {/* Summary */}
@@ -94,9 +103,9 @@ const CarritoPage = () => {
               Continuar compra
             </button>
             <button className="w-full bg-white border border-gray-300 text-gray-800 py-3 rounded-md font-semibold text-lg hover:bg-gray-100 transition cursor-pointer"
-            onClick={() => {
-              router.push('/products');
-            }}>
+              onClick={() => {
+                router.push('/products');
+              }}>
               Ver más productos
             </button>
           </div>
