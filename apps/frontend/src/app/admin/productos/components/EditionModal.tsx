@@ -152,9 +152,24 @@ export const EditionModal: React.FC<EditionModalProps> = ({
                   <option value="">
                     {loadingCategories ? 'Cargando categorías...' : 'Seleccionar categoría'}
                   </option>
-                  {categories.map(category => (
-                    <option key={category.id} value={category.name}>{category.name}</option>
-                  ))}
+                  {/* Agrupar y mostrar categorías igual que el frontend principal */}
+                  {(() => {
+                    const parentCategories = categories.filter(cat => !cat.parentId || cat.parentId === '');
+                    const childCategories = categories.filter(cat => cat.parentId && cat.parentId !== '');
+                    const childrenByParent = {} as Record<string, typeof categories>;
+                    childCategories.forEach(child => {
+                      if (!childrenByParent[child.parentId!]) childrenByParent[child.parentId!] = [];
+                      childrenByParent[child.parentId!].push(child);
+                    });
+                    return parentCategories.map(parent => [
+                      <option key={parent.id} value={parent.id} disabled>
+                        {parent.name}
+                      </option>,
+                      childrenByParent[parent.id]?.map(child => (
+                        <option key={child.id} value={child.name}>&nbsp;&nbsp;{child.name}</option>
+                      ))
+                    ]);
+                  })()}
                 </select>
               </div>
             </div>
