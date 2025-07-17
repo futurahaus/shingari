@@ -14,7 +14,6 @@ import {
   products_categories as ProductsCategoriesPrismaType,
   products_discounts as ProductDiscountPrismaType,
   product_images as ProductImagesPrismaType,
-  roles as RolePrismaType,
   products_stock as ProductsStockPrismaType,
 } from '../../../generated/prisma'; // Importar tipos y enums de Prisma
 import { CreateProductDto } from './dto/create-product.dto';
@@ -398,14 +397,22 @@ export class ProductsService {
 
   // Helper to clear all product-related cache keys
   private async clearProductCache(): Promise<void> {
-    // @ts-ignore
-    const redis = this.cacheManager.store.getClient?.();
-    if (redis) {
-      const keys = await redis.keys('products:*');
-      if (keys.length > 0) {
-        await redis.del(keys);
+    // El tipo de store depende del motor de cache, por eso usamos unknown y comprobamos el tipo en runtime
+    // El acceso a .getClient, .keys y .del solo es seguro si el store es Redis, por eso se justifica el uso de 'any' aquí
+    const store = (this.cacheManager as unknown as { store?: unknown }).store;
+    if (store && typeof (store as any).getClient === 'function') {
+      // Solo si es Redis store
+      const redis = (store as any).getClient(); // eslint-disable-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+      if (redis) {
+        const keys: string[] = await (redis as any).keys('products:*'); // eslint-disable-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        if (keys.length > 0) {
+          await (redis as any).del(keys); // eslint-disable-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        }
       }
+      return;
     }
+    // Si no es Redis, podrías agregar aquí lógica para limpiar manualmente las keys si las conoces
+    // Por ahora, no hace nada si no es Redis
   }
 
   async create(
@@ -737,7 +744,7 @@ export class ProductsService {
   async findAllForAdmin(
     queryProductDto: QueryProductDto,
   ): Promise<PaginatedProductResponseDto> {
-    const { page = 1, limit = 20, search } = queryProductDto;
+    const { page = 1, limit = 20, search, sortField = 'created_at', sortDirection = 'desc' } = queryProductDto as any;
     const skip = (page - 1) * limit;
 
     const where: Prisma.productsWhereInput = {
@@ -775,10 +782,11 @@ export class ProductsService {
       ];
     }
 
+    const orderBy: any = {};
+    orderBy[sortField] = sortDirection;
+
     const productsData = await this.prisma.products.findMany({
-      orderBy: {
-        created_at: 'desc', // Ordenar por fecha de creación descendente (más nuevos primero)
-      },
+      orderBy,
       where,
       skip,
       take: limit,

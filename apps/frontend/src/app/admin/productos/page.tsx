@@ -24,6 +24,9 @@ export default function AdminProductsPage() {
 
   const lastProductRef = useRef<HTMLTableRowElement | null>(null);
 
+  const [sortField, setSortField] = useState<'created_at' | 'updated_at'>('created_at');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
   // Usar el hook para obtener productos con searchQuery (no searchTerm)
   const {
     products,
@@ -31,7 +34,7 @@ export default function AdminProductsPage() {
     error,
     lastPage,
     refetch
-  } = useAdminProducts({ page, search: searchQuery });
+  } = useAdminProducts({ page, search: searchQuery, sortField, sortDirection });
 
   const openEditModal = (product: Product) => {
     setSelectedProduct(product);
@@ -111,20 +114,43 @@ export default function AdminProductsPage() {
             Gestiona control de mercadería
           </Text>
 
-          {/* Buscador */}
-          <div className="relative max-w-md">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FaSearch className="h-5 w-5 text-gray-400" />
+          {/* Buscador y Ordenador */}
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
+            <div className="relative max-w-md flex-1">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FaSearch className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Buscar por SKU, nombre o ID..."
+                value={searchTerm}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                onBlur={handleSearchSubmit}
+                onKeyPress={handleKeyPress}
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-black focus:border-black"
+              />
             </div>
-            <input
-              type="text"
-              placeholder="Buscar por SKU, nombre o ID..."
-              value={searchTerm}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              onBlur={handleSearchSubmit}
-              onKeyPress={handleKeyPress}
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-black focus:border-black"
-            />
+            <div className="flex gap-2 items-center">
+              <label htmlFor="sortField" className="text-sm text-gray-600">Ordenar por:</label>
+              <select
+                id="sortField"
+                value={sortField}
+                onChange={e => setSortField(e.target.value as 'created_at' | 'updated_at')}
+                className="border border-gray-300 rounded-lg px-2 py-1 text-sm"
+              >
+                <option value="created_at">Más recientes</option>
+                <option value="updated_at">Última actualización</option>
+              </select>
+              <select
+                id="sortDirection"
+                value={sortDirection}
+                onChange={e => setSortDirection(e.target.value as 'asc' | 'desc')}
+                className="border border-gray-300 rounded-lg px-2 py-1 text-sm"
+              >
+                <option value="desc">Descendente</option>
+                <option value="asc">Ascendente</option>
+              </select>
+            </div>
           </div>
         </div>
 
