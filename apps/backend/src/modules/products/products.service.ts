@@ -842,6 +842,7 @@ export class ProductsService {
       id: c.id.toString(),
       name: c.name,
       parentId: c.parent_id?.toString() || '',
+      image: c.image_url || '',
     }));
   }
 
@@ -867,6 +868,7 @@ export class ProductsService {
       id: c.id.toString(),
       name: c.name,
       parentId: c.parent_id?.toString() || '',
+      image: c.image_url || '',
     }));
   }
 
@@ -885,6 +887,7 @@ export class ProductsService {
       id: category.id.toString(),
       name: category.name,
       parentId: category.parent_id?.toString() || '',
+      image: category.image_url || '',
     };
   }
 
@@ -904,6 +907,7 @@ export class ProductsService {
       id: updated.id.toString(),
       name: updated.name,
       parentId: updated.parent_id?.toString() || '',
+      image: updated.image_url || '',
     };
   }
 
