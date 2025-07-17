@@ -39,6 +39,9 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard'; // Import AdminGuard desde auth/guards
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
+import { CategoryResponseDto } from './dto/category-response.dto';
 
 @ApiTags('Products')
 @Controller('products')
@@ -233,6 +236,38 @@ export class ProductsController {
     @NestRequest() req,
   ): Promise<ProductResponseDto> {
     return this.productsService.findOne(+id, req.user?.id);
+  }
+
+  @Post('categories')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Crear una nueva categoría (Solo Admin)' })
+  @ApiBody({ type: CreateCategoryDto })
+  @ApiResponse({ status: 201, description: 'Categoría creada exitosamente.', type: CategoryResponseDto })
+  async createCategory(@Body() dto: CreateCategoryDto): Promise<CategoryResponseDto> {
+    return this.productsService.createCategory(dto);
+  }
+
+  @Put('categories/:id')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar una categoría existente (Solo Admin)' })
+  @ApiParam({ name: 'id', description: 'ID de la categoría a actualizar', type: 'string' })
+  @ApiBody({ type: UpdateCategoryDto })
+  @ApiResponse({ status: 200, description: 'Categoría actualizada exitosamente.', type: CategoryResponseDto })
+  async updateCategory(@Param('id') id: string, @Body() dto: UpdateCategoryDto): Promise<CategoryResponseDto> {
+    return this.productsService.updateCategory(id, dto);
+  }
+
+  @Delete('categories/:id')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Eliminar una categoría (Solo Admin)' })
+  @ApiParam({ name: 'id', description: 'ID de la categoría a eliminar', type: 'string' })
+  @ApiResponse({ status: 204, description: 'Categoría eliminada exitosamente.' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteCategory(@Param('id') id: string): Promise<void> {
+    return this.productsService.deleteCategory(id);
   }
 
   // @Post('upload-image')

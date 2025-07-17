@@ -27,6 +27,8 @@ import {
 import { ProductDiscountResponseDto } from './dto/product-discount-response.dto';
 import { CategoryResponseDto } from './dto/category-response.dto';
 import { Cache } from 'cache-manager';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 // Tipo para el producto con categorías incluidas, específico para findAllPublic y findOne
 type ProductWithCategoriesForResponse = Omit<ProductPrismaType, 'image_url'> & {
@@ -831,7 +833,6 @@ export class ProductsService {
     return categories.map((c) => ({
       id: c.id.toString(),
       name: c.name,
-      image: c.image_url,
       parentId: c.parent_id?.toString() || '',
     }));
   }
@@ -857,8 +858,54 @@ export class ProductsService {
     return categories.map((c) => ({
       id: c.id.toString(),
       name: c.name,
-      image: c.image_url,
       parentId: c.parent_id?.toString() || '',
     }));
+  }
+
+  async createCategory(dto: CreateCategoryDto): Promise<CategoryResponseDto> {
+    const { name, parentId } = dto;
+    // Check for duplicate name
+    const existing = await this.prisma.categories.findFirst({ where: { name } });
+    if (existing) throw new BadRequestException('Ya existe una categoría con ese nombre');
+    const category = await this.prisma.categories.create({
+      data: {
+        name,
+        parent_id: parentId ? Number(parentId) : null,
+      },
+    });
+    return {
+      id: category.id.toString(),
+      name: category.name,
+      parentId: category.parent_id?.toString() || '',
+    };
+  }
+
+  async updateCategory(id: string, dto: UpdateCategoryDto): Promise<CategoryResponseDto> {
+    const category = await this.prisma.categories.findUnique({ where: { id: Number(id) } });
+    if (!category) throw new NotFoundException('Categoría no encontrada');
+    // Prevent setting parentId to itself
+    if (dto.parentId && dto.parentId === id) throw new BadRequestException('Una categoría no puede ser su propio padre');
+    const updated = await this.prisma.categories.update({
+      where: { id: Number(id) },
+      data: {
+        name: dto.name ?? category.name,
+        parent_id: dto.parentId !== undefined ? (dto.parentId ? Number(dto.parentId) : null) : category.parent_id,
+      },
+    });
+    return {
+      id: updated.id.toString(),
+      name: updated.name,
+      parentId: updated.parent_id?.toString() || '',
+    };
+  }
+
+  async deleteCategory(id: string): Promise<void> {
+    // Prevent delete if has children
+    const children = await this.prisma.categories.findFirst({ where: { parent_id: Number(id) } });
+    if (children) throw new BadRequestException('No se puede eliminar una categoría que tiene subcategorías');
+    // Prevent delete if has products
+    const hasProducts = await this.prisma.products_categories.findFirst({ where: { category_id: Number(id) } });
+    if (hasProducts) throw new BadRequestException('No se puede eliminar una categoría que tiene productos asociados');
+    await this.prisma.categories.delete({ where: { id: Number(id) } });
   }
 }
