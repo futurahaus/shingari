@@ -2,11 +2,9 @@
 
 import React, { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
-import { useRouter } from 'next/navigation';
 
 export default function PagosPage() {
   const { cart } = useCart();
-  const router = useRouter();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
   const [cardData, setCardData] = useState({
     cardNumber: '',
