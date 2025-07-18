@@ -361,7 +361,7 @@ const ProductsSection = ({
             </Text>
             <ProductFilters filters={filters} onFilterChange={handleFilterChange} />
             {loading && products.length === 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-pulse">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 3xl:grid-cols-6 gap-6 animate-pulse">
                     {[...Array(8)].map((_, i) => (
                         <ProductCardSkeleton key={i} />
                     ))}
@@ -378,7 +378,7 @@ const ProductsSection = ({
                 </div>
             ) : (
                 <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 3xl:grid-cols-6 gap-6">
                         {products.map((product) => (
                             <ProductCard key={product.id} product={product} />
                         ))}

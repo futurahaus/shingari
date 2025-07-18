@@ -18,8 +18,8 @@ export default function PagosPage() {
 
   // Calcular totales
   const total = cart.reduce((sum, p) => sum + p.price * p.quantity, 0);
-  const shipping = 1899; // Gastos de envío
-  const discount = 1899; // Descuento por puntos
+  const shipping = 0; // Gastos de envío
+  const discount = 0; // Descuento por puntos
   const finalTotal = total + shipping - discount;
 
   const handleCardDataChange = (field: string, value: string) => {
@@ -70,9 +70,16 @@ export default function PagosPage() {
                 onClick={() => setSelectedPaymentMethod('card')}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-4 h-4 border rounded ${
-                    selectedPaymentMethod === 'card' ? 'bg-white border-white' : 'border-gray-400'
-                  }`}></div>
+                  <svg 
+                    className={`w-5 h-5 ${
+                      selectedPaymentMethod === 'card' ? 'text-white' : 'text-gray-600'
+                    }`}
+                    fill="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
+                    <path d="M6 14h4v2H6z"/>
+                  </svg>
                   <span className={selectedPaymentMethod === 'card' ? 'text-white' : 'text-gray-600'}>
                     Tarjeta de débito/crédito
                   </span>
@@ -86,9 +93,16 @@ export default function PagosPage() {
                 onClick={() => setSelectedPaymentMethod('cash')}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-4 h-4 border rounded ${
-                    selectedPaymentMethod === 'cash' ? 'bg-white border-white' : 'border-gray-400'
-                  }`}></div>
+                  <svg 
+                    className={`w-5 h-5 ${
+                      selectedPaymentMethod === 'cash' ? 'text-white' : 'text-gray-600'
+                    }`}
+                    fill="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+                  </svg>
                   <span className={selectedPaymentMethod === 'cash' ? 'text-white' : 'text-gray-600'}>
                     Efectivo
                   </span>
@@ -229,7 +243,8 @@ export default function PagosPage() {
                   <div key={item.id} className="flex justify-between">
                     <div className="flex items-center gap-1">
                       <div className="w-4 h-4 bg-gray-200 rounded-sm"></div>
-                      <span className="text-xs font-medium text-black">Producto</span>
+                      <span className="text-xs font-medium text-black">{item.name}</span>
+                      <span className="text-xs font-medium text-black">x{item.quantity}</span>
                     </div>
                     <span className="text-sm font-medium text-black">
                       €{(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
