@@ -188,7 +188,7 @@ export default function PagosPage() {
                     </div>
                     
                     <div className="absolute bottom-6 left-6 right-6">
-                      <div className="text-3xl font-normal mb-2">
+                      <div className="text-2xl font-normal mb-2">
                         {cardData.cardNumber || '**** **** **** ****'}
                       </div>
                       <div className="flex justify-between items-end">
