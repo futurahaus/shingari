@@ -164,8 +164,8 @@ export default function AdminCategoriasPage() {
       <div className="">
         <div className="flex items-center justify-between mb-4">
           <Text size="3xl" weight="bold" color="gray-900" as="h1">Categorías</Text>
+          <Button text="Agregar Nueva categoría" type="primary-admin" onPress={() => openAddModal()} testID="add-root" icon="FaPlus" inline />
         </div>
-        <Button text="Agregar Nueva categoría" type="primary-admin" onPress={() => openAddModal()} testID="add-root" icon="FaPlus" />
         {loading ? (
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="space-y-3">
