@@ -1,10 +1,13 @@
 'use client';
 
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
 
 export const Banner = () => {
+  const router = useRouter();
+
   return (
     <div className="h-[480px] relative my-8 mx-4 sm:mx-6 lg:mx-8 group">
       <div className="mx-auto sm:px-6 lg:px-8 h-full">
@@ -50,8 +53,7 @@ export const Banner = () => {
               />
               <Button
                 onPress={() => {
-                  // Lógica para navegar a tienda hosteleros
-                  console.log('Navegar a tienda hosteleros');
+                  router.push('/products');
                 }}
                 type="primary"
                 text="Tienda Online Hosteleros"

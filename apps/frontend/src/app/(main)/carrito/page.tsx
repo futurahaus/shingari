@@ -90,7 +90,12 @@ const CarritoPage = () => {
             <span>€{(discountedTotal + shipping).toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
           </div>
           <div className="flex flex-col gap-2 mt-6">
-            <button className="w-full bg-[#EA3D15] text-white py-3 rounded-md font-semibold text-lg hover:bg-[#d43e0e] transition cursor-pointer">
+            <button 
+              className="w-full bg-[#EA3D15] text-white py-3 rounded-md font-semibold text-lg hover:bg-[#d43e0e] transition cursor-pointer"
+              onClick={() => {
+                router.push('/pagos');
+              }}
+            >
               Continuar compra
             </button>
             <button className="w-full bg-white border border-gray-300 text-gray-800 py-3 rounded-md font-semibold text-lg hover:bg-gray-100 transition cursor-pointer"
