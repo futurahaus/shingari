@@ -45,15 +45,15 @@ export default function ProductGrid() {
                 <Text as="h2" size="2xl" weight="bold" color="primary" className="mb-6 text-center">
                     Descubre nuestros productos
                 </Text>
-                <div className="flex gap-6 overflow-x-auto pb-2 animate-pulse">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     {[...Array(6)].map((_, i) => (
                         <div
                             key={i}
-                            className="rounded-2xl flex-shrink-0 bg-gray-200"
-                            style={{ width: 220, minWidth: 220, maxWidth: 260 }}
+                            className="rounded-2xl bg-gray-200"
+                            style={{ width: '100%' }}
                         >
-                            <div className="w-full h-50 relative">
-                                <div className="w-full h-40 bg-gray-300 rounded-t-2xl" />
+                            <div className="w-full aspect-square relative">
+                                <div className="w-full h-full bg-gray-300 rounded-t-2xl" />
                             </div>
                             <div className="py-4">
                                 <div className="h-5 bg-gray-300 rounded mb-2 w-3/4 mx-auto" />
