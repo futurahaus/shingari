@@ -12,6 +12,7 @@ interface ButtonProps {
   inline?: boolean;
   textProps?: Omit<TextProps, 'children'>;
   htmlType?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -23,6 +24,7 @@ export const Button: React.FC<ButtonProps> = ({
   inline = false,
   textProps = {},
   htmlType = 'button',
+  disabled = false,
 }) => {
   const baseClasses = `px-6 py-3 rounded-[10px] font-medium text-base text-center min-h-[44px] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 flex items-center justify-center gap-2 cursor-pointer ${inline ? '' : 'w-full'}`;
   
@@ -56,8 +58,9 @@ export const Button: React.FC<ButtonProps> = ({
     <button
       type={htmlType}
       className={buttonClasses}
-      onClick={onPress}
+      onClick={disabled ? undefined : onPress}
       data-testid={testID}
+      disabled={disabled}
     >
       {IconComponent && (
         <IconComponent 

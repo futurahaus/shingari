@@ -14,7 +14,6 @@ import {
   products_categories as ProductsCategoriesPrismaType,
   products_discounts as ProductDiscountPrismaType,
   product_images as ProductImagesPrismaType,
-  roles as RolePrismaType,
   products_stock as ProductsStockPrismaType,
 } from '../../../generated/prisma'; // Importar tipos y enums de Prisma
 import { CreateProductDto } from './dto/create-product.dto';
@@ -27,6 +26,8 @@ import {
 import { ProductDiscountResponseDto } from './dto/product-discount-response.dto';
 import { CategoryResponseDto } from './dto/category-response.dto';
 import { Cache } from 'cache-manager';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 // Tipo para el producto con categorías incluidas, específico para findAllPublic y findOne
 type ProductWithCategoriesForResponse = Omit<ProductPrismaType, 'image_url'> & {
@@ -398,14 +399,22 @@ export class ProductsService {
 
   // Helper to clear all product-related cache keys
   private async clearProductCache(): Promise<void> {
-    // @ts-ignore
-    const redis = this.cacheManager.store.getClient?.();
-    if (redis) {
-      const keys = await redis.keys('products:*');
-      if (keys.length > 0) {
-        await redis.del(keys);
+    // El tipo de store depende del motor de cache, por eso usamos unknown y comprobamos el tipo en runtime
+    // El acceso a .getClient, .keys y .del solo es seguro si el store es Redis, por eso se justifica el uso de 'any' aquí
+    const store = (this.cacheManager as unknown as { store?: unknown }).store;
+    if (store && typeof (store as any).getClient === 'function') {
+      // Solo si es Redis store
+      const redis = (store as any).getClient(); // eslint-disable-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+      if (redis) {
+        const keys: string[] = await (redis as any).keys('products:*'); // eslint-disable-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        if (keys.length > 0) {
+          await (redis as any).del(keys); // eslint-disable-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        }
       }
+      return;
     }
+    // Si no es Redis, podrías agregar aquí lógica para limpiar manualmente las keys si las conoces
+    // Por ahora, no hace nada si no es Redis
   }
 
   async create(
@@ -737,7 +746,7 @@ export class ProductsService {
   async findAllForAdmin(
     queryProductDto: QueryProductDto,
   ): Promise<PaginatedProductResponseDto> {
-    const { page = 1, limit = 20, search } = queryProductDto;
+    const { page = 1, limit = 20, search, sortField = 'created_at', sortDirection = 'desc' } = queryProductDto as any;
     const skip = (page - 1) * limit;
 
     const where: Prisma.productsWhereInput = {
@@ -775,10 +784,11 @@ export class ProductsService {
       ];
     }
 
+    const orderBy: any = {};
+    orderBy[sortField] = sortDirection;
+
     const productsData = await this.prisma.products.findMany({
-      orderBy: {
-        created_at: 'desc', // Ordenar por fecha de creación descendente (más nuevos primero)
-      },
+      orderBy,
       where,
       skip,
       take: limit,
@@ -833,8 +843,8 @@ export class ProductsService {
     return categories.map((c) => ({
       id: c.id.toString(),
       name: c.name,
-      image: c.image_url,
       parentId: c.parent_id?.toString() || '',
+      image: c.image_url || '',
     }));
   }
 
@@ -859,8 +869,57 @@ export class ProductsService {
     return categories.map((c) => ({
       id: c.id.toString(),
       name: c.name,
-      image: c.image_url,
       parentId: c.parent_id?.toString() || '',
+      image: c.image_url || '',
     }));
+  }
+
+  async createCategory(dto: CreateCategoryDto): Promise<CategoryResponseDto> {
+    const { name, parentId } = dto;
+    // Check for duplicate name
+    const existing = await this.prisma.categories.findFirst({ where: { name } });
+    if (existing) throw new BadRequestException('Ya existe una categoría con ese nombre');
+    const category = await this.prisma.categories.create({
+      data: {
+        name,
+        parent_id: parentId ? Number(parentId) : null,
+      },
+    });
+    return {
+      id: category.id.toString(),
+      name: category.name,
+      parentId: category.parent_id?.toString() || '',
+      image: category.image_url || '',
+    };
+  }
+
+  async updateCategory(id: string, dto: UpdateCategoryDto): Promise<CategoryResponseDto> {
+    const category = await this.prisma.categories.findUnique({ where: { id: Number(id) } });
+    if (!category) throw new NotFoundException('Categoría no encontrada');
+    // Prevent setting parentId to itself
+    if (dto.parentId && dto.parentId === id) throw new BadRequestException('Una categoría no puede ser su propio padre');
+    const updated = await this.prisma.categories.update({
+      where: { id: Number(id) },
+      data: {
+        name: dto.name ?? category.name,
+        parent_id: dto.parentId !== undefined ? (dto.parentId ? Number(dto.parentId) : null) : category.parent_id,
+      },
+    });
+    return {
+      id: updated.id.toString(),
+      name: updated.name,
+      parentId: updated.parent_id?.toString() || '',
+      image: updated.image_url || '',
+    };
+  }
+
+  async deleteCategory(id: string): Promise<void> {
+    // Prevent delete if has children
+    const children = await this.prisma.categories.findFirst({ where: { parent_id: Number(id) } });
+    if (children) throw new BadRequestException('No se puede eliminar una categoría que tiene subcategorías');
+    // Prevent delete if has products
+    const hasProducts = await this.prisma.products_categories.findFirst({ where: { category_id: Number(id) } });
+    if (hasProducts) throw new BadRequestException('No se puede eliminar una categoría que tiene productos asociados');
+    await this.prisma.categories.delete({ where: { id: Number(id) } });
   }
 }

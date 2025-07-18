@@ -7,6 +7,7 @@ export interface Category {
   id: string;
   name: string;
   image?: string;
+  parentId?: string;
 }
 
 // Función para obtener categorías

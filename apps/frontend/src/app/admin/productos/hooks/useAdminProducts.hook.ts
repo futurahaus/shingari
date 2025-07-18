@@ -5,7 +5,7 @@ import { useNotificationContext } from '@/contexts/NotificationContext';
 import { PaginatedProductsResponse } from '../interfaces/product.interfaces';
 
 // Función para obtener productos paginados
-const fetchAdminProducts = async (page: number, limit: number = 20, search?: string): Promise<PaginatedProductsResponse> => {
+const fetchAdminProducts = async (page: number, limit: number = 20, search?: string, sortField?: string, sortDirection?: string): Promise<PaginatedProductsResponse> => {
     const params = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
@@ -14,6 +14,12 @@ const fetchAdminProducts = async (page: number, limit: number = 20, search?: str
     // Agregar parámetro de búsqueda si existe
     if (search && search.trim()) {
         params.append('search', search.trim());
+    }
+    if (sortField) {
+        params.append('sortField', sortField);
+    }
+    if (sortDirection) {
+        params.append('sortDirection', sortDirection);
     }
 
     const response = await api.get<PaginatedProductsResponse>(`/products/admin/all?${params.toString()}`);
@@ -24,10 +30,12 @@ interface UseAdminProductsOptions {
     page: number;
     limit?: number;
     search?: string;
+    sortField?: string;
+    sortDirection?: string;
     enabled?: boolean;
 }
 
-export const useAdminProducts = ({ page, limit = 20, search = '', enabled = true }: UseAdminProductsOptions) => {
+export const useAdminProducts = ({ page, limit = 20, search = '', sortField = 'created_at', sortDirection = 'desc', enabled = true }: UseAdminProductsOptions) => {
     const { showError } = useNotificationContext();
 
     const {
@@ -36,8 +44,8 @@ export const useAdminProducts = ({ page, limit = 20, search = '', enabled = true
         error,
         refetch
     } = useQuery({
-        queryKey: ['admin-products', page, limit, search],
-        queryFn: () => fetchAdminProducts(page, limit, search),
+        queryKey: ['admin-products', page, limit, search, sortField, sortDirection],
+        queryFn: () => fetchAdminProducts(page, limit, search, sortField, sortDirection),
         staleTime: 2 * 60 * 1000, // 2 minutos - los productos pueden cambiar
         gcTime: 5 * 60 * 1000, // 5 minutos en cache
         retry: 2,
