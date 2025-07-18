@@ -104,7 +104,7 @@ export default function AdminCategoriasPage() {
 
   function renderTree(nodes: CategoryWithChildren[], level = 0) {
     return (
-      <ul className={level === 0 ? 'space-y-1' : 'ml-5 border-l-2 border-gray-100 pl-3 space-y-1'}>
+      <ul className={level === 0 ? 'space-y-1' : 'ml-5 border-l-2 border-gray-100 pl-3 space-y-1 flex-1'}>
         {nodes.map((cat) => {
           const isParent = cat.children && cat.children.length > 0;
           return (
@@ -124,7 +124,7 @@ export default function AdminCategoriasPage() {
                   <FaFolder className="text-gray-400 w-4 h-4" />
                 )}
               </span>
-              <span className="font-medium text-gray-900 flex-1 truncate text-base" title={cat.name}>{cat.name}</span>
+              <span className="font-medium text-gray-900 font-medium text-gray-900 flex-1 truncate text-base" title={cat.name}>{cat.name}</span>
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   onClick={() => openEditModal(cat)}
