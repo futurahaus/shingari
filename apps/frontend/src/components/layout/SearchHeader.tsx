@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { FaSearch } from 'react-icons/fa';
+import { FaSearch, FaCog } from 'react-icons/fa';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import LoginModal from '@/components/auth/LoginModal';

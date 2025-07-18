@@ -51,4 +51,4 @@ export default function Sidebar({ className = '', children }: SidebarProps) {
       {children}
     </aside>
   );
-}
+} 
