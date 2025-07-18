@@ -292,43 +292,13 @@ export class ProductsService {
       orderBy,
       skip,
       take: limit,
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        list_price: true,
-        wholesale_price: true,
-        sku: true,
-        created_at: true,
-        status: true, // <-- Added to match ProductWithCategoriesForResponse
-        iva: true,
-        grammage: true,
+      include: {
         products_categories: {
-          select: {
-            product_id: true,
-            category_id: true,
-            categories: {
-              select: {
-                id: true,
-                name: true,
-                image_url: true,
-                created_at: true,
-                parent_id: true, // <-- Added for type compatibility
-              },
-            },
+          include: {
+            categories: true,
           },
         },
-        product_images: {
-          select: {
-            id: true,
-            product_id: true,
-            image_url: true,
-            alt_text: true,
-            is_main: true,
-            sort_order: true,
-            created_at: true,
-          },
-        },
+        product_images: true,
         products_stock: {
           include: {
             units: true,
