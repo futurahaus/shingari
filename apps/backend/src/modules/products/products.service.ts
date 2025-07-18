@@ -300,6 +300,8 @@ export class ProductsService {
         sku: true,
         created_at: true,
         status: true, // <-- Added to match ProductWithCategoriesForResponse
+        iva: true,
+        grammage: true,
         products_categories: {
           select: {
             product_id: true,
