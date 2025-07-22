@@ -17,6 +17,8 @@ export default function ProductDetailPage() {
   const params = useParams();
   const { id } = params;
   const { addToCart } = useCart();
+  const [boxes, setBoxes] = useState(0);
+  const [units, setUnits] = useState(0);
 
   useEffect(() => {
     if (id) {
@@ -56,16 +58,21 @@ export default function ProductDetailPage() {
           <SimilarProducts product={product} />
         </div>
         <div className="flex flex-col gap-6">
-          <ProductInfo product={product} />
+          <ProductInfo product={product} units={units} setUnits={setUnits} boxes={boxes} setBoxes={setBoxes} />
           <button
             className="w-full px-4 py-4 font-bold text-[#23272F] bg-white border border-[#23272F] rounded-xl text-lg hover:bg-gray-50 transition-all cursor-pointer"
-            onClick={() => addToCart({
-              id: product.id,
-              name: product.name,
-              price: product.price,
-              image: product.images?.[0] || undefined,
-              quantity: 1,
-            })}
+            onClick={() => {
+              if (units > 0) {
+                addToCart({
+                  id: product.id,
+                  name: product.name,
+                  price: product.price,
+                  image: product.images?.[0] || undefined,
+                  quantity: units,
+                  unitType: 'Unidades',
+                });
+              }
+            }}
           >
             Agregar al carrito
           </button>

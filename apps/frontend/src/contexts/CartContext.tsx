@@ -14,9 +14,9 @@ export interface CartProduct {
 interface CartContextType {
   cart: CartProduct[];
   addToCart: (product: CartProduct) => void;
-  removeFromCart: (id: string) => void;
+  removeFromCart: (id: string, unitType?: string) => void;
   removeAllFromCart: () => void;
-  updateQuantity: (id: string, quantity: number) => void;
+  updateQuantity: (id: string, quantity: number, unitType?: string) => void;
   clearCart: () => void;
   isCartOpen: boolean;
   openCart: () => void;
@@ -61,16 +61,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     // setIsCartOpen(true);
   };
 
-  const removeFromCart = (id: string) => {
-    setCart(prev => prev.filter(p => p.id !== id));
+  const removeFromCart = (id: string, unitType?: string) => {
+    setCart(prev => prev.filter(p => !(p.id === id && (unitType ? p.unitType === unitType : true))));
   };
 
   const removeAllFromCart = () => {
     setCart([]);
   };
 
-  const updateQuantity = (id: string, quantity: number) => {
-    setCart(prev => prev.map(p => (p.id === id ? { ...p, quantity } : p)));
+  const updateQuantity = (id: string, quantity: number, unitType?: string) => {
+    setCart(prev => prev.map(p => (p.id === id && (unitType ? p.unitType === unitType : true) ? { ...p, quantity } : p)));
     // setIsCartOpen(true);
   };
 

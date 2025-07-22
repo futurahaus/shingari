@@ -3,10 +3,28 @@ import { Product } from "@/components/ProductCard";
 
 interface ProductInfoProps {
   product: Product;
+  units: number;
+  setUnits: (n: number) => void;
+  boxes: number;
+  setBoxes: (n: number) => void;
 }
 
-export function ProductInfo({ product }: ProductInfoProps) {
+export function ProductInfo({ product, units, setUnits, boxes, setBoxes }: ProductInfoProps) {
   const hasDiscount = typeof product.discount === 'number' && product.discount > 0 && product.originalPrice;
+  const unitsPerBox = product.units_per_box || 1;
+
+  // Sync units when boxes change
+  const handleBoxesChange = (newBoxes: number) => {
+    setBoxes(newBoxes);
+    setUnits(newBoxes * unitsPerBox);
+    // Optionally update cart here if you want live sync
+  };
+  // Sync boxes when units change
+  const handleUnitsChange = (newUnits: number) => {
+    setUnits(newUnits);
+    setBoxes(Math.floor(newUnits / unitsPerBox));
+    // Optionally update cart here if you want live sync
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -40,19 +58,15 @@ export function ProductInfo({ product }: ProductInfoProps) {
       {/* Selectores de cantidad */}
       <div className="flex flex-row gap-8 py-4">
         <div className="flex items-center gap-2">
-          <QuantitySelector label="Unidades" />
+          <QuantitySelector label="Unidades" quantity={units} setQuantity={handleUnitsChange} />
         </div>
         <div className="flex items-center gap-2">
-          <QuantitySelector label="Cajas" />
+          <QuantitySelector label="Cajas" quantity={boxes} setQuantity={handleBoxesChange} />
         </div>
       </div>
 
       {/* Botones */}
-      <div className="flex flex-col gap-3 mt-2">
-        <button className="w-full px-4 py-4 font-bold text-white bg-[#F0461C] rounded-xl text-lg hover:bg-orange-700 transition-all cursor-pointer">
-          Comprar ahora
-        </button>
-      </div>
+      {/* The main add to cart button is now in ProductDetailPage */}
     </div>
   );
 }

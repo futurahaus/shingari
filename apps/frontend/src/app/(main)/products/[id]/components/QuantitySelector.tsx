@@ -1,17 +1,17 @@
 'use client';
 
-import { useState } from 'react';
 import { Minus, Plus } from 'lucide-react';
 
 interface QuantitySelectorProps {
   label: string;
+  quantity: number;
+  setQuantity: (value: number) => void;
 }
 
-export function QuantitySelector({ label }: QuantitySelectorProps) {
-  const [quantity, setQuantity] = useState(0);
+export function QuantitySelector({ label, quantity, setQuantity }: QuantitySelectorProps) {
 
-  const increment = () => setQuantity((prev) => prev + 1);
-  const decrement = () => setQuantity((prev) => (prev > 0 ? prev - 1 : 0));
+  const increment = () => setQuantity(quantity + 1);
+  const decrement = () => setQuantity(quantity > 0 ? quantity - 1 : 0);
 
   return (
     <div className="flex items-center justify-between w-full gap-2">

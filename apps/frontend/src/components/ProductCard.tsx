@@ -15,6 +15,7 @@ export interface Product {
     images: string[];
     categories: string[];
     sku?: string;
+    units_per_box?: number;
 }
 
 export const ProductCard = ({ product }: { product: Product }) => {

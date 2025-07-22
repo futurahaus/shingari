@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useRef } from 'react';
 import { useCart } from '@/contexts/CartContext';
+import { Product } from '@/components/ProductCard';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
@@ -82,19 +83,33 @@ export const CartModal = () => {
                     <div className="flex items-center gap-2 mb-2">
                       <button
                         className="px-2 py-1 bg-gray-100 rounded cursor-pointer"
-                        onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                        onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1), item.unitType)}
                         disabled={item.quantity <= 1}
                       >-</button>
                       <span className="mx-1">{item.quantity}</span>
                       <button
                         className="px-2 py-1 bg-gray-100 rounded cursor-pointer"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() => updateQuantity(item.id, item.quantity + 1, item.unitType)}
                       >+</button>
                       <span className="ml-2 text-xs text-gray-500">{item.unitType || 'Unidades'}</span>
+                      {/* Box indicator */}
+                      {item.unitType === 'Unidades' && item.quantity && item.quantity > 0 && typeof window !== 'undefined' && (() => {
+                        // Try to get units_per_box from the product list in localStorage (if available)
+                        const products = JSON.parse(localStorage.getItem('products') || '[]');
+                        const prod = products.find((p: Product) => p.id === item.id);
+                        const unitsPerBox = prod?.units_per_box || 0;
+                        if (unitsPerBox > 1) {
+                          const boxes = Math.floor(item.quantity / unitsPerBox);
+                          if (boxes > 0) {
+                            return <span className="ml-2 text-xs text-blue-500">({boxes} cajas)</span>;
+                          }
+                        }
+                        return null;
+                      })()}
                     </div>
                     <button
                       className="text-xs text-red-500 hover:underline cursor-pointer"
-                      onClick={() => removeFromCart(item.id)}
+                      onClick={() => removeFromCart(item.id, item.unitType)}
                     >Eliminar</button>
                   </div>
                 </div>
