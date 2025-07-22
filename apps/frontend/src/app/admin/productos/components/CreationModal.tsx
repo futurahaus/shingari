@@ -243,6 +243,17 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Unidades por Caja</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={createForm.units_per_box || ''}
+                    onChange={(e) => setCreateForm({ ...createForm, units_per_box: parseInt(e.target.value) || 0 })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-black"
+                  />
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>

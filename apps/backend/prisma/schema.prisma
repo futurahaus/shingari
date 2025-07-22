@@ -321,6 +321,7 @@ model auth_users {
   mfa_factors                 mfa_factors[]
   one_time_tokens             one_time_tokens[]
   sessions                    sessions[]
+  orders                      orders[]
   products_discounts          products_discounts[]
   user_roles                  user_roles[]
   users                       public_users?
@@ -372,7 +373,7 @@ model public_users {
   profile_is_complete Boolean?   @default(false)
   nombrefiscal        String?
   tax_name            String?
-  internal_id            String?
+  internal_id         String?
   users               auth_users @relation(fields: [uuid], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([uuid], map: "idx_users_uuid")
@@ -384,8 +385,10 @@ model categories {
   id                  Int                   @id @default(autoincrement())
   name                String                @unique @db.VarChar(100)
   created_at          DateTime?             @default(now()) @db.Timestamp(6)
-  parent_id           Int?
   image_url           String?               @db.VarChar
+  parent_id           Int?
+  categories          categories?           @relation("categoriesTocategories", fields: [parent_id], references: [id], onUpdate: NoAction)
+  other_categories    categories[]          @relation("categoriesTocategories")
   products_categories products_categories[]
 
   @@schema("public")
@@ -398,10 +401,14 @@ model products {
   image_url           String?
   list_price          Decimal               @db.Decimal(10, 2)
   created_at          DateTime?             @default(now()) @db.Timestamp(6)
-  updated_at          DateTime?             @updatedAt @db.Timestamp(6)
   status              product_states?
   wholesale_price     Decimal               @db.Decimal
   sku                 String                @unique @default("") @db.VarChar
+  iva                 Decimal?              @db.Decimal
+  grammage            String?
+  updated_at          DateTime?             @updatedAt @db.Timestamp(6)
+  units_per_box       BigInt?
+  order_lines         order_lines[]
   product_images      product_images[]
   products_categories products_categories[]
   products_discounts  products_discounts[]
@@ -472,6 +479,69 @@ model product_images {
   products   products  @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([product_id], map: "idx_product_images_product_id")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model order_addresses {
+  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id      String? @db.Uuid
+  type          String
+  full_name     String
+  address_line1 String
+  address_line2 String?
+  city          String
+  state         String?
+  postal_code   String
+  country       String
+  phone         String?
+  orders        orders? @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model order_lines {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id     String?   @db.Uuid
+  product_id   Int?
+  product_name String
+  quantity     Int
+  unit_price   Decimal   @db.Decimal(10, 2)
+  total_price  Decimal?  @default(dbgenerated("(unit_price * (quantity)::numeric)")) @db.Decimal(10, 2)
+  orders       orders?   @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  products     products? @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model order_payments {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id       String?   @db.Uuid
+  payment_method String
+  status         String    @default("pending")
+  paid_at        DateTime? @db.Timestamp(6)
+  amount         Decimal   @db.Decimal(10, 2)
+  transaction_id String?
+  metadata       Json?
+  orders         orders?   @relation(fields: [order_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model orders {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id         String?           @db.Uuid
+  status          String            @default("pending")
+  total_amount    Decimal           @db.Decimal(10, 2)
+  currency        String            @default("USD") @db.VarChar(3)
+  created_at      DateTime?         @default(now()) @db.Timestamp(6)
+  updated_at      DateTime?         @default(now()) @db.Timestamp(6)
+  order_addresses order_addresses[]
+  order_lines     order_lines[]
+  order_payments  order_payments[]
+  users           auth_users?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
   @@schema("public")
 }
 

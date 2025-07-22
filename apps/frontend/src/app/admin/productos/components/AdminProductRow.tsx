@@ -44,11 +44,8 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
             </td>
 
             {/* Stock */}
-            <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-900">
-                    {product.stock !== undefined ? product.stock : 'N/A'}
-                </div>
-            </td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.stock}</td>
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{product.units_per_box ?? '-'}</td>
 
             {/* Precio minorista */}
             <td className="px-6 py-4 whitespace-nowrap">

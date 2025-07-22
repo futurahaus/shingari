@@ -148,6 +148,7 @@ export class ProductsService {
         product.products_categories?.map((pc) => pc.categories.name) || [],
       images: product.product_images?.map((pi) => pi.image_url) || [],
       sku: product.sku || '',
+      units_per_box: product.units_per_box !== undefined && product.units_per_box !== null ? Number(product.units_per_box) : undefined,
     };
   }
 
@@ -224,6 +225,7 @@ export class ProductsService {
             product.products_categories?.map((pc) => pc.categories.name) || [],
           images: product.product_images?.map((pi) => pi.image_url) || [],
           sku: product.sku || '',
+          units_per_box: product.units_per_box !== undefined && product.units_per_box !== null ? Number(product.units_per_box) : undefined,
         };
       }),
     );
@@ -428,6 +430,7 @@ export class ProductsService {
           ? (product_states[status as keyof typeof product_states] ??
             product_states.active)
           : product_states.active,
+        units_per_box: typeof createProductDto.units_per_box === 'number' ? createProductDto.units_per_box : undefined,
       },
       include: {
         products_categories: { include: { categories: true } },
@@ -538,6 +541,10 @@ export class ProductsService {
         status: status
           ? (product_states[status as keyof typeof product_states] ?? undefined)
           : undefined,
+        units_per_box:
+          typeof updateProductDto.units_per_box === 'number'
+            ? updateProductDto.units_per_box
+            : undefined,
       },
       include: {
         products_categories: { include: { categories: true } },
