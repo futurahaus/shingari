@@ -49,6 +49,53 @@ interface Order {
   order_payments: OrderPayment[];
 }
 
+const CongratsSkeleton = () => (
+  <div className="min-h-screen bg-white">
+    {/* Main Content */}
+    <main className="max-w-7xl mx-auto px-12 py-8 animate-pulse">
+      {/* Breadcrumb Skeleton */}
+      <div className="flex justify-between items-center mb-8">
+        <div className="w-48 h-6 bg-gray-200 rounded"></div>
+      </div>
+
+      {/* Congratulations Card Skeleton */}
+      <div className="flex justify-center">
+        <div className="bg-[#FBFBFB] border-2 border-[#E3E3E3] rounded-[32px] p-16 max-w-2xl w-full">
+          <div className="flex flex-col items-center text-center space-y-4">
+            {/* Check Icon Skeleton */}
+            <div className="w-15 h-15 bg-white rounded-full flex items-center justify-center mb-4">
+              <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+            </div>
+
+            {/* Main Message Skeleton */}
+            <div className="w-80 h-8 bg-gray-200 rounded"></div>
+
+            {/* Order Details Skeleton */}
+            <div className="space-y-2">
+              <div className="w-32 h-4 bg-gray-200 rounded"></div>
+              <div className="w-24 h-4 bg-gray-200 rounded"></div>
+              <div className="w-28 h-4 bg-gray-200 rounded"></div>
+            </div>
+
+            {/* Subtitle Skeleton */}
+            <div className="w-96 h-4 bg-gray-200 rounded"></div>
+
+            {/* Action Buttons Skeleton */}
+            <div className="flex flex-col sm:flex-row gap-4 mt-8 w-full max-w-md">
+              <div className="flex-1 h-12 bg-gray-200 rounded-[10px]"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Back to Home Button Skeleton */}
+      <div className="flex justify-center mt-8">
+        <div className="w-32 h-12 bg-gray-200 rounded-[10px]"></div>
+      </div>
+    </main>
+  </div>
+);
+
 export default function CongratsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -81,14 +128,7 @@ export default function CongratsPage() {
   }, [orderId]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#EA3D15] mx-auto mb-4"></div>
-          <p className="text-gray-600">Cargando detalles de la orden...</p>
-        </div>
-      </div>
-    );
+    return <CongratsSkeleton />;
   }
 
   if (error || !order) {

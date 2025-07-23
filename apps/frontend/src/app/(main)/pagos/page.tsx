@@ -7,7 +7,7 @@ import { api } from '@/lib/api';
 import { Button } from '@/app/ui/components/Button';
 
 export default function PagosPage() {
-  const { cart } = useCart();
+  const { cart, clearCart } = useCart();
   const router = useRouter();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
   const [cardData, setCardData] = useState({
@@ -113,6 +113,10 @@ export default function PagosPage() {
       console.log('Sending order data:', JSON.stringify(orderData, null, 2));
 
       const order = await api.post<any, typeof orderData>('/orders', orderData);
+      
+      // Vaciar el carrito después de crear la orden exitosamente
+      clearCart();
+      
       router.push(`/congrats?orderId=${order.id}`);
     } catch (error) {
       console.error('Error al procesar el pago:', error);
@@ -126,7 +130,7 @@ export default function PagosPage() {
     <div className="min-h-screen bg-white relative">
       {/* Overlay de carga */}
       {isLoading && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
           <div className="bg-white rounded-lg p-8 flex flex-col items-center shadow-lg">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#EA3D15] mb-4"></div>
             <span className="text-gray-700 font-medium">Procesando pago...</span>
@@ -361,7 +365,7 @@ export default function PagosPage() {
                 <Button
                   onPress={handlePaymentConfirmation}
                   type="primary"
-                  text="Continuar al Pago"
+                  text="Confirmar compra"
                   testID="pay-button"
                   disabled={isLoading}
                 />

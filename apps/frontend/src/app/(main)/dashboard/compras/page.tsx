@@ -106,6 +106,34 @@ const formatOrderId = (id: string) => {
   return `#${id.slice(0, 8).toUpperCase()}`;
 };
 
+const OrderCardSkeleton = () => (
+  <div className="bg-white border border-gray-200 rounded-xl p-4 animate-pulse">
+    <div className="flex items-center justify-between">
+      {/* Order Info */}
+      <div className="flex-1">
+        <div className="flex items-center gap-4 mb-2">
+          {/* Status Tag Skeleton */}
+          <div className="w-24 h-6 bg-gray-200 rounded-full"></div>
+          
+          {/* Order ID Skeleton */}
+          <div className="w-32 h-5 bg-gray-200 rounded"></div>
+        </div>
+        
+        {/* Order Details Skeleton */}
+        <div className="space-y-1">
+          <div className="w-48 h-4 bg-gray-200 rounded"></div>
+          <div className="w-24 h-4 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+      
+      {/* Action Button Skeleton */}
+      <div className="ml-4">
+        <div className="w-24 h-8 bg-gray-200 rounded border"></div>
+      </div>
+    </div>
+  </div>
+);
+
 export default function ComprasPage() {
   const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
@@ -133,9 +161,12 @@ export default function ComprasPage() {
       <div className="mx-auto px-4 sm:px-6 lg:px-16 py-12">
         <div className="flex gap-8">
           <Sidebar />
-          <div className="flex-1 bg-white shadow-sm rounded-lg p-6">
-            <div className="flex items-center justify-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#EA3D15]"></div>
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold mb-6">Mis Compras</h2>
+            <div className="space-y-4">
+              {[...Array(4)].map((_, i) => (
+                <OrderCardSkeleton key={i} />
+              ))}
             </div>
           </div>
         </div>

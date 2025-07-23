@@ -109,6 +109,134 @@ const formatCurrency = (amount: string) => {
   return `€${Number(amount).toFixed(2).replace('.', ',')}`;
 };
 
+const OrderDetailSkeleton = () => (
+  <div className="flex-1 space-y-4 animate-pulse">
+    {/* Header Card Skeleton */}
+    <div className="bg-white border border-gray-200 rounded-xl p-4">
+      <div className="flex items-center justify-between">
+        <div className="flex-1">
+          <div className="flex items-center gap-4 mb-2">
+            <div className="w-24 h-6 bg-gray-200 rounded-full"></div>
+            <div className="w-32 h-5 bg-gray-200 rounded"></div>
+          </div>
+          <div className="w-48 h-4 bg-gray-200 rounded"></div>
+        </div>
+        <div className="ml-4">
+          <div className="w-28 h-8 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    </div>
+
+    {/* Delivery Details Card Skeleton */}
+    <div className="bg-white border border-gray-200 rounded-xl p-4">
+      <div className="mb-4">
+        <div className="w-32 h-5 bg-gray-200 rounded"></div>
+      </div>
+      <div className="space-y-3">
+        <div className="flex gap-1">
+          <div className="w-24 h-4 bg-gray-200 rounded"></div>
+          <div className="w-32 h-4 bg-gray-200 rounded"></div>
+        </div>
+        <div className="flex gap-1">
+          <div className="w-20 h-4 bg-gray-200 rounded"></div>
+          <div className="w-48 h-4 bg-gray-200 rounded"></div>
+        </div>
+        <div className="flex gap-1">
+          <div className="w-28 h-4 bg-gray-200 rounded"></div>
+          <div className="w-56 h-4 bg-gray-200 rounded"></div>
+        </div>
+        <div className="space-y-2">
+          <div className="flex gap-1">
+            <div className="w-36 h-4 bg-gray-200 rounded"></div>
+            <div className="w-32 h-4 bg-gray-200 rounded"></div>
+          </div>
+          <div className="w-24 h-8 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    </div>
+
+    {/* Payment and Summary Cards Skeleton */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* Payment Details Card Skeleton */}
+      <div className="bg-white border border-gray-200 rounded-xl p-4">
+        <div className="mb-4">
+          <div className="w-28 h-5 bg-gray-200 rounded"></div>
+        </div>
+        <div className="space-y-2">
+          <div className="w-32 h-4 bg-gray-200 rounded"></div>
+          <div className="w-40 h-4 bg-gray-200 rounded"></div>
+        </div>
+        <div className="mt-4">
+          <div className="w-full h-8 bg-gray-200 rounded border"></div>
+        </div>
+      </div>
+
+      {/* Summary Card Skeleton */}
+      <div className="bg-white border border-gray-200 rounded-xl p-4">
+        <div className="mb-4">
+          <div className="w-20 h-5 bg-gray-200 rounded"></div>
+        </div>
+        <div className="space-y-2">
+          <div className="flex justify-between">
+            <div className="w-16 h-4 bg-gray-200 rounded"></div>
+            <div className="w-20 h-4 bg-gray-200 rounded"></div>
+          </div>
+          <div className="flex justify-between">
+            <div className="w-20 h-4 bg-gray-200 rounded"></div>
+            <div className="w-16 h-4 bg-gray-200 rounded"></div>
+          </div>
+          <div className="flex justify-between">
+            <div className="w-12 h-4 bg-gray-200 rounded"></div>
+            <div className="w-16 h-4 bg-gray-200 rounded"></div>
+          </div>
+          <div className="border-t pt-2 mt-2">
+            <div className="flex justify-between">
+              <div className="w-12 h-4 bg-gray-200 rounded"></div>
+              <div className="w-20 h-4 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Products Card Skeleton */}
+    <div className="bg-white border border-gray-200 rounded-xl p-4">
+      <div className="mb-4">
+        <div className="flex justify-between items-center">
+          <div className="w-20 h-5 bg-gray-200 rounded"></div>
+          <div className="flex gap-4">
+            <div className="w-16 h-4 bg-gray-200 rounded"></div>
+            <div className="w-20 h-4 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div className="space-y-4">
+        {[...Array(2)].map((_, i) => (
+          <div key={i}>
+            {i > 0 && <hr className="border-gray-200 my-4" />}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 flex-1">
+                <div className="w-12 h-12 bg-gray-200 border border-gray-300 rounded flex items-center justify-center">
+                  <div className="w-10 h-10 bg-gray-300 rounded"></div>
+                </div>
+                <div className="flex-1">
+                  <div className="w-48 h-4 bg-gray-200 rounded mb-1"></div>
+                  <div className="w-24 h-3 bg-gray-200 rounded"></div>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="w-20 h-4 bg-gray-200 rounded"></div>
+                <div className="w-20 h-4 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
 export default function OrderDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -141,11 +269,7 @@ export default function OrderDetailPage() {
       <div className="mx-auto px-4 sm:px-6 lg:px-16 py-12">
         <div className="flex gap-8">
           <Sidebar />
-          <div className="flex-1">
-            <div className="flex items-center justify-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#EA3D15]"></div>
-            </div>
-          </div>
+          <OrderDetailSkeleton />
         </div>
       </div>
     );
