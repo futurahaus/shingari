@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
 import { api } from '@/lib/api';
 
@@ -106,6 +107,7 @@ const formatOrderId = (id: string) => {
 };
 
 export default function ComprasPage() {
+  const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -204,8 +206,7 @@ export default function ComprasPage() {
                       <div className="ml-4">
                         <button
                           onClick={() => {
-                            // Navegar al detalle de la orden
-                            console.log('Ver detalle de orden:', order.id);
+                            router.push(`/dashboard/compras/${order.id}`);
                           }}
                           className="px-4 py-2 border border-gray-900 text-gray-900 rounded text-sm font-medium hover:bg-gray-50 transition-colors"
                         >

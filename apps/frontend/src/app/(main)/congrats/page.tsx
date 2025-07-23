@@ -164,8 +164,7 @@ export default function CongratsPage() {
               <div className="flex flex-col sm:flex-row gap-4 mt-8 w-full max-w-md">
                 <button
                   onClick={() => {
-                    // Lógica para ir a mis compras
-                    console.log('Ir a mis compras');
+                    router.push('/dashboard/compras');
                   }}
                   className="flex-1 bg-[#EA3D15] text-white py-3 px-4 rounded-[10px] font-medium text-sm hover:bg-[#d43e0e] transition-colors"
                 >

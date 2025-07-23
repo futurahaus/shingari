@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import { Button } from '@/app/ui/components/Button';
 
 export default function PagosPage() {
   const { cart } = useCart();
@@ -16,6 +17,7 @@ export default function PagosPage() {
     cardholderName: '',
     id: ''
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   // Calcular totales
   const total = cart.reduce((sum, p) => sum + p.price * p.quantity, 0);
@@ -63,6 +65,7 @@ export default function PagosPage() {
       return;
     }
 
+    setIsLoading(true);
     try {
       // Crear la orden en el backend
       const orderData = {
@@ -110,17 +113,26 @@ export default function PagosPage() {
       console.log('Sending order data:', JSON.stringify(orderData, null, 2));
 
       const order = await api.post<any, typeof orderData>('/orders', orderData);
-      
-      // Navegar a la pantalla de congratulations con el order ID
       router.push(`/congrats?orderId=${order.id}`);
     } catch (error) {
       console.error('Error al procesar el pago:', error);
       alert('Error al procesar el pago. Por favor, inténtalo de nuevo.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white relative">
+      {/* Overlay de carga */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg p-8 flex flex-col items-center shadow-lg">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#EA3D15] mb-4"></div>
+            <span className="text-gray-700 font-medium">Procesando pago...</span>
+          </div>
+        </div>
+      )}
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-12 py-8">
         <div className="flex gap-8">
@@ -346,12 +358,13 @@ export default function PagosPage() {
 
               {/* Continue Button */}
               <div className="mt-4">
-                <button
-                  onClick={handlePaymentConfirmation}
-                  className="w-full bg-[#EA3D15] text-white py-3 rounded-lg font-medium text-sm hover:bg-[#d43e0e] transition-colors"
-                >
-                  Continuar al Pago
-                </button>
+                <Button
+                  onPress={handlePaymentConfirmation}
+                  type="primary"
+                  text="Continuar al Pago"
+                  testID="pay-button"
+                  disabled={isLoading}
+                />
               </div>
             </div>
           </div>
