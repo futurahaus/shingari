@@ -210,7 +210,7 @@ const OrderDetailSkeleton = () => (
           </div>
         </div>
       </div>
-      
+
       <div className="space-y-4">
         {[...Array(2)].map((_, i) => (
           <div key={i}>
@@ -241,7 +241,7 @@ export default function OrderDetailPage() {
   const params = useParams();
   const router = useRouter();
   const orderId = params.id as string;
-  
+
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -322,7 +322,7 @@ export default function OrderDetailPage() {
                     // Lógica para repetir compra
                     console.log('Repetir compra:', order.id);
                   }}
-                  className="px-4 py-2 bg-[#EA3D15] text-white rounded text-sm font-medium hover:bg-[#d43e0e] transition-colors"
+                  className="px-4 py-2 bg-[#EA3D15] text-white rounded text-sm font-medium hover:bg-[#d43e0e] transition-colors cursor-pointer"
                 >
                   Repetir compra
                 </button>
@@ -359,7 +359,7 @@ export default function OrderDetailPage() {
                     {order.id.slice(0, 8).toUpperCase()}-{order.id.slice(8, 12).toUpperCase()}
                   </span>
                 </div>
-                <button className="px-4 py-2 bg-[#EA3D15] text-white rounded text-sm font-medium hover:bg-[#d43e0e] transition-colors">
+                <button className="px-4 py-2 bg-[#EA3D15] text-white rounded text-sm font-medium hover:bg-[#d43e0e] transition-colors cursor-pointer">
                   Seguir compra
                 </button>
               </div>
@@ -382,7 +382,7 @@ export default function OrderDetailPage() {
                 </p>
               </div>
               <div className="mt-4">
-                <button className="w-full px-4 py-2 border border-gray-700 text-gray-700 rounded text-sm font-bold hover:bg-gray-50 transition-colors">
+                <button className="w-full px-4 py-2 border border-gray-700 text-gray-700 rounded text-sm font-bold hover:bg-gray-50 transition-colors cursor-pointer">
                   Ver factura
                 </button>
               </div>
@@ -427,7 +427,7 @@ export default function OrderDetailPage() {
                 </div>
               </div>
             </div>
-            
+
             <div className="space-y-4">
               {order.order_lines.map((line, index) => (
                 <div key={line.id}>
@@ -455,4 +455,4 @@ export default function OrderDetailPage() {
       </div>
     </div>
   );
-} 
+}

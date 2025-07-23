@@ -114,18 +114,18 @@ const OrderCardSkeleton = () => (
         <div className="flex items-center gap-4 mb-2">
           {/* Status Tag Skeleton */}
           <div className="w-24 h-6 bg-gray-200 rounded-full"></div>
-          
+
           {/* Order ID Skeleton */}
           <div className="w-32 h-5 bg-gray-200 rounded"></div>
         </div>
-        
+
         {/* Order Details Skeleton */}
         <div className="space-y-1">
           <div className="w-48 h-4 bg-gray-200 rounded"></div>
           <div className="w-24 h-4 bg-gray-200 rounded"></div>
         </div>
       </div>
-      
+
       {/* Action Button Skeleton */}
       <div className="ml-4">
         <div className="w-24 h-8 bg-gray-200 rounded border"></div>
@@ -195,7 +195,7 @@ export default function ComprasPage() {
         <Sidebar />
         <div className="flex-1">
           <h2 className="text-2xl font-bold mb-6">Mis Compras</h2>
-          
+
           {orders.length === 0 ? (
             <div className="bg-white shadow-sm rounded-lg p-6 text-center">
               <p className="text-gray-600">No tienes compras registradas.</p>
@@ -204,7 +204,7 @@ export default function ComprasPage() {
             <div className="space-y-4">
               {orders.map((order) => {
                 const statusConfig = getStatusConfig(order.status);
-                
+
                 return (
                   <div key={order.id} className="bg-white border border-gray-200 rounded-xl p-4">
                     <div className="flex items-center justify-between">
@@ -215,13 +215,13 @@ export default function ComprasPage() {
                           <div className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-medium ${statusConfig.bgColor} ${statusConfig.textColor} ${statusConfig.borderColor} border`}>
                             {statusConfig.label}
                           </div>
-                          
+
                           {/* Order ID */}
                           <span className="text-sm font-medium text-gray-900">
                             Orden {formatOrderId(order.id)}
                           </span>
                         </div>
-                        
+
                         {/* Order Details */}
                         <div className="space-y-1">
                           <p className="text-sm text-gray-600">
@@ -232,14 +232,14 @@ export default function ComprasPage() {
                           </p>
                         </div>
                       </div>
-                      
+
                       {/* Action Button */}
                       <div className="ml-4">
                         <button
                           onClick={() => {
                             router.push(`/dashboard/compras/${order.id}`);
                           }}
-                          className="px-4 py-2 border border-gray-900 text-gray-900 rounded text-sm font-medium hover:bg-gray-50 transition-colors"
+                          className="px-4 py-2 border border-gray-900 text-gray-900 rounded text-sm font-medium hover:bg-gray-50 transition-colors cursor-pointer"
                         >
                           Ver detalle
                         </button>
@@ -254,4 +254,4 @@ export default function ComprasPage() {
       </div>
     </div>
   );
-} 
+}
