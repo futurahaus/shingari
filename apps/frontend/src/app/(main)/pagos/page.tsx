@@ -2,9 +2,12 @@
 
 import React, { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
+import { useRouter } from 'next/navigation';
+import { api } from '@/lib/api';
 
 export default function PagosPage() {
   const { cart } = useCart();
+  const router = useRouter();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
   const [cardData, setCardData] = useState({
     cardNumber: '',
@@ -48,6 +51,72 @@ export default function PagosPage() {
       return v.substring(0, 2) + '/' + v.substring(2, 4);
     }
     return v;
+  };
+
+  const handlePaymentConfirmation = async () => {
+    if (!selectedPaymentMethod) {
+      alert('Por favor selecciona un método de pago');
+      return;
+    }
+    if (selectedPaymentMethod === 'card' && (!cardData.cardNumber || !cardData.expiry || !cardData.cvc || !cardData.cardholderName || !cardData.id)) {
+      alert('Por favor completa todos los campos de la tarjeta');
+      return;
+    }
+
+    try {
+      // Crear la orden en el backend
+      const orderData = {
+        total_amount: finalTotal,
+        currency: 'EUR',
+        status: 'pending',
+        order_lines: cart.map(item => ({
+          product_id: item.id,
+          product_name: item.name,
+          quantity: item.quantity,
+          unit_price: item.price,
+        })),
+        order_addresses: [
+          {
+            type: 'billing',
+            full_name: cardData.cardholderName || 'Cliente',
+            address_line1: 'Dirección de facturación',
+            city: 'Ciudad',
+            postal_code: '00000',
+            country: 'España',
+            phone: '',
+          },
+          {
+            type: 'shipping',
+            full_name: cardData.cardholderName || 'Cliente',
+            address_line1: 'Dirección de envío',
+            city: 'Ciudad',
+            postal_code: '00000',
+            country: 'España',
+            phone: '',
+          },
+        ],
+        order_payments: [
+          {
+            payment_method: selectedPaymentMethod,
+            amount: finalTotal,
+            metadata: {
+              card_last_four: cardData.cardNumber.slice(-4),
+              card_type: 'credit',
+            },
+          },
+        ],
+      };
+
+      console.log('Sending order data:', JSON.stringify(orderData, null, 2));
+
+      const order = await api.post<any, typeof orderData>('/orders', orderData);
+      
+      // Navegar a la pantalla de congratulations con el order ID
+      router.push(`/congrats?orderId=${order.id}`);
+    } catch (error) {
+      console.error('Error al procesar el pago:', error);
+      alert('Error al procesar el pago. Por favor, inténtalo de nuevo.');
+    }
   };
 
   return (
@@ -278,18 +347,7 @@ export default function PagosPage() {
               {/* Continue Button */}
               <div className="mt-4">
                 <button
-                  onClick={() => {
-                    if (!selectedPaymentMethod) {
-                      alert('Por favor selecciona un método de pago');
-                      return;
-                    }
-                    if (selectedPaymentMethod === 'card' && (!cardData.cardNumber || !cardData.expiry || !cardData.cvc || !cardData.cardholderName || !cardData.id)) {
-                      alert('Por favor completa todos los campos de la tarjeta');
-                      return;
-                    }
-                    // Aquí iría la lógica para procesar el pago
-                    console.log('Procesando pago...', { selectedPaymentMethod, cardData });
-                  }}
+                  onClick={handlePaymentConfirmation}
                   className="w-full bg-[#EA3D15] text-white py-3 rounded-lg font-medium text-sm hover:bg-[#d43e0e] transition-colors"
                 >
                   Continuar al Pago
