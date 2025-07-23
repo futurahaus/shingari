@@ -9,6 +9,7 @@ import {
     ParseUUIDPipe,
     Logger,
     BadRequestException,
+    Query,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -42,6 +43,29 @@ export class OrdersController {
     })
     async findMyOrders(@NestRequest() req): Promise<OrderResponseDto[]> {
         return this.ordersService.findByUserId(req.user.id);
+    }
+
+    @Get('admin/all')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Obtener todas las órdenes (admin)' })
+    @ApiResponse({
+        status: 200,
+        description: 'Órdenes obtenidas exitosamente.',
+        type: [OrderResponseDto],
+    })
+    async findAllOrdersForAdmin(
+        @Query('page') page: number = 1,
+        @Query('limit') limit: number = 20,
+    ): Promise<any> {
+        const [orders, total] = await this.ordersService.findAllPaginated(page, limit);
+        return {
+            data: orders,
+            total,
+            page,
+            limit,
+            lastPage: Math.ceil(total / limit),
+        };
     }
 
     @Get(':id')

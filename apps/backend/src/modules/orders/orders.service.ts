@@ -10,7 +10,10 @@ export class OrdersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
-    this.logger.log('Creating order with data:', JSON.stringify(createOrderDto, null, 2));
+    this.logger.log(
+      'Creating order with data:',
+      JSON.stringify(createOrderDto, null, 2),
+    );
     
     const { order_lines, order_addresses, order_payments, ...orderData } = createOrderDto;
 
@@ -19,7 +22,7 @@ export class OrdersService {
         data: {
           ...orderData,
           order_lines: {
-            create: order_lines.map(line => ({
+            create: order_lines.map((line) => ({
               product_id: line.product_id,
               product_name: line.product_name,
               quantity: line.quantity,
@@ -27,7 +30,7 @@ export class OrdersService {
             })),
           },
           order_addresses: {
-            create: order_addresses.map(address => ({
+            create: order_addresses.map((address) => ({
               type: address.type,
               full_name: address.full_name,
               address_line1: address.address_line1,
@@ -40,7 +43,7 @@ export class OrdersService {
             })),
           },
           order_payments: {
-            create: order_payments.map(payment => ({
+            create: order_payments.map((payment) => ({
               payment_method: payment.payment_method,
               amount: payment.amount,
               transaction_id: payment.transaction_id,
@@ -55,7 +58,7 @@ export class OrdersService {
         },
       });
 
-      this.logger.log('Order created successfully:', order.id);
+      this.logger.log('Order created successfully:', (order as { id: string }).id);
       return this.mapToOrderResponse(order);
     } catch (error) {
       this.logger.error('Error creating order:', error);
@@ -94,6 +97,37 @@ export class OrdersService {
     });
 
     return orders.map(order => this.mapToOrderResponse(order));
+  }
+
+  async findAll(): Promise<OrderResponseDto[]> {
+    const orders = await this.prisma.orders.findMany({
+      include: {
+        order_lines: true,
+        order_addresses: true,
+        order_payments: true,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+    return orders.map((order) => this.mapToOrderResponse(order));
+  }
+
+  async findAllPaginated(page = 1, limit = 20): Promise<[OrderResponseDto[], number]> {
+    const [orders, total] = await this.prisma.$transaction([
+      this.prisma.orders.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+        include: {
+          order_lines: true,
+          order_addresses: true,
+          order_payments: true,
+        },
+        orderBy: { created_at: 'desc' },
+      }),
+      this.prisma.orders.count(),
+    ]);
+    return [orders.map((order) => this.mapToOrderResponse(order)), total];
   }
 
   private mapToOrderResponse(order: any): OrderResponseDto {
