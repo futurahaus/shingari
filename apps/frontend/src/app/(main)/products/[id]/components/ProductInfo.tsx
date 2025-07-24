@@ -1,30 +1,12 @@
-import { QuantitySelector } from "./QuantitySelector";
+import { QuantityControls } from "@/components/QuantityControls";
 import { Product } from "@/components/ProductCard";
 
 interface ProductInfoProps {
   product: Product;
-  units: number;
-  setUnits: (n: number) => void;
-  boxes: number;
-  setBoxes: (n: number) => void;
 }
 
-export function ProductInfo({ product, units, setUnits, boxes, setBoxes }: ProductInfoProps) {
+export function ProductInfo({ product }: ProductInfoProps) {
   const hasDiscount = typeof product.discount === 'number' && product.discount > 0 && product.originalPrice;
-  const unitsPerBox = product.units_per_box || 1;
-
-  // Sync units when boxes change
-  const handleBoxesChange = (newBoxes: number) => {
-    setBoxes(newBoxes);
-    setUnits(newBoxes * unitsPerBox);
-    // Optionally update cart here if you want live sync
-  };
-  // Sync boxes when units change
-  const handleUnitsChange = (newUnits: number) => {
-    setUnits(newUnits);
-    setBoxes(Math.floor(newUnits / unitsPerBox));
-    // Optionally update cart here if you want live sync
-  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -55,18 +37,19 @@ export function ProductInfo({ product, units, setUnits, boxes, setBoxes }: Produ
         <span className="inline-block bg-[#FFD6D6] text-[#F0461C] text-base font-semibold rounded-md px-3 py-1">¡Últimas unidades!</span>
       </div>
 
-      {/* Selectores de cantidad */}
+      {/* Controles de cantidad */}
       <div className="flex flex-row gap-8 py-4">
         <div className="flex items-center gap-2">
-          <QuantitySelector label="Unidades" quantity={units} setQuantity={handleUnitsChange} />
-        </div>
-        <div className="flex items-center gap-2">
-          <QuantitySelector label="Cajas" quantity={boxes} setQuantity={handleBoxesChange} />
+          <QuantityControls
+            productId={product.id}
+            productName={product.name}
+            productPrice={product.price}
+            productImage={product.images[0]}
+            unitsPerBox={product.units_per_box}
+            variant="inline"
+          />
         </div>
       </div>
-
-      {/* Botones */}
-      {/* The main add to cart button is now in ProductDetailPage */}
     </div>
   );
 }

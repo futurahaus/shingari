@@ -7,6 +7,7 @@ interface QuantityControlsProps {
     productPrice: number;
     productImage: string;
     unitsPerBox?: number;
+    variant?: 'overlay' | 'inline';
 }
 
 export const QuantityControls = ({ 
@@ -14,7 +15,8 @@ export const QuantityControls = ({
     productName, 
     productPrice, 
     productImage, 
-    unitsPerBox 
+    unitsPerBox,
+    variant = 'overlay'
 }: QuantityControlsProps) => {
     const { cart, addToCart, updateQuantity, removeFromCart } = useCart();
     const cartItem = cart.find((item) => item.id === productId);
@@ -75,30 +77,46 @@ export const QuantityControls = ({
         }
     };
 
+    const containerClasses = variant === 'overlay' 
+        ? "absolute bottom-2 right-2 flex items-center bg-white/90 rounded-full shadow px-2 py-1 gap-2 z-10"
+        : "flex items-center bg-white border border-gray-300 rounded-lg shadow-sm px-3 py-2 gap-3";
+
+    const buttonClasses = variant === 'overlay'
+        ? "w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-lg font-bold cursor-pointer"
+        : "w-8 h-8 flex items-center justify-center rounded-md bg-gray-200 hover:bg-gray-300 text-lg font-bold cursor-pointer";
+
+    const quantityClasses = variant === 'overlay'
+        ? "w-4 text-center text-sm select-none"
+        : "w-8 text-center text-base font-medium select-none";
+
+    const selectClasses = variant === 'overlay'
+        ? "text-xs bg-white border border-gray-300 rounded px-1 py-0.5 cursor-pointer"
+        : "text-sm bg-white border border-gray-300 rounded px-2 py-1 cursor-pointer";
+
     return (
-        <div className="absolute bottom-2 right-2 flex items-center bg-white/90 rounded-full shadow px-2 py-1 gap-2 z-10">
+        <div className={containerClasses}>
             <button
                 type="button"
-                className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-lg font-bold cursor-pointer"
+                className={buttonClasses}
                 onClick={e => { e.preventDefault(); e.stopPropagation(); handleRemove(); }}
             >
                 -
             </button>
-            <span className="w-4 text-center text-sm select-none">
+            <span className={quantityClasses}>
                 {unitType === 'boxes' && unitsPerBox 
                     ? Math.trunc(quantity / unitsPerBox) 
                     : quantity}
             </span>
             <button
                 type="button"
-                className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-lg font-bold cursor-pointer"
+                className={buttonClasses}
                 onClick={e => { e.preventDefault(); e.stopPropagation(); handleAdd(); }}
             >
                 +
             </button>
             <select
                 value={unitType}
-                className="text-xs bg-white border border-gray-300 rounded px-1 py-0.5 cursor-pointer"
+                className={selectClasses}
                 onClick={e => { e.preventDefault(); e.stopPropagation(); }}
                 onChange={handleUnitTypeChange}
             >
