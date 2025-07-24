@@ -1,14 +1,14 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
-import { Product, ProductCard } from '../ProductCard';
+import { Product, ProductCard } from '../../../components/ProductCard';
 
 interface PaginatedProductsResponse {
-    data: Product[];
-    total: number;
-    page: number;
-    limit: number;
-    lastPage: number;
+  data: Product[];
+  total: number;
+  page: number;
+  limit: number;
+  lastPage: number;
 }
 
 const Products = () => {
@@ -21,7 +21,7 @@ const Products = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await api.get<PaginatedProductsResponse>('/products');
+        const response = await api.get<PaginatedProductsResponse>('/products?limit=4');
         setProducts(response.data);
         setError(null);
       } catch (error) {
@@ -72,12 +72,6 @@ const Products = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-3xl font-bold text-center mb-8">Nuestros Productos</h2>
         <div className="relative">
-          <button
-            onClick={prevSlide}
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-red-600 text-white p-2 rounded-full z-10"
-          >
-            &#8249;
-          </button>
           <div className="overflow-hidden">
             <div
               className="flex transition-transform duration-500 ease-in-out"
@@ -92,23 +86,7 @@ const Products = () => {
               </div>
             </div>
           </div>
-          <button
-            onClick={nextSlide}
-            className="button absolute right-0 top-1/2 transform -translate-y-1/2 bg-red-600 text-white p-2 rounded-full z-10"
-          >
-            &#8250;
-          </button>
-          <div className="flex justify-center mt-4">
-            {Array.from({ length: Math.ceil(products.length / 4) }).map((_, index) => (
-              <button
-                key={index}
-                className={`button h-2 w-2 rounded-full mx-1 ${
-                  currentSlide === index ? 'bg-red-600' : 'bg-gray-300'
-                }`}
-                onClick={() => setCurrentSlide(index)}
-              />
-            ))}
-          </div>
+
         </div>
       </div>
     </section>
