@@ -1,9 +1,8 @@
 import Image from 'next/image';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
-import { useState } from 'react';
-import { useCart } from '@/contexts/CartContext';
 import { useRouter } from 'next/navigation';
+import { QuantityControls } from './QuantityControls';
 
 export interface Product {
     id: string;
@@ -19,42 +18,7 @@ export interface Product {
 }
 
 export const ProductCard = ({ product }: { product: Product }) => {
-    const { cart, addToCart, updateQuantity, removeFromCart } = useCart();
-    // Find current quantity in cart
-    const cartItem = cart.find((item) => item.id === product.id);
-    const [quantity, setQuantity] = useState(cartItem ? cartItem.quantity : 0);
-    const [unitType, setUnitType] = useState<'units' | 'boxes'>('units');
-
     const router = useRouter();
-    const handleAdd = () => {
-        const increment = unitType === 'boxes' && product.units_per_box ? product.units_per_box : 1;
-        const newQty = quantity + increment;
-        setQuantity(newQty);
-        if (cartItem) {
-            updateQuantity(product.id, newQty);
-        } else {
-            addToCart({
-                id: product.id,
-                name: product.name,
-                price: product.price,
-                image: product.images[0],
-                quantity: increment,
-            });
-        }
-    };
-
-    const handleRemove = () => {
-        if (quantity > 0) {
-            const decrement = unitType === 'boxes' && product.units_per_box ? product.units_per_box : 1;
-            const newQty = Math.max(0, quantity - decrement);
-            setQuantity(newQty);
-            if (newQty === 0) {
-                removeFromCart(product.id);
-            } else {
-                updateQuantity(product.id, newQty);
-            }
-        }
-    };
 
     return (
         <div className="bg-white rounded-lg shadow-sm overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointe h-full flex flex-col">
@@ -73,36 +37,13 @@ export const ProductCard = ({ product }: { product: Product }) => {
                     </Text>
                 )}
                 {/* Quantity controls */}
-                <div className="absolute bottom-2 right-2 flex items-center bg-white/90 rounded-full shadow px-2 py-1 gap-2 z-10">
-                    <button
-                        type="button"
-                        className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-lg font-bold cursor-pointer"
-                        onClick={e => { e.preventDefault(); e.stopPropagation(); handleRemove(); }}
-                    >
-                        -
-                    </button>
-                    <span className="w-4 text-center text-sm select-none">
-                        {unitType === 'boxes' && product.units_per_box 
-                            ? Math.trunc(quantity / product.units_per_box) 
-                            : quantity}
-                    </span>
-                    <button
-                        type="button"
-                        className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-lg font-bold cursor-pointer"
-                        onClick={e => { e.preventDefault(); e.stopPropagation(); handleAdd(); }}
-                    >
-                        +
-                    </button>
-                    <select
-                        value={unitType}
-                        className="text-xs bg-white border border-gray-300 rounded px-1 py-0.5 cursor-pointer"
-                        onClick={e => { e.preventDefault(); e.stopPropagation(); }}
-                        onChange={(e) => setUnitType(e.target.value as 'units' | 'boxes')}
-                    >
-                        <option value="units">Unidades</option>
-                        <option value="boxes">Cajas</option>
-                    </select>
-                </div>
+                <QuantityControls 
+                    productId={product.id}
+                    productName={product.name}
+                    productPrice={product.price}
+                    productImage={product.images[0]}
+                    unitsPerBox={product.units_per_box}
+                />
             </div>
             <div className="p-4 flex flex-col flex-1">
                 <Text as="h3" size="lg" weight="bold" color="primary" testID={`product-name-${product.id}`} className="line-clamp-2 mb-2">
