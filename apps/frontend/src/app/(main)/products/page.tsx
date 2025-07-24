@@ -242,7 +242,7 @@ const ProductsSection = ({
     const buildParams = (pageNumber: number) => {
         const params = new URLSearchParams({
             page: pageNumber.toString(),
-            limit: '8',
+            limit: '10',
         });
         Object.entries(filters).forEach(([key, value]) => {
             if (value) {
