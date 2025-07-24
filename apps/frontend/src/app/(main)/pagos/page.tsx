@@ -113,10 +113,10 @@ export default function PagosPage() {
       console.log('Sending order data:', JSON.stringify(orderData, null, 2));
 
       const order = await api.post<any, typeof orderData>('/orders', orderData);
-      
+
       // Vaciar el carrito después de crear la orden exitosamente
       clearCart();
-      
+
       router.push(`/congrats?orderId=${order.id}`);
     } catch (error) {
       console.error('Error al procesar el pago:', error);
@@ -133,7 +133,7 @@ export default function PagosPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
           <div className="bg-white rounded-lg p-8 flex flex-col items-center shadow-lg">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#EA3D15] mb-4"></div>
-            <span className="text-gray-700 font-medium">Procesando pago...</span>
+            <span className="text-gray-700 font-medium">Procesando pedido...</span>
           </div>
         </div>
       )}
@@ -146,18 +146,18 @@ export default function PagosPage() {
 
             {/* Payment Methods */}
             <div className="space-y-4">
-              <div 
+              {/* <div
                 className={`border border-gray-300 rounded-lg p-4 cursor-pointer transition-colors ${
                   selectedPaymentMethod === 'card' ? 'bg-[#EA3D15] text-white' : 'bg-gray-50'
                 }`}
                 onClick={() => setSelectedPaymentMethod('card')}
               >
                 <div className="flex items-center gap-3">
-                  <svg 
+                  <svg
                     className={`w-5 h-5 ${
                       selectedPaymentMethod === 'card' ? 'text-white' : 'text-gray-600'
                     }`}
-                    fill="currentColor" 
+                    fill="currentColor"
                     viewBox="0 0 24 24"
                   >
                     <path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>
@@ -167,20 +167,20 @@ export default function PagosPage() {
                     Tarjeta de débito/crédito
                   </span>
                 </div>
-              </div>
+              </div> */}
 
-              <div 
+              <div
                 className={`border border-gray-300 rounded-lg p-4 cursor-pointer transition-colors ${
                   selectedPaymentMethod === 'cash' ? 'bg-[#EA3D15] text-white' : 'bg-gray-50'
                 }`}
                 onClick={() => setSelectedPaymentMethod('cash')}
               >
                 <div className="flex items-center gap-3">
-                  <svg 
+                  <svg
                     className={`w-5 h-5 ${
                       selectedPaymentMethod === 'cash' ? 'text-white' : 'text-gray-600'
                     }`}
-                    fill="currentColor" 
+                    fill="currentColor"
                     viewBox="0 0 24 24"
                   >
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
@@ -197,7 +197,7 @@ export default function PagosPage() {
             {selectedPaymentMethod === 'card' && (
               <div className="mt-8">
                 <h2 className="text-sm font-semibold text-black mb-4">Tarjetas de Crédito y Débito</h2>
-                
+
                 <div className="flex gap-6">
                   {/* Form Fields */}
                   <div className="flex-1 space-y-6">
@@ -283,7 +283,7 @@ export default function PagosPage() {
                     <div className="absolute top-6 right-6">
                       <div className="w-12 h-8 bg-white/20 rounded"></div>
                     </div>
-                    
+
                     <div className="absolute bottom-6 left-6 right-6">
                       <div className="text-2xl font-normal mb-2">
                         {cardData.cardNumber || '**** **** **** ****'}
@@ -365,7 +365,7 @@ export default function PagosPage() {
                 <Button
                   onPress={handlePaymentConfirmation}
                   type="primary"
-                  text="Confirmar compra"
+                  text="Confirmar pedido"
                   testID="pay-button"
                   disabled={isLoading}
                 />
@@ -376,4 +376,4 @@ export default function PagosPage() {
       </main>
     </div>
   );
-} 
+}
