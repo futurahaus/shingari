@@ -50,7 +50,7 @@ const CarritoPage = () => {
             <div className="py-8 text-center text-gray-500">Tu carrito está vacío.</div>
           ) : (
             cart.map((item) => (
-              <div key={item.id + (item.unitType || "")}
+              <div key={item.id}
                 className="flex items-center py-4 border-t">
                 <div className="w-64 flex items-center">
                   <div className="w-16 h-16 bg-gray-200 flex items-center justify-center rounded mr-4">
@@ -62,7 +62,7 @@ const CarritoPage = () => {
                   </div>
                   <div>
                     <div className="font-semibold text-base">{item.name}</div>
-                    <div className="text-xs text-gray-500">{item.unitType || "Unidades"}</div>
+                    <div className="text-xs text-gray-500">{"Unidades"}</div>
                   </div>
                 </div>
                 <div className="w-32 flex items-center justify-center gap-2">
@@ -115,7 +115,7 @@ const CarritoPage = () => {
             <span>€{(discountedTotal + shipping).toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
           </div>
           <div className="flex flex-col gap-2 mt-6">
-            <button 
+            <button
               className="w-full bg-[#EA3D15] text-white py-3 rounded-md font-semibold text-lg hover:bg-[#d43e0e] transition cursor-pointer"
               onClick={() => {
                 if (!user) {
@@ -129,9 +129,9 @@ const CarritoPage = () => {
               Continuar compra
             </button>
             <button className="w-full bg-white border border-gray-300 text-gray-800 py-3 rounded-md font-semibold text-lg hover:bg-gray-100 transition cursor-pointer"
-            onClick={() => {
-              router.push('/products');
-            }}>
+              onClick={() => {
+                router.push('/products');
+              }}>
               Ver más productos
             </button>
           </div>

@@ -8,15 +8,15 @@ export interface CartProduct {
   price: number;
   image?: string;
   quantity: number;
-  unitType?: string; // e.g., 'Unidades', 'Cajas'
+  units_per_box?: number;
 }
 
 interface CartContextType {
   cart: CartProduct[];
   addToCart: (product: CartProduct) => void;
-  removeFromCart: (id: string, unitType?: string) => void;
+  removeFromCart: (id: string) => void;
   removeAllFromCart: () => void;
-  updateQuantity: (id: string, quantity: number, unitType?: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
   isCartOpen: boolean;
   openCart: () => void;
@@ -48,10 +48,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const addToCart = (product: CartProduct) => {
     setCart(prev => {
-      const existing = prev.find(p => p.id === product.id && p.unitType === product.unitType);
+      const existing = prev.find(p => p.id === product.id);
       if (existing) {
         return prev.map(p =>
-          p.id === product.id && p.unitType === product.unitType
+          p.id === product.id
             ? { ...p, quantity: p.quantity + product.quantity }
             : p
         );
@@ -61,16 +61,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     // setIsCartOpen(true);
   };
 
-  const removeFromCart = (id: string, unitType?: string) => {
-    setCart(prev => prev.filter(p => !(p.id === id && (unitType ? p.unitType === unitType : true))));
+  const removeFromCart = (id: string) => {
+    setCart(prev => prev.filter(p => !(p.id === id)));
   };
 
   const removeAllFromCart = () => {
     setCart([]);
   };
 
-  const updateQuantity = (id: string, quantity: number, unitType?: string) => {
-    setCart(prev => prev.map(p => (p.id === id && (unitType ? p.unitType === unitType : true) ? { ...p, quantity } : p)));
+  const updateQuantity = (id: string, quantity: number) => {
+    setCart(prev => prev.map(p => (p.id === id ? { ...p, quantity } : p)));
     // setIsCartOpen(true);
   };
 
