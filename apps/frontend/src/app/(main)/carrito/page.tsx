@@ -40,26 +40,30 @@ const CarritoPage = () => {
         {/* Product List */}
         <section className="flex-1 bg-white rounded-lg shadow p-4 divide-y divide-gray-200">
           <div className="flex font-bold text-lg mb-4">
-            <span className="flex-1">Producto</span>
+            <span className="w-64">Producto</span>
             <span className="w-32 text-center">Cantidad</span>
+            <span className="w-32 text-center">Precio</span>
             <span className="w-32 text-right">Total</span>
+            <span className="w-20"></span>
           </div>
           {cart.length === 0 ? (
             <div className="py-8 text-center text-gray-500">Tu carrito está vacío.</div>
           ) : (
             cart.map((item) => (
               <div key={item.id + (item.unitType || "")}
-                className="flex items-center gap-4 py-4">
-                <div className="w-16 h-16 bg-gray-200 flex items-center justify-center rounded">
-                  {item.image ? (
-                    <Image src={item.image} alt={item.name} width={64} height={64} className="object-cover rounded" />
-                  ) : (
-                    <div className="w-14 h-14 bg-gray-300 rounded" />
-                  )}
-                </div>
-                <div className="flex-1">
-                  <div className="font-semibold text-base">{item.name}</div>
-                  <div className="text-xs text-gray-500">{item.unitType || "Unidades"}</div>
+                className="flex items-center py-4 border-t">
+                <div className="w-64 flex items-center">
+                  <div className="w-16 h-16 bg-gray-200 flex items-center justify-center rounded mr-4">
+                    {item.image ? (
+                      <Image src={item.image} alt={item.name} width={64} height={64} className="object-cover rounded" />
+                    ) : (
+                      <div className="w-14 h-14 bg-gray-300 rounded" />
+                    )}
+                  </div>
+                  <div>
+                    <div className="font-semibold text-base">{item.name}</div>
+                    <div className="text-xs text-gray-500">{item.unitType || "Unidades"}</div>
+                  </div>
                 </div>
                 <div className="w-32 flex items-center justify-center gap-2">
                   <button
@@ -74,14 +78,19 @@ const CarritoPage = () => {
                     disabled={!user}
                   >+</button>
                 </div>
-                <div className="w-32 text-right font-semibold">
-                  € { (item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2 }) }
+                <div className="w-32 text-center font-semibold">
+                  € {item.price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
                 </div>
-                <button
-                  className="ml-4 text-xs text-red-500 hover:underline"
-                  onClick={() => removeFromCart(item.id)}
-                  disabled={!user}
-                >Eliminar</button>
+                <div className="w-32 text-right font-semibold">
+                  € {(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                </div>
+                <div className="w-20 flex justify-end">
+                  <button
+                    className="ml-4 text-xs text-red-500 hover:underline"
+                    onClick={() => removeFromCart(item.id)}
+                    disabled={!user}
+                  >Eliminar</button>
+                </div>
               </div>
             ))
           )}

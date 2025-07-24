@@ -136,6 +136,7 @@ export default function AdminOrderDetailPage() {
                   <th className="px-6 py-3 text-left font-medium text-gray-500">Nombre de Producto</th>
                   <th className="px-6 py-3 text-left font-medium text-gray-500">Cantidad</th>
                   <th className="px-6 py-3 text-left font-medium text-gray-500">Precio</th>
+                  <th className="px-6 py-3 text-left font-medium text-gray-500">Subtotal</th>
                 </tr>
               </thead>
               <tbody className="bg-white">
@@ -144,9 +145,18 @@ export default function AdminOrderDetailPage() {
                     <td className="px-6 py-4 text-gray-900">{line.product_name}</td>
                     <td className="px-6 py-4 text-gray-900">{line.quantity}</td>
                     <td className="px-6 py-4 text-gray-900">{formatCurrency(line.unit_price)}</td>
+                    <td className="px-6 py-4 text-gray-900">{formatCurrency((Number(line.unit_price) * line.quantity).toString())}</td>
                   </tr>
                 ))}
               </tbody>
+              <tfoot>
+                <tr className="bg-gray-50 border-t border-gray-200">
+                  <td className="px-6 py-4 text-right font-bold" colSpan={3}>Total</td>
+                  <td className="px-6 py-4 text-gray-900 font-bold">
+                    {formatCurrency(order.order_lines.reduce((acc, line) => acc + Number(line.unit_price) * line.quantity, 0).toString())}
+                  </td>
+                </tr>
+              </tfoot>
             </table>
           </div>
         </div>

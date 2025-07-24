@@ -325,7 +325,6 @@ export default function PagosPage() {
                 {cart.map((item) => (
                   <div key={item.id} className="flex justify-between">
                     <div className="flex items-center gap-1">
-                      <div className="w-4 h-4 bg-gray-200 rounded-sm"></div>
                       <span className="text-xs font-medium text-black">{item.name}</span>
                       <span className="text-xs font-medium text-black">x{item.quantity}</span>
                     </div>
