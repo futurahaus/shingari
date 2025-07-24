@@ -17,6 +17,16 @@ const Products = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const nextSlide = () => {
+    const maxSlides = Math.ceil(products.length / 4) - 1;
+    setCurrentSlide(current => current < maxSlides ? current + 1 : 0);
+  };
+
+  const prevSlide = () => {
+    const maxSlides = Math.ceil(products.length / 4) - 1;
+    setCurrentSlide(current => current > 0 ? current - 1 : maxSlides);
+  };
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -34,16 +44,6 @@ const Products = () => {
 
     fetchProducts();
   }, []);
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % Math.ceil(products.length / 4));
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) =>
-      prev === 0 ? Math.ceil(products.length / 4) - 1 : prev - 1
-    );
-  };
 
   if (loading) {
     return (
@@ -86,7 +86,24 @@ const Products = () => {
               </div>
             </div>
           </div>
-
+          
+          {/* Navigation buttons */}
+          {products.length > 4 && (
+            <div className="flex justify-between mt-4">
+              <button
+                onClick={prevSlide}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+              >
+                Anterior
+              </button>
+              <button
+                onClick={nextSlide}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+              >
+                Siguiente
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </section>

@@ -1,9 +1,9 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
 import { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
+import { useRouter } from 'next/navigation';
 
 export interface Product {
     id: string;
@@ -24,6 +24,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
     const cartItem = cart.find((item) => item.id === product.id);
     const [quantity, setQuantity] = useState(cartItem ? cartItem.quantity : 0);
 
+    const router = useRouter();
     const handleAdd = () => {
         const newQty = quantity + 1;
         setQuantity(newQty);
@@ -131,8 +132,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
                 <div className="mt-auto">
                     <Button
                         onPress={() => {
-                            // Aquí puedes agregar la lógica para agregar al carrito
-                            console.log('Agregar al carrito:', product.id);
+                            router.push(`/products/${product.id}`);
                         }}
                         type="primary"
                         text="Ver Producto"

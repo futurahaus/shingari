@@ -284,7 +284,7 @@ const ProductsSection = ({
         } finally {
             setLoading(false);
         }
-    }, [filters, categoryFilter, selectedParent, childNamesOfSelectedParent]);
+    }, [filters, categoryFilter, selectedParent, childNamesOfSelectedParent]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Buffer the next page
     const bufferNextPage = useCallback(async (nextPage: number) => {
@@ -298,7 +298,7 @@ const ProductsSection = ({
         } finally {
             setBufferLoading(false);
         }
-    }, [filters, categoryFilter, selectedParent, childNamesOfSelectedParent]);
+    }, [filters, categoryFilter, selectedParent, childNamesOfSelectedParent]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Initial load and when filters/searchParams change
     useEffect(() => {

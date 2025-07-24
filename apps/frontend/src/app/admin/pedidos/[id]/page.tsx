@@ -1,8 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import Link from 'next/link';
-import { Text } from '@/app/ui/components/Text';
 import { OrdersDetailSkeleton } from '../components/OrdersDetailSkeleton';
 import { api } from '@/lib/api';
 
@@ -35,7 +33,7 @@ interface OrderPayment {
   paid_at?: string;
   amount: string;
   transaction_id?: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 interface Order {

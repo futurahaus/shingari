@@ -33,7 +33,7 @@ interface OrderPayment {
   paid_at?: string;
   amount: string; // Decimal se serializa como string
   transaction_id?: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 interface Order {

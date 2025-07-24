@@ -112,7 +112,7 @@ export default function PagosPage() {
 
       console.log('Sending order data:', JSON.stringify(orderData, null, 2));
 
-      const order = await api.post<any, typeof orderData>('/orders', orderData);
+      const order = await api.post<{ id: string }, typeof orderData>('/orders', orderData);
 
       // Vaciar el carrito después de crear la orden exitosamente
       clearCart();

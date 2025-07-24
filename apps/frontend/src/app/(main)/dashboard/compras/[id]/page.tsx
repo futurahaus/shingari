@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
 import { api } from '@/lib/api';
 
@@ -34,7 +34,7 @@ interface OrderPayment {
   paid_at?: string;
   amount: string;
   transaction_id?: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 interface Order {
@@ -239,7 +239,6 @@ const OrderDetailSkeleton = () => (
 
 export default function OrderDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const orderId = params.id as string;
 
   const [order, setOrder] = useState<Order | null>(null);
@@ -292,7 +291,6 @@ export default function OrderDetailPage() {
 
   const statusConfig = getStatusConfig(order.status);
   const shippingAddress = order.order_addresses.find(addr => addr.type === 'shipping');
-  const billingAddress = order.order_addresses.find(addr => addr.type === 'billing');
   const payment = order.order_payments[0];
 
   return (

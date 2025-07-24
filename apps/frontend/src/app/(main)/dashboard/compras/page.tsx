@@ -34,7 +34,7 @@ interface OrderPayment {
   paid_at?: string;
   amount: string;
   transaction_id?: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 interface Order {
