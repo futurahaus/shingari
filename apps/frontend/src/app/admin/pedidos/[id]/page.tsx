@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Text } from '@/app/ui/components/Text';
-import { ProductsListSkeleton } from '../../productos/components/ProductsListSkeleton';
+import { OrdersDetailSkeleton } from '../components/OrdersDetailSkeleton';
 import { api } from '@/lib/api';
 
 interface OrderLine {
@@ -84,7 +84,7 @@ export default function AdminOrderDetailPage() {
   }, [orderId]);
 
   if (loading) {
-    return <ProductsListSkeleton />;
+    return <OrdersDetailSkeleton />;
   }
   if (error || !order) {
     return <div className="text-red-600 text-center py-8">{error || 'No se pudo cargar la orden.'}</div>;
@@ -115,7 +115,7 @@ export default function AdminOrderDetailPage() {
             </div>
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
               <div className="text-gray-500">Puntos</div>
-              <div className="text-gray-900 text-right">300</div>
+              <div className="text-gray-900 text-right">-</div>
             </div>
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
               <div className="text-gray-500">Total</div>

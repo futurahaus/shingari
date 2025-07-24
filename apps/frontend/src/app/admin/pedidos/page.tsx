@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Text } from "@/app/ui/components/Text";
-import { ProductsListSkeleton } from "../productos/components/ProductsListSkeleton";
+import { OrdersListSkeleton } from "./components/OrdersListSkeleton";
 import { useAdminOrders } from "./hooks/useAdminOrders.hook";
 import { FaSearch, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import { Button } from "@/app/ui/components/Button";
@@ -74,7 +74,7 @@ export default function AdminOrdersPage() {
         </div>
       </div>
       {loading ? (
-        <ProductsListSkeleton rowsCount={10} />
+        <OrdersListSkeleton rowsCount={10} />
       ) : error ? (
         <div className="text-red-600 text-center py-8">{error}</div>
       ) : (
