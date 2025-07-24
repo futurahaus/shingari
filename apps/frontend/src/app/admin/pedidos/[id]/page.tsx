@@ -95,32 +95,39 @@ export default function AdminOrderDetailPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center py-8">
-      <div className="bg-white rounded-xl shadow-lg w-full p-8">
-        <div className="text-center mb-6">
-          <div className="text-sm text-gray-400 mb-2">Detalles de orden</div>
-          <h2 className="font-bold text-lg mb-2">Detalles de la orden</h2>
+      <div className="bg-white rounded-xl shadow-lg w-full p-0">
+        <div className="text-center pt-8 pb-4">
+          <h2 className="font-bold text-lg">Detalles de la orden</h2>
         </div>
-        <div className="border-t border-b border-gray-200 divide-y divide-gray-100 mb-8">
-          <div className="grid grid-cols-2 gap-x-4 py-4 text-sm">
-            <div className="text-gray-500">ID de compra</div>
-            <div className="text-gray-900 font-medium">#{order.id.slice(0, 8).toUpperCase()}</div>
-            <div className="text-gray-500">Fecha</div>
-            <div className="text-gray-900">{formatDate(order.created_at)}</div>
-          </div>
-          <div className="grid grid-cols-2 gap-x-4 py-4 text-sm">
-            <div className="text-gray-500">ID de Cliente</div>
-            <div className="text-gray-900 font-medium">{order.user_id ? `#${order.user_id.slice(0, 6)}` : '-'}</div>
-            <div className="text-gray-500">Puntos</div>
-            <div className="text-gray-900">300</div>
-          </div>
-          <div className="grid grid-cols-2 gap-x-4 py-4 text-sm">
-            <div className="text-gray-500">Total</div>
-            <div className="text-gray-900 font-medium">{formatCurrency(order.total_amount)}</div>
-            <div className="text-gray-500">Método de pago</div>
-            <div className="text-gray-900">{payment?.payment_method || '-'}</div>
+        <div className="px-8">
+          <div className="border-t border-gray-200">
+            <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
+              <div className="text-gray-500">ID de compra</div>
+              <div className="text-gray-900 font-medium text-right">#{order.id.slice(0, 8).toUpperCase()}</div>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
+              <div className="text-gray-500">Fecha</div>
+              <div className="text-gray-900 text-right">{formatDate(order.created_at)}</div>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
+              <div className="text-gray-500">ID de Cliente</div>
+              <div className="text-gray-900 font-medium text-right">{order.user_id ? `#${order.user_id.slice(0, 6)}` : '-'}</div>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
+              <div className="text-gray-500">Puntos</div>
+              <div className="text-gray-900 text-right">300</div>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
+              <div className="text-gray-500">Total</div>
+              <div className="text-gray-900 font-medium text-right">{formatCurrency(order.total_amount)}</div>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 py-6">
+              <div className="text-gray-500">Método de pago</div>
+              <div className="text-gray-900 text-right">{payment?.payment_method || '-'}</div>
+            </div>
           </div>
         </div>
-        <div className="mb-8">
+        <div className="mb-8 px-8">
           <h3 className="font-bold text-lg mb-4">Productos Comprados</h3>
           <div className="rounded-xl border border-gray-200 overflow-hidden">
             <table className="min-w-full text-sm">
@@ -143,7 +150,7 @@ export default function AdminOrderDetailPage() {
             </table>
           </div>
         </div>
-        <div className="mb-8">
+        <div className="mb-8 px-8">
           <h3 className="font-bold text-lg mb-2">Dirección de Envío</h3>
           <div className="text-gray-700">
             {shippingAddress
@@ -151,7 +158,7 @@ export default function AdminOrderDetailPage() {
               : 'No especificada'}
           </div>
         </div>
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-4">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-4 px-8">
           <div className="flex-1">
             <label className="block font-medium mb-2">Subir factura</label>
             <div className="flex items-center gap-2 p-3 border rounded-xl bg-gray-50">
