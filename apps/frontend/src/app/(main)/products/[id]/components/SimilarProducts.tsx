@@ -28,9 +28,9 @@ export function SimilarProducts({ product }: SimilarProductsProps) {
       try {
         const params = new URLSearchParams();
         product.categories.forEach(cat => params.append('categoryFilters', cat));
-        params.append('limit', '3');
+        params.append('limit', '4');
         const response = await api.get<PaginatedProductsResponse>(`/products?${params.toString()}`);
-        const products = response.data.filter((p: Product) => p.id !== product.id).slice(0, 3);
+        const products = response.data.filter((p: Product) => p.id !== product.id).slice(0, 4);
         setSimilarProducts(products);
       } catch {
         setSimilarProducts([]);
@@ -44,9 +44,9 @@ export function SimilarProducts({ product }: SimilarProductsProps) {
   return (
     <div className="gap-4">
       <h2 className="text-xl font-bold text-black py-4">Productos Similares</h2>
-      <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6${loading ? ' animate-pulse' : ''}`}>
+      <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6${loading ? ' animate-pulse' : ''}`}>
         {loading?
-          Array.from({ length: 3 }).map((_, i) => (
+          Array.from({ length: 4 }).map((_, i) => (
             <ProductCardSkeleton key={i} />
           ))
           : similarProducts.map((prod) => (
