@@ -10,11 +10,11 @@ interface QuantityControlsProps {
     variant?: 'overlay' | 'inline';
 }
 
-export const QuantityControls = ({ 
-    productId, 
-    productName, 
-    productPrice, 
-    productImage, 
+export const QuantityControls = ({
+    productId,
+    productName,
+    productPrice,
+    productImage,
     unitsPerBox,
     variant = 'overlay'
 }: QuantityControlsProps) => {
@@ -56,12 +56,12 @@ export const QuantityControls = ({
     const handleUnitTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const newUnitType = e.target.value as 'units' | 'boxes';
         setUnitType(newUnitType);
-        
+
         if (newUnitType === 'boxes' && unitsPerBox && quantity > 0) {
             // Convertir unidades actuales a cajas y luego a unidades completas
             const currentBoxes = Math.trunc(quantity / unitsPerBox);
             const newQuantity = currentBoxes * unitsPerBox;
-            
+
             if (cartItem) {
                 updateQuantity(productId, newQuantity);
             } else if (newQuantity > 0) {
@@ -77,13 +77,13 @@ export const QuantityControls = ({
         }
     };
 
-    const containerClasses = variant === 'overlay' 
+    const containerClasses = variant === 'overlay'
         ? "absolute bottom-2 right-2 flex items-center bg-white/90 rounded-full shadow px-2 py-1 gap-2 z-10"
-        : "flex items-center bg-white border border-gray-300 rounded-lg shadow-sm px-3 py-2 gap-3";
+        : "flex items-center bg-white border border-gray-300 rounded-lg px-3 py-2 gap-3";
 
     const buttonClasses = variant === 'overlay'
-        ? "w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-lg font-bold cursor-pointer"
-        : "w-8 h-8 flex items-center justify-center rounded-md bg-gray-200 hover:bg-gray-300 text-lg font-bold cursor-pointer";
+        ? "w-6 h-6 flex items-center justify-center rounded-full bg-[#EA3D15] hover:bg-[#c53211] text-lg text-white font-bold cursor-pointer"
+        : "w-8 h-8 flex items-center justify-center rounded-md bg-[#EA3D15] hover:bg-[#c53211] text-lg text-white font-bold cursor-pointer";
 
     const quantityClasses = variant === 'overlay'
         ? "w-4 text-center text-sm select-none"
@@ -103,8 +103,8 @@ export const QuantityControls = ({
                 -
             </button>
             <span className={quantityClasses}>
-                {unitType === 'boxes' && unitsPerBox 
-                    ? Math.trunc(quantity / unitsPerBox) 
+                {unitType === 'boxes' && unitsPerBox
+                    ? Math.trunc(quantity / unitsPerBox)
                     : quantity}
             </span>
             <button
