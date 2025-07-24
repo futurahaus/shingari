@@ -5,6 +5,7 @@ import { Text } from "@/app/ui/components/Text";
 import { ProductsListSkeleton } from "../productos/components/ProductsListSkeleton";
 import { useAdminOrders } from "./hooks/useAdminOrders.hook";
 import { FaSearch, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
+import { Button } from "@/app/ui/components/Button";
 
 export default function AdminOrdersPage() {
   const [page, setPage] = useState(1);
@@ -13,8 +14,9 @@ export default function AdminOrdersPage() {
   const [sortField, setSortField] = useState<'created_at' | 'updated_at' | 'total_amount' | 'status' | 'user_name'>('created_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
-  const { orders, loading, error, refetch } = useAdminOrders({ 
+  const { orders, loading, error, lastPage } = useAdminOrders({ 
     page, 
+    limit: 10,
     search: searchQuery, 
     sortField, 
     sortDirection 
@@ -34,6 +36,12 @@ export default function AdminOrdersPage() {
     return sortDirection === 'asc' 
       ? <FaSortUp className="w-4 h-4 text-gray-600" /> 
       : <FaSortDown className="w-4 h-4 text-gray-600" />;
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage !== page && newPage > 0 && newPage <= lastPage) {
+      setPage(newPage);
+    }
   };
 
   return (
@@ -66,7 +74,7 @@ export default function AdminOrdersPage() {
         </div>
       </div>
       {loading ? (
-        <ProductsListSkeleton />
+        <ProductsListSkeleton rowsCount={10} />
       ) : error ? (
         <div className="text-red-600 text-center py-8">{error}</div>
       ) : (
@@ -147,6 +155,48 @@ export default function AdminOrdersPage() {
               ))}
             </tbody>
           </table>
+          {/* Paginador */}
+          <div className="flex justify-center items-center gap-2 py-6">
+            <Button
+              onPress={() => handlePageChange(page - 1)}
+              type="secondary"
+              text="Anterior"
+              testID="prev-page-button"
+              inline
+              textProps={{
+                size: 'sm',
+                weight: 'medium',
+                color: page === 1 ? 'gray-400' : 'secondary-main'
+              }}
+            />
+            {Array.from({ length: lastPage }, (_, i) => i + 1).map((p) => (
+              <Button
+                key={p}
+                onPress={() => handlePageChange(p)}
+                type={p === page ? 'primary' : 'secondary'}
+                text={p.toString()}
+                testID={`page-${p}-button`}
+                inline
+                textProps={{
+                  size: 'sm',
+                  weight: 'medium',
+                  color: p === page ? 'primary-contrast' : 'secondary-main'
+                }}
+              />
+            ))}
+            <Button
+              onPress={() => handlePageChange(page + 1)}
+              type="secondary"
+              text="Siguiente"
+              testID="next-page-button"
+              inline
+              textProps={{
+                size: 'sm',
+                weight: 'medium',
+                color: page === lastPage ? 'gray-400' : 'secondary-main'
+              }}
+            />
+          </div>
         </div>
       )}
     </div>

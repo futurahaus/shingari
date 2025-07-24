@@ -34,7 +34,7 @@ export default function AdminProductsPage() {
     error,
     lastPage,
     refetch
-  } = useAdminProducts({ page, search: searchQuery, sortField, sortDirection });
+  } = useAdminProducts({ page, limit: 10, search: searchQuery, sortField, sortDirection });
 
   const openEditModal = (product: Product) => {
     setSelectedProduct(product);
@@ -161,7 +161,7 @@ export default function AdminProductsPage() {
         )}
 
         {loading ? (
-          <ProductsListSkeleton rowsCount={20} />
+          <ProductsListSkeleton rowsCount={10} />
         ) : products && products.length > 0 ? (
           <div className="bg-white shadow overflow-hidden sm:rounded-lg">
             <div className="overflow-x-auto">
