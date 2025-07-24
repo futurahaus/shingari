@@ -102,7 +102,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 className="flex items-center w-full px-4 py-3 text-sm font-medium rounded-md transition-colors text-gray-600 hover:bg-red-50 hover:text-red-700"
               >
                 <span className="mr-3">
-                  <LogOut className="w-5 h-5 text-gray-400" />
+                  <LogOut className="w-5 h-5 text-gray-400 cursor-pointer" />
                 </span>
                 Cerrar Sesión
               </button>
