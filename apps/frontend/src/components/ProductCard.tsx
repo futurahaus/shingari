@@ -23,10 +23,12 @@ export const ProductCard = ({ product }: { product: Product }) => {
     // Find current quantity in cart
     const cartItem = cart.find((item) => item.id === product.id);
     const [quantity, setQuantity] = useState(cartItem ? cartItem.quantity : 0);
+    const [unitType, setUnitType] = useState<'units' | 'boxes'>('units');
 
     const router = useRouter();
     const handleAdd = () => {
-        const newQty = quantity + 1;
+        const increment = unitType === 'boxes' && product.units_per_box ? product.units_per_box : 1;
+        const newQty = quantity + increment;
         setQuantity(newQty);
         if (cartItem) {
             updateQuantity(product.id, newQty);
@@ -36,14 +38,15 @@ export const ProductCard = ({ product }: { product: Product }) => {
                 name: product.name,
                 price: product.price,
                 image: product.images[0],
-                quantity: 1,
+                quantity: increment,
             });
         }
     };
 
     const handleRemove = () => {
         if (quantity > 0) {
-            const newQty = quantity - 1;
+            const decrement = unitType === 'boxes' && product.units_per_box ? product.units_per_box : 1;
+            const newQty = Math.max(0, quantity - decrement);
             setQuantity(newQty);
             if (newQty === 0) {
                 removeFromCart(product.id);
@@ -78,7 +81,11 @@ export const ProductCard = ({ product }: { product: Product }) => {
                     >
                         -
                     </button>
-                    <span className="w-4 text-center text-sm select-none">{quantity}</span>
+                    <span className="w-4 text-center text-sm select-none">
+                        {unitType === 'boxes' && product.units_per_box 
+                            ? Math.trunc(quantity / product.units_per_box) 
+                            : quantity}
+                    </span>
                     <button
                         type="button"
                         className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-200 hover:bg-gray-300 text-lg font-bold cursor-pointer"
@@ -86,6 +93,15 @@ export const ProductCard = ({ product }: { product: Product }) => {
                     >
                         +
                     </button>
+                    <select
+                        value={unitType}
+                        className="text-xs bg-white border border-gray-300 rounded px-1 py-0.5 cursor-pointer"
+                        onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+                        onChange={(e) => setUnitType(e.target.value as 'units' | 'boxes')}
+                    >
+                        <option value="units">Unidades</option>
+                        <option value="boxes">Cajas</option>
+                    </select>
                 </div>
             </div>
             <div className="p-4 flex flex-col flex-1">
