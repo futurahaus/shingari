@@ -82,6 +82,15 @@ export class OrderResponseDto {
   @ApiProperty({ description: 'ID del usuario' })
   user_id?: string;
 
+  @ApiProperty({ description: 'Email del usuario' })
+  user_email?: string;
+
+  @ApiProperty({ description: 'Nombre del usuario' })
+  user_name?: string;
+
+  @ApiProperty({ description: 'Nombre comercial del usuario' })
+  user_trade_name?: string;
+
   @ApiProperty({ description: 'Estado de la orden' })
   status: string;
 

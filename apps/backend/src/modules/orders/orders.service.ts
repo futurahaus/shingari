@@ -14,7 +14,7 @@ export class OrdersService {
       'Creating order with data:',
       JSON.stringify(createOrderDto, null, 2),
     );
-    
+
     const { order_lines, order_addresses, order_payments, ...orderData } = createOrderDto;
 
     try {
@@ -113,7 +113,23 @@ export class OrdersService {
     return orders.map((order) => this.mapToOrderResponse(order));
   }
 
-  async findAllPaginated(page = 1, limit = 20): Promise<[OrderResponseDto[], number]> {
+  async findAllPaginated(
+    page = 1,
+    limit = 20,
+    sortField = 'created_at',
+    sortDirection = 'desc'
+  ): Promise<[OrderResponseDto[], number]> {
+    // Define valid sort fields and their mappings
+    const sortFieldMap: Record<string, any> = {
+      'created_at': { created_at: sortDirection },
+      'updated_at': { updated_at: sortDirection },
+      'total_amount': { total_amount: sortDirection },
+      'status': { status: sortDirection },
+      'user_name': { users: { users: { first_name: sortDirection } } },
+    };
+
+    const orderBy = sortFieldMap[sortField] || { created_at: 'desc' };
+
     const [orders, total] = await this.prisma.$transaction([
       this.prisma.orders.findMany({
         skip: (page - 1) * limit,
@@ -122,8 +138,13 @@ export class OrdersService {
           order_lines: true,
           order_addresses: true,
           order_payments: true,
+          users: {
+            include: {
+              users: true, // This includes public_users data
+            },
+          },
         },
-        orderBy: { created_at: 'desc' },
+        orderBy,
       }),
       this.prisma.orders.count(),
     ]);
@@ -134,6 +155,11 @@ export class OrdersService {
     return {
       id: order.id,
       user_id: order.user_id,
+      user_email: order.users?.email || null,
+      user_name: order.users?.users?.first_name && order.users?.users?.last_name
+        ? `${order.users.users.first_name} ${order.users.users.last_name}`.trim()
+        : order.users?.users?.trade_name || null,
+      user_trade_name: order.users?.users?.trade_name || null,
       status: order.status,
       total_amount: order.total_amount,
       currency: order.currency,
@@ -170,4 +196,4 @@ export class OrdersService {
       })),
     };
   }
-} 
+}

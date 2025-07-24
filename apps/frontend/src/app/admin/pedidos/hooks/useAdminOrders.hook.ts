@@ -6,6 +6,9 @@ import { useNotificationContext } from '@/contexts/NotificationContext';
 export interface Order {
   id: string;
   user_id?: string;
+  user_email?: string;
+  user_name?: string;
+  user_trade_name?: string;
   status: string;
   total_amount: string;
   currency: string;

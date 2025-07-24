@@ -57,8 +57,10 @@ export class OrdersController {
     async findAllOrdersForAdmin(
         @Query('page') page: number = 1,
         @Query('limit') limit: number = 20,
+        @Query('sortField') sortField: string = 'created_at',
+        @Query('sortDirection') sortDirection: 'asc' | 'desc' = 'desc',
     ): Promise<any> {
-        const [orders, total] = await this.ordersService.findAllPaginated(page, limit);
+        const [orders, total] = await this.ordersService.findAllPaginated(page, limit, sortField, sortDirection);
         return {
             data: orders,
             total,
