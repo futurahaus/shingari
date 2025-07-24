@@ -3,10 +3,24 @@ import React from "react";
 import { useCart } from "@/contexts/CartContext";
 import Image from "next/image";
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import LoginModal from '@/components/auth/LoginModal';
+import { useState, useEffect } from 'react';
 
 const CarritoPage = () => {
   const { cart, updateQuantity, removeFromCart, removeAllFromCart } = useCart();
   const router = useRouter();
+  const { user, isLoading } = useAuth();
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      setShowLoginModal(true);
+    } else {
+      setShowLoginModal(false);
+    }
+  }, [user, isLoading]);
+
   // Calculate totals
   const total = cart.reduce((sum, p) => sum + p.price * p.quantity, 0);
   const discount = 0; // Placeholder for discounts
@@ -18,7 +32,7 @@ const CarritoPage = () => {
       {/* Header */}
       <header className="w-full max-w-6xl px-6 py-6 flex flex-col gap-2">
         <h1 className="text-2xl font-bold">Mi Carrito</h1>
-        <button className="text-red-500 text-sm underline self-end" onClick={removeAllFromCart}>
+        <button className="text-red-500 text-sm underline self-end" onClick={removeAllFromCart} disabled={!user}>
           Vaciar carrito
         </button>
       </header>
@@ -51,12 +65,13 @@ const CarritoPage = () => {
                   <button
                     className="px-2 py-1 bg-gray-100 rounded cursor-pointer"
                     onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                    disabled={item.quantity <= 1}
+                    disabled={item.quantity <= 1 || !user}
                   >-</button>
                   <span className="mx-1">{item.quantity}</span>
                   <button
                     className="px-2 py-1 bg-gray-100 rounded cursor-pointer"
                     onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                    disabled={!user}
                   >+</button>
                 </div>
                 <div className="w-32 text-right font-semibold">
@@ -65,6 +80,7 @@ const CarritoPage = () => {
                 <button
                   className="ml-4 text-xs text-red-500 hover:underline"
                   onClick={() => removeFromCart(item.id)}
+                  disabled={!user}
                 >Eliminar</button>
               </div>
             ))
@@ -93,8 +109,13 @@ const CarritoPage = () => {
             <button 
               className="w-full bg-[#EA3D15] text-white py-3 rounded-md font-semibold text-lg hover:bg-[#d43e0e] transition cursor-pointer"
               onClick={() => {
+                if (!user) {
+                  setShowLoginModal(true);
+                  return;
+                }
                 router.push('/pagos');
               }}
+              disabled={!user}
             >
               Continuar compra
             </button>
@@ -107,6 +128,9 @@ const CarritoPage = () => {
           </div>
         </aside>
       </main>
+      {showLoginModal && (
+        <LoginModal isOpen={showLoginModal} onClose={() => setShowLoginModal(false)} redirectPath={"/carrito"} />
+      )}
     </div>
   );
 };
