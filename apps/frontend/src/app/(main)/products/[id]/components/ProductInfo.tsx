@@ -1,5 +1,7 @@
 import { QuantityControls } from "@/components/QuantityControls";
 import { Product } from "@/components/ProductCard";
+import { Button } from "@/app/ui/components/Button";
+import { useRouter } from "next/navigation";
 
 interface ProductInfoProps {
   product: Product;
@@ -7,7 +9,7 @@ interface ProductInfoProps {
 
 export function ProductInfo({ product }: ProductInfoProps) {
   const hasDiscount = typeof product.discount === 'number' && product.discount > 0 && product.originalPrice;
-
+  const router = useRouter();
   return (
     <div className="flex flex-col gap-4">
       {/* Nombre y subtítulo */}
@@ -50,6 +52,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
           />
         </div>
       </div>
+      <Button icon="FaShoppingCart" text="Ir al carrito" type="primary" onPress={() => router.push('/carrito')} testID="go-cart" />
     </div>
   );
 }
