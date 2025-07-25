@@ -21,6 +21,11 @@ export const ProductRowSkeleton: React.FC = () => {
         <div className="h-4 bg-gray-300 rounded w-12"></div>
       </td>
       
+      {/* Unidades por Caja */}
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="h-4 bg-gray-300 rounded w-16"></div>
+      </td>
+      
       {/* Precio Minorista */}
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="h-4 bg-gray-300 rounded w-16"></div>

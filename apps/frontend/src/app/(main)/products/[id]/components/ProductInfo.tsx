@@ -1,4 +1,4 @@
-import { QuantitySelector } from "./QuantitySelector";
+import { QuantityControls } from "@/components/QuantityControls";
 import { Product } from "@/components/ProductCard";
 
 interface ProductInfoProps {
@@ -37,21 +37,18 @@ export function ProductInfo({ product }: ProductInfoProps) {
         <span className="inline-block bg-[#FFD6D6] text-[#F0461C] text-base font-semibold rounded-md px-3 py-1">¡Últimas unidades!</span>
       </div>
 
-      {/* Selectores de cantidad */}
+      {/* Controles de cantidad */}
       <div className="flex flex-row gap-8 py-4">
         <div className="flex items-center gap-2">
-          <QuantitySelector label="Unidades" />
+          <QuantityControls
+            productId={product.id}
+            productName={product.name}
+            productPrice={product.price}
+            productImage={product.images[0]}
+            unitsPerBox={product.units_per_box}
+            variant="inline"
+          />
         </div>
-        <div className="flex items-center gap-2">
-          <QuantitySelector label="Cajas" />
-        </div>
-      </div>
-
-      {/* Botones */}
-      <div className="flex flex-col gap-3 mt-2">
-        <button className="w-full px-4 py-4 font-bold text-white bg-[#F0461C] rounded-xl text-lg hover:bg-orange-700 transition-all cursor-pointer">
-          Comprar ahora
-        </button>
       </div>
     </div>
   );

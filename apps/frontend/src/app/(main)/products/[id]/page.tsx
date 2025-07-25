@@ -10,13 +10,11 @@ import { Product } from "@/components/ProductCard";
 import Link from 'next/link';
 import ProductDetailSkeleton from './components/ProductDetailSkeleton';
 import { SimilarProducts } from "./components/SimilarProducts";
-import { useCart } from '@/contexts/CartContext';
 
 export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const params = useParams();
   const { id } = params;
-  const { addToCart } = useCart();
 
   useEffect(() => {
     if (id) {
@@ -57,18 +55,6 @@ export default function ProductDetailPage() {
         </div>
         <div className="flex flex-col gap-6">
           <ProductInfo product={product} />
-          <button
-            className="w-full px-4 py-4 font-bold text-[#23272F] bg-white border border-[#23272F] rounded-xl text-lg hover:bg-gray-50 transition-all cursor-pointer"
-            onClick={() => addToCart({
-              id: product.id,
-              name: product.name,
-              price: product.price,
-              image: product.images?.[0] || undefined,
-              quantity: 1,
-            })}
-          >
-            Agregar al carrito
-          </button>
         </div>
       </div>
     </div>

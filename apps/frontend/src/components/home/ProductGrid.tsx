@@ -102,7 +102,7 @@ export default function ProductGrid() {
                                     src={product.images[0]}
                                     alt={product.name}
                                     fill
-                                    className="object-cover rounded-2xl transition-transform duration-300 group-hover:scale-105"
+                                    className="object-contain object-center rounded-2xl transition-transform duration-300 group-hover:scale-105"
                                 />
                             ) : (
                                 <Text as="div" size="sm" color="gray-400" className="w-full h-40 flex items-center justify-center bg-gray-100 rounded-t-2xl">

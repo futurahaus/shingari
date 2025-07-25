@@ -34,7 +34,7 @@ export default function AdminProductsPage() {
     error,
     lastPage,
     refetch
-  } = useAdminProducts({ page, search: searchQuery, sortField, sortDirection });
+  } = useAdminProducts({ page, limit: 10, search: searchQuery, sortField, sortDirection });
 
   const openEditModal = (product: Product) => {
     setSelectedProduct(product);
@@ -161,7 +161,7 @@ export default function AdminProductsPage() {
         )}
 
         {loading ? (
-          <ProductsListSkeleton rowsCount={20} />
+          <ProductsListSkeleton rowsCount={10} />
         ) : products && products.length > 0 ? (
           <div className="bg-white shadow overflow-hidden sm:rounded-lg">
             <div className="overflow-x-auto">
@@ -173,6 +173,9 @@ export default function AdminProductsPage() {
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Stock
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Unidades por Caja
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Precio Minorista

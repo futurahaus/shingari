@@ -1,15 +1,257 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
+import { api } from '@/lib/api';
+
+interface OrderLine {
+  id: string;
+  product_id: number;
+  product_name: string;
+  quantity: number;
+  unit_price: string;
+  total_price: string;
+}
+
+interface OrderAddress {
+  id: string;
+  type: string;
+  full_name: string;
+  address_line1: string;
+  address_line2?: string;
+  city: string;
+  state?: string;
+  postal_code: string;
+  country: string;
+  phone?: string;
+}
+
+interface OrderPayment {
+  id: string;
+  payment_method: string;
+  status: string;
+  paid_at?: string;
+  amount: string;
+  transaction_id?: string;
+  metadata?: Record<string, unknown>;
+}
+
+interface Order {
+  id: string;
+  user_id?: string;
+  status: string;
+  total_amount: string;
+  currency: string;
+  created_at: string;
+  updated_at: string;
+  order_lines: OrderLine[];
+  order_addresses: OrderAddress[];
+  order_payments: OrderPayment[];
+}
+
+const getStatusConfig = (status: string) => {
+  switch (status.toLowerCase()) {
+    case 'pending':
+      return {
+        label: 'Pendiente',
+        bgColor: 'bg-yellow-100',
+        textColor: 'text-yellow-800',
+        borderColor: 'border-yellow-200'
+      };
+    case 'completed':
+    case 'paid':
+      return {
+        label: 'Compra facturada',
+        bgColor: 'bg-green-100',
+        textColor: 'text-green-800',
+        borderColor: 'border-green-200'
+      };
+    case 'cancelled':
+    case 'cancelled':
+      return {
+        label: 'Compra cancelada',
+        bgColor: 'bg-red-100',
+        textColor: 'text-red-800',
+        borderColor: 'border-red-200'
+      };
+    case 'processing':
+      return {
+        label: 'En proceso',
+        bgColor: 'bg-blue-100',
+        textColor: 'text-blue-800',
+        borderColor: 'border-blue-200'
+      };
+    default:
+      return {
+        label: status,
+        bgColor: 'bg-gray-100',
+        textColor: 'text-gray-800',
+        borderColor: 'border-gray-200'
+      };
+  }
+};
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  const options: Intl.DateTimeFormatOptions = {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  };
+  return date.toLocaleDateString('es-ES', options);
+};
+
+const formatOrderId = (id: string) => {
+  return `#${id.slice(0, 8).toUpperCase()}`;
+};
+
+const OrderCardSkeleton = () => (
+  <div className="bg-white border border-gray-200 rounded-xl p-4 animate-pulse">
+    <div className="flex items-center justify-between">
+      {/* Order Info */}
+      <div className="flex-1">
+        <div className="flex items-center gap-4 mb-2">
+          {/* Status Tag Skeleton */}
+          <div className="w-24 h-6 bg-gray-200 rounded-full"></div>
+
+          {/* Order ID Skeleton */}
+          <div className="w-32 h-5 bg-gray-200 rounded"></div>
+        </div>
+
+        {/* Order Details Skeleton */}
+        <div className="space-y-1">
+          <div className="w-48 h-4 bg-gray-200 rounded"></div>
+          <div className="w-24 h-4 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+
+      {/* Action Button Skeleton */}
+      <div className="ml-4">
+        <div className="w-24 h-8 bg-gray-200 rounded border"></div>
+      </div>
+    </div>
+  </div>
+);
 
 export default function ComprasPage() {
+  const router = useRouter();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const ordersData = await api.get<Order[]>('/orders/user/me');
+        setOrders(ordersData);
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+        setError('Error al cargar las órdenes');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="mx-auto px-4 sm:px-6 lg:px-16 py-12">
+        <div className="flex gap-8">
+          <Sidebar />
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold mb-6">Mis Compras</h2>
+            <div className="space-y-4">
+              {[...Array(4)].map((_, i) => (
+                <OrderCardSkeleton key={i} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="mx-auto px-4 sm:px-6 lg:px-16 py-12">
+        <div className="flex gap-8">
+          <Sidebar />
+          <div className="flex-1 bg-white shadow-sm rounded-lg p-6">
+            <div className="text-center text-red-600">
+              <p>{error}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto px-4 sm:px-6 lg:px-16 py-12">
       <div className="flex gap-8">
         <Sidebar />
-        <div className="flex-1 bg-white shadow-sm rounded-lg p-6">
-          <h2 className="text-2xl font-bold mb-4">Mis Compras</h2>
-          <p className="text-gray-600">Aquí se mostrarán las compras del usuario. (Mockup)</p>
+        <div className="flex-1">
+          <h2 className="text-2xl font-bold mb-6">Mis Compras</h2>
+
+          {orders.length === 0 ? (
+            <div className="bg-white shadow-sm rounded-lg p-6 text-center">
+              <p className="text-gray-600">No tienes compras registradas.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {orders.map((order) => {
+                const statusConfig = getStatusConfig(order.status);
+
+                return (
+                  <div key={order.id} className="bg-white border border-gray-200 rounded-xl p-4">
+                    <div className="flex items-center justify-between">
+                      {/* Order Info */}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-4 mb-2">
+                          {/* Status Tag */}
+                          <div className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-medium ${statusConfig.bgColor} ${statusConfig.textColor} ${statusConfig.borderColor} border`}>
+                            {statusConfig.label}
+                          </div>
+
+                          {/* Order ID */}
+                          <span className="text-sm font-medium text-gray-900">
+                            Orden {formatOrderId(order.id)}
+                          </span>
+                        </div>
+
+                        {/* Order Details */}
+                        <div className="space-y-1">
+                          <p className="text-sm text-gray-600">
+                            Fecha de compra: {formatDate(order.created_at)}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Total: €{Number(order.total_amount).toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Action Button */}
+                      <div className="ml-4">
+                        <button
+                          onClick={() => {
+                            router.push(`/dashboard/compras/${order.id}`);
+                          }}
+                          className="px-4 py-2 border border-gray-900 text-gray-900 rounded text-sm font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
+                          Ver detalle
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
-} 
+}

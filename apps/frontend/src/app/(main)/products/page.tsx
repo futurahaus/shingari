@@ -242,7 +242,7 @@ const ProductsSection = ({
     const buildParams = (pageNumber: number) => {
         const params = new URLSearchParams({
             page: pageNumber.toString(),
-            limit: '8',
+            limit: '10',
         });
         Object.entries(filters).forEach(([key, value]) => {
             if (value) {
@@ -284,7 +284,7 @@ const ProductsSection = ({
         } finally {
             setLoading(false);
         }
-    }, [filters, categoryFilter, selectedParent, childNamesOfSelectedParent]);
+    }, [filters, categoryFilter, selectedParent, childNamesOfSelectedParent]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Buffer the next page
     const bufferNextPage = useCallback(async (nextPage: number) => {
@@ -298,7 +298,7 @@ const ProductsSection = ({
         } finally {
             setBufferLoading(false);
         }
-    }, [filters, categoryFilter, selectedParent, childNamesOfSelectedParent]);
+    }, [filters, categoryFilter, selectedParent, childNamesOfSelectedParent]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Initial load and when filters/searchParams change
     useEffect(() => {
@@ -362,7 +362,7 @@ const ProductsSection = ({
             <ProductFilters filters={filters} onFilterChange={handleFilterChange} />
             {loading && products.length === 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 3xl:grid-cols-6 gap-6 animate-pulse">
-                    {[...Array(8)].map((_, i) => (
+                    {[...Array(10)].map((_, i) => (
                         <ProductCardSkeleton key={i} />
                     ))}
                 </div>

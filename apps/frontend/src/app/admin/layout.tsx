@@ -5,12 +5,13 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Home, Users, Boxes, Settings, LogOut, FolderTree } from 'lucide-react';
+import { Home, Users, Boxes, Settings, LogOut, FolderTree, Inbox } from 'lucide-react';
 
 const sidebarOptions = [
   { name: 'Dashboard', path: '/admin/dashboard', icon: <Home className="w-5 h-5 text-gray-400" /> },
   { name: 'Usuarios', path: '/admin/usuarios', icon: <Users className="w-5 h-5 text-gray-400" /> },
   { name: 'Productos', path: '/admin/productos', icon: <Boxes className="w-5 h-5 text-gray-400" /> },
+  { name: 'Pedidos', path: '/admin/pedidos', icon: <Inbox className="w-5 h-5 text-gray-400" /> },
   { name: 'Categorias', path: '/admin/categorias', icon: <FolderTree className="w-5 h-5 text-gray-400" /> },
   { name: 'Configuración', path: '/admin/setup', icon: <Settings className="w-5 h-5 text-gray-400" /> },
 ];
@@ -101,7 +102,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 className="flex items-center w-full px-4 py-3 text-sm font-medium rounded-md transition-colors text-gray-600 hover:bg-red-50 hover:text-red-700"
               >
                 <span className="mr-3">
-                  <LogOut className="w-5 h-5 text-gray-400" />
+                  <LogOut className="w-5 h-5 text-gray-400 cursor-pointer" />
                 </span>
                 Cerrar Sesión
               </button>

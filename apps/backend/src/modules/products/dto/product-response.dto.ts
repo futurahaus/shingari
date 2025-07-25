@@ -43,6 +43,12 @@ export class ProductResponseDto {
   })
   stock?: number;
 
+  @ApiPropertyOptional({ 
+    description: 'Unidades por caja',
+    example: 12,
+  })
+  units_per_box?: number;
+
   @ApiProperty({ description: 'Fecha de creación del producto' })
   createdAt: Date;
 

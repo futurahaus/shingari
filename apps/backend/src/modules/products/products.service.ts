@@ -28,6 +28,7 @@ import { CategoryResponseDto } from './dto/category-response.dto';
 import { Cache } from 'cache-manager';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { UpdateCategoriesOrderDto } from './dto/update-category.dto';
 
 // Tipo para el producto con categorías incluidas, específico para findAllPublic y findOne
 type ProductWithCategoriesForResponse = Omit<ProductPrismaType, 'image_url'> & {
@@ -148,6 +149,7 @@ export class ProductsService {
         product.products_categories?.map((pc) => pc.categories.name) || [],
       images: product.product_images?.map((pi) => pi.image_url) || [],
       sku: product.sku || '',
+      units_per_box: product.units_per_box !== undefined && product.units_per_box !== null ? Number(product.units_per_box) : undefined,
     };
   }
 
@@ -224,6 +226,7 @@ export class ProductsService {
             product.products_categories?.map((pc) => pc.categories.name) || [],
           images: product.product_images?.map((pi) => pi.image_url) || [],
           sku: product.sku || '',
+          units_per_box: product.units_per_box !== undefined && product.units_per_box !== null ? Number(product.units_per_box) : undefined,
         };
       }),
     );
@@ -428,6 +431,7 @@ export class ProductsService {
           ? (product_states[status as keyof typeof product_states] ??
             product_states.active)
           : product_states.active,
+        units_per_box: typeof createProductDto.units_per_box === 'number' ? createProductDto.units_per_box : undefined,
       },
       include: {
         products_categories: { include: { categories: true } },
@@ -538,6 +542,10 @@ export class ProductsService {
         status: status
           ? (product_states[status as keyof typeof product_states] ?? undefined)
           : undefined,
+        units_per_box:
+          typeof updateProductDto.units_per_box === 'number'
+            ? updateProductDto.units_per_box
+            : undefined,
       },
       include: {
         products_categories: { include: { categories: true } },
@@ -803,10 +811,12 @@ export class ProductsService {
         name: true,
         image_url: true,
         parent_id: true,
+        order: true,
       },
-      orderBy: {
-        name: 'asc',
-      },
+      orderBy: [
+        { order: 'asc' },
+        { name: 'asc' },
+      ],
       take: limit,
     });
 
@@ -815,6 +825,7 @@ export class ProductsService {
       name: c.name,
       parentId: c.parent_id?.toString() || '',
       image: c.image_url || '',
+      order: c.order ?? 0,
     }));
   }
 
@@ -881,6 +892,19 @@ export class ProductsService {
       parentId: updated.parent_id?.toString() || '',
       image: updated.image_url || '',
     };
+  }
+
+  async updateCategoriesOrder(dto: UpdateCategoriesOrderDto): Promise<void> {
+    const { categories } = dto;
+    if (!categories || !Array.isArray(categories)) return;
+    await this.prisma.$transaction(
+      categories.map(({ id, order }) =>
+        this.prisma.categories.update({
+          where: { id: Number(id) },
+          data: { order },
+        })
+      )
+    );
   }
 
   async deleteCategory(id: string): Promise<void> {

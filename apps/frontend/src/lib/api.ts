@@ -92,6 +92,13 @@ class ApiClient {
       return {} as T;
     }
 
+    // Handle 200 OK with empty body
+    if (response.status === 200) {
+      const text = await response.text();
+      if (!text) return {} as T;
+      return JSON.parse(text);
+    }
+
     return response.json();
   }
 
@@ -126,6 +133,18 @@ class ApiClient {
 
   async delete<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     return this.request<T>(endpoint, { ...options, method: 'DELETE' });
+  }
+
+  async patch<T, D extends Record<string, unknown>>(
+    endpoint: string,
+    data: D,
+    options: RequestInit = {}
+  ): Promise<T> {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
   }
 }
 

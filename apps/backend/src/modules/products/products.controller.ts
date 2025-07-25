@@ -16,6 +16,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Patch,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -42,6 +43,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryResponseDto } from './dto/category-response.dto';
+import { UpdateCategoriesOrderDto } from './dto/update-category.dto';
 
 @ApiTags('Products')
 @Controller('products')
@@ -268,6 +270,16 @@ export class ProductsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteCategory(@Param('id') id: string): Promise<void> {
     return this.productsService.deleteCategory(id);
+  }
+
+  @Patch('categories/order')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar el orden de múltiples categorías (Solo Admin)' })
+  @ApiBody({ type: UpdateCategoriesOrderDto })
+  @ApiResponse({ status: 200, description: 'Órdenes de categorías actualizadas exitosamente.' })
+  async updateCategoriesOrder(@Body() dto: UpdateCategoriesOrderDto): Promise<void> {
+    return this.productsService.updateCategoriesOrder(dto);
   }
 
   // @Post('upload-image')

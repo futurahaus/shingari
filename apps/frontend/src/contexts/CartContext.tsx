@@ -8,7 +8,7 @@ export interface CartProduct {
   price: number;
   image?: string;
   quantity: number;
-  unitType?: string; // e.g., 'Unidades', 'Cajas'
+  units_per_box?: number;
 }
 
 interface CartContextType {
@@ -48,10 +48,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   const addToCart = (product: CartProduct) => {
     setCart(prev => {
-      const existing = prev.find(p => p.id === product.id && p.unitType === product.unitType);
+      const existing = prev.find(p => p.id === product.id);
       if (existing) {
         return prev.map(p =>
-          p.id === product.id && p.unitType === product.unitType
+          p.id === product.id
             ? { ...p, quantity: p.quantity + product.quantity }
             : p
         );
@@ -62,7 +62,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const removeFromCart = (id: string) => {
-    setCart(prev => prev.filter(p => p.id !== id));
+    setCart(prev => prev.filter(p => !(p.id === id)));
   };
 
   const removeAllFromCart = () => {
