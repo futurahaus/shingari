@@ -139,13 +139,11 @@ export default function PagosPage() {
       )}
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-12 py-8">
-        <div className="flex gap-8">
-          {/* Left Column - Payment Methods */}
-          <div className="flex-1">
-            <h1 className="text-xl font-bold text-black mb-8">Selecciona método de pago</h1>
+        <div className="">
+          <h1 className="text-xl font-bold text-black mb-8">Selecciona método de pago</h1>
 
-            {/* Payment Methods */}
-            <div className="space-y-4">
+          {/* Payment Methods */}
+          <div className="space-y-4">
               {/* <div
                 className={`border border-gray-300 rounded-lg p-4 cursor-pointer transition-colors ${
                   selectedPaymentMethod === 'card' ? 'bg-[#EA3D15] text-white' : 'bg-gray-50'
@@ -303,10 +301,9 @@ export default function PagosPage() {
                 </div>
               </div>
             )}
-          </div>
 
-          {/* Right Column - Order Summary */}
-          <div className="w-96">
+          {/* Order Summary - moved here */}
+          <div className="mt-8">
             <div className="bg-white border border-gray-200 rounded-lg p-4">
               <h3 className="text-sm font-bold text-black border-b border-gray-200 pb-2 mb-4">
                 Resumen de la compra
