@@ -124,7 +124,6 @@ const CarritoPage = () => {
                 }
                 router.push('/pagos');
               }}
-              disabled={!user}
             >
               Continuar compra
             </button>
