@@ -17,16 +17,16 @@ export default function Navbar() {
               Sobre Shingari
             </Text>
           </Link>
-          <Link href="/contact" className="flex flex-1 items-center h-full text-center">
+          <Link href="/contacto" className="flex flex-1 items-center h-full text-center">
             <Text as="span" size="md" color="white">
               Contacto
             </Text>
           </Link>
-          <Link href="/others" className="flex flex-1 items-center h-full text-center">
+          {/* <Link href="/others" className="flex flex-1 items-center h-full text-center">
             <Text as="span" size="md" color="white">
               Otros
             </Text>
-          </Link>
+          </Link> */}
         </div>
       </div>
     </nav>

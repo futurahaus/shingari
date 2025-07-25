@@ -7,6 +7,7 @@
       - layout.tsx (Sidebar con opciones: Dashboard, Usuarios, Productos)
   - /app/(main): Contiene las páginas principales de la app (productos, dashboard, perfil, etc)
   - /app/carrito: Página dedicada al carrito de compras, muestra los productos agregados siguiendo el diseño de Figma.
+  - `/contacto`: Página de contacto con un formulario simple (nombre, correo, mensaje) y mensaje de éxito al enviar. No tiene integración backend.
 - /contexts
   - AuthContext.tsx (Incluye 'role' en el usuario para control de acceso por roles)
 
