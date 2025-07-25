@@ -5,6 +5,7 @@ import { Product } from '@/components/ProductCard';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { QuantityControls } from '../QuantityControls';
+import { useNotificationContext } from '@/contexts/NotificationContext';
 
 export const CartModal = () => {
   const {
@@ -18,6 +19,8 @@ export const CartModal = () => {
   const router = useRouter();
 
   const modalRef = useRef<HTMLDivElement>(null);
+
+  const { showWarning } = useNotificationContext();
 
   // Close on Escape key
   useEffect(() => {
@@ -106,7 +109,10 @@ export const CartModal = () => {
                     </div>
                     <button
                       className="text-xs text-red-500 hover:underline cursor-pointer"
-                      onClick={() => removeFromCart(item.id)}
+                      onClick={() => {
+                        removeFromCart(item.id);
+                        showWarning('Producto eliminado', `"${item.name}" eliminado del carrito.`, 2000);
+                      }}
                     >Eliminar</button>
                   </div>
                 </div>
@@ -116,7 +122,10 @@ export const CartModal = () => {
           {/* removeAllFromCart */}
           <button
             className="text-xs text-red-500 hover:underline cursor-pointer"
-            onClick={() => removeAllFromCart()}
+            onClick={() => {
+              removeAllFromCart();
+              showWarning('Carrito vacío', 'Todos los productos eliminados del carrito.', 2000);
+            }}
           >Eliminar todos</button>
           <div className="text-sm space-y-1 mb-6">
             <div className="flex justify-between">

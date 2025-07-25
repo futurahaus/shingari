@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
+import { useNotificationContext } from '@/contexts/NotificationContext';
 
 interface QuantityControlsProps {
     productId: string;
@@ -19,6 +20,7 @@ export const QuantityControls = ({
     variant = 'overlay'
 }: QuantityControlsProps) => {
     const { cart, addToCart, updateQuantity, removeFromCart } = useCart();
+    const { showSuccess, showInfo, showWarning } = useNotificationContext();
     const cartItem = cart.find((item) => item.id === productId);
     const [quantity, setQuantity] = useState(cartItem ? cartItem.quantity : 0);
     const [unitType, setUnitType] = useState<'units' | 'boxes'>('units');
@@ -29,6 +31,7 @@ export const QuantityControls = ({
         setQuantity(newQty);
         if (cartItem) {
             updateQuantity(productId, newQty);
+            showInfo('Cantidad actualizada', `Cantidad de "${productName}" actualizada a ${newQty}.`, 2000);
         } else {
             addToCart({
                 id: productId,
@@ -37,6 +40,7 @@ export const QuantityControls = ({
                 image: productImage,
                 quantity: increment,
             });
+            showSuccess('Producto añadido', `"${productName}" añadido al carrito.`, 2000);
         }
     };
 
@@ -47,8 +51,10 @@ export const QuantityControls = ({
             setQuantity(newQty);
             if (newQty === 0) {
                 removeFromCart(productId);
+                showWarning('Producto eliminado', `"${productName}" eliminado del carrito.`, 2000);
             } else {
                 updateQuantity(productId, newQty);
+                showInfo('Cantidad actualizada', `Cantidad de "${productName}" actualizada a ${newQty}.`, 2000);
             }
         }
     };
@@ -64,6 +70,7 @@ export const QuantityControls = ({
 
             if (cartItem) {
                 updateQuantity(productId, newQuantity);
+                showInfo('Cantidad actualizada', `Cantidad de "${productName}" actualizada a ${newQuantity}.`, 2000);
             } else if (newQuantity > 0) {
                 addToCart({
                     id: productId,
@@ -72,6 +79,7 @@ export const QuantityControls = ({
                     image: productImage,
                     quantity: newQuantity,
                 });
+                showSuccess('Producto añadido', `"${productName}" añadido al carrito.`, 2000);
             }
             setQuantity(newQuantity);
         }
