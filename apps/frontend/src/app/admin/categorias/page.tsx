@@ -8,7 +8,7 @@ import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { FaEdit, FaTrash, FaPlus, FaFolder, FaExclamationTriangle } from 'react-icons/fa';
 import Image from 'next/image';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { DragDropContext, Droppable, Draggable, DropResult, ResponderProvided } from '@hello-pangea/dnd';
 import React from 'react';
 
 interface CategoryFormState {
@@ -116,15 +116,30 @@ export default function AdminCategoriasPage() {
     setLocalTree([...buildCategoryTree(categories)].sort(sortByOrder));
   }, [categories]);
 
-  // Handle drag end for root categories
-  const onDragEnd = async (result: DropResult) => {
+  // Generalized drag end handler for any level
+  const handleDragEnd = async (result: DropResult, nodes: CategoryWithChildren[], parentId?: string) => {
     if (!result.destination) return;
-    const newTree = Array.from(localTree);
-    const [removed] = newTree.splice(result.source.index, 1);
-    newTree.splice(result.destination.index, 0, removed);
-    // Update order field
-    const reordered = newTree.map((cat, idx) => ({ ...cat, order: idx }));
-    setLocalTree(reordered);
+    const newNodes = Array.from(nodes);
+    const [removed] = newNodes.splice(result.source.index, 1);
+    newNodes.splice(result.destination.index, 0, removed);
+    // Update order field for this level
+    const reordered = newNodes.map((cat, idx) => ({ ...cat, order: idx }));
+    // Update localTree recursively
+    function updateTreeOrder(tree: CategoryWithChildren[]): CategoryWithChildren[] {
+      return tree.map(cat => {
+        if ((parentId === undefined && !cat.parentId) || cat.id === parentId) {
+          // Root or matching parent
+          if (parentId === undefined && !cat.parentId) {
+            // Root
+            return reordered.find(r => r.id === cat.id) || cat;
+          } else if (cat.id === parentId) {
+            return { ...cat, children: reordered };
+          }
+        }
+        return { ...cat, children: updateTreeOrder(cat.children) };
+      });
+    }
+    setLocalTree(updateTreeOrder(localTree));
     try {
       await api.patch('/products/categories/order', {
         categories: reordered.map((cat, idx) => ({ id: Number(cat.id), order: idx }))
@@ -137,109 +152,52 @@ export default function AdminCategoriasPage() {
     }
   };
 
-  function renderTree(nodes: CategoryWithChildren[], level = 0) {
+  // Recursive drag-and-drop tree
+  function renderDraggableTree(nodes: CategoryWithChildren[], level = 0, parentId?: string) {
+    // Sort nodes by order, then by name
+    const sortedNodes = [...nodes].sort((a, b) => {
+      if ((a.order ?? 0) !== (b.order ?? 0)) return (a.order ?? 0) - (b.order ?? 0);
+      return a.name.localeCompare(b.name);
+    });
     return (
-      <ul className={level === 0 ? 'space-y-1' : 'ml-5 border-l-2 border-gray-100 pl-3 space-y-1 flex-1'}>
-        {nodes.map((cat) => {
-          const isParent = cat.children && cat.children.length > 0;
-          return (
-            <li
-              key={cat.id}
-              className={
-                `flex items-center group rounded px-1 py-1 hover:bg-gray-50 transition relative ` +
-                (isParent ? 'bg-gray-50' : 'bg-white')
-              }
-              style={{ minHeight: 28 }}
-            >
-              {/* Indent and icon */}
-              <span className="flex items-center mr-2">
-                {cat.image ? (
-                  <Image src={cat.image} alt={cat.name} width={18} height={18} className="rounded object-cover" />
-                ) : (
-                  <FaFolder className="text-gray-400 w-4 h-4" />
-                )}
-              </span>
-              <span className="font-medium text-gray-900 font-medium text-gray-900 flex-1 truncate text-base" title={cat.name}>{cat.name}</span>
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  onClick={() => openEditModal(cat)}
-                  className="p-1 text-gray-600 hover:text-blue-600 rounded-lg transition"
-                  title="Editar categoría"
-                  type="button"
-                >
-                  <FaEdit size={13} />
-                </button>
-                <button
-                  onClick={() => openDelete(cat.id)}
-                  className="p-1 text-gray-600 hover:text-red-600 rounded-lg transition"
-                  title="Eliminar categoría"
-                  type="button"
-                >
-                  <FaTrash size={13} />
-                </button>
-                <button
-                  onClick={() => openAddModal(cat.id)}
-                  className="p-1 text-gray-600 hover:text-green-600 rounded-lg transition"
-                  title="Agregar subcategoría"
-                  type="button"
-                >
-                  <FaPlus size={13} />
-                </button>
-              </div>
-              {isParent && cat.children && cat.children.length > 0 && renderTree(cat.children, level + 1)}
-            </li>
-          );
-        })}
-      </ul>
+      <DragDropContext onDragEnd={result => handleDragEnd(result, sortedNodes, parentId)}>
+        <Droppable droppableId={parentId ? `droppable-${parentId}` : 'root-categories'}>
+          {(provided) => (
+            <ul ref={provided.innerRef} {...provided.droppableProps} className={level === 0 ? 'space-y-1' : 'ml-5 border-l-2 border-gray-100 pl-3 space-y-1 flex-1'}>
+              {sortedNodes.map((cat, idx) => (
+                <Draggable key={cat.id} draggableId={cat.id} index={idx}>
+                  {(provided, snapshot) => (
+                    <li
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      className={`flex items-center group rounded px-1 py-1 hover:bg-gray-50 transition relative bg-white ${snapshot.isDragging ? 'ring-2 ring-primary-main' : ''}`}
+                      style={{ minHeight: 28, ...provided.draggableProps.style }}
+                    >
+                      <span className="flex items-center mr-2">
+                        {cat.image ? (
+                          <Image src={cat.image} alt={cat.name} width={18} height={18} className="rounded object-cover" />
+                        ) : (
+                          <FaFolder className="text-gray-400 w-4 h-4" />
+                        )}
+                      </span>
+                      <span className="font-medium text-gray-900 flex-1 truncate text-base" title={cat.name}>{cat.name}</span>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={() => openEditModal(cat)} className="p-1 text-gray-600 hover:text-blue-600 rounded-lg transition" title="Editar categoría" type="button"><FaEdit size={13} /></button>
+                        <button onClick={() => openDelete(cat.id)} className="p-1 text-gray-600 hover:text-red-600 rounded-lg transition" title="Eliminar categoría" type="button"><FaTrash size={13} /></button>
+                        <button onClick={() => openAddModal(cat.id)} className="p-1 text-gray-600 hover:text-green-600 rounded-lg transition" title="Agregar subcategoría" type="button"><FaPlus size={13} /></button>
+                      </div>
+                      {cat.children && cat.children.length > 0 && renderDraggableTree(cat.children, level + 1, cat.id)}
+                    </li>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </ul>
+          )}
+        </Droppable>
+      </DragDropContext>
     );
-  }
-
-  function renderDraggableTree(nodes: CategoryWithChildren[], level = 0) {
-    if (level === 0) {
-      // Only root categories are draggable
-      return (
-        <DragDropContext onDragEnd={onDragEnd}>
-          <Droppable droppableId="root-categories">
-            {(provided) => (
-              <ul ref={provided.innerRef} {...provided.droppableProps} className="space-y-1">
-                {nodes.map((cat, idx) => (
-                  <Draggable key={cat.id} draggableId={cat.id} index={idx}>
-                    {(provided, snapshot) => (
-                      <li
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        className={`flex items-center group rounded px-1 py-1 hover:bg-gray-50 transition relative bg-white ${snapshot.isDragging ? 'ring-2 ring-primary-main' : ''}`}
-                        style={{ minHeight: 28, ...provided.draggableProps.style }}
-                      >
-                        <span className="flex items-center mr-2">
-                          {cat.image ? (
-                            <Image src={cat.image} alt={cat.name} width={18} height={18} className="rounded object-cover" />
-                          ) : (
-                            <FaFolder className="text-gray-400 w-4 h-4" />
-                          )}
-                        </span>
-                        <span className="font-medium text-gray-900 flex-1 truncate text-base" title={cat.name}>{cat.name}</span>
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => openEditModal(cat)} className="p-1 text-gray-600 hover:text-blue-600 rounded-lg transition" title="Editar categoría" type="button"><FaEdit size={13} /></button>
-                          <button onClick={() => openDelete(cat.id)} className="p-1 text-gray-600 hover:text-red-600 rounded-lg transition" title="Eliminar categoría" type="button"><FaTrash size={13} /></button>
-                          <button onClick={() => openAddModal(cat.id)} className="p-1 text-gray-600 hover:text-green-600 rounded-lg transition" title="Agregar subcategoría" type="button"><FaPlus size={13} /></button>
-                        </div>
-                        {cat.children && cat.children.length > 0 && renderTree(cat.children, 1)}
-                      </li>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </ul>
-            )}
-          </Droppable>
-        </DragDropContext>
-      );
-    } else {
-      // Subcategories (not draggable for now)
-      return renderTree(nodes, level);
-    }
   }
 
   return (
