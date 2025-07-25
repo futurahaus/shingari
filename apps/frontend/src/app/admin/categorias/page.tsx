@@ -8,7 +8,7 @@ import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { FaEdit, FaTrash, FaPlus, FaFolder, FaExclamationTriangle } from 'react-icons/fa';
 import Image from 'next/image';
-import { DragDropContext, Droppable, Draggable, DropResult, ResponderProvided } from '@hello-pangea/dnd';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import React from 'react';
 
 interface CategoryFormState {
@@ -146,7 +146,7 @@ export default function AdminCategoriasPage() {
       });
       showSuccess('Orden actualizado', 'El orden de las categorías se ha actualizado');
       refetch();
-    } catch (error) {
+    } catch {
       showError('Error', 'No se pudo actualizar el orden');
       setLocalTree([...tree].sort(sortByOrder)); // revert
     }
@@ -257,7 +257,7 @@ export default function AdminCategoriasPage() {
             </label>
             <div className="flex justify-end gap-2 mt-6">
               <Button text="Cancelar" type="secondary" onPress={closeModal} testID="cancel-modal" />
-              <Button text={modalMode === 'add' ? 'Agregar' : 'Guardar'} type="primary-admin" htmlType="submit" testID="submit-modal" onPress={() => {}} disabled={saving} icon={modalMode === 'add' ? 'FaPlus' : 'FaEdit'} />
+              <Button text={modalMode === 'add' ? 'Agregar' : 'Guardar'} type="primary-admin" htmlType="submit" testID="submit-modal" onPress={() => { }} disabled={saving} icon={modalMode === 'add' ? 'FaPlus' : 'FaEdit'} />
             </div>
           </form>
         </div>
