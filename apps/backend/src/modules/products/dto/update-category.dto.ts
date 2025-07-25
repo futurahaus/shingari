@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsInt } from 'class-validator';
 
 export class UpdateCategoryDto {
   @ApiPropertyOptional({
@@ -17,4 +17,25 @@ export class UpdateCategoryDto {
   @IsString()
   @IsOptional()
   parentId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Nuevo orden de la categoría',
+    example: 1,
+  })
+  @IsInt()
+  @IsOptional()
+  order?: number;
+}
+
+export class UpdateCategoriesOrderDto {
+  @ApiPropertyOptional({
+    description: 'Lista de categorías con su nuevo orden',
+    example: [
+      { id: '1', order: 1 },
+      { id: '2', order: 2 },
+    ],
+    type: [Object],
+  })
+  @IsOptional()
+  categories!: { id: string; order: number }[];
 } 

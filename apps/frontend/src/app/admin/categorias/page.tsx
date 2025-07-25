@@ -8,6 +8,8 @@ import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { FaEdit, FaTrash, FaPlus, FaFolder, FaExclamationTriangle } from 'react-icons/fa';
 import Image from 'next/image';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import React from 'react';
 
 interface CategoryFormState {
   id?: string;
@@ -15,7 +17,7 @@ interface CategoryFormState {
   parentId?: string;
 }
 
-type CategoryWithChildren = Category & { children: CategoryWithChildren[] };
+type CategoryWithChildren = Category & { children: CategoryWithChildren[]; order?: number };
 
 function buildCategoryTree(categories: Category[]): CategoryWithChildren[] {
   const map: Record<string, CategoryWithChildren> = {};
@@ -102,6 +104,39 @@ export default function AdminCategoriasPage() {
     }
   };
 
+  // Helper to sort categories by order
+  function sortByOrder(a: CategoryWithChildren, b: CategoryWithChildren) {
+    return (a.order ?? 0) - (b.order ?? 0);
+  }
+
+  // Local state for root categories order
+  const [localTree, setLocalTree] = useState<CategoryWithChildren[]>([]);
+  // Sync localTree with tree when categories change
+  React.useEffect(() => {
+    setLocalTree([...buildCategoryTree(categories)].sort(sortByOrder));
+  }, [categories]);
+
+  // Handle drag end for root categories
+  const onDragEnd = async (result: DropResult) => {
+    if (!result.destination) return;
+    const newTree = Array.from(localTree);
+    const [removed] = newTree.splice(result.source.index, 1);
+    newTree.splice(result.destination.index, 0, removed);
+    // Update order field
+    const reordered = newTree.map((cat, idx) => ({ ...cat, order: idx }));
+    setLocalTree(reordered);
+    try {
+      await api.patch('/products/categories/order', {
+        categories: reordered.map((cat, idx) => ({ id: Number(cat.id), order: idx }))
+      });
+      showSuccess('Orden actualizado', 'El orden de las categorías se ha actualizado');
+      refetch();
+    } catch (error) {
+      showError('Error', 'No se pudo actualizar el orden');
+      setLocalTree([...tree].sort(sortByOrder)); // revert
+    }
+  };
+
   function renderTree(nodes: CategoryWithChildren[], level = 0) {
     return (
       <ul className={level === 0 ? 'space-y-1' : 'ml-5 border-l-2 border-gray-100 pl-3 space-y-1 flex-1'}>
@@ -159,6 +194,54 @@ export default function AdminCategoriasPage() {
     );
   }
 
+  function renderDraggableTree(nodes: CategoryWithChildren[], level = 0) {
+    if (level === 0) {
+      // Only root categories are draggable
+      return (
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="root-categories">
+            {(provided) => (
+              <ul ref={provided.innerRef} {...provided.droppableProps} className="space-y-1">
+                {nodes.map((cat, idx) => (
+                  <Draggable key={cat.id} draggableId={cat.id} index={idx}>
+                    {(provided, snapshot) => (
+                      <li
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        className={`flex items-center group rounded px-1 py-1 hover:bg-gray-50 transition relative bg-white ${snapshot.isDragging ? 'ring-2 ring-primary-main' : ''}`}
+                        style={{ minHeight: 28, ...provided.draggableProps.style }}
+                      >
+                        <span className="flex items-center mr-2">
+                          {cat.image ? (
+                            <Image src={cat.image} alt={cat.name} width={18} height={18} className="rounded object-cover" />
+                          ) : (
+                            <FaFolder className="text-gray-400 w-4 h-4" />
+                          )}
+                        </span>
+                        <span className="font-medium text-gray-900 flex-1 truncate text-base" title={cat.name}>{cat.name}</span>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => openEditModal(cat)} className="p-1 text-gray-600 hover:text-blue-600 rounded-lg transition" title="Editar categoría" type="button"><FaEdit size={13} /></button>
+                          <button onClick={() => openDelete(cat.id)} className="p-1 text-gray-600 hover:text-red-600 rounded-lg transition" title="Eliminar categoría" type="button"><FaTrash size={13} /></button>
+                          <button onClick={() => openAddModal(cat.id)} className="p-1 text-gray-600 hover:text-green-600 rounded-lg transition" title="Agregar subcategoría" type="button"><FaPlus size={13} /></button>
+                        </div>
+                        {cat.children && cat.children.length > 0 && renderTree(cat.children, 1)}
+                      </li>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </ul>
+            )}
+          </Droppable>
+        </DragDropContext>
+      );
+    } else {
+      // Subcategories (not draggable for now)
+      return renderTree(nodes, level);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="">
@@ -187,7 +270,7 @@ export default function AdminCategoriasPage() {
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-sm p-4">
-            {renderTree(tree)}
+            {renderDraggableTree([...localTree].sort(sortByOrder))}
           </div>
         )}
       </div>

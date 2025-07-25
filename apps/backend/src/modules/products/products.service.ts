@@ -28,6 +28,7 @@ import { CategoryResponseDto } from './dto/category-response.dto';
 import { Cache } from 'cache-manager';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { UpdateCategoriesOrderDto } from './dto/update-category.dto';
 
 // Tipo para el producto con categorías incluidas, específico para findAllPublic y findOne
 type ProductWithCategoriesForResponse = Omit<ProductPrismaType, 'image_url'> & {
@@ -810,10 +811,12 @@ export class ProductsService {
         name: true,
         image_url: true,
         parent_id: true,
+        order: true,
       },
-      orderBy: {
-        name: 'asc',
-      },
+      orderBy: [
+        { order: 'asc' },
+        { name: 'asc' },
+      ],
       take: limit,
     });
 
@@ -822,6 +825,7 @@ export class ProductsService {
       name: c.name,
       parentId: c.parent_id?.toString() || '',
       image: c.image_url || '',
+      order: c.order ?? 0,
     }));
   }
 
@@ -888,6 +892,19 @@ export class ProductsService {
       parentId: updated.parent_id?.toString() || '',
       image: updated.image_url || '',
     };
+  }
+
+  async updateCategoriesOrder(dto: UpdateCategoriesOrderDto): Promise<void> {
+    const { categories } = dto;
+    if (!categories || !Array.isArray(categories)) return;
+    await this.prisma.$transaction(
+      categories.map(({ id, order }) =>
+        this.prisma.categories.update({
+          where: { id: Number(id) },
+          data: { order },
+        })
+      )
+    );
   }
 
   async deleteCategory(id: string): Promise<void> {
