@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 
@@ -96,7 +96,7 @@ const CongratsSkeleton = () => (
   </div>
 );
 
-export default function CongratsPage() {
+const CongratsContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId');
@@ -226,5 +226,13 @@ export default function CongratsPage() {
         </div>
       </main>
     </div>
+  );
+};
+
+export default function CongratsPage() {
+  return (
+    <Suspense fallback={<CongratsSkeleton />}>
+      <CongratsContent />
+    </Suspense>
   );
 }
