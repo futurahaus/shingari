@@ -52,7 +52,7 @@ interface Order {
 const CongratsSkeleton = () => (
   <div className="min-h-screen bg-white">
     {/* Main Content */}
-    <main className="max-w-7xl mx-auto px-12 py-8 animate-pulse">
+    <main className="max-w-7xl mx-auto px-4 md:px-16 py-8 animate-pulse">
       {/* Breadcrumb Skeleton */}
       <div className="flex justify-between items-center mb-8">
         <div className="w-48 h-6 bg-gray-200 rounded"></div>
@@ -160,7 +160,7 @@ const CongratsContent = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-12 py-8">
+      <main className="max-w-7xl mx-auto px-4 md:px-16 py-8">
         {/* Breadcrumb */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-base font-bold text-[#121417]">
@@ -170,7 +170,7 @@ const CongratsContent = () => {
 
         {/* Congratulations Card */}
         <div className="flex justify-center">
-          <div className="bg-[#FBFBFB] border-2 border-[#E3E3E3] rounded-[32px] p-16 max-w-2xl w-full">
+          <div className="bg-[#FBFBFB] border-2 border-[#E3E3E3] rounded-[32px] p-8 max-w-2xl w-full">
             <div className="flex flex-col items-center text-center space-y-4">
               {/* Check Icon */}
               <div className="w-15 h-15 bg-white rounded-full flex items-center justify-center mb-4">
