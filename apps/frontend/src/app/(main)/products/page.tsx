@@ -170,13 +170,13 @@ const Breadcrumb = ({
 );
 
 const ProductFilters = ({ filters, onFilterChange }: ProductFiltersProps) => (
-    <div className="flex space-x-4 mb-6">
+    <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative">
             <select
                 name="type"
                 value={filters.type}
                 onChange={onFilterChange}
-                className="appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
+                className="w-full sm:w-auto appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
             >
                 <option value="">Tipo</option>
                 {/* Add real types later */}
@@ -188,7 +188,7 @@ const ProductFilters = ({ filters, onFilterChange }: ProductFiltersProps) => (
                 name="price"
                 value={filters.price}
                 onChange={onFilterChange}
-                className="appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
+                className="w-full sm:w-auto appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
             >
                 <option value="">Precio</option>
                 <option value="ASC">Menor a Mayor</option>
@@ -201,7 +201,7 @@ const ProductFilters = ({ filters, onFilterChange }: ProductFiltersProps) => (
                 name="stock"
                 value={filters.stock}
                 onChange={onFilterChange}
-                className="appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
+                className="w-full sm:w-auto appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
             >
                 <option value="">Venta por cajas</option>
                 {/* Add real stock types later */}
@@ -439,7 +439,7 @@ function ProductsPageContent() {
     }, []);
 
     return (
-        <div className="mx-auto px-16 py-8 bg-white">
+        <div className="mx-auto px-4 md:px-16 py-8 bg-white">
             <div className="flex">
                 <CategorySidebar
                     categories={categories}

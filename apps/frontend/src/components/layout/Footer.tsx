@@ -4,7 +4,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col items-center">
         {/* Menú de navegación */}
         <nav className="w-full mb-8">
-          <ul className="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-24">
+          <ul className="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-24">
             <li className="font-normal text-[14px] leading-6 tracking-[0px] text-center" style={{ fontFamily: 'Instrument Sans', color: '#6B7582' }}>Home</li>
             <li className="font-normal text-[14px] leading-6 tracking-[0px] text-center" style={{ fontFamily: 'Instrument Sans', color: '#6B7582' }}>Ofertas</li>
             <li className="font-normal text-[14px] leading-6 tracking-[0px] text-center" style={{ fontFamily: 'Instrument Sans', color: '#6B7582' }}>Contacto</li>
