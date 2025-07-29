@@ -5,7 +5,7 @@ import { Text, TextProps } from './Text';
 
 interface ButtonProps {
   onPress: () => void;
-  type: 'primary' | 'primary-admin' | 'secondary';
+  type: 'primary' | 'primary-admin' | 'secondary' | 'tertiary';
   text?: string;
   testID: string;
   icon?: keyof typeof FaIcons;
@@ -42,12 +42,15 @@ export const Button: React.FC<ButtonProps> = ({
   const primaryClasses = `bg-[${colors.primary.main}] hover:bg-[${colors.primary.dark}] focus:ring-[${colors.primary.main}] shadow-md`;
   const primaryAdminClasses = `bg-[${colors.admin.main}] hover:bg-[${colors.admin.light}] focus:ring-[${colors.admin.main}] shadow-md`;
   const secondaryClasses = `bg-transparent border border-[${colors.secondary.main}] hover:bg-[${colors.neutral.gray[100]}] focus:ring-[${colors.secondary.main}]`;
+  const tertiaryClasses = `bg-transparent hover:bg-[${colors.neutral.gray[100]}] focus:ring-[${colors.primary.main}]`;
   
   const buttonClasses = type === 'primary' 
     ? `${baseClasses} ${primaryClasses}`
     : type === 'primary-admin'
     ? `${baseClasses} ${primaryAdminClasses}`
-    : `${baseClasses} ${secondaryClasses}`;
+    : type === 'secondary'
+    ? `${baseClasses} ${secondaryClasses}`
+    : `${baseClasses} ${tertiaryClasses}`;
 
   const IconComponent = icon ? FaIcons[icon] : null;
 
@@ -55,7 +58,7 @@ export const Button: React.FC<ButtonProps> = ({
   const defaultTextProps: Omit<TextProps, 'children'> = {
     size: 'md',
     weight: 'medium',
-    color: type === 'primary' || type === 'primary-admin' ? 'primary-contrast' : 'secondary-main',
+    color: type === 'primary' || type === 'primary-admin' ? 'primary-contrast' : type === 'tertiary' ? 'primary-main' : 'secondary-main',
     as: 'span',
   };
 
@@ -76,7 +79,7 @@ export const Button: React.FC<ButtonProps> = ({
       {IconComponent && (
         <IconComponent 
           size={16} 
-          color={type === 'primary' || type === 'primary-admin' ? colors.primary.contrast : colors.secondary.main}
+          color={type === 'primary' || type === 'primary-admin' ? colors.primary.contrast : type === 'tertiary' ? colors.primary.main : colors.secondary.main}
         />
       )}
       {text && (
