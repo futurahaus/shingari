@@ -22,6 +22,7 @@ export const EditionModal: React.FC<EditionModalProps> = ({
     wholesalePrice: 0,
     stock: 0,
     categoryIds: [],
+    iva: 0,
   });
 
   // Initialize form when product changes
@@ -38,6 +39,7 @@ export const EditionModal: React.FC<EditionModalProps> = ({
         images: product.images || [],
         unit_id: product.unit_id ?? undefined,
         units_per_box: product.units_per_box ?? 0,
+        iva: product.iva ?? 0,
       });
     }
   }, [product]);
@@ -61,6 +63,7 @@ export const EditionModal: React.FC<EditionModalProps> = ({
         wholesalePrice: 0,
         stock: 0,
         categoryIds: [],
+        iva: 0,
       });
       onProductUpdated();
       showSuccess('Producto Actualizado', 'El producto se ha actualizado exitosamente');
@@ -151,6 +154,21 @@ export const EditionModal: React.FC<EditionModalProps> = ({
                     value={editForm.wholesalePrice || ''}
                     onChange={e => setEditForm({ ...editForm, wholesalePrice: parseFloat(e.target.value) || 0 })}
                     className="w-full border border-gray-300 text-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">IVA (%)</label>
+                  <input
+                    type="number"
+                    placeholder="21"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value={editForm.iva || ''}
+                    onChange={(e) => setEditForm({ ...editForm, iva: parseFloat(e.target.value) || 0 })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
               </div>

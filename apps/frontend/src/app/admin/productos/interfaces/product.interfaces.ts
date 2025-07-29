@@ -19,6 +19,7 @@ export interface Product {
   unit_id?: number;
   unit_name?: string;
   units_per_box?: number;
+  iva?: number;
 }
 
 export interface PaginatedProductsResponse {
@@ -40,6 +41,7 @@ export interface CreateProductData {
   images?: string[];
   unit_id?: number;
   units_per_box?: number;
+  iva?: number;
 }
 
 export interface UpdateProductData {
@@ -53,6 +55,7 @@ export interface UpdateProductData {
   images?: string[];
   unit_id?: number;
   units_per_box?: number;
+  iva?: number;
 }
 
 // Props interfaces para componentes

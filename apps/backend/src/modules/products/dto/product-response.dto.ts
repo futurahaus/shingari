@@ -93,6 +93,12 @@ export class ProductResponseDto {
   })
   unit_name?: string;
 
+  @ApiPropertyOptional({ 
+    description: 'IVA del producto (porcentaje)',
+    example: 21.0,
+  })
+  iva?: number;
+
   // Considerar añadir otros campos que sean relevantes desde Prisma, como relaciones cargadas.
 }
 
