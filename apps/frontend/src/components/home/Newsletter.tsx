@@ -26,9 +26,14 @@ const Newsletter = () => {
               console.log('Suscribirse al newsletter');
             }}
             type="primary"
+            size='sm'
             text="Suscribirse"
             testID="newsletter-subscribe-button"
             inline={true}
+            textProps={{
+              size: 'sm',
+              weight: 'normal',
+            }}
           />
         </form>
       </div>

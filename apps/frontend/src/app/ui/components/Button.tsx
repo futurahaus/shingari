@@ -13,6 +13,7 @@ interface ButtonProps {
   textProps?: Omit<TextProps, 'children'>;
   htmlType?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
+  size?: 'sm' | 'md' | 'lg';
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -25,8 +26,18 @@ export const Button: React.FC<ButtonProps> = ({
   textProps = {},
   htmlType = 'button',
   disabled = false,
+  size = 'lg',
 }) => {
-  const baseClasses = `px-6 py-3 rounded-[10px] font-medium text-base text-center min-h-[44px] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 flex items-center justify-center gap-2 cursor-pointer ${inline ? '' : 'w-full'}`;
+  const getPaddingClasses = () => {
+    switch (size) {
+      case 'sm': return 'px-2 py-1';
+      case 'md': return 'px-4 py-2';
+      case 'lg': return 'px-6 py-3';
+      default: return 'px-6 py-3';
+    }
+  };
+
+  const baseClasses = `${getPaddingClasses()} rounded-[10px] font-medium text-base text-center min-h-[44px] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 flex items-center justify-center gap-2 cursor-pointer ${inline ? '' : 'w-full'}`;
   
   const primaryClasses = `bg-[${colors.primary.main}] hover:bg-[${colors.primary.dark}] focus:ring-[${colors.primary.main}] shadow-md`;
   const primaryAdminClasses = `bg-[${colors.admin.main}] hover:bg-[${colors.admin.light}] focus:ring-[${colors.admin.main}] shadow-md`;
