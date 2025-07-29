@@ -23,6 +23,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
     wholesalePrice: 0,
     stock: 0,
     categoryIds: [],
+    iva: 0,
   });
 
   // Estado para archivos seleccionados
@@ -99,6 +100,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
         wholesalePrice: 0,
         stock: 0,
         categoryIds: [],
+        iva: 0,
       });
       onProductCreated();
       showSuccess('Producto Creado', 'El producto se ha creado exitosamente');
@@ -119,6 +121,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
       wholesalePrice: 0,
       stock: 0,
       categoryIds: [],
+      iva: 0,
     });
     onClose();
   };
@@ -274,6 +277,21 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                     value={createForm.wholesalePrice || ''}
                     onChange={e => setCreateForm({ ...createForm, wholesalePrice: parseFloat(e.target.value) || 0 })}
                     className="w-full border border-gray-300 text-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">IVA (%)</label>
+                  <input
+                    type="number"
+                    placeholder="21"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value={createForm.iva || ''}
+                    onChange={(e) => setCreateForm({ ...createForm, iva: parseFloat(e.target.value) || 0 })}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
               </div>

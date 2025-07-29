@@ -15,6 +15,7 @@ export interface Product {
     categories: string[];
     sku?: string;
     units_per_box?: number;
+    iva?: number;
 }
 
 export const ProductCard = ({ product }: { product: Product }) => {
@@ -37,7 +38,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
                     </Text>
                 )}
                 {/* Quantity controls */}
-                <QuantityControls 
+                <QuantityControls
                     productId={product.id}
                     productName={product.name}
                     productPrice={product.price}
@@ -50,9 +51,16 @@ export const ProductCard = ({ product }: { product: Product }) => {
                     {product.name}
                 </Text>
                 <div className="flex items-center mt-2 mb-2">
-                    <Text as="h4" size="md" weight="semibold" color="gray-900" testID={`product-price-${product.id}`}>
-                        {`€${new Intl.NumberFormat('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(product.price)}`}
-                    </Text>
+                    <div className="flex flex-col">
+                        <Text as="h4" size="md" weight="semibold" color="gray-900" testID={`product-price-${product.id}`}>
+                            {`€${new Intl.NumberFormat('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(product.price)}`}
+                        </Text>
+                        {product.iva && product.iva > 0 && (
+                            <Text as="span" size="xs" color="gray-500" className="text-xs">
+                                IVA incluido ({product.iva}%)
+                            </Text>
+                        )}
+                    </div>
                     {(typeof product.discount === 'number' && product.discount > 0) && (
                         <Text
                             as="span"
