@@ -22,7 +22,7 @@ export default function Sidebar({ className = '', children }: SidebarProps) {
   const { logout } = useAuth();
 
   return (
-    <aside className={`bg-white w-full max-w-xs ${className}`}>
+    <aside className={`bg-white w-full max-w-xs hidden md:block ${className}`}>
       <nav className="flex flex-col gap-2 justify-between">
         {navItems.map((item) => {
           const Icon = item.icon;
