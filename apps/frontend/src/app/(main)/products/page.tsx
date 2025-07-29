@@ -55,7 +55,7 @@ const CategorySidebar = ({
     });
 
     return (
-        <aside className="w-64 pr-8">
+        <aside className="w-64 pr-8 hidden md:block">
             <Text as="h2" size="xl" weight="bold" color="primary" className="mb-4">
                 Categorías
             </Text>
