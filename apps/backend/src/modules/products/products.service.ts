@@ -136,13 +136,32 @@ export class ProductsService {
       userRole,
     );
 
+    // Calculate IVA-included prices
+    // Check if IVA is stored as decimal (0.21) or percentage (21)
+    let ivaValue = product.iva ? product.iva.toNumber() : 21;
+
+    // If IVA value is very small (< 1), it's likely stored as decimal (0.21 for 21%)
+    // Convert it to percentage format
+    if (ivaValue < 1 && ivaValue > 0) {
+      ivaValue = ivaValue * 100;
+    }
+
+    // Default to 21% if no IVA is set
+    if (!product.iva) {
+      ivaValue = 21;
+    }
+
+    const priceWithIva = price * (1 + ivaValue / 100);
+    const originalPriceWithIva = originalPrice ? originalPrice * (1 + ivaValue / 100) : undefined;
     return {
       updatedAt: new Date(),
       id: product.id.toString(),
       name: product.name,
       description: product.description || '',
-      price: price,
-      originalPrice: originalPrice,
+      price: Math.round(priceWithIva * 100) / 100, // IVA-included price
+      originalPrice: originalPriceWithIva
+        ? Math.round(originalPriceWithIva * 100) / 100
+        : undefined, // IVA-included original price
       discount: discount,
       createdAt: product.created_at || new Date(),
       categories:
@@ -150,7 +169,7 @@ export class ProductsService {
       images: product.product_images?.map((pi) => pi.image_url) || [],
       sku: product.sku || '',
       units_per_box: product.units_per_box !== undefined && product.units_per_box !== null ? Number(product.units_per_box) : undefined,
-      iva: product.iva ? product.iva.toNumber() : undefined,
+      iva: product.iva ? ivaValue : undefined,
     };
   }
 
@@ -211,14 +230,34 @@ export class ProductsService {
             userRole,
           );
 
+        // Calculate IVA-included prices
+        // Check if IVA is stored as decimal (0.21) or percentage (21)
+        let ivaValue = product.iva ? product.iva.toNumber() : 21;
+
+        // If IVA value is very small (< 1), it's likely stored as decimal (0.21 for 21%)
+        // Convert it to percentage format
+        if (ivaValue < 1 && ivaValue > 0) {
+          ivaValue = ivaValue * 100;
+        }
+
+        // Default to 21% if no IVA is set
+        if (!product.iva) {
+          ivaValue = 21;
+        }
+
+        const priceWithIva = price * (1 + ivaValue / 100);
+        const originalPriceWithIva = originalPrice ? originalPrice * (1 + ivaValue / 100) : undefined;
+
         return {
           updatedAt: new Date(),
           id: product.id.toString(),
           name: product.name,
           description: product.description || '',
-          price: price,
+          price: Math.round(priceWithIva * 100) / 100, // IVA-included price
           stock: product.products_stock[0]?.quantity.toNumber() || 0,
-          originalPrice: originalPrice,
+          originalPrice: originalPriceWithIva
+            ? Math.round(originalPriceWithIva * 100) / 100
+            : undefined, // IVA-included original price
           listPrice: product.list_price.toNumber(),
           wholesalePrice: product.wholesale_price.toNumber(),
           discount: discount,
@@ -228,7 +267,7 @@ export class ProductsService {
           images: product.product_images?.map((pi) => pi.image_url) || [],
           sku: product.sku || '',
           units_per_box: product.units_per_box !== undefined && product.units_per_box !== null ? Number(product.units_per_box) : undefined,
-          iva: product.iva ? product.iva.toNumber() : undefined,
+          iva: product.iva ? ivaValue : undefined,
         };
       }),
     );
@@ -249,6 +288,7 @@ export class ProductsService {
     queryProductDto: QueryProductDto,
     userId?: string,
   ): Promise<PaginatedProductResponseDto> {
+
     const cacheKey = this.getFindAllPublicCacheKey(queryProductDto, userId);
     const cached =
       await this.cacheManager.get<PaginatedProductResponseDto>(cacheKey);
