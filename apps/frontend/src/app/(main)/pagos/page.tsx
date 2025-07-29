@@ -138,7 +138,7 @@ export default function PagosPage() {
         </div>
       )}
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-12 py-8">
+      <main className="max-w-7xl mx-auto px-4 md:px-16 py-8">
         <div className="">
           <h1 className="text-xl font-bold text-black mb-8">Selecciona método de pago</h1>
 

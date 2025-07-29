@@ -23,7 +23,7 @@ export const Banner = () => {
           <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
             <Text 
               as="h1" 
-              size="4xl" 
+              size="3xl" 
               weight="bold" 
               color="primary-contrast" 
               className="mb-4 leading-tight"
@@ -41,7 +41,7 @@ export const Banner = () => {
             >
               Productos de alimentación singulares de asia y otros continentes.
             </Text>
-            <div className="flex flex-col sm:flex-row gap-6 w-full max-w-2xl justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full max-w-2xl justify-center">
               <Button
                 onPress={() => {
                   // Lógica para navegar a tienda particulares

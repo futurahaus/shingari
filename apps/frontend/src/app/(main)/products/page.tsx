@@ -9,8 +9,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import ProductCardSkeleton from '@/components/ProductCardSkeleton';
 import { Text } from '@/app/ui/components/Text';
 import { Suspense } from 'react';
-import { Button } from '@/app/ui/components/Button';
-import { useCart } from '@/contexts/CartContext';
 
 interface Category {
     id: string;
@@ -457,50 +455,10 @@ function ProductsPageContent() {
     );
 }
 
-function FloatingCartButton() {
-  const { openCart, cart } = useCart();
-  const [show, setShow] = useState(false);
-  // Find the search bar element rendered by SearchHeader
-  useEffect(() => {
-    const searchBar = document.querySelector('.bg-white.py-4');
-    if (!searchBar) return;
-    const observer = new window.IntersectionObserver(
-      ([entry]) => {
-        setShow(!entry.isIntersecting);
-      },
-      { root: null, threshold: 0.01 }
-    );
-    observer.observe(searchBar);
-    return () => observer.disconnect();
-  }, []);
-  if (!show) return null;
-  return (
-    <div style={{ position: 'fixed', top: 24, right: 24, zIndex: 50 }}>
-      <div className="relative">
-        <Button
-          onPress={openCart}
-          type="primary"
-          testID="floating-cart-button"
-          icon="FaShoppingCart"
-          inline={true}
-        />
-        {cart.length > 0 && (
-          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
-            {cart.length}
-          </span>
-        )}
-      </div>
-    </div>
-  );
-}
-
 export default function ProductsPage() {
     return (
-        <>
-            <Suspense fallback={<div>Cargando productos...</div>}>
-                <ProductsPageContent />
-            </Suspense>
-            <FloatingCartButton />
-        </>
+        <Suspense fallback={<div>Cargando productos...</div>}>
+            <ProductsPageContent />
+        </Suspense>
     );
 }
