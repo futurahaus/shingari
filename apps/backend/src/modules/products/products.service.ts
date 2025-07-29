@@ -150,6 +150,7 @@ export class ProductsService {
       images: product.product_images?.map((pi) => pi.image_url) || [],
       sku: product.sku || '',
       units_per_box: product.units_per_box !== undefined && product.units_per_box !== null ? Number(product.units_per_box) : undefined,
+      iva: product.iva ? product.iva.toNumber() : undefined,
     };
   }
 
@@ -227,6 +228,7 @@ export class ProductsService {
           images: product.product_images?.map((pi) => pi.image_url) || [],
           sku: product.sku || '',
           units_per_box: product.units_per_box !== undefined && product.units_per_box !== null ? Number(product.units_per_box) : undefined,
+          iva: product.iva ? product.iva.toNumber() : undefined,
         };
       }),
     );
@@ -404,6 +406,7 @@ export class ProductsService {
       status,
       images,
       unit_id = 1,
+      iva,
     } = createProductDto;
 
     // Generate a unique SKU
@@ -432,6 +435,7 @@ export class ProductsService {
             product_states.active)
           : product_states.active,
         units_per_box: typeof createProductDto.units_per_box === 'number' ? createProductDto.units_per_box : undefined,
+        iva: iva !== undefined ? new Prisma.Decimal(iva) : undefined,
       },
       include: {
         products_categories: { include: { categories: true } },
@@ -519,6 +523,7 @@ export class ProductsService {
       status,
       images,
       unit_id = 1,
+      iva,
     } = updateProductDto;
 
     const existingProduct = await this.prisma.products.findUnique({
@@ -546,6 +551,7 @@ export class ProductsService {
           typeof updateProductDto.units_per_box === 'number'
             ? updateProductDto.units_per_box
             : undefined,
+        iva: iva !== undefined ? new Prisma.Decimal(iva) : undefined,
       },
       include: {
         products_categories: { include: { categories: true } },

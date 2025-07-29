@@ -117,6 +117,16 @@ export class CreateProductDto {
   @IsOptional()
   units_per_box?: number;
 
+  @ApiPropertyOptional({
+    description: 'IVA del producto (porcentaje)',
+    example: 21.0,
+    type: Number,
+  })
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  @IsOptional()
+  iva?: number;
+
   // Si tuvieras metadatos o atributos customizables podrías usar algo como:
   // @ApiPropertyOptional({ type: [ProductMetadataDto], description: 'Metadatos adicionales del producto' })
   // @IsArray()

@@ -68,6 +68,13 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
                 </div>
             </td>
 
+            {/* IVA */}
+            <td className="px-6 py-4 whitespace-nowrap">
+                <div className="text-sm text-gray-900">
+                    {product.iva ? `${product.iva.toFixed(2)}%` : '-'}
+                </div>
+            </td>
+
             {/* Unidades vendidas (Mock) */}
             <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">
