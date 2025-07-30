@@ -9,6 +9,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import ProductCardSkeleton from '@/components/ProductCardSkeleton';
 import { Text } from '@/app/ui/components/Text';
 import { Suspense } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useFavorites } from '@/hooks/useFavorites';
 
 interface Category {
     id: string;
@@ -38,11 +40,16 @@ const CategorySidebar = ({
     categories,
     selectedCategoryName,
     onSelectCategory,
+    isFavoritesSelected,
+    onSelectFavorites,
 }: {
     categories: Category[];
     selectedCategoryName: string | null;
     onSelectCategory: (name: string | null) => void;
+    isFavoritesSelected: boolean;
+    onSelectFavorites: () => void;
 }) => {
+    const { user } = useAuth();
     // Build a parent-children map
     const parentCategories = categories.filter(cat => !cat.parentId || cat.parentId === '');
     const childCategories = categories.filter(cat => cat.parentId && cat.parentId !== '');
@@ -54,6 +61,42 @@ const CategorySidebar = ({
 
     return (
         <aside className="w-64 pr-8 hidden md:block">
+            {/* Favoritos Link - Only show if user is authenticated */}
+            {user && (
+                <div className="mb-6">
+                    {isFavoritesSelected ? (
+                        <Text
+                            as="span"
+                            size="lg"
+                            weight="bold"
+                            color="primary-main"
+                            className="transition-colors cursor-default"
+                        >
+                            ⭐ Favoritos
+                        </Text>
+                    ) : (
+                        <a
+                            href="#"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                onSelectFavorites();
+                            }}
+                            className="block"
+                        >
+                            <Text
+                                as="span"
+                                size="lg"
+                                weight="bold"
+                                color="primary"
+                                className="transition-colors hover:text-black"
+                            >
+                                ⭐ Favoritos
+                            </Text>
+                        </a>
+                    )}
+                </div>
+            )}
+
             <Text as="h2" size="xl" weight="bold" color="primary" className="mb-4">
                 Categorías
             </Text>
@@ -214,12 +257,15 @@ const ProductsSection = ({
     selectedParent,
     childNamesOfSelectedParent,
     categoryFilter,
+    isFavoritesSelected,
 }: {
     selectedCategory: string | null;
     selectedParent?: Category | null;
     childNamesOfSelectedParent?: string[];
     categoryFilter: string | null;
+    isFavoritesSelected: boolean;
 }) => {
+    const { favorites } = useFavorites();
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -298,32 +344,65 @@ const ProductsSection = ({
         }
     }, [filters, categoryFilter, selectedParent, childNamesOfSelectedParent]); // eslint-disable-line react-hooks/exhaustive-deps
 
+    // Handle favorites filtering
+    useEffect(() => {
+        if (isFavoritesSelected) {
+            setLoading(true);
+            // Convert favorites to products format and filter by current filters
+            const favoriteProducts: Product[] = favorites.map(fav => ({
+                id: fav.product_id.toString(),
+                name: fav.product.name,
+                price: parseFloat(fav.product.list_price),
+                description: fav.product.description || '',
+                images: fav.product.image_url ? [fav.product.image_url] : [],
+                categories: [],
+                sku: fav.product.sku,
+            }));
+
+                         // Apply price sorting if selected
+             const sortedProducts = [...favoriteProducts];
+             if (filters.price === 'ASC') {
+                 sortedProducts.sort((a, b) => a.price - b.price);
+             } else if (filters.price === 'DESC') {
+                 sortedProducts.sort((a, b) => b.price - a.price);
+             }
+
+            setProducts(sortedProducts);
+            setHasMore(false); // No pagination for favorites
+            setBufferedProducts([]);
+            setLoading(false);
+            return;
+        }
+    }, [isFavoritesSelected, favorites, filters.price]);
+
     // Initial load and when filters/searchParams change
     useEffect(() => {
-        setProducts([]);
-        setPage(1);
-        setHasMore(true);
-        setBufferedProducts([]);
-        fetchProducts(1);
-    }, [filters, categoryFilter, fetchProducts]);
+        if (!isFavoritesSelected) {
+            setProducts([]);
+            setPage(1);
+            setHasMore(true);
+            setBufferedProducts([]);
+            fetchProducts(1);
+        }
+    }, [filters, categoryFilter, fetchProducts, isFavoritesSelected]);
 
-    // Buffer next page after main load
+    // Buffer next page after main load (only if not favorites)
     useEffect(() => {
-        if (page === 1 && hasMore) {
+        if (!isFavoritesSelected && page === 1 && hasMore) {
             bufferNextPage(2);
         }
-    }, [page, hasMore, bufferNextPage]);
+    }, [page, hasMore, bufferNextPage, isFavoritesSelected]);
 
-    // When products or page changes, buffer the next page
+    // When products or page changes, buffer the next page (only if not favorites)
     useEffect(() => {
-        if (page > 1 && hasMore) {
+        if (!isFavoritesSelected && page > 1 && hasMore) {
             bufferNextPage(page + 1);
         }
-    }, [page, hasMore, bufferNextPage]);
+    }, [page, hasMore, bufferNextPage, isFavoritesSelected]);
 
-    // IntersectionObserver for infinite scroll
+    // IntersectionObserver for infinite scroll (only if not favorites)
     useEffect(() => {
-        if (!hasMore || loading || bufferLoading) return;
+        if (isFavoritesSelected || !hasMore || loading || bufferLoading) return;
         const observer = new window.IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting && bufferedProducts.length > 0) {
@@ -355,7 +434,7 @@ const ProductsSection = ({
                 selectedCategory={selectedCategory}
             />
             <Text as="h1" size="4xl" weight="extrabold" color="primary" className="mb-6">
-                {selectedCategory || 'Todos los Productos'}
+                {isFavoritesSelected ? 'Mis Favoritos' : (selectedCategory || 'Todos los Productos')}
             </Text>
             <ProductFilters filters={filters} onFilterChange={handleFilterChange} />
             {loading && products.length === 0 ? (
@@ -400,7 +479,9 @@ function ProductsPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const categoryFilter = searchParams.get('categoryFilters');
-    const selectedCategory = categoryFilter;
+    const favoritesFilter = searchParams.get('favorites');
+    const isFavoritesSelected = favoritesFilter === 'true';
+    const selectedCategory = isFavoritesSelected ? null : categoryFilter;
 
     // New: Find if selectedCategory is a parent or child
     const parentCategories = categories.filter(cat => !cat.parentId || cat.parentId === '');
@@ -414,10 +495,28 @@ function ProductsPageContent() {
     const handleSelectCategory = (categoryName: string | null) => {
         const newParams = new URLSearchParams(searchParams.toString());
 
+        // Clear favorites when selecting a category
+        newParams.delete('favorites');
+
         if (categoryName === null || categoryName === selectedCategory) {
             newParams.delete('categoryFilters');
         } else {
             newParams.set('categoryFilters', categoryName);
+        }
+
+        router.push(`/products?${newParams.toString()}`);
+    };
+
+    const handleSelectFavorites = () => {
+        const newParams = new URLSearchParams(searchParams.toString());
+
+        // Clear category filters when selecting favorites
+        newParams.delete('categoryFilters');
+
+        if (isFavoritesSelected) {
+            newParams.delete('favorites');
+        } else {
+            newParams.set('favorites', 'true');
         }
 
         router.push(`/products?${newParams.toString()}`);
@@ -443,12 +542,15 @@ function ProductsPageContent() {
                     categories={categories}
                     selectedCategoryName={categoryFilter}
                     onSelectCategory={handleSelectCategory}
+                    isFavoritesSelected={isFavoritesSelected}
+                    onSelectFavorites={handleSelectFavorites}
                 />
                 <ProductsSection
                     selectedCategory={selectedCategory}
                     selectedParent={selectedParent}
                     childNamesOfSelectedParent={childNamesOfSelectedParent}
                     categoryFilter={categoryFilter}
+                    isFavoritesSelected={isFavoritesSelected}
                 />
             </div>
         </div>

@@ -78,6 +78,21 @@ Aplicación construida con NestJS. **Todas las rutas de la API del backend está
             -   `GET /products/discounts`: Obtener descuentos de productos para el usuario autenticado (puede filtrar por `productId`).
         -   `products.module.ts`: Definición del módulo.
         -   `dto/`: Data Transfer Objects para productos (creación, actualización, consulta, respuesta, descuentos).
+    -   **`favorites/`**: Módulo para la gestión de productos favoritos de los usuarios.
+        -   `favorites.service.ts`: Lógica de negocio para favoritos, incluyendo agregar, eliminar y obtener favoritos del usuario.
+        -   `favorites.controller.ts`: Endpoints HTTP para favoritos.
+            -   `POST /favorites`: Agregar producto a favoritos (protegido por JwtAuthGuard).
+            -   `DELETE /favorites/:productId`: Eliminar producto de favoritos (protegido por JwtAuthGuard).
+            -   `GET /favorites`: Obtener lista de favoritos del usuario (protegido por JwtAuthGuard).
+            -   `GET /favorites/:productId/check`: Verificar si un producto está en favoritos (protegido por JwtAuthGuard).
+        -   `favorites.module.ts`: Definición del módulo.
+        -   `dto/`: Data Transfer Objects para favoritos (agregar favorito, respuesta de favoritos, mensajes simples).
+        -   **Funcionalidad de Favoritos**: Sistema completo de favoritos para usuarios autenticados.
+            -   **Validación de Productos**: Verifica que el producto exista antes de agregarlo a favoritos.
+            -   **Prevención de Duplicados**: Evita agregar el mismo producto múltiples veces a favoritos.
+            -   **Gestión Completa**: Permite agregar, eliminar, listar y verificar estado de favoritos.
+            -   **Información Enriquecida**: Incluye datos completos del producto al obtener favoritos.
+            -   **Protección por JWT**: Todos los endpoints requieren autenticación.
 -   **`test/`**: Contiene tests end-to-end (e2e).
 -   **`generated/`**: Posiblemente para artefactos generados (ej. cliente Prisma).
 
