@@ -101,9 +101,9 @@ const CarritoPage = () => {
                   <div className="md:hidden">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center flex-1">
-                        <div className="w-12 h-12 bg-gray-200 flex items-center justify-center rounded mr-3">
+                        <div className="w-12 h-12 bg-gray-200 flex items-center justify-center rounded mr-3 overflow-hidden">
                           {item.image ? (
-                            <Image src={item.image} alt={item.name} width={48} height={48} className="object-cover rounded" />
+                            <Image src={item.image} alt={item.name} width={48} height={48} className="object-cover w-full h-full" />
                           ) : (
                             <div className="w-10 h-10 bg-gray-300 rounded" />
                           )}

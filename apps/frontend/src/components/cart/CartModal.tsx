@@ -74,7 +74,7 @@ export const CartModal = () => {
                 <div key={item.id} className="py-4 flex gap-4">
                   <div className="w-24 h-24 bg-gray-200 flex items-center justify-center">
                     {item.image ? (
-                      <Image src={item.image} alt={item.name} width={96} height={96} className="object-cover" />
+                      <Image src={item.image} alt={item.name} width={96} height={96} className="object-cover w-full h-full" />
                     ) : (
                       <div className="w-20 h-20 bg-gray-300" />
                     )}
