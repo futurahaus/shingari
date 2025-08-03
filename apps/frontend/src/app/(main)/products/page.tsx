@@ -246,7 +246,7 @@ const ProductsSection = ({
     const [bufferedProducts, setBufferedProducts] = useState<Product[]>([]);
     const [bufferLoading, setBufferLoading] = useState(false);
     const observerRef = useRef<HTMLDivElement | null>(null);
-    // Remove: const searchParams = useSearchParams();
+    const searchParams = useSearchParams();
 
     // Helper to build params
     const buildParams = (pageNumber: number) => {
@@ -275,6 +275,11 @@ const ProductsSection = ({
                 params.append('categoryFilters', categoryFilter);
             }
         }
+        // Add search parameter if present
+        const searchQuery = searchParams.get('search');
+        if (searchQuery) {
+            params.append('search', searchQuery);
+        }
         return params;
     };
 
@@ -297,7 +302,7 @@ const ProductsSection = ({
         } finally {
             setLoading(false);
         }
-    }, [filters, categoryFilter, selectedParent, childNamesOfSelectedParent]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [filters, categoryFilter, selectedParent, childNamesOfSelectedParent, searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Buffer the next page
     const bufferNextPage = useCallback(async (nextPage: number) => {
@@ -311,7 +316,7 @@ const ProductsSection = ({
         } finally {
             setBufferLoading(false);
         }
-    }, [filters, categoryFilter, selectedParent, childNamesOfSelectedParent]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [filters, categoryFilter, selectedParent, childNamesOfSelectedParent, searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Update filters when selectedCategory changes
     useEffect(() => {

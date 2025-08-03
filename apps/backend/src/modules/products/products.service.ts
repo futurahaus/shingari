@@ -296,6 +296,7 @@ export class ProductsService {
     const {
       page = 1,
       limit = 10,
+      search,
       searchName,
       categoryFilters,
       sortByPrice,
@@ -307,7 +308,13 @@ export class ProductsService {
       // NOTA: En tu schema, 'products' no tiene 'deletedAt'. El borrado lógico se maneja por 'status'.
     };
 
-    if (searchName) {
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { sku: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
+    } else if (searchName) {
       where.name = { contains: searchName, mode: 'insensitive' };
     }
 
