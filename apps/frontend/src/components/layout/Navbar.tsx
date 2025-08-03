@@ -31,13 +31,13 @@ export default function Navbar() {
                 Categorías
               </Text>
             </Link>
-            
+
             <Link href="/about-us" className="flex flex-1 items-center justify-center h-full text-white hover:opacity-80 transition-opacity">
               <Text as="span" size="md" color="white">
                 Sobre Shingari
               </Text>
             </Link>
-            
+
             <Link href="/contacto" className="flex flex-1 items-center justify-center h-full text-white hover:opacity-80 transition-opacity">
               <Text as="span" size="md" color="white">
                 Contacto
@@ -83,24 +83,19 @@ export default function Navbar() {
         {isMenuOpen && (
           <div className="md:hidden relative top-0 left-0 right-0 bg-white z-50">
             <div className="bg-primary">
-              <Link 
-                href="/products" 
+              <Link
+                href="/products"
                 onClick={closeMenu}
                 className="block py-3 text-gray-800 hover:text-primary transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="text-white">
-                    <rect y="5" width="24" height="2" rx="1" fill="currentColor" />
-                    <rect y="11" width="24" height="2" rx="1" fill="currentColor" />
-                    <rect y="17" width="24" height="2" rx="1" fill="currentColor" />
-                  </svg>
                   <Text as="span" size="md" color="white">
                     Categorías
                   </Text>
                 </div>
               </Link>
-              <Link 
-                href="/about-us" 
+              <Link
+                href="/about-us"
                 onClick={closeMenu}
                 className="block py-3 text-gray-800 hover:text-primary transition-colors"
               >
@@ -108,8 +103,8 @@ export default function Navbar() {
                   Sobre Shingari
                 </Text>
               </Link>
-              <Link 
-                href="/contacto" 
+              <Link
+                href="/contacto"
                 onClick={closeMenu}
                 className="block py-3 text-white hover:text-primary transition-colors"
               >
