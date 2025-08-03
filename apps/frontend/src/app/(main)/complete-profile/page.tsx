@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import Sidebar from '@/components/layout/Sidebar';
+import { Button } from '@/app/ui/components/Button';
 
 interface UserProfile extends Record<string, unknown> {
   nombre: string;
@@ -104,8 +105,62 @@ export default function CompleteProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+      <div className="mx-auto px-4 sm:px-6 lg:px-16 py-8 lg:py-12">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar Skeleton */}
+          <div className="w-full lg:w-64 bg-white shadow-sm rounded-lg p-4 sm:p-6">
+            <div className="animate-pulse">
+              <div className="h-6 bg-gray-200 rounded mb-6"></div>
+              <div className="space-y-4">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="flex items-center space-x-3">
+                    <div className="w-5 h-5 bg-gray-200 rounded"></div>
+                    <div className="h-4 bg-gray-200 rounded flex-1"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Form Skeleton */}
+          <div className="flex-1 bg-white shadow-sm rounded-lg p-4 sm:p-6">
+            <div className="animate-pulse">
+              {/* Header Skeleton */}
+              <div className="pb-5 border-b border-gray-200 mb-6">
+                <div className="h-8 bg-gray-200 rounded w-32 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-64"></div>
+              </div>
+
+              {/* Form Fields Skeleton */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                {[...Array(12)].map((_, i) => (
+                  <div key={i}>
+                    <div className="h-4 bg-gray-200 rounded w-20 mb-2"></div>
+                    <div className="h-10 bg-gray-200 rounded"></div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Radio Buttons Skeleton */}
+              <div className="mt-6">
+                <div className="h-4 bg-gray-200 rounded w-40 mb-3"></div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="flex items-center">
+                      <div className="w-4 h-4 bg-gray-200 rounded mr-2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-24"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Button Skeleton */}
+              <div className="mt-6">
+                <div className="h-12 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -127,12 +182,12 @@ export default function CompleteProfilePage() {
   }
 
   return (
-    <div className="mx-auto px-4 sm:px-6 lg:px-16 py-12">
-      <div className="flex gap-8">
+    <div className="mx-auto px-4 sm:px-6 lg:px-16 py-8 lg:py-12">
+      <div className="flex flex-col lg:flex-row gap-8">
         <Sidebar />
-        <div className="flex-1 bg-white shadow-sm rounded-lg p-6">
+        <div className="flex-1 bg-white shadow-sm rounded-lg p-4 sm:p-6">
           <div className="pb-5 border-b border-gray-200">
-            <h3 className="text-2xl leading-6 font-medium text-gray-900">
+            <h3 className="text-xl sm:text-2xl leading-6 font-medium text-gray-900">
               Mi Perfil
             </h3>
             <p className="mt-2 text-sm text-gray-600">
@@ -142,7 +197,7 @@ export default function CompleteProfilePage() {
 
           <div className="mt-6">
             <form className="space-y-6" onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 {/* Personal Information */}
                 <div>
                   <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
@@ -153,7 +208,7 @@ export default function CompleteProfilePage() {
                     id="nombre"
                     name="nombre"
                     required
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 text-sm sm:text-base"
                     value={formData.nombre}
                     onChange={handleChange}
                   />
@@ -168,7 +223,7 @@ export default function CompleteProfilePage() {
                     id="apellidos"
                     name="apellidos"
                     required
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 text-sm sm:text-base"
                     value={formData.apellidos}
                     onChange={handleChange}
                   />
@@ -328,8 +383,8 @@ export default function CompleteProfilePage() {
               </div>
 
               <div className="mt-6">
-                <p className="text-sm font-medium text-gray-700 mb-2">¿Cómo nos conociste?</p>
-                <div className="flex space-x-6">
+                <p className="text-sm font-medium text-gray-700 mb-3">¿Cómo nos conociste?</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                   <label className="flex items-center">
                     <input
                       type="radio"
@@ -378,12 +433,13 @@ export default function CompleteProfilePage() {
               </div>
 
               <div>
-                <button
-                  type="submit"
-                  className="button w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                >
-                  Guardar Perfil
-                </button>
+                <Button 
+                  type="primary" 
+                  htmlType="submit"
+                  onPress={() => {}} // Form submit will handle this
+                  testID="save-profile-button"
+                  text="Guardar Perfil"
+                />
               </div>
             </form>
           </div>
