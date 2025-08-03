@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import Image from 'next/image';
 import Sidebar from '@/components/layout/Sidebar';
 import { api } from '@/lib/api';
 
@@ -12,6 +13,7 @@ interface OrderLine {
   quantity: number;
   unit_price: string;
   total_price: string;
+  product_image?: string;
 }
 
 interface OrderAddress {
@@ -113,16 +115,16 @@ const OrderDetailSkeleton = () => (
   <div className="flex-1 space-y-4 animate-pulse">
     {/* Header Card Skeleton */}
     <div className="bg-white border border-gray-200 rounded-xl p-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex-1">
-          <div className="flex items-center gap-4 mb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2">
             <div className="w-24 h-6 bg-gray-200 rounded-full"></div>
             <div className="w-32 h-5 bg-gray-200 rounded"></div>
           </div>
           <div className="w-48 h-4 bg-gray-200 rounded"></div>
         </div>
-        <div className="ml-4">
-          <div className="w-28 h-8 bg-gray-200 rounded"></div>
+        <div className="sm:ml-4">
+          <div className="w-full sm:w-28 h-8 bg-gray-200 rounded"></div>
         </div>
       </div>
     </div>
@@ -202,7 +204,7 @@ const OrderDetailSkeleton = () => (
     {/* Products Card Skeleton */}
     <div className="bg-white border border-gray-200 rounded-xl p-4">
       <div className="mb-4">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
           <div className="w-20 h-5 bg-gray-200 rounded"></div>
           <div className="flex gap-4">
             <div className="w-16 h-4 bg-gray-200 rounded"></div>
@@ -215,17 +217,17 @@ const OrderDetailSkeleton = () => (
         {[...Array(2)].map((_, i) => (
           <div key={i}>
             {i > 0 && <hr className="border-gray-200 my-4" />}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="flex items-center gap-2 flex-1">
-                <div className="w-12 h-12 bg-gray-200 border border-gray-300 rounded flex items-center justify-center">
-                  <div className="w-10 h-10 bg-gray-300 rounded"></div>
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-200 border border-gray-300 rounded overflow-hidden">
+                  <div className="w-full h-full bg-gray-300"></div>
                 </div>
                 <div className="flex-1">
                   <div className="w-48 h-4 bg-gray-200 rounded mb-1"></div>
                   <div className="w-24 h-3 bg-gray-200 rounded"></div>
                 </div>
               </div>
-              <div className="flex gap-4">
+              <div className="flex gap-2 sm:gap-4">
                 <div className="w-20 h-4 bg-gray-200 rounded"></div>
                 <div className="w-20 h-4 bg-gray-200 rounded"></div>
               </div>
@@ -265,8 +267,8 @@ export default function OrderDetailPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto px-4 sm:px-6 lg:px-16 py-12">
-        <div className="flex gap-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-16 py-8 lg:py-12">
+        <div className="flex flex-col lg:flex-row gap-8">
           <Sidebar />
           <OrderDetailSkeleton />
         </div>
@@ -276,8 +278,8 @@ export default function OrderDetailPage() {
 
   if (error || !order) {
     return (
-      <div className="mx-auto px-4 sm:px-6 lg:px-16 py-12">
-        <div className="flex gap-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-16 py-8 lg:py-12">
+        <div className="flex flex-col lg:flex-row gap-8">
           <Sidebar />
           <div className="flex-1">
             <div className="text-center text-red-600">
@@ -294,33 +296,33 @@ export default function OrderDetailPage() {
   const payment = order.order_payments[0];
 
   return (
-    <div className="mx-auto px-4 sm:px-6 lg:px-16 py-12">
-      <div className="flex gap-8">
+    <div className="mx-auto px-4 sm:px-6 lg:px-16 py-8 lg:py-12">
+      <div className="flex flex-col lg:flex-row gap-8">
         <Sidebar />
         <div className="flex-1 space-y-4">
           {/* Header Card - Order Status */}
           <div className="bg-white border border-gray-200 rounded-xl p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex-1">
-                <div className="flex items-center gap-4 mb-2">
-                  <div className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-medium ${statusConfig.bgColor} ${statusConfig.textColor} ${statusConfig.borderColor} border`}>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2">
+                  <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs sm:text-sm font-medium ${statusConfig.bgColor} ${statusConfig.textColor} ${statusConfig.borderColor} border w-fit`}>
                     {statusConfig.label}
                   </div>
                   <span className="text-sm font-bold text-gray-900">
                     Orden {formatOrderId(order.id)}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600">
+                <p className="text-xs sm:text-sm text-gray-600">
                   Fecha de compra: {formatDate(order.created_at)}
                 </p>
               </div>
-              <div className="ml-4">
+              <div className="sm:ml-4">
                 <button
                   onClick={() => {
                     // Lógica para repetir compra
                     console.log('Repetir compra:', order.id);
                   }}
-                  className="px-4 py-2 bg-[#EA3D15] text-white rounded text-sm font-medium hover:bg-[#d43e0e] transition-colors cursor-pointer"
+                  className="w-full sm:w-auto px-4 py-2 bg-[#EA3D15] text-white rounded text-sm font-medium hover:bg-[#d43e0e] transition-colors cursor-pointer"
                 >
                   Repetir compra
                 </button>
@@ -334,30 +336,30 @@ export default function OrderDetailPage() {
               <h3 className="text-sm font-bold text-gray-900">Detalle de entrega</h3>
             </div>
             <div className="space-y-3">
-              <div className="flex gap-1">
-                <span className="text-sm text-gray-600">Tipo de entrega:</span>
-                <span className="text-sm font-medium text-gray-900">Envío a domicilio</span>
+              <div className="flex flex-col sm:flex-row sm:gap-1">
+                <span className="text-xs sm:text-sm text-gray-600">Tipo de entrega:</span>
+                <span className="text-xs sm:text-sm font-medium text-gray-900">Envío a domicilio</span>
               </div>
-              <div className="flex gap-1">
-                <span className="text-sm text-gray-600">Entrega en:</span>
-                <span className="text-sm font-medium text-gray-900">
+              <div className="flex flex-col sm:flex-row sm:gap-1">
+                <span className="text-xs sm:text-sm text-gray-600">Entrega en:</span>
+                <span className="text-xs sm:text-sm font-medium text-gray-900">
                   {shippingAddress ? `${shippingAddress.address_line1}, ${shippingAddress.city}, ${shippingAddress.country}` : 'No especificada'}
                 </span>
               </div>
-              <div className="flex gap-1">
-                <span className="text-sm text-gray-600">Fecha de entrega:</span>
-                <span className="text-sm font-medium text-gray-900">
+              <div className="flex flex-col sm:flex-row sm:gap-1">
+                <span className="text-xs sm:text-sm text-gray-600">Fecha de entrega:</span>
+                <span className="text-xs sm:text-sm font-medium text-gray-900">
                   {formatDate(order.created_at)} de 9:00a.m. a 3:00p.m.
                 </span>
               </div>
               <div className="space-y-2">
-                <div className="flex gap-1">
-                  <span className="text-sm text-gray-600">Código de seguimiento:</span>
-                  <span className="text-sm font-medium text-gray-900">
+                <div className="flex flex-col sm:flex-row sm:gap-1">
+                  <span className="text-xs sm:text-sm text-gray-600">Código de seguimiento:</span>
+                  <span className="text-xs sm:text-sm font-medium text-gray-900">
                     {order.id.slice(0, 8).toUpperCase()}-{order.id.slice(8, 12).toUpperCase()}
                   </span>
                 </div>
-                <button className="px-4 py-2 bg-[#EA3D15] text-white rounded text-sm font-medium hover:bg-[#d43e0e] transition-colors cursor-pointer">
+                <button className="w-full sm:w-auto px-4 py-2 bg-[#EA3D15] text-white rounded text-sm font-medium hover:bg-[#d43e0e] transition-colors cursor-pointer">
                   Seguir compra
                 </button>
               </div>
@@ -365,7 +367,7 @@ export default function OrderDetailPage() {
           </div>
 
           {/* Payment and Summary Cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Payment Details Card */}
             <div className="bg-white border border-gray-200 rounded-xl p-4">
               <div className="mb-4">
@@ -417,32 +419,79 @@ export default function OrderDetailPage() {
           {/* Products Card */}
           <div className="bg-white border border-gray-200 rounded-xl p-4">
             <div className="mb-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-sm font-medium text-gray-900">Productos</h3>
+              <h3 className="text-sm font-medium text-gray-900 mb-3">Productos</h3>
+              {/* Desktop Headers */}
+              <div className="hidden sm:flex justify-between items-center text-xs font-medium text-gray-500 border-b border-gray-100 pb-2">
+                <span className="flex-1">Producto</span>
                 <div className="flex gap-4">
-                  <span className="text-sm font-medium text-gray-900 w-24 text-center">Precio</span>
-                  <span className="text-sm font-medium text-gray-900 w-24 text-center">Subtotal</span>
+                  <span className="w-20 text-center">Precio</span>
+                  <span className="w-20 text-center">Subtotal</span>
                 </div>
               </div>
             </div>
 
             <div className="space-y-4">
               {order.order_lines.map((line, index) => (
-                <div key={line.id}>
+                <div key={line.id} className="border border-gray-100 rounded-lg p-3">
                   {index > 0 && <hr className="border-gray-200 my-4" />}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 flex-1">
-                      <div className="w-12 h-12 bg-gray-200 border border-gray-300 rounded flex items-center justify-center">
-                        <div className="w-10 h-10 bg-gray-300 rounded"></div>
+                  
+                  {/* Mobile Layout */}
+                  <div className="sm:hidden">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-12 h-12 bg-gray-200 border border-gray-300 rounded flex items-center justify-center overflow-hidden">
+                        {line.product_image ? (
+                          <Image
+                            src={line.product_image}
+                            alt={line.product_name}
+                            width={48}
+                            height={48}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 bg-gray-300 rounded"></div>
+                        )}
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-600">{line.product_name}</p>
-                        <p className="text-sm text-gray-400">Cantidad: {line.quantity}</p>
+                        <p className="text-sm font-medium text-gray-900 mb-1">{line.product_name}</p>
+                        <p className="text-xs text-gray-500">Cantidad: {line.quantity}</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="text-center">
+                        <p className="text-gray-500 text-xs mb-1">Precio unitario</p>
+                        <p className="font-medium text-gray-900">{formatCurrency(line.unit_price)}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-gray-500 text-xs mb-1">Subtotal</p>
+                        <p className="font-medium text-gray-900">{formatCurrency(line.total_price)}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Desktop Layout */}
+                  <div className="hidden sm:flex items-center justify-between">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="w-12 h-12 bg-gray-200 border border-gray-300 rounded flex items-center justify-center overflow-hidden">
+                        {line.product_image ? (
+                          <Image
+                            src={line.product_image}
+                            alt={line.product_name}
+                            width={48}
+                            height={48}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 bg-gray-300 rounded"></div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">{line.product_name}</p>
+                        <p className="text-xs text-gray-500">Cantidad: {line.quantity}</p>
                       </div>
                     </div>
                     <div className="flex gap-4">
-                      <span className="text-sm text-gray-900 w-24 text-center">{formatCurrency(line.unit_price)}</span>
-                      <span className="text-sm text-gray-900 w-24 text-center">{formatCurrency(line.total_price)}</span>
+                      <span className="text-sm text-gray-900 w-20 text-center">{formatCurrency(line.unit_price)}</span>
+                      <span className="text-sm text-gray-900 w-20 text-center">{formatCurrency(line.total_price)}</span>
                     </div>
                   </div>
                 </div>

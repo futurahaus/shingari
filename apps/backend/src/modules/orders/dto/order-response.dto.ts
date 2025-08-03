@@ -18,6 +18,9 @@ export class OrderLineResponseDto {
 
   @ApiProperty({ description: 'Precio total de la línea' })
   total_price: number;
+
+  @ApiProperty({ description: 'URL de la imagen del producto', required: false })
+  product_image?: string;
 }
 
 export class OrderAddressResponseDto {

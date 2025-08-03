@@ -70,7 +70,15 @@ export class OrdersService {
     const order = await this.prisma.orders.findUnique({
       where: { id },
       include: {
-        order_lines: true,
+        order_lines: {
+          include: {
+            products: {
+              select: {
+                image_url: true,
+              },
+            },
+          },
+        },
         order_addresses: true,
         order_payments: true,
       },
@@ -87,7 +95,15 @@ export class OrdersService {
     const orders = await this.prisma.orders.findMany({
       where: { user_id: userId },
       include: {
-        order_lines: true,
+        order_lines: {
+          include: {
+            products: {
+              select: {
+                image_url: true,
+              },
+            },
+          },
+        },
         order_addresses: true,
         order_payments: true,
       },
@@ -102,7 +118,15 @@ export class OrdersService {
   async findAll(): Promise<OrderResponseDto[]> {
     const orders = await this.prisma.orders.findMany({
       include: {
-        order_lines: true,
+        order_lines: {
+          include: {
+            products: {
+              select: {
+                image_url: true,
+              },
+            },
+          },
+        },
         order_addresses: true,
         order_payments: true,
       },
@@ -135,7 +159,15 @@ export class OrdersService {
         skip: (page - 1) * limit,
         take: limit,
         include: {
-          order_lines: true,
+          order_lines: {
+            include: {
+              products: {
+                select: {
+                  image_url: true,
+                },
+              },
+            },
+          },
           order_addresses: true,
           order_payments: true,
           users: {
@@ -172,6 +204,7 @@ export class OrdersService {
         quantity: line.quantity,
         unit_price: line.unit_price,
         total_price: line.total_price,
+        product_image: line.products?.image_url || null,
       })),
       order_addresses: order.order_addresses.map((address: any) => ({
         id: address.id,
