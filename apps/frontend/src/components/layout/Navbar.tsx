@@ -3,9 +3,12 @@
 import Link from 'next/link';
 import { Text } from '@/app/ui/components/Text';
 import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { User, MapPin, ShoppingBag } from 'lucide-react';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -14,6 +17,14 @@ export default function Navbar() {
   const closeMenu = () => {
     setIsMenuOpen(false);
   };
+
+  // Sidebar navigation items for logged users
+  const sidebarItems = [
+    { label: 'Datos Personales', href: '/dashboard', icon: User },
+    { label: 'Mi perfil', href: '/complete-profile' },
+    { label: 'Direcciones', href: '/dashboard/direcciones', icon: MapPin },
+    { label: 'Mis Compras', href: '/dashboard/compras', icon: ShoppingBag },
+  ];
 
   return (
     <nav className="main-navbar">
@@ -50,7 +61,7 @@ export default function Navbar() {
             {/* Hamburger Menu Button */}
             <button
               onClick={toggleMenu}
-              className="text-white p-2 focus:outline-none"
+              className="text-white py-2 focus:outline-none"
               aria-label="Toggle menu"
             >
               <svg
@@ -81,12 +92,13 @@ export default function Navbar() {
 
         {/* Mobile Menu Overlay */}
         {isMenuOpen && (
-          <div className="md:hidden relative top-0 left-0 right-0 bg-white z-50">
+          <div className="md:hidden relative top-0 left-0 right-0 bg-white z-50 mb-4">
             <div className="bg-primary">
+              {/* Main Navigation Links */}
               <Link
                 href="/products"
                 onClick={closeMenu}
-                className="block py-3 text-gray-800 hover:text-primary transition-colors"
+                className="block py-3 hover:bg-primary-dark transition-colors"
               >
                 <div className="flex items-center gap-2">
                   <Text as="span" size="md" color="white">
@@ -97,7 +109,7 @@ export default function Navbar() {
               <Link
                 href="/about-us"
                 onClick={closeMenu}
-                className="block py-3 text-gray-800 hover:text-primary transition-colors"
+                className="block py-3 hover:bg-primary-dark transition-colors"
               >
                 <Text as="span" size="md" color="white">
                   Sobre Shingari
@@ -106,12 +118,34 @@ export default function Navbar() {
               <Link
                 href="/contacto"
                 onClick={closeMenu}
-                className="block py-3 text-white hover:text-primary transition-colors"
+                className="block py-3 hover:bg-primary-dark transition-colors"
               >
                 <Text as="span" size="md" color="white">
                   Contacto
                 </Text>
               </Link>
+
+              {/* User Dashboard Links - Only show if user is logged in */}
+              {user && (
+                <>
+                  <div className="border-t border-white/20 my-2"></div>
+                  {sidebarItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={closeMenu}
+                      className="block py-3 hover:bg-primary-dark transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        {item.icon && <item.icon className="w-5 h-5 text-white" />}
+                        <Text as="span" size="md" color="white">
+                          {item.label}
+                        </Text>
+                      </div>
+                    </Link>
+                  ))}
+                </>
+              )}
             </div>
           </div>
         )}
