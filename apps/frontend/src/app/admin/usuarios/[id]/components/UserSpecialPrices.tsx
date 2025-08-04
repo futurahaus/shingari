@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { api } from '@/lib/api';
+import { AddSpecialPriceModal } from './AddSpecialPriceModal';
 
 interface SpecialPrice {
   product: string;
@@ -16,13 +17,14 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
   const [specialPrices, setSpecialPrices] = useState<SpecialPrice[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
 
-  useEffect(() => {
+      const loadSpecialPrices = useCallback(() => {
     if (!userId) return;
-    
+
     setLoading(true);
     setError(null);
-    
+
     api.get(`/user/admin/${userId}/special-prices`)
       .then((pricesRes) => {
         const pricesData = Array.isArray(pricesRes) ? pricesRes : [];
@@ -35,6 +37,15 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
       })
       .finally(() => setLoading(false));
   }, [userId, onSpecialPricesLoaded]);
+
+  useEffect(() => {
+    loadSpecialPrices();
+  }, [loadSpecialPrices]);
+
+  const handleSpecialPriceAdded = () => {
+    setShowAddModal(false);
+    loadSpecialPrices(); // Refresh the list
+  };
 
   if (loading) {
     return (
@@ -64,7 +75,15 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
   if (error) {
     return (
       <div className="mb-8">
-        <h2 className="text-lg font-semibold mb-4">Lista de Precios especial</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">Lista de Precios especial</h2>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+          >
+            Agregar precio especial
+          </button>
+        </div>
         <div className="text-red-600 text-sm">{error}</div>
       </div>
     );
@@ -72,7 +91,15 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
 
   return (
     <div className="mb-8">
-      <h2 className="text-lg font-semibold mb-4">Lista de Precios especial</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold">Lista de Precios especial</h2>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className=""
+        >
+          Agregar precio especial
+        </button>
+      </div>
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 rounded-lg">
           <thead>
@@ -101,6 +128,14 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
           </tbody>
         </table>
       </div>
+
+      {showAddModal && (
+        <AddSpecialPriceModal
+          userId={userId}
+          onClose={() => setShowAddModal(false)}
+          onSpecialPriceAdded={handleSpecialPriceAdded}
+        />
+      )}
     </div>
   );
-}; 
+};

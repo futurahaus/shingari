@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
+import { Prisma } from '../../../generated/prisma';
 
 interface PublicUser {
   first_name?: string;
@@ -414,5 +415,82 @@ export class UserService {
       priceRetail: d.products?.list_price?.toString() || '',
       priceClient: d.price?.toString() || '',
     }));
+  }
+
+  // Create a special price for a user
+  async createSpecialPrice(createSpecialPriceData: {
+    user_id: string;
+    product_id: number;
+    price: number;
+    is_active?: boolean;
+    valid_from?: string;
+    valid_to?: string;
+  }) {
+    const {
+      user_id,
+      product_id,
+      price,
+      is_active = true,
+      valid_from,
+      valid_to,
+    } = createSpecialPriceData;
+
+    // Verify that the product exists
+    const product = await this.prismaService.products.findUnique({
+      where: { id: product_id },
+    });
+
+    if (!product) {
+      throw new Error('Product not found');
+    }
+
+    // Verify that the user exists
+    const user = await this.prismaService.auth_users.findUnique({
+      where: { id: user_id },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Check if a special price already exists for this user and product
+    const existingDiscount = await this.prismaService.products_discounts.findFirst({
+      where: {
+        user_id: user_id,
+        product_id: product_id,
+        is_active: true,
+      },
+    });
+
+    if (existingDiscount) {
+      throw new Error('A special price already exists for this user and product');
+    }
+
+    // Create the special price
+    const specialPrice = await this.prismaService.products_discounts.create({
+      data: {
+        user_id,
+        product_id,
+        price: new Prisma.Decimal(price),
+        is_active,
+        valid_from: valid_from ? new Date(valid_from) : null,
+        valid_to: valid_to ? new Date(valid_to) : null,
+      },
+      include: {
+        products: {
+          select: { name: true, list_price: true },
+        },
+      },
+    });
+
+    return {
+      id: specialPrice.id,
+      product: specialPrice.products?.name || '',
+      priceRetail: specialPrice.products?.list_price?.toString() || '',
+      priceClient: specialPrice.price?.toString() || '',
+      isActive: specialPrice.is_active,
+      validFrom: specialPrice.valid_from,
+      validTo: specialPrice.valid_to,
+    };
   }
 }
