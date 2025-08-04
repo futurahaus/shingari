@@ -225,21 +225,46 @@ export default function AdminProductsPage() {
                   color: page === 1 ? 'gray-400' : 'secondary-main'
                 }}
               />
-              {Array.from({ length: lastPage }, (_, i) => i + 1).map((p) => (
-                <Button
-                  key={p}
-                  onPress={() => handlePageChange(p)}
-                  type={p === page ? 'primary' : 'secondary'}
-                  text={p.toString()}
-                  testID={`page-${p}-button`}
-                  inline
-                  textProps={{
-                    size: 'sm',
-                    weight: 'medium',
-                    color: p === page ? 'primary-contrast' : 'secondary-main'
-                  }}
-                />
-              ))}
+              {(() => {
+                const pages = [];
+                const maxVisiblePages = 5;
+                const startPage = Math.max(1, page - Math.floor(maxVisiblePages / 2));
+                const endPage = Math.min(lastPage, startPage + maxVisiblePages - 1);
+                
+                // Agregar primera página si no está incluida
+                if (startPage > 1) {
+                  pages.push(1);
+                  if (startPage > 2) pages.push('...');
+                }
+                
+                // Agregar páginas visibles
+                for (let i = startPage; i <= endPage; i++) {
+                  pages.push(i);
+                }
+                
+                // Agregar última página si no está incluida
+                if (endPage < lastPage) {
+                  if (endPage < lastPage - 1) pages.push('...');
+                  pages.push(lastPage);
+                }
+                
+                return pages.map((p, index) => (
+                  <Button
+                    key={index}
+                    onPress={() => typeof p === 'number' ? handlePageChange(p) : undefined}
+                    type={p === page ? 'primary' : 'secondary'}
+                    text={p.toString()}
+                    testID={`page-${p}-button`}
+                    inline
+                    disabled={typeof p !== 'number'}
+                    textProps={{
+                      size: 'sm',
+                      weight: 'medium',
+                      color: p === page ? 'primary-contrast' : typeof p === 'number' ? 'secondary-main' : 'gray-400'
+                    }}
+                  />
+                ));
+              })()}
               <Button
                 onPress={() => handlePageChange(page + 1)}
                 type="secondary"
