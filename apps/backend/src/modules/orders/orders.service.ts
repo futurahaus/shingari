@@ -18,9 +18,14 @@ export class OrdersService {
     const { order_lines, order_addresses, order_payments, ...orderData } = createOrderDto;
 
     try {
+      const { user_id, ...orderDataWithoutUserId } = orderData;
+      if (!user_id) {
+        throw new Error('user_id is required to create an order');
+      }
       const order = await this.prisma.orders.create({
         data: {
-          ...orderData,
+          user_id,
+          ...orderDataWithoutUserId,
           order_lines: {
             create: order_lines.map((line) => ({
               product_id: line.product_id,

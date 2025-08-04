@@ -71,7 +71,7 @@ export class FavoriteResponseDto {
     example: '2024-01-15T10:30:00Z',
     required: false,
   })
-  created_at: Date;
+  created_at: Date | null;
 
   @ApiProperty({
     description: 'Product information',
