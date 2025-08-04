@@ -25,7 +25,21 @@ class ApiClient {
       if (!response.ok) throw new Error('Failed to refresh token');
 
       const data = await response.json();
+      
+      // Update both tokens and user data in localStorage
       localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      // Dispatch custom event to notify AuthContext of token update
+      window.dispatchEvent(new CustomEvent('tokenRefreshed', { 
+        detail: { 
+          accessToken: data.accessToken, 
+          refreshToken: data.refreshToken, 
+          user: data.user 
+        } 
+      }));
+      
       return data.accessToken;
     } catch (error) {
       console.error('Error refreshing token:', error);
@@ -33,6 +47,10 @@ class ApiClient {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
+      
+      // Dispatch event to notify AuthContext of logout
+      window.dispatchEvent(new CustomEvent('tokenRefreshFailed'));
+      
       return null;
     }
   }

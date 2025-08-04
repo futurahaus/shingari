@@ -3,6 +3,10 @@ import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
 import { useRouter } from 'next/navigation';
 import { QuantityControls } from './QuantityControls';
+import { useAuth } from '@/contexts/AuthContext';
+import { useFavorites } from '@/hooks/useFavorites';
+import { FaStar, FaRegStar } from 'react-icons/fa';
+import { useState } from 'react';
 
 export interface Product {
     id: string;
@@ -20,10 +24,39 @@ export interface Product {
 
 export const ProductCard = ({ product }: { product: Product }) => {
     const router = useRouter();
+    const { user } = useAuth();
+    const { isFavorite, toggleFavorite } = useFavorites();
+    const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
+
+    const handleFavoriteClick = async (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent navigation to product detail
+        if (isTogglingFavorite) return;
+
+        setIsTogglingFavorite(true);
+        await toggleFavorite(product.id, product.name);
+        setIsTogglingFavorite(false);
+    };
 
     return (
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointe h-full flex flex-col">
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden group hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col">
             <div className="bg-white h-48 flex items-center justify-center relative overflow-hidden flex-shrink-0">
+                {/* Favorite Star Button - Only show if user is authenticated */}
+                {user && (
+                    <button
+                        onClick={handleFavoriteClick}
+                        disabled={isTogglingFavorite}
+                        className={`absolute top-2 right-2 z-10 p-2 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 shadow-sm transition-all duration-200 hover:bg-white hover:scale-110 ${
+                            isTogglingFavorite ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                        }`}
+                        aria-label={isFavorite(product.id) ? 'Eliminar de favoritos' : 'Agregar a favoritos'}
+                    >
+                        {isFavorite(product.id) ? (
+                            <FaStar className="w-4 h-4 text-yellow-400" />
+                        ) : (
+                            <FaRegStar className="w-4 h-4 text-gray-400 hover:text-yellow-400" />
+                        )}
+                    </button>
+                )}
                 {product.images.length > 0 ? (
                     <Image
                         src={product.images[0]}
