@@ -139,7 +139,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-8 lg:ml-0 ml-0">
+        <main className="flex-1 p-4 lg:p-8 lg:ml-0 ml-0">
           <div className="mx-auto">
             {children}
           </div>

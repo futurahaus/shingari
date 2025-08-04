@@ -83,7 +83,7 @@ export default function AdminProductsPage() {
   }, [handleSearchSubmit]);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="">
       <div className="">
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">

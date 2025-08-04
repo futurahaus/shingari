@@ -123,15 +123,15 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="p-8">
+    <div className="">
       {/* Header */}
-      <div className="mb-6 flex justify-between items-center">
+      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold mb-1">Clientes</h1>
+          <h1 className="text-xl lg:text-2xl font-bold mb-1">Clientes</h1>
           <p className="text-gray-500 text-sm">Gestiona tu cartera de clientes</p>
         </div>
         <button
-          className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer"
+          className="w-full sm:w-auto px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer text-sm lg:text-base"
           onClick={() => setShowNewClientModal(true)}
         >
           + Nuevo cliente
@@ -139,14 +139,14 @@ export default function AdminUsersPage() {
       </div>
       {/* New Client Modal */}
       {showNewClientModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-lg p-6 w-full max-w-lg">
-            <h3 className="text-lg font-medium mb-4">Nuevo Cliente</h3>
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-lg p-4 lg:p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <h3 className="text-base lg:text-lg font-medium mb-4">Nuevo Cliente</h3>
             <form
               onSubmit={handleCreateNewUser}
               className="space-y-4"
             >
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs text-gray-500">Email</label>
                   <input name="email" value={newClientForm.email} onChange={e => setNewClientForm(f => ({ ...f, email: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
@@ -215,9 +215,9 @@ export default function AdminUsersPage() {
                 </div>
               </div>
               {saveNewClientError && <div className="text-red-600 text-sm">{saveNewClientError}</div>}
-              <div className="flex justify-end space-x-2 mt-6">
-                <button type="button" onClick={() => setShowNewClientModal(false)} className="px-4 py-2 text-gray-600 hover:text-gray-800 cursor-pointer">Cancelar</button>
-                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer" disabled={savingNewClient}>{savingNewClient ? 'Guardando...' : 'Guardar'}</button>
+              <div className="flex flex-col sm:flex-row justify-end gap-2 mt-6">
+                <button type="button" onClick={() => setShowNewClientModal(false)} className="px-4 py-2 text-gray-600 hover:text-gray-800 cursor-pointer text-sm">Cancelar</button>
+                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer text-sm" disabled={savingNewClient}>{savingNewClient ? 'Guardando...' : 'Guardar'}</button>
               </div>
             </form>
           </div>
@@ -230,10 +230,10 @@ export default function AdminUsersPage() {
           placeholder="Buscar cliente"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200"
+          className="w-full px-3 lg:px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm lg:text-base"
         />
-        <span className="absolute right-4 text-gray-400">
-          <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1 0 6.5 6.5a7.5 7.5 0 0 0 10.6 10.6Z"/></svg>
+        <span className="absolute right-3 lg:right-4 text-gray-400">
+          <svg width="16" height="16" className="lg:w-5 lg:h-5" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1 0 6.5 6.5a7.5 7.5 0 0 0 10.6 10.6Z"/></svg>
         </span>
       </div>
       
@@ -242,7 +242,8 @@ export default function AdminUsersPage() {
         <UsersTableSkeleton rowsCount={15} />
       ) : (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="overflow-x-auto">
+          {/* Desktop Table */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -288,7 +289,7 @@ export default function AdminUsersPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <Link
                           href={`/admin/usuarios/${user.id}`}
-                          className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer"
+                          className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer text-sm"
                         >
                           Ver Detalles
                         </Link>
@@ -298,6 +299,67 @@ export default function AdminUsersPage() {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="lg:hidden">
+            {filteredUsers.length === 0 ? (
+              <div className="px-4 py-8 text-center text-gray-500">
+                No hay usuarios registrados
+              </div>
+            ) : (
+              filteredUsers.map(user => (
+                <div key={user.id} className="p-4 border-b border-gray-200 last:border-b-0">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-medium text-gray-900">
+                          {(user.first_name || '') + ' ' + (user.last_name || '')}
+                        </span>
+                        <span className="text-xs text-gray-500">#{user.id.slice(0, 6)}</span>
+                      </div>
+                      <p className="text-sm text-blue-700 underline">{user.email}</p>
+                      {user.trade_name && (
+                        <p className="text-xs text-gray-600 mt-1">{user.trade_name}</p>
+                      )}
+                    </div>
+                    <Link
+                      href={`/admin/usuarios/${user.id}`}
+                      className="px-3 py-1 bg-black text-white rounded text-xs hover:bg-gray-800 cursor-pointer"
+                    >
+                      Ver
+                    </Link>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div>
+                      <span className="text-gray-500">Ciudad:</span>
+                      <span className="ml-1 text-gray-900">{user.city || '-'}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Teléfono:</span>
+                      <span className="ml-1 text-gray-900">{user.phone || '-'}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Compras:</span>
+                      <span className="ml-1 text-gray-900">{user.compras ?? '-'}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Scoring:</span>
+                      <span className="ml-1 bg-gray-100 px-2 py-0.5 rounded-full text-gray-700">
+                        {user.scoring ?? '0'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {user.last_sign_in_at && (
+                    <div className="mt-2 text-xs text-gray-500">
+                      Últ. login: {new Date(user.last_sign_in_at).toISOString().slice(0, 10)}
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         </div>
       )}
