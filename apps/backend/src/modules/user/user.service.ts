@@ -592,4 +592,26 @@ export class UserService {
       validTo: updatedSpecialPrice.valid_to,
     };
   }
+
+  // Delete a special price for a user
+  async deleteSpecialPrice(userId: string, specialPriceId: string) {
+    // Verify that the special price exists and belongs to the user
+    const existingSpecialPrice = await this.prismaService.products_discounts.findFirst({
+      where: {
+        id: parseInt(specialPriceId),
+        user_id: userId,
+      },
+    });
+
+    if (!existingSpecialPrice) {
+      throw new Error('Special price not found');
+    }
+
+    // Delete the special price
+    await this.prismaService.products_discounts.delete({
+      where: { id: parseInt(specialPriceId) },
+    });
+
+    return { success: true, message: 'Special price deleted successfully' };
+  }
 }

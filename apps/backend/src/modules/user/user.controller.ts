@@ -252,4 +252,20 @@ export class UserController {
   ) {
     return this.userService.updateSpecialPrice(id, updateSpecialPriceData);
   }
+
+  @Delete('admin/:userId/special-prices/:id')
+  @UseGuards(AdminGuard)
+  @ApiOperation({ summary: 'Delete a special price for a user (Admin only)' })
+  @ApiParam({ name: 'userId', description: 'User ID' })
+  @ApiParam({ name: 'id', description: 'Special price ID' })
+  @ApiResponse({ status: 200, description: 'Special price deleted successfully.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required.' })
+  @ApiResponse({ status: 404, description: 'Special price not found.' })
+  async deleteSpecialPrice(
+    @Param('userId') userId: string,
+    @Param('id') id: string
+  ) {
+    return this.userService.deleteSpecialPrice(userId, id);
+  }
 }
