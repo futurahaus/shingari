@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Link from 'next/link';
 import { OrdersDetailSkeleton } from '../components/OrdersDetailSkeleton';
 import { api } from '@/lib/api';
 
@@ -109,7 +110,15 @@ export default function AdminOrderDetailPage() {
             </div>
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
               <div className="text-gray-500">ID de Cliente</div>
-              <div className="text-gray-900 font-medium text-right">{order.user_id ? `#${order.user_id.slice(0, 6)}` : '-'}</div>
+              <div className="text-gray-900 font-medium text-right">
+                {order.user_id ? (
+                  <Link href={`/admin/usuarios/${order.user_id}`} className="text-blue-600 hover:text-blue-800 hover:underline">
+                    #{order.user_id.slice(0, 6)}
+                  </Link>
+                ) : (
+                  '-'
+                )}
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
               <div className="text-gray-500">Puntos</div>

@@ -14,6 +14,7 @@ import {
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderResponseDto } from './dto/order-response.dto';
+import { MailService } from '../mail/mail.service';
 import {
     ApiTags,
     ApiOperation,
@@ -30,7 +31,10 @@ import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 export class OrdersController {
     private readonly logger = new Logger(OrdersController.name);
 
-    constructor(private readonly ordersService: OrdersService) { }
+    constructor(
+        private readonly ordersService: OrdersService,
+        private readonly mailService: MailService,
+    ) { }
 
     @Get('user/me')
     @UseGuards(JwtAuthGuard)
@@ -116,6 +120,16 @@ export class OrdersController {
 
             const result = await this.ordersService.create(createOrderDto);
             this.logger.log('Order created successfully:', result.id);
+            
+            // Enviar notificación por email
+            try {
+                await this.mailService.sendOrderNotification(result, req.user?.id);
+                this.logger.log('Notification email sent successfully');
+            } catch (emailError) {
+                this.logger.error('Error sending notification email:', emailError);
+                // No lanzamos el error para no afectar la creación de la orden
+            }
+            
             return result;
         } catch (error) {
             this.logger.error('Error creating order:', error);

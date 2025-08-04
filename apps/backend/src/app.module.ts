@@ -9,6 +9,7 @@ import { PrismaModule } from './modules/prisma/prisma.module';
 import { ProductsModule } from './modules/products/products.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { MailModule } from './modules/mail/mail.module';
 import * as redisStore from 'cache-manager-ioredis';
 
 @Module({
@@ -29,6 +30,7 @@ import * as redisStore from 'cache-manager-ioredis';
     PrismaModule,
     ProductsModule,
     OrdersModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

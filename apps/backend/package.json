@@ -29,6 +29,7 @@
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/swagger": "^11.2.0",
     "@prisma/client": "^6.9.0",
+    "@sendgrid/mail": "^8.1.5",
     "@supabase/supabase-js": "^2.49.8",
     "@types/bcrypt": "^5.0.2",
     "@types/compression": "^1.8.0",
