@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Home, Users, Boxes, Settings, LogOut, FolderTree, Inbox } from 'lucide-react';
+import { Home, Users, Boxes, Settings, LogOut, FolderTree, Inbox, Menu, X } from 'lucide-react';
 
 const sidebarOptions = [
   { name: 'Dashboard', path: '/admin/dashboard', icon: <Home className="w-5 h-5 text-gray-400" /> },
@@ -21,6 +21,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { user, logout, isLoading } = useAuth();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     // Only check authentication after the auth context has finished loading
@@ -57,9 +58,33 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // Render admin layout
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Mobile menu button */}
+      <div className="lg:hidden fixed top-4 left-4 z-50">
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="p-2 bg-white rounded-md shadow-md border border-gray-200"
+        >
+          {isSidebarOpen ? (
+            <X className="w-6 h-6 text-gray-600" />
+          ) : (
+            <Menu className="w-6 h-6 text-gray-600" />
+          )}
+        </button>
+      </div>
+
+      {/* Mobile overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       <div className="flex">
         {/* Sidebar */}
-        <aside className="w-64 bg-white shadow-sm border-r border-gray-200 min-h-screen flex flex-col justify-between">
+        <aside className={`fixed lg:static inset-y-0 left-0 z-40 w-64 bg-white shadow-sm border-r border-gray-200 min-h-screen flex flex-col justify-between transform transition-transform duration-300 ease-in-out ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}>
           <nav className="mt-8 flex-1 flex flex-col justify-between">
             <div className="px-4">
               <ul className="space-y-2">
@@ -77,11 +102,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 {sidebarOptions.map(option => (
                   <li key={option.path}>
                     <Link href={option.path} legacyBehavior>
-                      <a className={`flex items-center px-4 py-3 text-sm font-medium rounded-md transition-colors ${
-                        pathname === option.path
-                          ? 'bg-red-50 text-red-700 border-r-2 border-red-500'
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                      }`}>
+                      <a 
+                        className={`flex items-center px-4 py-3 text-sm font-medium rounded-md transition-colors ${
+                          pathname === option.path
+                            ? 'bg-red-50 text-red-700 border-r-2 border-red-500'
+                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        }`}
+                        onClick={() => setIsSidebarOpen(false)}
+                      >
                         <span className="mr-3">
                           {option.icon}
                         </span>
@@ -111,7 +139,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-8 lg:ml-0 ml-0">
           <div className="mx-auto">
             {children}
           </div>

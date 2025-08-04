@@ -16,22 +16,22 @@ const mockTable = [
 
 export default function AdminDashboardPage() {
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard de Administrador</h1>
-        <p className="mt-2 text-gray-600">Resumen general de la plataforma</p>
+    <div className="space-y-6">
+      <div className="mb-6 lg:mb-8">
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Dashboard de Administrador</h1>
+        <p className="mt-2 text-sm lg:text-base text-gray-600">Resumen general de la plataforma</p>
       </div>
 
       {/* KPIs Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
         {mockKPIs.map(kpi => (
-          <div key={kpi.label} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div key={kpi.label} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 lg:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">{kpi.label}</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{kpi.value}</p>
+                <p className="text-xs lg:text-sm font-medium text-gray-600">{kpi.label}</p>
+                <p className="text-lg lg:text-2xl font-bold text-gray-900 mt-1">{kpi.value}</p>
               </div>
-              <div className={`text-sm font-medium ${
+              <div className={`text-xs lg:text-sm font-medium ${
                 kpi.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
               }`}>
                 {kpi.change}
@@ -41,12 +41,14 @@ export default function AdminDashboardPage() {
         ))}
       </div>
 
-      {/* Recent Users Table */}
+            {/* Recent Users Table */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900">Usuarios Recientes</h2>
+        <div className="px-4 lg:px-6 py-4 border-b border-gray-200">
+          <h2 className="text-base lg:text-lg font-medium text-gray-900">Usuarios Recientes</h2>
         </div>
-        <div className="overflow-x-auto">
+        
+        {/* Desktop Table */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -101,6 +103,37 @@ export default function AdminDashboardPage() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="lg:hidden">
+          {mockTable.map(row => (
+            <div key={row.id} className="p-4 border-b border-gray-200 last:border-b-0">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium text-gray-900">#{row.id}</span>
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                    row.rol === 'admin'
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-blue-100 text-blue-800'
+                  }`}>
+                    {row.rol}
+                  </span>
+                </div>
+                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                  row.estado === 'Activo'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-gray-100 text-gray-800'
+                }`}>
+                  {row.estado}
+                </span>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-gray-900">{row.usuario}</p>
+                <p className="text-xs text-gray-500">{row.email}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
