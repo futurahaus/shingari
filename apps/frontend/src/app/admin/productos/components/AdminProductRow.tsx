@@ -61,24 +61,24 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
                 </div>
             </td>
 
-            {/* Precio con descuento */}
+            {/* Precio con IVA Minorista */}
+            <td className="px-6 py-4 whitespace-nowrap">
+                <div className="text-sm text-gray-900">
+                    ${product.price?.toFixed(2) || '0.00'}
+                </div>
+            </td>
+            {/* TODO: Agregar precio con IVA Mayorista */}
+            {/* Precio con IVA Mayorista */}
             <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">
                     ${product.price?.toFixed(2) || '0.00'}
                 </div>
             </td>
 
-            {/* IVA */}
+            {/* IVA*/}
             <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">
                     {product.iva ? `${product.iva.toFixed(2)}%` : '-'}
-                </div>
-            </td>
-
-            {/* Unidades vendidas (Mock) */}
-            <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-900">
-                    {Math.floor(Math.random() * 100) + 1}
                 </div>
             </td>
 
@@ -103,4 +103,4 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
             </td>
         </tr>
     );
-}; 
+};

@@ -40,8 +40,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setRefreshToken(storedRefreshToken);
     }
 
+    // Listen for token refresh events from API client
+    const handleTokenRefreshed = (event: CustomEvent) => {
+      const { accessToken: newAccessToken, refreshToken: newRefreshToken, user: newUser } = event.detail;
+      setAccessToken(newAccessToken);
+      setRefreshToken(newRefreshToken);
+      setUser(newUser);
+    };
+
+    const handleTokenRefreshFailed = () => {
+      // Clear local state immediately
+      setAccessToken(null);
+      setRefreshToken(null);
+      setUser(null);
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+    };
+
+    window.addEventListener('tokenRefreshed', handleTokenRefreshed as EventListener);
+    window.addEventListener('tokenRefreshFailed', handleTokenRefreshFailed);
+
     // Mark loading as complete
     setIsLoading(false);
+
+    // Cleanup event listeners
+    return () => {
+      window.removeEventListener('tokenRefreshed', handleTokenRefreshed as EventListener);
+      window.removeEventListener('tokenRefreshFailed', handleTokenRefreshFailed);
+    };
   }, []);
 
   const login = (newAccessToken: string, newRefreshToken: string, userData: User) => {
@@ -96,8 +123,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const data = await response.json();
+      
+      // Update both tokens and user data
       setAccessToken(data.accessToken);
+      setRefreshToken(data.refreshToken);
+      setUser(data.user);
+      
+      // Update localStorage
       localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      localStorage.setItem('user', JSON.stringify(data.user));
 
       return data.accessToken;
     } catch (error) {

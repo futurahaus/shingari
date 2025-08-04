@@ -226,16 +226,43 @@ export class AuthService {
         secret: process.env.JWT_REFRESH_SECRET,
       });
 
-      const {
-        data: { user },
-        error,
-      } = await this.databaseService.getClient().auth.getUser();
+      // Get user data from Supabase
+      const { data: { user }, error } = await this.databaseService
+        .getAdminClient()
+        .auth.admin.getUserById(payload.sub);
 
-      if (error || !user || user.id !== payload.sub) {
+      if (error || !user) {
         throw new UnauthorizedException('Invalid refresh token');
       }
 
-      return this.generateTokens(user);
+      // Fetch user roles
+      const { data: userRoles, error: rolesError } = await this.databaseService
+        .getAdminClient()
+        .from('user_roles')
+        .select('roles:role_id(name)')
+        .eq('user_id', user.id);
+
+      if (rolesError) {
+        this.logger.logError('User roles fetch during refresh', rolesError);
+        throw rolesError;
+      }
+
+      const customRoles = (userRoles || []).map((ur: { roles: { name: string }[] }) => ur.roles[0]?.name).filter(Boolean);
+      const roles = ['authenticated', ...customRoles];
+
+      // Create enriched user object with roles
+      const enrichedUser = {
+        ...user,
+        role: roles[0],
+        roles,
+        app_metadata: {
+          ...user.app_metadata,
+          provider: user.app_metadata?.provider || 'email',
+          roles,
+        },
+      };
+
+      return this.generateTokens(enrichedUser);
     } catch (error) {
       this.logger.logError('Token Refresh', error);
       throw new UnauthorizedException('Invalid refresh token');
