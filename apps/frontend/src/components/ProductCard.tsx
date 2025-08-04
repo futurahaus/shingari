@@ -88,11 +88,6 @@ export const ProductCard = ({ product }: { product: Product }) => {
                         <Text as="h4" size="md" weight="semibold" color="gray-900" testID={`product-price-${product.id}`}>
                             {`€${new Intl.NumberFormat('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(product.price)}`}
                         </Text>
-                        {product.iva && product.iva > 0 && (
-                            <Text as="span" size="xs" color="gray-500" className="text-xs">
-                                IVA incluido ({product.iva}%)
-                            </Text>
-                        )}
                     </div>
                     {(typeof product.discount === 'number' && product.discount > 0) && (
                         <Text

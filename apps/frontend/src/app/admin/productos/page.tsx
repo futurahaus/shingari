@@ -230,24 +230,24 @@ export default function AdminProductsPage() {
                 const maxVisiblePages = 5;
                 const startPage = Math.max(1, page - Math.floor(maxVisiblePages / 2));
                 const endPage = Math.min(lastPage, startPage + maxVisiblePages - 1);
-                
+
                 // Agregar primera página si no está incluida
                 if (startPage > 1) {
                   pages.push(1);
                   if (startPage > 2) pages.push('...');
                 }
-                
+
                 // Agregar páginas visibles
                 for (let i = startPage; i <= endPage; i++) {
                   pages.push(i);
                 }
-                
+
                 // Agregar última página si no está incluida
                 if (endPage < lastPage) {
                   if (endPage < lastPage - 1) pages.push('...');
                   pages.push(lastPage);
                 }
-                
+
                 return pages.map((p, index) => (
                   <Button
                     key={index}

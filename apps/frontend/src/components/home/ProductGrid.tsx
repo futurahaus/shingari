@@ -118,11 +118,6 @@ export default function ProductGrid() {
                                 <Text as="div" size="md" color="secondary">
                                     €{product.price.toFixed(2)}
                                 </Text>
-                                {product.iva && product.iva > 0 && (
-                                    <Text as="span" size="xs" color="gray-500" className="text-xs">
-                                        IVA incluido ({product.iva}%)
-                                    </Text>
-                                )}
                             </div>
                         </div>
                     </div>

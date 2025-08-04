@@ -27,11 +27,6 @@ export function ProductInfo({ product }: ProductInfoProps) {
         <span className="text-3xl font-bold text-black">
           €{new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(product.price)}
         </span>
-        {product.iva && product.iva > 0 && (
-          <span className="text-sm text-gray-500">
-            IVA incluido ({product.iva}%)
-          </span>
-        )}
         {hasDiscount && typeof product.originalPrice === 'number' && (
           <span className="text-gray-400 text-xl line-through">
             €{new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(product.originalPrice)}
