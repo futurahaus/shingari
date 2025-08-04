@@ -108,10 +108,10 @@ const formatOrderId = (id: string) => {
 
 const OrderCardSkeleton = () => (
   <div className="bg-white border border-gray-200 rounded-xl p-4 animate-pulse">
-    <div className="flex items-center justify-between">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       {/* Order Info */}
       <div className="flex-1">
-        <div className="flex items-center gap-4 mb-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2">
           {/* Status Tag Skeleton */}
           <div className="w-24 h-6 bg-gray-200 rounded-full"></div>
 
@@ -127,8 +127,8 @@ const OrderCardSkeleton = () => (
       </div>
 
       {/* Action Button Skeleton */}
-      <div className="ml-4">
-        <div className="w-24 h-8 bg-gray-200 rounded border"></div>
+      <div className="sm:ml-4">
+        <div className="w-full sm:w-24 h-8 bg-gray-200 rounded border"></div>
       </div>
     </div>
   </div>
@@ -158,11 +158,11 @@ export default function ComprasPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto px-4 sm:px-6 lg:px-16 py-12">
-        <div className="flex gap-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-16 py-8 lg:py-12">
+        <div className="flex flex-col lg:flex-row gap-8">
           <Sidebar />
           <div className="flex-1">
-            <h2 className="text-2xl font-bold mb-6">Mis Compras</h2>
+            <h2 className="text-xl sm:text-2xl font-bold mb-6">Mis Compras</h2>
             <div className="space-y-4">
               {[...Array(4)].map((_, i) => (
                 <OrderCardSkeleton key={i} />
@@ -176,10 +176,10 @@ export default function ComprasPage() {
 
   if (error) {
     return (
-      <div className="mx-auto px-4 sm:px-6 lg:px-16 py-12">
-        <div className="flex gap-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-16 py-8 lg:py-12">
+        <div className="flex flex-col lg:flex-row gap-8">
           <Sidebar />
-          <div className="flex-1 bg-white shadow-sm rounded-lg p-6">
+          <div className="flex-1 bg-white shadow-sm rounded-lg p-4 sm:p-6">
             <div className="text-center text-red-600">
               <p>{error}</p>
             </div>
@@ -190,14 +190,14 @@ export default function ComprasPage() {
   }
 
   return (
-    <div className="mx-auto px-4 sm:px-6 lg:px-16 py-12">
-      <div className="flex gap-8">
+    <div className="mx-auto px-4 sm:px-6 lg:px-16 py-8 lg:py-12">
+      <div className="flex flex-col lg:flex-row gap-8">
         <Sidebar />
         <div className="flex-1">
-          <h2 className="text-2xl font-bold mb-6">Mis Compras</h2>
+          <h2 className="text-xl sm:text-2xl font-bold mb-6">Mis Compras</h2>
 
           {orders.length === 0 ? (
-            <div className="bg-white shadow-sm rounded-lg p-6 text-center">
+            <div className="bg-white shadow-sm rounded-lg p-4 sm:p-6 text-center">
               <p className="text-gray-600">No tienes compras registradas.</p>
             </div>
           ) : (
@@ -207,12 +207,12 @@ export default function ComprasPage() {
 
                 return (
                   <div key={order.id} className="bg-white border border-gray-200 rounded-xl p-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       {/* Order Info */}
                       <div className="flex-1">
-                        <div className="flex items-center gap-4 mb-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2">
                           {/* Status Tag */}
-                          <div className={`inline-flex items-center px-2 py-1 rounded-full text-sm font-medium ${statusConfig.bgColor} ${statusConfig.textColor} ${statusConfig.borderColor} border`}>
+                          <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs sm:text-sm font-medium ${statusConfig.bgColor} ${statusConfig.textColor} ${statusConfig.borderColor} border w-fit`}>
                             {statusConfig.label}
                           </div>
 
@@ -224,22 +224,22 @@ export default function ComprasPage() {
 
                         {/* Order Details */}
                         <div className="space-y-1">
-                          <p className="text-sm text-gray-600">
+                          <p className="text-xs sm:text-sm text-gray-600">
                             Fecha de compra: {formatDate(order.created_at)}
                           </p>
-                          <p className="text-sm text-gray-600">
+                          <p className="text-xs sm:text-sm text-gray-600">
                             Total: €{Number(order.total_amount).toFixed(2)}
                           </p>
                         </div>
                       </div>
 
                       {/* Action Button */}
-                      <div className="ml-4">
+                      <div className="sm:ml-4">
                         <button
                           onClick={() => {
                             router.push(`/dashboard/compras/${order.id}`);
                           }}
-                          className="px-4 py-2 border border-gray-900 text-gray-900 rounded text-sm font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+                          className="w-full sm:w-auto px-4 py-2 border border-gray-900 text-gray-900 rounded text-sm font-medium hover:bg-gray-50 transition-colors cursor-pointer"
                         >
                           Ver detalle
                         </button>

@@ -36,67 +36,123 @@ const CarritoPage = () => {
           Vaciar carrito
         </button>
       </header>
-      <main className="w-full max-w-6xl flex flex-col md:flex-row gap-8 px-6">
+      <main className="w-full max-w-6xl flex flex-col lg:flex-row gap-8 px-6">
         {/* Product List */}
-        <section className="flex-1 bg-white rounded-lg shadow p-4 divide-y divide-gray-200">
-          <div className="flex font-bold text-lg mb-4">
-            <span className="w-64">Producto</span>
+        <section className="flex-1 bg-white rounded-lg shadow p-4">
+          {/* Desktop Header */}
+          <div className="hidden md:flex font-bold text-lg mb-4">
+            <span className="flex-1">Producto</span>
             <span className="w-32 text-center">Cantidad</span>
             <span className="w-32 text-center">Precio</span>
             <span className="w-32 text-right">Total</span>
             <span className="w-20"></span>
           </div>
+          
           {cart.length === 0 ? (
             <div className="py-8 text-center text-gray-500">Tu carrito está vacío.</div>
           ) : (
-            cart.map((item) => (
-              <div key={item.id}
-                className="flex items-center py-4 border-t">
-                <div className="w-64 flex items-center">
-                  <div className="w-16 h-16 bg-gray-200 flex items-center justify-center rounded mr-4">
-                    {item.image ? (
-                      <Image src={item.image} alt={item.name} width={64} height={64} className="object-cover rounded" />
-                    ) : (
-                      <div className="w-14 h-14 bg-gray-300 rounded" />
-                    )}
+            <div className="space-y-4">
+              {cart.map((item) => (
+                <div key={item.id} className="border border-gray-200 rounded-lg p-4">
+                  {/* Desktop Layout */}
+                  <div className="hidden md:flex items-center">
+                    <div className="flex-1 flex items-center">
+                      <div className="w-16 h-16 bg-gray-200 flex items-center justify-center rounded mr-4">
+                        {item.image ? (
+                          <Image src={item.image} alt={item.name} width={64} height={64} className="object-cover rounded" />
+                        ) : (
+                          <div className="w-14 h-14 bg-gray-300 rounded" />
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-base">{item.name}</div>
+                        <div className="text-xs text-gray-500">{"Unidades"}</div>
+                      </div>
+                    </div>
+                    <div className="w-32 flex items-center justify-center gap-2">
+                      <button
+                        className="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 transition-colors"
+                        onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                        disabled={item.quantity <= 1 || !user}
+                      >-</button>
+                      <span className="mx-1 min-w-[2rem] text-center">{item.quantity}</span>
+                      <button
+                        className="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 transition-colors"
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        disabled={!user}
+                      >+</button>
+                    </div>
+                    <div className="w-32 text-center font-semibold">
+                      € {item.price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                    </div>
+                    <div className="w-32 text-right font-semibold">
+                      € {(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                    </div>
+                    <div className="w-20 flex justify-end">
+                      <button
+                        className="text-xs text-red-500 hover:underline"
+                        onClick={() => removeFromCart(item.id)}
+                        disabled={!user}
+                      >Eliminar</button>
+                    </div>
                   </div>
-                  <div>
-                    <div className="font-semibold text-base">{item.name}</div>
-                    <div className="text-xs text-gray-500">{"Unidades"}</div>
+
+                  {/* Mobile Layout */}
+                  <div className="md:hidden">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center flex-1">
+                        <div className="w-12 h-12 bg-gray-200 flex items-center justify-center rounded mr-3 overflow-hidden">
+                          {item.image ? (
+                            <Image src={item.image} alt={item.name} width={48} height={48} className="object-cover w-full h-full" />
+                          ) : (
+                            <div className="w-10 h-10 bg-gray-300 rounded" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-semibold text-sm">{item.name}</div>
+                          <div className="text-xs text-gray-500">{"Unidades"}</div>
+                        </div>
+                      </div>
+                      <button
+                        className="text-xs text-red-500 hover:underline ml-2"
+                        onClick={() => removeFromCart(item.id)}
+                        disabled={!user}
+                      >Eliminar</button>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <button
+                          className="px-3 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 transition-colors"
+                          onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                          disabled={item.quantity <= 1 || !user}
+                        >-</button>
+                        <span className="mx-2 min-w-[2rem] text-center font-medium">{item.quantity}</span>
+                        <button
+                          className="px-3 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 transition-colors"
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          disabled={!user}
+                        >+</button>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-gray-500">Precio unitario</div>
+                        <div className="font-semibold text-sm">
+                          € {item.price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                        </div>
+                        <div className="text-sm text-gray-500 mt-1">Total</div>
+                        <div className="font-bold text-base">
+                          € {(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="w-32 flex items-center justify-center gap-2">
-                  <button
-                    className="px-2 py-1 bg-gray-100 rounded cursor-pointer"
-                    onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                    disabled={item.quantity <= 1 || !user}
-                  >-</button>
-                  <span className="mx-1">{item.quantity}</span>
-                  <button
-                    className="px-2 py-1 bg-gray-100 rounded cursor-pointer"
-                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                    disabled={!user}
-                  >+</button>
-                </div>
-                <div className="w-32 text-center font-semibold">
-                  € {item.price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
-                </div>
-                <div className="w-32 text-right font-semibold">
-                  € {(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
-                </div>
-                <div className="w-20 flex justify-end">
-                  <button
-                    className="ml-4 text-xs text-red-500 hover:underline"
-                    onClick={() => removeFromCart(item.id)}
-                    disabled={!user}
-                  >Eliminar</button>
-                </div>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </section>
         {/* Summary */}
-        <aside className="w-full md:w-96 bg-white rounded-lg shadow p-6 flex flex-col gap-4">
+        <aside className="w-full lg:w-96 bg-white rounded-lg shadow p-6 flex flex-col gap-4">
           <h2 className="font-bold text-lg mb-2">Resumen de la compra</h2>
           <div className="flex justify-between text-sm">
             <span>Precio de mis productos:</span>

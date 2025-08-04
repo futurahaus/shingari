@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import Sidebar from '@/components/layout/Sidebar';
+import { Button } from '@/app/ui/components/Button';
 
 interface UserProfile extends Record<string, unknown> {
   nombre: string;
@@ -102,292 +103,336 @@ export default function CompleteProfilePage() {
     }));
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
-      </div>
-    );
-  }
+  const FormSkeleton = () => (
+    <div className="flex-1 bg-white shadow-sm rounded-lg p-4 sm:p-6">
+      <div className="animate-pulse">
+        {/* Header Skeleton */}
+        <div className="pb-5 border-b border-gray-200 mb-6">
+          <div className="h-8 bg-gray-200 rounded w-32 mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded w-64"></div>
+        </div>
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
+        {/* Form Fields Skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          {[...Array(12)].map((_, i) => (
+            <div key={i}>
+              <div className="h-4 bg-gray-200 rounded w-20 mb-2"></div>
+              <div className="h-10 bg-gray-200 rounded"></div>
+            </div>
+          ))}
+        </div>
+
+        {/* Radio Buttons Skeleton */}
+        <div className="mt-6">
+          <div className="h-4 bg-gray-200 rounded w-40 mb-3"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="flex items-center">
+                <div className="w-4 h-4 bg-gray-200 rounded mr-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-24"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Button Skeleton */}
+        <div className="mt-6">
+          <div className="h-12 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const ErrorContent = () => (
+    <div className="flex-1 bg-white shadow-sm rounded-lg p-4 sm:p-6">
+      <div className="pb-5 border-b border-gray-200">
+        <h3 className="text-xl sm:text-2xl leading-6 font-medium text-gray-900">
+          Mi Perfil
+        </h3>
+      </div>
+      <div className="mt-6">
         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg">
           <p>{error}</p>
           <button
             onClick={() => router.push('/')}
-            className="button mt-4 text-sm font-medium text-red-600 hover:text-red-500"
+            className="mt-4 text-sm font-medium text-red-600 hover:text-red-500"
           >
             Volver al inicio
           </button>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 
   return (
-    <div className="mx-auto px-4 sm:px-6 lg:px-16 py-12">
-      <div className="flex gap-8">
+    <div className="mx-auto px-4 sm:px-6 lg:px-16 py-8 lg:py-12">
+      <div className="flex flex-col lg:flex-row gap-8">
         <Sidebar />
-        <div className="flex-1 bg-white shadow-sm rounded-lg p-6">
-          <div className="pb-5 border-b border-gray-200">
-            <h3 className="text-2xl leading-6 font-medium text-gray-900">
-              Mi Perfil
-            </h3>
-            <p className="mt-2 text-sm text-gray-600">
-              Completa tu información personal para continuar
-            </p>
+        {loading ? (
+          <FormSkeleton />
+        ) : error ? (
+          <ErrorContent />
+        ) : (
+          <div className="flex-1 bg-white shadow-sm rounded-lg p-4 sm:p-6">
+            <div className="pb-5 border-b border-gray-200">
+              <h3 className="text-xl sm:text-2xl leading-6 font-medium text-gray-900">
+                Mi Perfil
+              </h3>
+              <p className="mt-2 text-sm text-gray-600">
+                Completa tu información personal para continuar
+              </p>
+            </div>
+
+            <div className="mt-6">
+              <form className="space-y-6" onSubmit={handleSubmit}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                  {/* Personal Information */}
+                  <div>
+                    <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
+                      Nombre
+                    </label>
+                    <input
+                      type="text"
+                      id="nombre"
+                      name="nombre"
+                      required
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 text-sm sm:text-base"
+                      value={formData.nombre}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="apellidos" className="block text-sm font-medium text-gray-700">
+                      Apellidos
+                    </label>
+                    <input
+                      type="text"
+                      id="apellidos"
+                      name="apellidos"
+                      required
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 text-sm sm:text-base"
+                      value={formData.apellidos}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="localidad" className="block text-sm font-medium text-gray-700">
+                      Localidad
+                    </label>
+                    <input
+                      type="text"
+                      id="localidad"
+                      name="localidad"
+                      required
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
+                      value={formData.localidad}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="provincia" className="block text-sm font-medium text-gray-700">
+                      Provincia
+                    </label>
+                    <input
+                      type="text"
+                      id="provincia"
+                      name="provincia"
+                      required
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
+                      value={formData.provincia}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="trade_name" className="block text-sm font-medium text-gray-700">
+                      Nombre Comercial
+                    </label>
+                    <input
+                      type="text"
+                      id="trade_name"
+                      name="trade_name"
+                      required
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
+                      value={formData.trade_name}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="pais" className="block text-sm font-medium text-gray-700">
+                      País
+                    </label>
+                    <input
+                      type="text"
+                      id="pais"
+                      name="pais"
+                      required
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 bg-gray-50"
+                      value={formData.pais}
+                      readOnly
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="tax_name" className="block text-sm font-medium text-gray-700">
+                      Nombre Fiscal
+                    </label>
+                    <input
+                      type="text"
+                      id="tax_name"
+                      name="tax_name"
+                      required
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
+                      value={formData.tax_name}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="telefono" className="block text-sm font-medium text-gray-700">
+                      Teléfono
+                    </label>
+                    <input
+                      type="tel"
+                      id="telefono"
+                      name="telefono"
+                      required
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
+                      placeholder="+034567890"
+                      value={formData.telefono}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="tax_id" className="block text-sm font-medium text-gray-700">
+                      NIF
+                    </label>
+                    <input
+                      type="text"
+                      id="tax_id"
+                      name="tax_id"
+                      required
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
+                      value={formData.tax_id}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="billing_address" className="block text-sm font-medium text-gray-700">
+                      Dirección Fiscal
+                    </label>
+                    <input
+                      type="text"
+                      id="billing_address"
+                      name="billing_address"
+                      required
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
+                      value={formData.billing_address}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="shipping_address" className="block text-sm font-medium text-gray-700">
+                      Dirección de Entrega
+                    </label>
+                    <input
+                      type="text"
+                      id="shipping_address"
+                      name="shipping_address"
+                      required
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
+                      value={formData.shipping_address}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="cp" className="block text-sm font-medium text-gray-700">
+                      C.P.
+                    </label>
+                    <input
+                      type="text"
+                      id="cp"
+                      name="cp"
+                      required
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
+                      placeholder="12345"
+                      value={formData.cp}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <p className="text-sm font-medium text-gray-700 mb-3">¿Cómo nos conociste?</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="referral_source"
+                        value="redes"
+                        className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
+                        checked={formData.referral_source === 'redes'}
+                        onChange={handleChange}
+                      />
+                      <span className="ml-2 text-sm text-gray-600">Redes Sociales</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="referral_source"
+                        value="recomendacion"
+                        className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
+                        checked={formData.referral_source === 'recomendacion'}
+                        onChange={handleChange}
+                      />
+                      <span className="ml-2 text-sm text-gray-600">Recomendación</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="referral_source"
+                        value="publicidad"
+                        className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
+                        checked={formData.referral_source === 'publicidad'}
+                        onChange={handleChange}
+                      />
+                      <span className="ml-2 text-sm text-gray-600">Publicidad</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="referral_source"
+                        value="otros"
+                        className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
+                        checked={formData.referral_source === 'otros'}
+                        onChange={handleChange}
+                      />
+                      <span className="ml-2 text-sm text-gray-600">Otros</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <Button 
+                    type="primary" 
+                    htmlType="submit"
+                    onPress={() => {}} // Form submit will handle this
+                    testID="save-profile-button"
+                    text="Guardar Perfil"
+                  />
+                </div>
+              </form>
+            </div>
           </div>
-
-          <div className="mt-6">
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Personal Information */}
-                <div>
-                  <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
-                    Nombre
-                  </label>
-                  <input
-                    type="text"
-                    id="nombre"
-                    name="nombre"
-                    required
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                    value={formData.nombre}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="apellidos" className="block text-sm font-medium text-gray-700">
-                    Apellidos
-                  </label>
-                  <input
-                    type="text"
-                    id="apellidos"
-                    name="apellidos"
-                    required
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                    value={formData.apellidos}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="localidad" className="block text-sm font-medium text-gray-700">
-                    Localidad
-                  </label>
-                  <input
-                    type="text"
-                    id="localidad"
-                    name="localidad"
-                    required
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                    value={formData.localidad}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="provincia" className="block text-sm font-medium text-gray-700">
-                    Provincia
-                  </label>
-                  <input
-                    type="text"
-                    id="provincia"
-                    name="provincia"
-                    required
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                    value={formData.provincia}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="trade_name" className="block text-sm font-medium text-gray-700">
-                    Nombre Comercial
-                  </label>
-                  <input
-                    type="text"
-                    id="trade_name"
-                    name="trade_name"
-                    required
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                    value={formData.trade_name}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="pais" className="block text-sm font-medium text-gray-700">
-                    País
-                  </label>
-                  <input
-                    type="text"
-                    id="pais"
-                    name="pais"
-                    required
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 bg-gray-50"
-                    value={formData.pais}
-                    readOnly
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="tax_name" className="block text-sm font-medium text-gray-700">
-                    Nombre Fiscal
-                  </label>
-                  <input
-                    type="text"
-                    id="tax_name"
-                    name="tax_name"
-                    required
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                    value={formData.tax_name}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="telefono" className="block text-sm font-medium text-gray-700">
-                    Teléfono
-                  </label>
-                  <input
-                    type="tel"
-                    id="telefono"
-                    name="telefono"
-                    required
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                    placeholder="+034567890"
-                    value={formData.telefono}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="tax_id" className="block text-sm font-medium text-gray-700">
-                    NIF
-                  </label>
-                  <input
-                    type="text"
-                    id="tax_id"
-                    name="tax_id"
-                    required
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                    value={formData.tax_id}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="billing_address" className="block text-sm font-medium text-gray-700">
-                    Dirección Fiscal
-                  </label>
-                  <input
-                    type="text"
-                    id="billing_address"
-                    name="billing_address"
-                    required
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                    value={formData.billing_address}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="shipping_address" className="block text-sm font-medium text-gray-700">
-                    Dirección de Entrega
-                  </label>
-                  <input
-                    type="text"
-                    id="shipping_address"
-                    name="shipping_address"
-                    required
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                    value={formData.shipping_address}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="cp" className="block text-sm font-medium text-gray-700">
-                    C.P.
-                  </label>
-                  <input
-                    type="text"
-                    id="cp"
-                    name="cp"
-                    required
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                    placeholder="12345"
-                    value={formData.cp}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-
-              <div className="mt-6">
-                <p className="text-sm font-medium text-gray-700 mb-2">¿Cómo nos conociste?</p>
-                <div className="flex space-x-6">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="referral_source"
-                      value="redes"
-                      className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
-                      checked={formData.referral_source === 'redes'}
-                      onChange={handleChange}
-                    />
-                    <span className="ml-2 text-sm text-gray-600">Redes Sociales</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="referral_source"
-                      value="recomendacion"
-                      className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
-                      checked={formData.referral_source === 'recomendacion'}
-                      onChange={handleChange}
-                    />
-                    <span className="ml-2 text-sm text-gray-600">Recomendación</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="referral_source"
-                      value="publicidad"
-                      className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
-                      checked={formData.referral_source === 'publicidad'}
-                      onChange={handleChange}
-                    />
-                    <span className="ml-2 text-sm text-gray-600">Publicidad</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="referral_source"
-                      value="otros"
-                      className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300"
-                      checked={formData.referral_source === 'otros'}
-                      onChange={handleChange}
-                    />
-                    <span className="ml-2 text-sm text-gray-600">Otros</span>
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <button
-                  type="submit"
-                  className="button w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                >
-                  Guardar Perfil
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

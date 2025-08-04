@@ -210,7 +210,13 @@ const Breadcrumb = ({
     </div>
 );
 
-const ProductFilters = ({ filters, onFilterChange }: ProductFiltersProps) => (
+const ProductFilters = ({
+    filters,
+    onFilterChange,
+    categories,
+}: ProductFiltersProps & {
+    categories: Category[];
+}) => (
     <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative">
             <select
@@ -219,8 +225,12 @@ const ProductFilters = ({ filters, onFilterChange }: ProductFiltersProps) => (
                 onChange={onFilterChange}
                 className="w-full sm:w-auto appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
             >
-                <option value="">Tipo</option>
-                {/* Add real types later */}
+                <option value="">Categoría</option>
+                {categories.map((category) => (
+                    <option key={category.id} value={category.name}>
+                        {category.name}
+                    </option>
+                ))}
             </select>
             <ChevronDown className="h-5 w-5 text-[color:var(--list-item-color)] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
@@ -258,12 +268,14 @@ const ProductsSection = ({
     childNamesOfSelectedParent,
     categoryFilter,
     isFavoritesSelected,
+    categories,
 }: {
     selectedCategory: string | null;
     selectedParent?: Category | null;
     childNamesOfSelectedParent?: string[];
     categoryFilter: string | null;
     isFavoritesSelected: boolean;
+    categories: Category[];
 }) => {
     const { favorites } = useFavorites();
     const [products, setProducts] = useState<Product[]>([]);
@@ -272,7 +284,7 @@ const ProductsSection = ({
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [filters, setFilters] = useState({
-        type: '',
+        type: selectedCategory || '',
         price: '',
         stock: '',
     });
@@ -280,7 +292,7 @@ const ProductsSection = ({
     const [bufferedProducts, setBufferedProducts] = useState<Product[]>([]);
     const [bufferLoading, setBufferLoading] = useState(false);
     const observerRef = useRef<HTMLDivElement | null>(null);
-    // Remove: const searchParams = useSearchParams();
+    const searchParams = useSearchParams();
 
     // Helper to build params
     const buildParams = (pageNumber: number) => {
@@ -292,6 +304,9 @@ const ProductsSection = ({
             if (value) {
                 if (key === 'price') {
                     params.append('sortByPrice', value);
+                } else if (key === 'type') {
+                    // Send category filter as categoryFilters to backend
+                    params.append('categoryFilters', value);
                 } else {
                     params.append(key, value);
                 }
@@ -305,6 +320,11 @@ const ProductsSection = ({
             if (categoryFilter) {
                 params.append('categoryFilters', categoryFilter);
             }
+        }
+        // Add search parameter if present
+        const searchQuery = searchParams.get('search');
+        if (searchQuery) {
+            params.append('search', searchQuery);
         }
         return params;
     };
@@ -328,7 +348,7 @@ const ProductsSection = ({
         } finally {
             setLoading(false);
         }
-    }, [filters, categoryFilter, selectedParent, childNamesOfSelectedParent]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [filters, categoryFilter, selectedParent, childNamesOfSelectedParent, searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Buffer the next page
     const bufferNextPage = useCallback(async (nextPage: number) => {
@@ -342,7 +362,15 @@ const ProductsSection = ({
         } finally {
             setBufferLoading(false);
         }
-    }, [filters, categoryFilter, selectedParent, childNamesOfSelectedParent]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [filters, categoryFilter, selectedParent, childNamesOfSelectedParent, searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Update filters when selectedCategory changes
+    useEffect(() => {
+        setFilters(prev => ({
+            ...prev,
+            type: selectedCategory || '',
+        }));
+    }, [selectedCategory]);
 
     // Handle favorites filtering
     useEffect(() => {
@@ -422,6 +450,23 @@ const ProductsSection = ({
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
+
+        if (name === 'type') {
+            // Update URL when category filter changes
+            const newParams = new URLSearchParams();
+            if (value) {
+                newParams.set('categoryFilters', value);
+            }
+            // Preserve other URL parameters
+            const currentParams = new URLSearchParams(window.location.search);
+            currentParams.forEach((val, key) => {
+                if (key !== 'categoryFilters') {
+                    newParams.set(key, val);
+                }
+            });
+            window.history.pushState({}, '', `/products?${newParams.toString()}`);
+        }
+
         setFilters((prevFilters) => ({
             ...prevFilters,
             [name]: value,
@@ -436,7 +481,11 @@ const ProductsSection = ({
             <Text as="h1" size="4xl" weight="extrabold" color="primary" className="mb-6">
                 {isFavoritesSelected ? 'Mis Favoritos' : (selectedCategory || 'Todos los Productos')}
             </Text>
-            <ProductFilters filters={filters} onFilterChange={handleFilterChange} />
+            <ProductFilters
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                categories={categories}
+            />
             {loading && products.length === 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 3xl:grid-cols-6 gap-6 animate-pulse">
                     {[...Array(10)].map((_, i) => (
@@ -551,6 +600,7 @@ function ProductsPageContent() {
                     childNamesOfSelectedParent={childNamesOfSelectedParent}
                     categoryFilter={categoryFilter}
                     isFavoritesSelected={isFavoritesSelected}
+                    categories={categories}
                 />
             </div>
         </div>

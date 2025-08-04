@@ -14,8 +14,21 @@ import { useRef } from 'react';
 const SearchHeaderDesktop = () => {
   const { user } = useAuth();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
   const { openCart, cart } = useCart();
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   return (
     <>
@@ -34,6 +47,10 @@ const SearchHeaderDesktop = () => {
                 <input
                   type="text"
                   placeholder="Buscar"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onBlur={handleSearch}
+                  onKeyPress={handleKeyPress}
                   className="w-full pl-10 pr-4 py-2 rounded-md focus:outline-none focus:ring-2 bg-[color:var(--search-background)]"
                 />
               </div>
