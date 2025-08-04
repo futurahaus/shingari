@@ -215,4 +215,41 @@ export class UserController {
   }) {
     return this.userService.createSpecialPrice(createSpecialPriceData);
   }
+
+  @Put('admin/special-prices/:id')
+  @UseGuards(AdminGuard)
+  @ApiOperation({ summary: 'Update a special price for a user (Admin only)' })
+  @ApiParam({ name: 'id', description: 'Special price ID' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        user_id: { type: 'string', format: 'uuid' },
+        product_id: { type: 'number' },
+        price: { type: 'number' },
+        is_active: { type: 'boolean', default: true },
+        valid_from: { type: 'string', format: 'date-time', nullable: true },
+        valid_to: { type: 'string', format: 'date-time', nullable: true },
+      },
+      required: ['user_id', 'product_id', 'price'],
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Special price updated successfully.' })
+  @ApiResponse({ status: 400, description: 'Invalid input data.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required.' })
+  @ApiResponse({ status: 404, description: 'Special price not found.' })
+  async updateSpecialPrice(
+    @Param('id') id: string,
+    @Body() updateSpecialPriceData: {
+      user_id: string;
+      product_id: number;
+      price: number;
+      is_active?: boolean;
+      valid_from?: string;
+      valid_to?: string;
+    }
+  ) {
+    return this.userService.updateSpecialPrice(id, updateSpecialPriceData);
+  }
 }

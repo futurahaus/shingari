@@ -8,6 +8,18 @@ interface Product {
   originalPrice?: number;
 }
 
+interface SpecialPrice {
+  id: string;
+  product: string;
+  priceRetail: string;
+  priceWholesale: string;
+  priceClient: string;
+  productId?: string;
+  isActive?: boolean;
+  validFrom?: string;
+  validTo?: string;
+}
+
 interface PaginatedResponse<T> {
   data: T[];
   total: number;
@@ -18,12 +30,14 @@ interface PaginatedResponse<T> {
 
 interface AddSpecialPriceModalProps {
   userId: string;
+  editingSpecialPrice?: SpecialPrice | null;
   onClose: () => void;
   onSpecialPriceAdded: () => void;
 }
 
 export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
   userId,
+  editingSpecialPrice,
   onClose,
   onSpecialPriceAdded,
 }) => {
@@ -39,6 +53,31 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
     validTo: '',
     isActive: true,
   });
+
+  // Preload form data when editing
+  useEffect(() => {
+    if (editingSpecialPrice) {
+      // Convert ISO date strings to datetime-local format (YYYY-MM-DDTHH:mm)
+      const formatDateForInput = (dateString: string) => {
+        if (!dateString) return '';
+        try {
+          const date = new Date(dateString);
+          return date.toISOString().slice(0, 16); // Format: YYYY-MM-DDTHH:mm
+        } catch (error) {
+          console.error('Error formatting date:', error);
+          return '';
+        }
+      };
+
+      setFormData({
+        productId: editingSpecialPrice.productId || '',
+        price: editingSpecialPrice.priceClient || '',
+        validFrom: formatDateForInput(editingSpecialPrice.validFrom || ''),
+        validTo: formatDateForInput(editingSpecialPrice.validTo || ''),
+        isActive: editingSpecialPrice.isActive ?? true,
+      });
+    }
+  }, [editingSpecialPrice]);
 
   useEffect(() => {
     // Load products for the dropdown
@@ -82,7 +121,13 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
         valid_to: formData.validTo || null,
       };
 
-      await api.post('/user/admin/special-prices', payload);
+      if (editingSpecialPrice) {
+        // Update existing special price
+        await api.put(`/user/admin/special-prices/${editingSpecialPrice.id}`, payload);
+      } else {
+        // Create new special price
+        await api.post('/user/admin/special-prices', payload);
+      }
 
       onSpecialPriceAdded();
     } catch (err) {
@@ -104,10 +149,12 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Agregar Precio Especial</h3>
+          <h3 className="text-lg font-semibold">
+            {editingSpecialPrice ? 'Editar Precio Especial' : 'Agregar Precio Especial'}
+          </h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-600 cursor-pointer"
           >
             ×
           </button>
@@ -200,7 +247,7 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+              className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer"
               disabled={submitting}
             >
               Cancelar
@@ -208,9 +255,9 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
             <button
               type="submit"
               disabled={submitting || loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
             >
-              {submitting ? 'Guardando...' : 'Guardar'}
+              {submitting ? 'Guardando...' : editingSpecialPrice ? 'Actualizar' : 'Guardar'}
             </button>
           </div>
         </form>
