@@ -109,7 +109,7 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
             onClick={() => setShowAddModal(true)}
             className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer"
           >
-            Agregar precio especial
+            + Agregar precio especial
           </button>
         </div>
         <div className="text-red-600 text-sm">{error}</div>
@@ -125,7 +125,7 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
           onClick={() => setShowAddModal(true)}
           className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer"
         >
-          Agregar precio especial
+          + Agregar precio especial
         </button>
       </div>
       <div className="overflow-x-auto">

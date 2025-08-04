@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { api } from '@/lib/api';
 
 interface Product {
@@ -42,9 +42,13 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
   onSpecialPriceAdded,
 }) => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState({
     productId: '',
@@ -76,11 +80,19 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
         validTo: formatDateForInput(editingSpecialPrice.validTo || ''),
         isActive: editingSpecialPrice.isActive ?? true,
       });
+
+      // Set the selected product for editing
+      if (editingSpecialPrice.productId) {
+        const product = products.find(p => p.id === editingSpecialPrice.productId);
+        if (product) {
+          setSearchTerm(product.name);
+        }
+      }
     }
-  }, [editingSpecialPrice]);
+  }, [editingSpecialPrice, products]);
 
   useEffect(() => {
-    // Load products for the dropdown
+    // Load products for the search
     api.get('/products/admin/all?limit=1000')
       .then((response) => {
         console.log('Products response:', response); // Debug log
@@ -88,6 +100,7 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
         const typedResponse = response as PaginatedResponse<Product>;
         if (typedResponse && typedResponse.data && Array.isArray(typedResponse.data)) {
           setProducts(typedResponse.data);
+          setFilteredProducts(typedResponse.data);
         } else {
           console.error('Unexpected products response format:', response);
           setError('Formato de respuesta inesperado');
@@ -99,6 +112,44 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
       })
       .finally(() => setLoading(false));
   }, []);
+
+  // Filter products based on search term
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setFilteredProducts(products);
+    } else {
+      const filtered = products.filter(product =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    }
+  }, [searchTerm, products]);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleProductSelect = (product: Product) => {
+    setSearchTerm(product.name);
+    setFormData(prev => ({ ...prev, productId: product.id }));
+    setShowDropdown(false);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setFormData(prev => ({ ...prev, productId: '' }));
+    setShowDropdown(true);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -167,26 +218,47 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
+          <div className="relative" ref={searchRef}>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Producto *
             </label>
             {loading ? (
               <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
             ) : (
-              <select
-                value={formData.productId}
-                onChange={(e) => handleChange('productId', e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              >
-                <option value="">Seleccionar producto...</option>
-                {products.map((product) => (
-                  <option key={product.id} value={product.id}>
-                    {product.name} (Precio actual: €{product.price})
-                  </option>
-                ))}
-              </select>
+              <>
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  onFocus={() => setShowDropdown(true)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Buscar producto..."
+                  required
+                />
+                {showDropdown && filteredProducts.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                    {filteredProducts.map((product) => (
+                      <div
+                        key={product.id}
+                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                        onClick={() => handleProductSelect(product)}
+                      >
+                        <div className="font-medium">{product.name}</div>
+                        <div className="text-sm text-gray-500">
+                          Precio actual: €{product.price}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {showDropdown && filteredProducts.length === 0 && searchTerm.trim() !== '' && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+                    <div className="px-3 py-2 text-gray-500">
+                      No se encontraron productos
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
