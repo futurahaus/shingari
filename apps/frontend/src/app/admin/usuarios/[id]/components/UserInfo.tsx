@@ -20,6 +20,7 @@ interface UserDetails {
   shipping_address?: string;
   postal_code?: string;
   internal_id?: string;
+  roles?: string[];
 }
 
 interface UserInfoProps {
@@ -118,6 +119,27 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, onUserLoaded }) => {
         <div>
           <div className="text-xs text-gray-500">Perfil Completo</div>
           <div className="font-medium text-gray-900">{user.profile_is_complete ? 'Sí' : 'No'}</div>
+        </div>
+        <div>
+          <div className="text-xs text-gray-500">Roles</div>
+          <div className="font-medium text-gray-900">
+            {user.roles && user.roles.length > 0 ? (
+              <div className="flex flex-wrap gap-1">
+                {user.roles.map((role) => (
+                  <span
+                    key={role}
+                    className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full capitalize"
+                  >
+                    {role === 'consumer' ? 'Consumidor' : 
+                     role === 'business' ? 'Empresa' : 
+                     role === 'admin' ? 'Administrador' : role}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              'Sin roles asignados'
+            )}
+          </div>
         </div>
       </div>
     </div>
