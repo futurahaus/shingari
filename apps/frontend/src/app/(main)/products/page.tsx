@@ -446,7 +446,7 @@ const ProductsSection = ({
         return () => {
             if (sentinel) observer.unobserve(sentinel);
         };
-    }, [bufferedProducts, hasMore, loading, bufferLoading]);
+    }, [bufferedProducts, hasMore, loading, bufferLoading, isFavoritesSelected]);
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;

@@ -2,13 +2,16 @@
 
 import Link from 'next/link';
 import { Text } from '@/app/ui/components/Text';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { User, MapPin, ShoppingBag } from 'lucide-react';
+import { api } from '@/lib/api';
+import { UserProfile } from '@/app/(main)/complete-profile/page';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user } = useAuth();
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const { user: authUser } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -17,6 +20,25 @@ export default function Navbar() {
   const closeMenu = () => {
     setIsMenuOpen(false);
   };
+
+  // Fetch user data from auth/me endpoint
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userData = await api.get<UserProfile>('/auth/me');
+        setUser(userData);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setUser(null);
+      }
+    };
+
+    if (authUser) {
+      fetchUser();
+    } else {
+      setUser(null);
+    }
+  }, [authUser]);
 
   // Sidebar navigation items for logged users
   const sidebarItems = [

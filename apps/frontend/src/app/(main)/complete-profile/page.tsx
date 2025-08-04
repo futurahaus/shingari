@@ -6,7 +6,7 @@ import { api } from '@/lib/api';
 import Sidebar from '@/components/layout/Sidebar';
 import { Button } from '@/app/ui/components/Button';
 
-interface UserProfile extends Record<string, unknown> {
+export interface UserProfile extends Record<string, unknown> {
   nombre: string;
   apellidos: string;
   localidad: string;
