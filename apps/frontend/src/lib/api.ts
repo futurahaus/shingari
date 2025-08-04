@@ -79,6 +79,7 @@ class ApiClient {
     // Handle 401 with token refresh
     if (response.status === 401) {
       const newAccessToken = await this.refreshToken();
+
       if (newAccessToken) {
         headers.set('Authorization', `Bearer ${newAccessToken}`);
         const retryResponse = await fetch(url, {
@@ -97,6 +98,8 @@ class ApiClient {
         }
         return retryResponse.json();
       }
+
+      window.location.href = '/';
       throw new Error('Authentication required');
     }
 

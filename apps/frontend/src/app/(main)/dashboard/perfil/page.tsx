@@ -43,12 +43,6 @@ export default function ProfilePage() {
   });
 
   useEffect(() => {
-    // Check if user is authenticated
-    if (!accessToken) {
-      window.location.hash = '#login?from=/dashboard/perfil';
-      return;
-    }
-
     const fetchUserData = async () => {
       try {
         const data = await api.get<UserProfile>('/auth/me');

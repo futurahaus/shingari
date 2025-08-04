@@ -44,12 +44,6 @@ export default function CompleteProfilePage() {
   });
 
   useEffect(() => {
-    // Check if user is authenticated first
-    if (!accessToken) {
-      window.location.hash = '#login?from=/complete-profile';
-      return;
-    }
-
     const fetchUserData = async () => {
       try {
         const data = await api.get<UserProfile>('/auth/me');

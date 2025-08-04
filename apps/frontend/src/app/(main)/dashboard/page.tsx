@@ -20,12 +20,6 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check if user is authenticated
-    if (!accessToken) {
-      window.location.hash = '#login?from=/dashboard';
-      return;
-    }
-
     const fetchUserData = async () => {
       try {
         const data = await api.get<UserData>('/auth/me');
