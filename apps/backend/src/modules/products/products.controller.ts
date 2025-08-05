@@ -215,6 +215,22 @@ export class ProductsController {
     return this.productsService.findDiscountsForUser(req.user.id);
   }
 
+  // Temporary debug endpoint to check user role and clear cache
+  @Get('debug/user-info')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Debug endpoint to check user role and clear cache' })
+  async debugUserInfo(@NestRequest() req: any) {
+    const userId: string = req.user.id;
+    const userRole = await this.productsService.getUserRole(userId);
+    await this.productsService.clearProductCache();
+    return {
+      userId,
+      userRole,
+      message: 'Cache cleared',
+    };
+  }
+
   // Endpoint para obtener un producto específico por ID (público)
   // Es buena práctica tener un endpoint para obtener detalles de un solo producto.
   @Get(':id')
