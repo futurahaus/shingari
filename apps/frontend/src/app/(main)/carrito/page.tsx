@@ -5,10 +5,11 @@ import Image from "next/image";
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import LoginModal from '@/components/auth/LoginModal';
+import { QuantityControls } from '@/components/QuantityControls';
 import { useState, useEffect } from 'react';
 
 const CarritoPage = () => {
-  const { cart, updateQuantity, removeFromCart, removeAllFromCart } = useCart();
+  const { cart, removeFromCart, removeAllFromCart } = useCart();
   const router = useRouter();
   const { user, isLoading } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -30,13 +31,13 @@ const CarritoPage = () => {
   return (
     <div className="min-h-screen bg-[#F7F7F7] flex flex-col items-center">
       {/* Header */}
-      <header className="w-full max-w-6xl px-6 py-6 flex flex-col gap-2">
+      <header className="w-full max-w-7xl px-6 py-6 flex flex-col gap-2">
         <h1 className="text-2xl font-bold">Mi Carrito</h1>
         <button className="text-red-500 text-sm underline self-end" onClick={removeAllFromCart} disabled={!user}>
           Vaciar carrito
         </button>
       </header>
-      <main className="w-full max-w-6xl flex flex-col lg:flex-row gap-8 px-6">
+      <main className="w-full max-w-7xl flex flex-col lg:flex-row gap-8 px-6">
         {/* Product List */}
         <section className="flex-1 bg-white rounded-lg shadow p-4">
           {/* Desktop Header */}
@@ -47,7 +48,7 @@ const CarritoPage = () => {
             <span className="w-32 text-right">Total</span>
             <span className="w-20"></span>
           </div>
-          
+
           {cart.length === 0 ? (
             <div className="py-8 text-center text-gray-500">Tu carrito está vacío.</div>
           ) : (
@@ -69,18 +70,15 @@ const CarritoPage = () => {
                         <div className="text-xs text-gray-500">{"Unidades"}</div>
                       </div>
                     </div>
-                    <div className="w-32 flex items-center justify-center gap-2">
-                      <button
-                        className="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 transition-colors"
-                        onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                        disabled={item.quantity <= 1 || !user}
-                      >-</button>
-                      <span className="mx-1 min-w-[2rem] text-center">{item.quantity}</span>
-                      <button
-                        className="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 transition-colors"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        disabled={!user}
-                      >+</button>
+                    <div className="w-32 flex items-center justify-center">
+                      <QuantityControls
+                        productId={item.id}
+                        productName={item.name}
+                        productPrice={item.price}
+                        productImage={item.image || ''}
+                        unitsPerBox={item.units_per_box}
+                        variant="inline"
+                      />
                     </div>
                     <div className="w-32 text-center font-semibold">
                       € {item.price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
@@ -119,20 +117,17 @@ const CarritoPage = () => {
                         disabled={!user}
                       >Eliminar</button>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <button
-                          className="px-3 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 transition-colors"
-                          onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                          disabled={item.quantity <= 1 || !user}
-                        >-</button>
-                        <span className="mx-2 min-w-[2rem] text-center font-medium">{item.quantity}</span>
-                        <button
-                          className="px-3 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 transition-colors"
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          disabled={!user}
-                        >+</button>
+                        <QuantityControls
+                          productId={item.id}
+                          productName={item.name}
+                          productPrice={item.price}
+                          productImage={item.image || ''}
+                          unitsPerBox={item.units_per_box}
+                          variant="inline"
+                        />
                       </div>
                       <div className="text-right">
                         <div className="text-sm text-gray-500">Precio unitario</div>

@@ -23,7 +23,7 @@ export const QuantityControls = ({
     const { showSuccess, showInfo, showWarning } = useNotificationContext();
     const cartItem = cart.find((item) => item.id === productId);
     const [quantity, setQuantity] = useState(cartItem ? cartItem.quantity : 0);
-    const [unitType, setUnitType] = useState<'units' | 'boxes'>('units');
+    const [unitType, setUnitType] = useState<'units' | 'boxes'>('boxes');
 
     const handleAdd = () => {
         const increment = unitType === 'boxes' && unitsPerBox ? unitsPerBox : 1;
@@ -39,6 +39,7 @@ export const QuantityControls = ({
                 price: productPrice,
                 image: productImage,
                 quantity: increment,
+                units_per_box: unitsPerBox,
             });
             showSuccess('Producto añadido', `"${productName}" añadido al carrito.`, 2000);
         }
@@ -78,6 +79,7 @@ export const QuantityControls = ({
                     price: productPrice,
                     image: productImage,
                     quantity: newQuantity,
+                    units_per_box: unitsPerBox,
                 });
                 showSuccess('Producto añadido', `"${productName}" añadido al carrito.`, 2000);
             }
@@ -87,19 +89,19 @@ export const QuantityControls = ({
 
     const containerClasses = variant === 'overlay'
         ? "absolute bottom-2 right-2 flex items-center bg-white/90 rounded-full shadow px-2 py-1 gap-2 z-10"
-        : "flex items-center bg-white border border-gray-300 rounded-lg px-3 py-2 gap-3";
+        : "flex items-center bg-white border border-gray-300 rounded-lg px-2 py-1 gap-2";
 
     const buttonClasses = variant === 'overlay'
         ? "w-6 h-6 flex items-center justify-center rounded-full bg-[#EA3D15] hover:bg-[#c53211] text-lg text-white font-bold cursor-pointer"
-        : "w-8 h-8 flex items-center justify-center rounded-md bg-[#EA3D15] hover:bg-[#c53211] text-lg text-white font-bold cursor-pointer";
+        : "w-6 h-6 flex items-center justify-center rounded-md bg-[#EA3D15] hover:bg-[#c53211] text-sm text-white font-bold cursor-pointer";
 
     const quantityClasses = variant === 'overlay'
         ? "w-4 text-center text-sm select-none"
-        : "w-8 text-center text-base font-medium select-none";
+        : "w-6 text-center text-sm font-medium select-none";
 
     const selectClasses = variant === 'overlay'
         ? "text-xs bg-white border border-gray-300 rounded px-1 py-0.5 cursor-pointer"
-        : "text-sm bg-white border border-gray-300 rounded px-2 py-1 cursor-pointer";
+        : "text-xs bg-white border border-gray-300 rounded px-1 py-0.5 cursor-pointer";
 
     return (
         <div className={containerClasses}>
@@ -133,4 +135,4 @@ export const QuantityControls = ({
             </select>
         </div>
     );
-}; 
+};
