@@ -51,7 +51,7 @@ export class ProductsService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {} // Inyectar PrismaService
 
-  private async getUserRole(userId: string): Promise<string | null> {
+  async getUserRole(userId: string): Promise<string | null> {
     const userRole = await this.prisma.user_roles.findFirst({
       where: {
         user_id: userId,
@@ -123,10 +123,9 @@ export class ProductsService {
       const discount = await this.getUserDiscount(userId, product.id);
       if (discount !== null) {
         userDiscountPrice = discount;
-      } else {
-        // Si no hay descuento específico, verificamos el rol del usuario
-        userRole = await this.getUserRole(userId);
       }
+      // Siempre verificamos el rol del usuario para determinar el cálculo del IVA
+      userRole = await this.getUserRole(userId);
     }
 
     const { price, originalPrice, discount } = await this.calculateProductPrice(
@@ -136,23 +135,41 @@ export class ProductsService {
       userRole,
     );
 
-    // Calculate IVA-included prices
-    // Check if IVA is stored as decimal (0.21) or percentage (21)
-    let ivaValue = product.iva ? product.iva.toNumber() : 21;
+    // Calculate IVA-included prices (only for non-business users)
+    // Business users see wholesale prices without IVA
+    let priceWithIva: number;
+    let originalPriceWithIva: number | undefined;
+    let finalIvaValue: number | undefined = undefined;
 
-    // If IVA value is very small (< 1), it's likely stored as decimal (0.21 for 21%)
-    // Convert it to percentage format
-    if (ivaValue < 1 && ivaValue > 0) {
-      ivaValue = ivaValue * 100;
+    // Debug logging to help identify the issue
+    console.log(`[DEBUG] Product ${product.id}: userId=${userId}, userRole=${userRole}, userDiscountPrice=${userDiscountPrice}`);
+    
+    if (userRole !== 'business') {
+      // Check if IVA is stored as decimal (0.21) or percentage (21)
+      let ivaValue = product.iva ? product.iva.toNumber() : 21;
+
+      // If IVA value is very small (< 1), it's likely stored as decimal (0.21 for 21%)
+      // Convert it to percentage format
+      if (ivaValue < 1 && ivaValue > 0) {
+        ivaValue = ivaValue * 100;
+      }
+
+      // Default to 21% if no IVA is set
+      if (!product.iva) {
+        ivaValue = 21;
+      }
+
+      priceWithIva = price * (1 + ivaValue / 100);
+      originalPriceWithIva = originalPrice ? originalPrice * (1 + ivaValue / 100) : undefined;
+      finalIvaValue = product.iva ? ivaValue : undefined;
+      console.log(`[DEBUG] Non-business user: applying IVA ${ivaValue}%, price ${price} -> ${priceWithIva}`);
+    } else {
+      // For business users, show prices without IVA
+      priceWithIva = price;
+      originalPriceWithIva = originalPrice;
+      finalIvaValue = undefined;
+      console.log(`[DEBUG] Business user: NO IVA applied, price remains ${priceWithIva}`);
     }
-
-    // Default to 21% if no IVA is set
-    if (!product.iva) {
-      ivaValue = 21;
-    }
-
-    const priceWithIva = price * (1 + ivaValue / 100);
-    const originalPriceWithIva = originalPrice ? originalPrice * (1 + ivaValue / 100) : undefined;
     return {
       updatedAt: new Date(),
       id: product.id.toString(),
@@ -169,7 +186,7 @@ export class ProductsService {
       images: product.product_images?.map((pi) => pi.image_url) || [],
       sku: product.sku || '',
       units_per_box: product.units_per_box !== undefined && product.units_per_box !== null ? Number(product.units_per_box) : undefined,
-      iva: product.iva ? ivaValue : undefined,
+      iva: finalIvaValue,
     };
   }
 
@@ -230,23 +247,41 @@ export class ProductsService {
             userRole,
           );
 
-        // Calculate IVA-included prices
-        // Check if IVA is stored as decimal (0.21) or percentage (21)
-        let ivaValue = product.iva ? product.iva.toNumber() : 21;
+        // Calculate IVA-included prices (only for non-business users)
+        // Business users see wholesale prices without IVA
+        let priceWithIva: number;
+        let originalPriceWithIva: number | undefined;
+        let finalIvaValue: number | undefined = undefined;
 
-        // If IVA value is very small (< 1), it's likely stored as decimal (0.21 for 21%)
-        // Convert it to percentage format
-        if (ivaValue < 1 && ivaValue > 0) {
-          ivaValue = ivaValue * 100;
+        // Debug logging for bulk products
+        if (products.indexOf(product) === 0) { // Log only for first product to avoid spam
+          console.log(`[DEBUG BULK] Products list: userId=${userId}, userRole=${userRole}, firstProduct=${product.id}`);
         }
+        
+        if (userRole !== 'business') {
+          // Check if IVA is stored as decimal (0.21) or percentage (21)
+          let ivaValue = product.iva ? product.iva.toNumber() : 21;
 
-        // Default to 21% if no IVA is set
-        if (!product.iva) {
-          ivaValue = 21;
+          // If IVA value is very small (< 1), it's likely stored as decimal (0.21 for 21%)
+          // Convert it to percentage format
+          if (ivaValue < 1 && ivaValue > 0) {
+            ivaValue = ivaValue * 100;
+          }
+
+          // Default to 21% if no IVA is set
+          if (!product.iva) {
+            ivaValue = 21;
+          }
+
+          priceWithIva = price * (1 + ivaValue / 100);
+          originalPriceWithIva = originalPrice ? originalPrice * (1 + ivaValue / 100) : undefined;
+          finalIvaValue = product.iva ? ivaValue : undefined;
+        } else {
+          // For business users, show prices without IVA
+          priceWithIva = price;
+          originalPriceWithIva = originalPrice;
+          finalIvaValue = undefined;
         }
-
-        const priceWithIva = price * (1 + ivaValue / 100);
-        const originalPriceWithIva = originalPrice ? originalPrice * (1 + ivaValue / 100) : undefined;
 
         return {
           updatedAt: new Date(),
@@ -267,7 +302,7 @@ export class ProductsService {
           images: product.product_images?.map((pi) => pi.image_url) || [],
           sku: product.sku || '',
           units_per_box: product.units_per_box !== undefined && product.units_per_box !== null ? Number(product.units_per_box) : undefined,
-          iva: product.iva ? ivaValue : undefined,
+          iva: finalIvaValue,
         };
       }),
     );
@@ -420,7 +455,7 @@ export class ProductsService {
   }
 
   // Helper to clear all product-related cache keys
-  private async clearProductCache(): Promise<void> {
+  async clearProductCache(): Promise<void> {
     // El tipo de store depende del motor de cache, por eso usamos unknown y comprobamos el tipo en runtime
     // El acceso a .getClient, .keys y .del solo es seguro si el store es Redis, por eso se justifica el uso de 'any' aquí
     const store = (this.cacheManager as unknown as { store?: unknown }).store;

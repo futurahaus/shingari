@@ -190,6 +190,7 @@ Aplicación construida con Next.js.
 -   **Sistema de Productos**: Implementación de catálogo de productos con funcionalidades públicas y protegidas.
     -   **Endpoints Públicos**: Los endpoints `GET /products` y `GET /products/:id` son públicos y no requieren autenticación.
     -   **Precios Dinámicos**: Los precios se calculan dinámicamente basados en el rol del usuario (precio al por mayor para usuarios 'business').
+    -   **Gestión de IVA**: Los usuarios con rol 'business' ven precios al por mayor SIN IVA incluido, mientras que otros usuarios ven precios con IVA incluido.
     -   **Descuentos Personalizados**: Sistema de descuentos específicos por usuario con fechas de validez.
     -   **Filtros y Paginación**: Soporte para filtrado por categorías, búsqueda por nombre, ordenamiento por precio y paginación.
 -   **Testing**: Ambos proyectos tienen configuraciones de Jest. El backend tiene tests unitarios para servicios y tests e2e. El frontend tiene tests para componentes.
@@ -204,5 +205,6 @@ Aplicación construida con Next.js.
 ---
 
 *Este archivo fue generado y actualizado el 2025-01-03 22:30:00.*
+*Última actualización: 2025-01-17 - Actualizado sistema de precios con gestión de IVA para usuarios business.*
 
 *Por favor, actualiza la fecha y cualquier información relevante cuando hagas cambios significativos.*

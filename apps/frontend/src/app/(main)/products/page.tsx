@@ -356,6 +356,7 @@ const ProductsSection = ({
         try {
             const params = buildParams(nextPage);
             const response = await api.get<PaginatedProductsResponse>(`/products?${params.toString()}`);
+            console.log('response', response);
             setBufferedProducts(response.data);
         } catch {
             setBufferedProducts([]);

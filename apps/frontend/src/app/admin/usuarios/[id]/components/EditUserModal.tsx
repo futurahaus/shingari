@@ -10,6 +10,7 @@ interface EditUserModalProps {
   handleEditSubmit: (e: React.FormEvent) => void;
   saveError: string | null;
   saving: boolean;
+  handleRoleChange?: (role: string, isChecked: boolean) => void;
 }
 
 export const EditUserModal: React.FC<EditUserModalProps> = ({
@@ -20,6 +21,7 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
   handleEditSubmit,
   saveError,
   saving,
+  handleRoleChange,
 }) => {
   if (!showEditModal || !editForm) return null;
 
@@ -84,6 +86,28 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
             <div>
               <label className="block text-xs text-gray-500">ID Interno</label>
               <input name="internal_id" value={editForm.internal_id || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1 text-gray-900" />
+            </div>
+          </div>
+
+          {/* Role Management Section */}
+          <div className="border-t pt-4 mt-4">
+            <h4 className="text-sm font-medium text-gray-700 mb-3">Gestión de Roles</h4>
+            <div className="space-y-2">
+              {['consumer', 'business', 'admin'].map((role) => (
+                <label key={role} className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={editForm.roles?.includes(role) || false}
+                    onChange={(e) => handleRoleChange?.(role, e.target.checked)}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-700 capitalize">
+                    {role === 'consumer' ? 'Consumidor' : 
+                     role === 'business' ? 'Empresa' : 
+                     role === 'admin' ? 'Administrador' : role}
+                  </span>
+                </label>
+              ))}
             </div>
           </div>
           {saveError && <div className="text-red-600 text-sm">{saveError}</div>}

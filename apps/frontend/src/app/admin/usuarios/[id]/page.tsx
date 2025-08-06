@@ -26,6 +26,7 @@ export interface UserDetails {
   shipping_address?: string;
   postal_code?: string;
   internal_id?: string;
+  roles?: string[];
 }
 
 export default function UserDetailsPage() {
@@ -48,6 +49,15 @@ export default function UserDetailsPage() {
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!editForm) return;
     setEditForm({ ...editForm, [e.target.name]: e.target.value });
+  };
+
+  const handleRoleChange = (role: string, isChecked: boolean) => {
+    if (!editForm) return;
+    const currentRoles = editForm.roles || [];
+    const newRoles = isChecked
+      ? [...currentRoles, role]
+      : currentRoles.filter(r => r !== role);
+    setEditForm({ ...editForm, roles: newRoles });
   };
 
   const handleEditSubmit = async (e: React.FormEvent) => {
@@ -113,6 +123,7 @@ export default function UserDetailsPage() {
         handleEditSubmit={handleEditSubmit}
         saveError={saveError}
         saving={saving}
+        handleRoleChange={handleRoleChange}
       />
 
       {/* Información del Cliente */}

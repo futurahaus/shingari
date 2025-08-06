@@ -24,9 +24,18 @@ export default function AdminUsersPage() {
     shipping_address: '',
     postal_code: '',
     internal_id: '',
+    roles: [] as string[],
   });
   const [savingNewClient, setSavingNewClient] = useState(false);
   const [saveNewClientError, setSaveNewClientError] = useState<string | null>(null);
+
+  const handleRoleChange = (role: string, isChecked: boolean) => {
+    const currentRoles = newClientForm.roles || [];
+    const newRoles = isChecked 
+      ? [...currentRoles, role]
+      : currentRoles.filter(r => r !== role);
+    setNewClientForm(f => ({ ...f, roles: newRoles }));
+  };
 
   // Usar el hook para obtener usuarios
   const { users, loading, error, refetch } = useAdminUsers();
@@ -50,7 +59,7 @@ export default function AdminUsersPage() {
       const createRes = await api.post('/user/admin/create', {
         email: newClientForm.email,
         password: newClientForm.password,
-        // roles: ['client'],
+        roles: newClientForm.roles,
       }) as { id?: string };
       // 2. Update public profile fields
       if (createRes && typeof createRes === 'object' && 'id' in createRes && createRes.id) {
@@ -87,6 +96,7 @@ export default function AdminUsersPage() {
         shipping_address: '',
         postal_code: '',
         internal_id: '',
+        roles: [],
       });
       refetch();
     } catch (err: unknown) {
@@ -214,6 +224,28 @@ export default function AdminUsersPage() {
                   />
                 </div>
               </div>
+
+              {/* Role Management Section */}
+              <div className="border-t pt-4 mt-4">
+                <h4 className="text-sm font-medium text-gray-700 mb-3">Gestión de Roles</h4>
+                <div className="space-y-2">
+                  {['consumer', 'business', 'admin'].map((role) => (
+                    <label key={role} className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={newClientForm.roles?.includes(role) || false}
+                        onChange={(e) => handleRoleChange(role, e.target.checked)}
+                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-gray-700 capitalize">
+                        {role === 'consumer' ? 'Consumidor' : 
+                         role === 'business' ? 'Empresa' : 
+                         role === 'admin' ? 'Administrador' : role}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
               {saveNewClientError && <div className="text-red-600 text-sm">{saveNewClientError}</div>}
               <div className="flex flex-col sm:flex-row justify-end gap-2 mt-6">
                 <button type="button" onClick={() => setShowNewClientModal(false)} className="px-4 py-2 text-gray-600 hover:text-gray-800 cursor-pointer text-sm">Cancelar</button>
@@ -255,6 +287,7 @@ export default function AdminUsersPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Compras</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scoring</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roles</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Últ. Login</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                 </tr>
@@ -262,7 +295,7 @@ export default function AdminUsersPage() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={10} className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan={11} className="px-6 py-8 text-center text-gray-500">
                       No hay usuarios registrados
                     </td>
                   </tr>
@@ -280,6 +313,24 @@ export default function AdminUsersPage() {
                         <span className="inline-block bg-gray-100 px-4 py-1 rounded-full font-semibold text-gray-700">
                           {user.scoring ?? '0'}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {user.roles && user.roles.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {user.roles.map((role) => (
+                              <span
+                                key={role}
+                                className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full capitalize"
+                              >
+                                {role === 'consumer' ? 'Consumidor' : 
+                                 role === 'business' ? 'Empresa' : 
+                                 role === 'admin' ? 'Administrador' : role}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-500">Sin roles</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {user.last_sign_in_at
@@ -350,6 +401,27 @@ export default function AdminUsersPage() {
                         {user.scoring ?? '0'}
                       </span>
                     </div>
+                  </div>
+
+                  {/* Roles in mobile view */}
+                  <div className="mt-3">
+                    <div className="text-xs text-gray-500 mb-1">Roles:</div>
+                    {user.roles && user.roles.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {user.roles.map((role) => (
+                          <span
+                            key={role}
+                            className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full capitalize"
+                          >
+                            {role === 'consumer' ? 'Consumidor' : 
+                             role === 'business' ? 'Empresa' : 
+                             role === 'admin' ? 'Administrador' : role}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-gray-500">Sin roles asignados</span>
+                    )}
                   </div>
                   
                   {user.last_sign_in_at && (
