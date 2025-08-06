@@ -3,8 +3,8 @@
 import React from 'react';
 import Image from 'next/image';
 
-const WHATSAPP_NUMBER = '34600000000'; // Replace with your number
-const DEFAULT_MESSAGE = 'Hola, me gustaría obtener más información.';
+const WHATSAPP_NUMBER = '34623310919'; // Replace with your number
+const DEFAULT_MESSAGE = 'Hola! me gustaría obtener más información.';
 
 export default function WhatsAppBubble() {
   const handleClick = () => {
