@@ -56,12 +56,14 @@ export class ProductsController {
   @ApiOperation({ summary: 'Obtener una lista de todas las categorías de productos' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Número máximo de categorías a retornar' })
   @ApiQuery({ name: 'locale', required: false, type: String, description: 'Locale for translations (es, zh)', example: 'es', default: 'es' })
+  @ApiQuery({ name: 'includeAllTranslations', required: false, type: Boolean, description: 'Include all translations for admin use', default: false })
   @ApiResponse({ status: 200, description: 'Lista de categorías obtenida exitosamente.', type: [ProductDiscountResponseDto] })
   async findAllCategories(
     @Query('limit') limit?: number,
     @Query('locale') locale: string = 'es',
+    @Query('includeAllTranslations') includeAllTranslations: boolean = false,
   ) {
-    return this.productsService.findAllCategories(limit, locale);
+    return this.productsService.findAllCategories(limit, locale, includeAllTranslations);
   }
 
   @Get('categories/parents')

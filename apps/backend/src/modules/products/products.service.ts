@@ -1013,7 +1013,7 @@ export class ProductsService {
     };
   }
 
-  async findAllCategories(limit?: number, locale: string = 'es'): Promise<CategoryResponseDto[]> {
+  async findAllCategories(limit?: number, locale: string = 'es', includeAllTranslations: boolean = false): Promise<CategoryResponseDto[]> {
     const categories = await this.prisma.categories.findMany({
       select: {
         id: true,
@@ -1021,7 +1021,7 @@ export class ProductsService {
         image_url: true,
         parent_id: true,
         order: true,
-        translations: {
+        translations: includeAllTranslations ? true : {
           where: { locale },
         },
       },
@@ -1034,10 +1034,18 @@ export class ProductsService {
 
     return categories.map((c) => ({
       id: c.id.toString(),
-      name: c.translations?.[0]?.name || c.name,
+      name: includeAllTranslations ? c.name : (c.translations?.[0]?.name || c.name),
       parentId: c.parent_id?.toString() || '',
       image: c.image_url || '',
       order: c.order ?? 0,
+      ...(includeAllTranslations && {
+        translations: c.translations?.map(t => ({
+          id: t.id,
+          category_id: t.category_id,
+          locale: t.locale,
+          name: t.name,
+        })) || [],
+      }),
     }));
   }
 

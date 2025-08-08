@@ -11,6 +11,7 @@ import { Text } from '@/app/ui/components/Text';
 import { Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useLocalizedAPI } from '@/hooks/useLocalizedAPI';
 
 interface Category {
     id: string;
@@ -526,6 +527,7 @@ const ProductsSection = ({
 
 function ProductsPageContent() {
     const [categories, setCategories] = useState<Category[]>([]);
+    const localizedAPI = useLocalizedAPI();
     const router = useRouter();
     const searchParams = useSearchParams();
     const categoryFilter = searchParams.get('categoryFilters');
@@ -575,7 +577,7 @@ function ProductsPageContent() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const data = await api.get<Category[]>('/products/categories');
+                const data = await localizedAPI.get<Category[]>('/products/categories');
                 setCategories(data);
             } catch (error) {
                 console.error('Failed to fetch categories:', error);
@@ -583,7 +585,7 @@ function ProductsPageContent() {
         };
 
         fetchCategories();
-    }, []);
+    }, [localizedAPI]);
 
     return (
         <div className="mx-auto px-4 md:px-16 py-8 bg-white">

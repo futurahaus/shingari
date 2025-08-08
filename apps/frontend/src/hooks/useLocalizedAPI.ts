@@ -2,6 +2,7 @@
 
 import { api } from '@/lib/api';
 import { useI18n } from '@/contexts/I18nContext';
+import { useCallback, useMemo } from 'react';
 
 /**
  * Hook that provides API methods with automatic locale parameter injection
@@ -9,64 +10,57 @@ import { useI18n } from '@/contexts/I18nContext';
 export function useLocalizedAPI() {
   const { locale } = useI18n();
 
-  const get = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
+  const get = useCallback(async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
     // Add locale to query parameters
-    const url = new URL(endpoint, window.location.origin);
-    url.searchParams.set('locale', locale);
-    
-    // Remove the origin and keep only the pathname and search
-    const localizedEndpoint = url.pathname + url.search;
+    const separator = endpoint.includes('?') ? '&' : '?';
+    const localizedEndpoint = `${endpoint}${separator}locale=${locale}`;
     
     return api.get<T>(localizedEndpoint, options);
-  };
+  }, [locale]);
 
-  const post = async <T, D extends Record<string, unknown>>(
+  const post = useCallback(async <T, D extends Record<string, unknown>>(
     endpoint: string,
     data: D,
     options: RequestInit = {}
   ): Promise<T> => {
     // For POST requests, we might want to include locale in the body or headers
     // depending on the endpoint. For now, we'll add it as a query parameter
-    const url = new URL(endpoint, window.location.origin);
-    url.searchParams.set('locale', locale);
-    const localizedEndpoint = url.pathname + url.search;
+    const separator = endpoint.includes('?') ? '&' : '?';
+    const localizedEndpoint = `${endpoint}${separator}locale=${locale}`;
     
     return api.post<T, D>(localizedEndpoint, data, options);
-  };
+  }, [locale]);
 
-  const put = async <T, D extends Record<string, unknown>>(
+  const put = useCallback(async <T, D extends Record<string, unknown>>(
     endpoint: string,
     data: D,
     options: RequestInit = {}
   ): Promise<T> => {
-    const url = new URL(endpoint, window.location.origin);
-    url.searchParams.set('locale', locale);
-    const localizedEndpoint = url.pathname + url.search;
+    const separator = endpoint.includes('?') ? '&' : '?';
+    const localizedEndpoint = `${endpoint}${separator}locale=${locale}`;
     
     return api.put<T, D>(localizedEndpoint, data, options);
-  };
+  }, [locale]);
 
-  const del = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
-    const url = new URL(endpoint, window.location.origin);
-    url.searchParams.set('locale', locale);
-    const localizedEndpoint = url.pathname + url.search;
+  const del = useCallback(async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
+    const separator = endpoint.includes('?') ? '&' : '?';
+    const localizedEndpoint = `${endpoint}${separator}locale=${locale}`;
     
     return api.delete<T>(localizedEndpoint, options);
-  };
+  }, [locale]);
 
-  const patch = async <T, D extends Record<string, unknown>>(
+  const patch = useCallback(async <T, D extends Record<string, unknown>>(
     endpoint: string,
     data: D,
     options: RequestInit = {}
   ): Promise<T> => {
-    const url = new URL(endpoint, window.location.origin);
-    url.searchParams.set('locale', locale);
-    const localizedEndpoint = url.pathname + url.search;
+    const separator = endpoint.includes('?') ? '&' : '?';
+    const localizedEndpoint = `${endpoint}${separator}locale=${locale}`;
     
     return api.patch<T, D>(localizedEndpoint, data, options);
-  };
+  }, [locale]);
 
-  return {
+  return useMemo(() => ({
     locale,
     get,
     post,
@@ -75,16 +69,15 @@ export function useLocalizedAPI() {
     patch,
     // Also provide the original api for cases where locale is not needed
     api,
-  };
+  }), [locale, get, post, put, del, patch]);
 }
 
 /**
  * Helper function to add locale to any URL
  */
 export function addLocaleToUrl(url: string, locale: string): string {
-  const urlObj = new URL(url, window.location.origin);
-  urlObj.searchParams.set('locale', locale);
-  return urlObj.pathname + urlObj.search;
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}locale=${locale}`;
 }
 
 /**

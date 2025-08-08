@@ -44,7 +44,7 @@ export function LanguageSelector() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors duration-200 border border-gray-200 rounded-lg hover:bg-gray-50"
+        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors duration-200 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
         aria-label="Select language"
       >
         <span className="text-lg">{currentLanguage.flag}</span>
@@ -66,9 +66,9 @@ export function LanguageSelector() {
               <button
                 key={language.code}
                 onClick={() => handleLanguageChange(language.code)}
-                className={`w-full px-4 py-2 text-left text-sm flex items-center gap-3 hover:bg-gray-50 transition-colors duration-200 ${
-                  locale === language.code 
-                    ? 'bg-gray-100 text-gray-900 font-medium' 
+                className={`w-full px-4 py-2 text-left text-sm flex items-center gap-3 hover:bg-gray-50 transition-colors duration-200 cursor-pointer ${
+                  locale === language.code
+                    ? 'bg-gray-100 text-gray-900 font-medium'
                     : 'text-gray-700'
                 }`}
               >

@@ -99,8 +99,7 @@ export function I18nProvider({ children }: I18nProviderProps) {
 
   // Translation function with nested key support
   const t = (key: string, params?: Record<string, string | number>): string => {
-    if (isLoading) return key;
-
+    // Don't return key while loading, try to find translation first
     const keys = key.split('.');
     let value: any = translations;
 
@@ -108,7 +107,23 @@ export function I18nProvider({ children }: I18nProviderProps) {
       if (value && typeof value === 'object' && k in value) {
         value = value[k];
       } else {
-        // Return the key if translation not found
+        // If still loading and no translation found, return a fallback or the key
+        if (isLoading) {
+          // For common keys, provide immediate fallbacks
+          const fallbacks: Record<string, string> = {
+            'common.search': 'Buscar',
+            'navigation.login': 'Iniciar Sesión',
+            'navigation.products': 'Productos',
+            'navigation.about': 'Nosotros',
+            'navigation.contact': 'Contacto',
+            'common.add_to_favorites': 'Agregar a favoritos',
+            'common.remove_from_favorites': 'Eliminar de favoritos',
+            'common.no_image': 'Sin imagen',
+            'common.view_details': 'Ver detalles'
+          };
+          return fallbacks[key] || key;
+        }
+        // Return the key if translation not found and not loading
         console.warn(`Translation missing for key: ${key} in locale: ${locale}`);
         return key;
       }
