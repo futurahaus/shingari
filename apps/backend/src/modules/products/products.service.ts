@@ -41,7 +41,7 @@ type ProductWithCategoriesForResponse = Omit<ProductPrismaType, 'image_url'> & {
   })[];
   product_images: ProductImagesPrismaType[];
   products_stock: ProductsStockPrismaType[];
-  translations?: ProductTranslationPrismaType[];
+  product_translations?: ProductTranslationPrismaType[];
 };
 
 // Tipo para el descuento con detalles del producto incluidos
@@ -161,6 +161,7 @@ export class ProductsService {
     userId?: string,
     locale: string = 'es',
   ): Promise<ProductResponseDto> {
+
     let userDiscountPrice: number | undefined;
     let userRole: string | null = null;
 
@@ -227,12 +228,12 @@ export class ProductsService {
 
     // Get translated name and description
     const translatedName = this.getTranslatedName(
-      product.translations,
+      product.product_translations,
       locale,
       product.name,
     );
     const translatedDescription = this.getTranslatedDescription(
-      product.translations,
+      product.product_translations,
       locale,
       product.description,
     );
@@ -362,12 +363,12 @@ export class ProductsService {
 
         // Get translated name and description
         const translatedName = this.getTranslatedName(
-          product.translations,
+          product.product_translations,
           locale,
           product.name,
         );
         const translatedDescription = this.getTranslatedDescription(
-          product.translations,
+          product.product_translations,
           locale,
           product.description,
         );
@@ -397,7 +398,7 @@ export class ProductsService {
               ? Number(product.units_per_box)
               : undefined,
           iva: finalIvaValue,
-          translations: product.translations?.map(t => ({
+          product_translations: product.product_translations?.map(t => ({
             id: t.id,
             product_id: t.product_id,
             locale: t.locale,
