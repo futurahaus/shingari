@@ -1,11 +1,10 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
 
 // Translation types
 interface TranslationFiles {
-  [key: string]: any;
+  [key: string]: string | number | boolean | TranslationFiles | undefined;
 }
 
 interface I18nContextType {
@@ -22,7 +21,7 @@ const AVAILABLE_LOCALES = ['es', 'zh'];
 const DEFAULT_LOCALE = 'es';
 
 // Translation store
-let translationCache: { [locale: string]: TranslationFiles } = {};
+const translationCache: { [locale: string]: TranslationFiles } = {};
 
 // Helper to load translations
 async function loadTranslation(locale: string): Promise<TranslationFiles> {
@@ -53,8 +52,6 @@ interface I18nProviderProps {
 }
 
 export function I18nProvider({ children }: I18nProviderProps) {
-  const router = useRouter();
-  const pathname = usePathname();
   const [locale, setLocaleState] = useState<string>(DEFAULT_LOCALE);
   const [translations, setTranslations] = useState<TranslationFiles>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -70,7 +67,7 @@ export function I18nProvider({ children }: I18nProviderProps) {
     if (initialLocale !== locale) {
       setLocaleState(initialLocale);
     }
-  }, []);
+  }, [locale]);
 
   // Load translations when locale changes
   useEffect(() => {
@@ -101,11 +98,11 @@ export function I18nProvider({ children }: I18nProviderProps) {
   const t = (key: string, params?: Record<string, string | number>): string => {
     // Don't return key while loading, try to find translation first
     const keys = key.split('.');
-    let value: any = translations;
+    let value: TranslationFiles = translations;
 
     for (const k of keys) {
       if (value && typeof value === 'object' && k in value) {
-        value = value[k];
+        value = value[k] as TranslationFiles;
       } else {
         // If still loading and no translation found, return a fallback or the key
         if (isLoading) {
@@ -136,7 +133,7 @@ export function I18nProvider({ children }: I18nProviderProps) {
 
     // Replace parameters if provided
     if (params) {
-      return Object.entries(params).reduce((str, [paramKey, paramValue]) => {
+      return Object.entries(params).reduce((str: string, [paramKey, paramValue]) => {
         return str.replace(new RegExp(`{{${paramKey}}}`, 'g'), String(paramValue));
       }, value);
     }

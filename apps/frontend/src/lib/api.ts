@@ -111,7 +111,7 @@ class ApiClient {
         if (text) {
           errorData = JSON.parse(text);
         }
-      } catch (e) {
+      } catch {
         // If parsing fails, use empty object
         errorData = {};
       }
@@ -135,7 +135,7 @@ class ApiClient {
       if (!text) return {} as T;
       try {
         return JSON.parse(text);
-      } catch (e) {
+      } catch {
         // If JSON parsing fails, return empty object
         return {} as T;
       }
@@ -144,7 +144,7 @@ class ApiClient {
     // For other status codes, try to parse JSON
     try {
       return await response.json();
-    } catch (e) {
+    } catch {
       // If JSON parsing fails, return empty object
       return {} as T;
     }

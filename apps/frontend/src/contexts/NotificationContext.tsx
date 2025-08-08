@@ -32,14 +32,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => notificationUtils, [
-    notificationUtils.notifications,
-    notificationUtils.addNotification,
-    notificationUtils.removeNotification,
-    notificationUtils.clearAllNotifications,
-    notificationUtils.showSuccess,
-    notificationUtils.showError,
-    notificationUtils.showInfo,
-    notificationUtils.showWarning,
+    notificationUtils,
   ]);
 
   return (

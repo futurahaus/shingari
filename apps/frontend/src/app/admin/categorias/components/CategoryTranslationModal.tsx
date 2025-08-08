@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
-import { Category, CategoryTranslation } from '../../productos/hooks/useCategories.hook';
+import { Category } from '../../productos/hooks/useCategories.hook';
 import { api } from '@/lib/api';
 
 interface CategoryTranslationModalProps {

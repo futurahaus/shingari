@@ -137,7 +137,6 @@ const SearchHeaderMobile = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const router = useRouter();
   const { openCart, cart } = useCart();
-  const { t } = useTranslation();
 
   return (
     <>
