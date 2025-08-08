@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { api } from '@/lib/api';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Text } from '@/app/ui/components/Text';
 import { useLocalizedAPI } from '@/hooks/useLocalizedAPI';
+import { useTranslation } from '@/contexts/I18nContext';
 
 interface Category {
     id: string;
@@ -19,6 +19,7 @@ export default function CategoryGrid() {
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
     const localizedAPI = useLocalizedAPI();
+    const { t } = useTranslation();
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -28,20 +29,20 @@ export default function CategoryGrid() {
                 setCategories(response);
                 setError(null);
             } catch (error) {
-                setError('Failed to fetch categories');
+                setError(t('products.failed_to_fetch_categories'));
                 console.error(error);
             } finally {
                 setLoading(false);
             }
         };
         fetchCategories();
-    }, [localizedAPI]);
+    }, [localizedAPI, t]);
 
     if (loading) {
         return (
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <Text as="h2" size="2xl" weight="bold" color="primary" className="mb-6 text-center">
-                    Descubre nuestras categorías
+                    {t('products.discover_categories')}
                 </Text>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 animate-pulse">
                     {[...Array(5)].map((_, i) => (
@@ -67,7 +68,7 @@ export default function CategoryGrid() {
         return (
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <Text as="h2" size="2xl" weight="bold" color="primary" className="mb-6 text-center">
-                    Descubre nuestras categorías
+                    {t('products.discover_categories')}
                 </Text>
                 <Text as="p" size="md" color="error" className="text-center" testID="category-grid-error">
                     {error}
@@ -83,7 +84,7 @@ export default function CategoryGrid() {
     return (
         <div className="w-full px-4 sm:px-6 lg:px-16 py-8" data-testid="category-grid">
             <Text as="h2" size="2xl" weight="bold" color="primary" className="mb-6">
-                Comprar por categoría
+                {t('products.shop_by_category')}
             </Text>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
                 {categories.map(category => (
@@ -103,7 +104,7 @@ export default function CategoryGrid() {
                                 />
                             ) : (
                                 <Text as="div" size="sm" color="gray-400" className="w-full h-full flex items-center justify-center bg-gray-100 rounded-2xl">
-                                    Sin imagen
+                                    {t('products.no_image')}
                                 </Text>
                             )}
                         </div>

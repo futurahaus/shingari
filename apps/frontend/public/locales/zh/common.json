@@ -39,6 +39,7 @@
   },
   "products": {
     "title": "产品",
+    "all_products": "所有产品",
     "search_placeholder": "搜索产品...",
     "price": "价格",
     "stock": "库存",
@@ -57,7 +58,35 @@
     "all_categories": "所有分类",
     "add_to_favorites": "添加到收藏",
     "remove_from_favorites": "从收藏中移除",
-    "no_image": "无图片"
+    "no_image": "无图片",
+    "discover_categories": "探索我们的类别",
+    "shop_by_category": "按类别购买",
+    "discover_products": "发现我们的产品",
+    "featured_products": "精选产品",
+    "failed_to_fetch_categories": "加载类别失败",
+    "failed_to_fetch_products": "加载产品失败",
+    "categories": "分类",
+    "favorites": "收藏",
+    "my_favorites": "我的收藏",
+    "home": "首页",
+    "category_filter": "分类",
+    "price_filter": "价格",
+    "price_low_to_high": "价格从低到高",
+    "price_high_to_low": "价格从高到低",
+    "bulk_sales": "批量销售",
+    "no_products_found": "该类别下没有找到产品。",
+    "loading_more": "加载更多产品...",
+    "loading_products": "加载产品中..."
+  },
+  "quantity_controls": {
+    "quantity_updated": "数量已更新",
+    "quantity_updated_to": "\"{productName}\" 的数量已更新为 {quantity}。",
+    "product_added": "产品已添加",
+    "product_added_to_cart": "\"{productName}\" 已添加到购物车。",
+    "product_removed": "产品已移除",
+    "product_removed_from_cart": "\"{productName}\" 已从购物车移除。",
+    "units": "单位",
+    "boxes": "箱"
   },
   "cart": {
     "title": "购物车",
@@ -87,6 +116,19 @@
     "profile": "档案",
     "account_settings": "账户设置",
     "logout_confirm": "确定要登出吗？"
+  },
+  "banner": {
+    "title": "日本食品批发零售",
+    "subtitle": "来自亚洲和其他大陆的独特食品。",
+    "button_individuals": "个人在线商店",
+    "button_businesses": "企业在线商店",
+    "alt_text": "主横幅"
+  },
+  "newsletter": {
+    "title": "Newsletter",
+    "subtitle": "订阅我们的通讯以获得独家优惠并了解新产品。",
+    "email_placeholder": "输入您的邮箱",
+    "subscribe_button": "订阅"
   },
   "admin": {
     "title": "管理",

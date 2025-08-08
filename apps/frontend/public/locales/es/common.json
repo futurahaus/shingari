@@ -39,6 +39,7 @@
   },
   "products": {
     "title": "Productos",
+    "all_products": "Todos los Productos",
     "search_placeholder": "Buscar productos...",
     "price": "Precio",
     "stock": "Stock",
@@ -57,7 +58,35 @@
     "all_categories": "Todas las Categorías",
     "add_to_favorites": "Agregar a favoritos",
     "remove_from_favorites": "Eliminar de favoritos",
-    "no_image": "Sin imagen"
+    "no_image": "Sin imagen",
+    "discover_categories": "Descubre nuestras categorías",
+    "shop_by_category": "Comprar por categoría",
+    "discover_products": "Descubre nuestros productos",
+    "featured_products": "Productos destacados",
+    "failed_to_fetch_categories": "Error al cargar las categorías",
+    "failed_to_fetch_products": "Error al cargar los productos",
+    "categories": "Categorías",
+    "favorites": "Favoritos",
+    "my_favorites": "Mis Favoritos",
+    "home": "Inicio",
+    "category_filter": "Categoría",
+    "price_filter": "Precio",
+    "price_low_to_high": "Menor a Mayor",
+    "price_high_to_low": "Mayor a Menor",
+    "bulk_sales": "Venta por cajas",
+    "no_products_found": "No se han encontrado productos para esta categoría.",
+    "loading_more": "Cargando más productos...",
+    "loading_products": "Cargando productos..."
+  },
+  "quantity_controls": {
+    "quantity_updated": "Cantidad actualizada",
+    "quantity_updated_to": "Cantidad de \"{productName}\" actualizada a {quantity}.",
+    "product_added": "Producto añadido",
+    "product_added_to_cart": "\"{productName}\" añadido al carrito.",
+    "product_removed": "Producto eliminado",
+    "product_removed_from_cart": "\"{productName}\" eliminado del carrito.",
+    "units": "Unidades",
+    "boxes": "Cajas"
   },
   "cart": {
     "title": "Carrito de Compras",
@@ -87,6 +116,19 @@
     "profile": "Perfil",
     "account_settings": "Configuración de Cuenta",
     "logout_confirm": "¿Estás seguro de que quieres cerrar sesión?"
+  },
+  "banner": {
+    "title": "Venta al por mayor y menor de Alimentos Japoneses.",
+    "subtitle": "Productos de alimentación singulares de asia y otros continentes.",
+    "button_individuals": "Tienda Online Particulares",
+    "button_businesses": "Tienda Online Hosteleros",
+    "alt_text": "Banner principal"
+  },
+  "newsletter": {
+    "title": "Newsletter",
+    "subtitle": "Suscríbete a nuestro newsletter para recibir ofertas exclusivas y enterarte de nuevos productos.",
+    "email_placeholder": "Ingresa tu mail",
+    "subscribe_button": "Suscribirse"
   },
   "admin": {
     "title": "Administración",
