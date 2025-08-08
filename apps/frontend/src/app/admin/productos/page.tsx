@@ -24,7 +24,7 @@ export default function AdminProductsPage() {
   const [showTranslationModal, setShowTranslationModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  const lastProductRef = useRef<HTMLTableRowElement | null>(null);
+  const lastProductRef = useRef<HTMLTableRowElement>(null!);
 
   const [sortField, setSortField] = useState<'created_at' | 'updated_at'>('created_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
