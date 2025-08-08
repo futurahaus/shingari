@@ -54,7 +54,7 @@ export class ProductsService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) {} // Inyectar PrismaService
+  ) { } // Inyectar PrismaService
 
   async getUserRole(userId: string): Promise<string | null> {
     const userRole = await this.prisma.user_roles.findFirst({
@@ -451,13 +451,13 @@ export class ProductsService {
         { sku: { contains: search, mode: 'insensitive' } },
         { description: { contains: search, mode: 'insensitive' } },
         // Also search in translations
-        { translations: { some: { name: { contains: search, mode: 'insensitive' } } } },
-        { translations: { some: { description: { contains: search, mode: 'insensitive' } } } },
+        { product_translations: { some: { name: { contains: search, mode: 'insensitive' } } } },
+        { product_translations: { some: { description: { contains: search, mode: 'insensitive' } } } },
       ];
     } else if (searchName) {
       where.OR = [
         { name: { contains: searchName, mode: 'insensitive' } },
-        { translations: { some: { name: { contains: searchName, mode: 'insensitive' } } } },
+        { product_translations: { some: { name: { contains: searchName, mode: 'insensitive' } } } },
       ];
     }
 
@@ -467,7 +467,7 @@ export class ProductsService {
           categories: {
             OR: [
               { name: { in: categoryFilters, mode: 'insensitive' } },
-              { translations: { some: { name: { in: categoryFilters, mode: 'insensitive' } } } },
+              { category_translations: { some: { name: { in: categoryFilters, mode: 'insensitive' } } } },
             ],
           },
         },
@@ -492,7 +492,7 @@ export class ProductsService {
           include: {
             categories: {
               include: {
-                translations: true,
+                category_translations: true,
               },
             },
           },
@@ -503,7 +503,7 @@ export class ProductsService {
             units: true,
           },
         },
-        translations: true,
+        product_translations: true,
       },
     });
 
@@ -540,7 +540,7 @@ export class ProductsService {
           include: {
             categories: {
               include: {
-                translations: true,
+                category_translations: true,
               },
             }, // Incluir los datos de la categoría
           },
@@ -555,7 +555,7 @@ export class ProductsService {
             units: true,
           },
         },
-        translations: true,
+        product_translations: true,
       },
     });
 
@@ -963,10 +963,10 @@ export class ProductsService {
         ...(isNaN(Number(searchTerm))
           ? []
           : [
-              {
-                id: parseInt(searchTerm),
-              },
-            ]),
+            {
+              id: parseInt(searchTerm),
+            },
+          ]),
       ];
     }
 
@@ -994,7 +994,7 @@ export class ProductsService {
             units: true,
           },
         },
-        translations: true, // Include translations for admin view
+        product_translations: true
       },
     });
 
@@ -1021,7 +1021,7 @@ export class ProductsService {
         image_url: true,
         parent_id: true,
         order: true,
-        translations: includeAllTranslations ? true : {
+        category_translations: includeAllTranslations ? true : {
           where: { locale },
         },
       },
@@ -1034,12 +1034,12 @@ export class ProductsService {
 
     return categories.map((c) => ({
       id: c.id.toString(),
-      name: includeAllTranslations ? c.name : (c.translations?.[0]?.name || c.name),
+      name: includeAllTranslations ? c.name : (c.category_translations?.[0]?.name || c.name),
       parentId: c.parent_id?.toString() || '',
       image: c.image_url || '',
       order: c.order ?? 0,
       ...(includeAllTranslations && {
-        translations: c.translations?.map(t => ({
+        translations: c.category_translations?.map(t => ({
           id: t.id,
           category_id: t.category_id,
           locale: t.locale,
@@ -1062,7 +1062,7 @@ export class ProductsService {
         name: true,
         image_url: true,
         parent_id: true,
-        translations: {
+        category_translations: {
           where: { locale },
         },
       },
@@ -1073,7 +1073,7 @@ export class ProductsService {
 
     return categories.map((c) => ({
       id: c.id.toString(),
-      name: c.translations?.[0]?.name || c.name,
+      name: c.category_translations?.[0]?.name || c.name,
       parentId: c.parent_id?.toString() || '',
       image: c.image_url || '',
     }));
