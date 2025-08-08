@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
 import { Product } from '../interfaces/product.interfaces';
@@ -38,16 +38,11 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
     description: ''
   });
 
-  // Fetch existing translation when modal opens or locale changes
-  useEffect(() => {
-    if (isOpen && product) {
-      fetchExistingTranslation();
-    }
-  }, [isOpen, product, translationData.locale]);
-
   // Reset form when modal opens/closes or product changes
   useEffect(() => {
     if (isOpen && product) {
+      console.log('Resetting form for product:', product);
+      console.log('Product has translations:', product.translations);
       setTranslationData({
         locale: 'zh',
         name: '',
@@ -59,43 +54,44 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
     }
   }, [isOpen, product]);
 
-  const fetchExistingTranslation = async () => {
+  const fetchExistingTranslation = useCallback(async () => {
     if (!product) return;
 
     setFetchingTranslation(true);
+    console.log('Fetching translation for product:', product.id, 'locale:', translationData.locale);
+    
     try {
-      // Try to get the product with translations to see if one exists for the current locale
-      const response = await api.get(`/products/${product.id}?locale=${translationData.locale}`);
-
-      // Check if the product has translations in the response
-      if (response && typeof response === 'object' && 'translations' in response && Array.isArray(response.translations) && response.translations.length > 0) {
-        const translation = response.translations.find((t: ExistingTranslation) => t.locale === translationData.locale);
+      // First, check if the product object already has translations (from admin list)
+      if (product.translations && Array.isArray(product.translations) && product.translations.length > 0) {
+        console.log('Product already has translations:', product.translations);
+        const translation = product.translations.find((t: ExistingTranslation) => t.locale === translationData.locale);
         if (translation) {
+          console.log('Found existing translation in product data:', translation);
           setExistingTranslation(translation);
           setTranslationData({
             locale: translation.locale,
             name: translation.name || '',
             description: translation.description || ''
           });
+          return;
         } else {
-          setExistingTranslation(null);
-          setTranslationData(prev => ({
-            ...prev,
-            name: '',
-            description: ''
-          }));
+          console.log('No translation found for locale in product data:', translationData.locale);
         }
       } else {
-        setExistingTranslation(null);
-        setTranslationData(prev => ({
-          ...prev,
-          name: '',
-          description: ''
-        }));
+        console.log('Product has no translations array or empty translations');
       }
+      
+      // If no translation in product data, clear the fields
+      console.log('Clearing form for new translation');
+      setExistingTranslation(null);
+      setTranslationData(prev => ({
+        ...prev,
+        name: '',
+        description: ''
+      }));
+      
     } catch (err) {
-      console.error('Error fetching existing translation:', err);
-      // If there's an error, assume no translation exists
+      console.error('Error processing existing translation:', err);
       setExistingTranslation(null);
       setTranslationData(prev => ({
         ...prev,
@@ -105,7 +101,14 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
     } finally {
       setFetchingTranslation(false);
     }
-  };
+  }, [product, translationData.locale]);
+
+  // Fetch existing translation when modal opens or locale changes
+  useEffect(() => {
+    if (isOpen && product) {
+      fetchExistingTranslation();
+    }
+  }, [isOpen, product, translationData.locale, fetchExistingTranslation]);
 
   const handleInputChange = (field: keyof TranslationData, value: string) => {
     setTranslationData(prev => ({
