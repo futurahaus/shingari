@@ -6,6 +6,7 @@ import { Product } from '../ProductCard';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Text } from '@/app/ui/components/Text';
+import { useLocalizedAPI } from '@/hooks/useLocalizedAPI';
 
 interface PaginatedProductsResponse {
     data: Product[];
@@ -20,12 +21,13 @@ export default function ProductGrid() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
+    const localizedAPI = useLocalizedAPI();
 
     useEffect(() => {
         const fetchProducts = async () => {
             try {
                 setLoading(true);
-                const response = await api.get<PaginatedProductsResponse>('/products?limit=6');
+                const response = await localizedAPI.get<PaginatedProductsResponse>('/products?limit=6');
                 setProducts(response.data);
                 setError(null);
             } catch (error) {
@@ -37,7 +39,7 @@ export default function ProductGrid() {
         };
 
         fetchProducts();
-    }, []);
+    }, [localizedAPI]);
 
     if (loading) {
         return (

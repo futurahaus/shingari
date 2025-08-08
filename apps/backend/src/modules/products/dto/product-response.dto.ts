@@ -1,5 +1,38 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
+export class ProductTranslationDto {
+  @ApiProperty({ 
+    description: 'ID de la traducción',
+    example: 1,
+  })
+  id: number;
+
+  @ApiProperty({ 
+    description: 'ID del producto',
+    example: 1,
+  })
+  product_id: number;
+
+  @ApiProperty({ 
+    description: 'Locale de la traducción',
+    example: 'zh',
+    enum: ['es', 'zh'],
+  })
+  locale: string;
+
+  @ApiProperty({ 
+    description: 'Nombre traducido del producto',
+    example: 'Product Name in Chinese',
+  })
+  name: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Descripción traducida del producto',
+    example: 'Product description in Chinese',
+  })
+  description?: string | null;
+}
+
 export class ProductResponseDto {
   @ApiProperty({ 
     description: 'ID único del producto',
@@ -98,6 +131,12 @@ export class ProductResponseDto {
     example: 21.0,
   })
   iva?: number;
+
+  @ApiPropertyOptional({ 
+    description: 'Traducciones del producto',
+    type: [ProductTranslationDto],
+  })
+  translations?: ProductTranslationDto[];
 
   // Considerar añadir otros campos que sean relevantes desde Prisma, como relaciones cargadas.
 }

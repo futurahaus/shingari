@@ -12,9 +12,12 @@
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
     "@tanstack/react-query": "^5.81.5",
+    "i18next": "^25.3.2",
     "next": "15.3.2",
+    "next-i18next": "^15.4.2",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-i18next": "^15.6.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

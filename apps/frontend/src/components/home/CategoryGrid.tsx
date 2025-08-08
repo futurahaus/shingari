@@ -5,6 +5,7 @@ import { api } from '@/lib/api';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Text } from '@/app/ui/components/Text';
+import { useLocalizedAPI } from '@/hooks/useLocalizedAPI';
 
 interface Category {
     id: string;
@@ -17,12 +18,13 @@ export default function CategoryGrid() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
+    const localizedAPI = useLocalizedAPI();
 
     useEffect(() => {
         const fetchCategories = async () => {
             try {
                 setLoading(true);
-                const response = await api.get<Category[]>('/products/categories/parents?limit=5');
+                const response = await localizedAPI.get<Category[]>('/products/categories/parents?limit=5');
                 setCategories(response);
                 setError(null);
             } catch (error) {
@@ -33,7 +35,7 @@ export default function CategoryGrid() {
             }
         };
         fetchCategories();
-    }, []);
+    }, [localizedAPI]);
 
     if (loading) {
         return (

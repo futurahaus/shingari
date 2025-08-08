@@ -15,6 +15,8 @@ import {
   products_discounts as ProductDiscountPrismaType,
   product_images as ProductImagesPrismaType,
   products_stock as ProductsStockPrismaType,
+  product_translations as ProductTranslationPrismaType,
+  category_translations as CategoryTranslationPrismaType,
 } from '../../../generated/prisma'; // Importar tipos y enums de Prisma
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -33,10 +35,13 @@ import { UpdateCategoriesOrderDto } from './dto/update-category.dto';
 // Tipo para el producto con categorías incluidas, específico para findAllPublic y findOne
 type ProductWithCategoriesForResponse = Omit<ProductPrismaType, 'image_url'> & {
   products_categories: (ProductsCategoriesPrismaType & {
-    categories: CategoryPrismaType;
+    categories: CategoryPrismaType & {
+      translations?: CategoryTranslationPrismaType[];
+    };
   })[];
   product_images: ProductImagesPrismaType[];
   products_stock: ProductsStockPrismaType[];
+  translations?: ProductTranslationPrismaType[];
 };
 
 // Tipo para el descuento con detalles del producto incluidos
@@ -87,12 +92,12 @@ export class ProductsService {
     return userDiscount ? userDiscount.price.toNumber() : null;
   }
 
-  private async calculateProductPrice(
+  private calculateProductPrice(
     product: ProductWithCategoriesForResponse,
     userId?: string,
     userDiscountPrice?: number,
     userRole?: string | null,
-  ): Promise<{ price: number; originalPrice: number; discount: number }> {
+  ): { price: number; originalPrice: number; discount: number } {
     const originalPrice =
       userRole === 'business'
         ? product.wholesale_price.toNumber()
@@ -111,9 +116,50 @@ export class ProductsService {
     return { price, originalPrice, discount };
   }
 
+  private getTranslatedName(
+    translations: ProductTranslationPrismaType[] | undefined,
+    locale: string,
+    defaultName: string,
+  ): string {
+    if (!translations || translations.length === 0) {
+      return defaultName;
+    }
+
+    const translation = translations.find((t) => t.locale === locale);
+    return translation ? translation.name : defaultName;
+  }
+
+  private getTranslatedDescription(
+    translations: ProductTranslationPrismaType[] | undefined,
+    locale: string,
+    defaultDescription: string | null,
+  ): string {
+    if (!translations || translations.length === 0) {
+      return defaultDescription || '';
+    }
+
+    const translation = translations.find((t) => t.locale === locale);
+    return translation?.description || defaultDescription || '';
+  }
+
+  private getTranslatedCategoryName(
+    category: CategoryPrismaType & {
+      translations?: CategoryTranslationPrismaType[];
+    },
+    locale: string,
+  ): string {
+    if (!category.translations || category.translations.length === 0) {
+      return category.name;
+    }
+
+    const translation = category.translations.find((t) => t.locale === locale);
+    return translation ? translation.name : category.name;
+  }
+
   private async mapToProductResponseDto(
     product: ProductWithCategoriesForResponse,
     userId?: string,
+    locale: string = 'es',
   ): Promise<ProductResponseDto> {
     let userDiscountPrice: number | undefined;
     let userRole: string | null = null;
@@ -128,7 +174,7 @@ export class ProductsService {
       userRole = await this.getUserRole(userId);
     }
 
-    const { price, originalPrice, discount } = await this.calculateProductPrice(
+    const { price, originalPrice, discount } = this.calculateProductPrice(
       product,
       userId,
       userDiscountPrice,
@@ -142,8 +188,10 @@ export class ProductsService {
     let finalIvaValue: number | undefined = undefined;
 
     // Debug logging to help identify the issue
-    console.log(`[DEBUG] Product ${product.id}: userId=${userId}, userRole=${userRole}, userDiscountPrice=${userDiscountPrice}`);
-    
+    console.log(
+      `[DEBUG] Product ${product.id}: userId=${userId}, userRole=${userRole}, userDiscountPrice=${userDiscountPrice}`,
+    );
+
     if (userRole !== 'business') {
       // Check if IVA is stored as decimal (0.21) or percentage (21)
       let ivaValue = product.iva ? product.iva.toNumber() : 21;
@@ -160,21 +208,40 @@ export class ProductsService {
       }
 
       priceWithIva = price * (1 + ivaValue / 100);
-      originalPriceWithIva = originalPrice ? originalPrice * (1 + ivaValue / 100) : undefined;
+      originalPriceWithIva = originalPrice
+        ? originalPrice * (1 + ivaValue / 100)
+        : undefined;
       finalIvaValue = product.iva ? ivaValue : undefined;
-      console.log(`[DEBUG] Non-business user: applying IVA ${ivaValue}%, price ${price} -> ${priceWithIva}`);
+      console.log(
+        `[DEBUG] Non-business user: applying IVA ${ivaValue}%, price ${price} -> ${priceWithIva}`,
+      );
     } else {
       // For business users, show prices without IVA
       priceWithIva = price;
       originalPriceWithIva = originalPrice;
       finalIvaValue = undefined;
-      console.log(`[DEBUG] Business user: NO IVA applied, price remains ${priceWithIva}`);
+      console.log(
+        `[DEBUG] Business user: NO IVA applied, price remains ${priceWithIva}`,
+      );
     }
+
+    // Get translated name and description
+    const translatedName = this.getTranslatedName(
+      product.translations,
+      locale,
+      product.name,
+    );
+    const translatedDescription = this.getTranslatedDescription(
+      product.translations,
+      locale,
+      product.description,
+    );
+
     return {
       updatedAt: new Date(),
       id: product.id.toString(),
-      name: product.name,
-      description: product.description || '',
+      name: translatedName,
+      description: translatedDescription,
       price: Math.round(priceWithIva * 100) / 100, // IVA-included price
       originalPrice: originalPriceWithIva
         ? Math.round(originalPriceWithIva * 100) / 100
@@ -182,10 +249,15 @@ export class ProductsService {
       discount: discount,
       createdAt: product.created_at || new Date(),
       categories:
-        product.products_categories?.map((pc) => pc.categories.name) || [],
+        product.products_categories?.map((pc) =>
+          this.getTranslatedCategoryName(pc.categories, locale),
+        ) || [],
       images: product.product_images?.map((pi) => pi.image_url) || [],
       sku: product.sku || '',
-      units_per_box: product.units_per_box !== undefined && product.units_per_box !== null ? Number(product.units_per_box) : undefined,
+      units_per_box:
+        product.units_per_box !== undefined && product.units_per_box !== null
+          ? Number(product.units_per_box)
+          : undefined,
       iva: finalIvaValue,
     };
   }
@@ -193,6 +265,7 @@ export class ProductsService {
   private async mapToProductsResponseDto(
     products: ProductWithCategoriesForResponse[],
     userId?: string,
+    locale: string = 'es',
   ): Promise<ProductResponseDto[]> {
     let discountMap: Map<number, number> | null = null;
     let userRole: string | null = null;
@@ -236,16 +309,15 @@ export class ProductsService {
 
     // Mapear productos con descuentos optimizados
     return Promise.all(
-      products.map(async (product) => {
+      products.map((product) => {
         const userDiscountPrice = discountMap?.get(product.id);
 
-        const { price, originalPrice, discount } =
-          await this.calculateProductPrice(
-            product,
-            userId,
-            userDiscountPrice,
-            userRole,
-          );
+        const { price, originalPrice, discount } = this.calculateProductPrice(
+          product,
+          userId,
+          userDiscountPrice,
+          userRole,
+        );
 
         // Calculate IVA-included prices (only for non-business users)
         // Business users see wholesale prices without IVA
@@ -254,10 +326,13 @@ export class ProductsService {
         let finalIvaValue: number | undefined = undefined;
 
         // Debug logging for bulk products
-        if (products.indexOf(product) === 0) { // Log only for first product to avoid spam
-          console.log(`[DEBUG BULK] Products list: userId=${userId}, userRole=${userRole}, firstProduct=${product.id}`);
+        if (products.indexOf(product) === 0) {
+          // Log only for first product to avoid spam
+          console.log(
+            `[DEBUG BULK] Products list: userId=${userId}, userRole=${userRole}, firstProduct=${product.id}`,
+          );
         }
-        
+
         if (userRole !== 'business') {
           // Check if IVA is stored as decimal (0.21) or percentage (21)
           let ivaValue = product.iva ? product.iva.toNumber() : 21;
@@ -274,7 +349,9 @@ export class ProductsService {
           }
 
           priceWithIva = price * (1 + ivaValue / 100);
-          originalPriceWithIva = originalPrice ? originalPrice * (1 + ivaValue / 100) : undefined;
+          originalPriceWithIva = originalPrice
+            ? originalPrice * (1 + ivaValue / 100)
+            : undefined;
           finalIvaValue = product.iva ? ivaValue : undefined;
         } else {
           // For business users, show prices without IVA
@@ -283,11 +360,23 @@ export class ProductsService {
           finalIvaValue = undefined;
         }
 
+        // Get translated name and description
+        const translatedName = this.getTranslatedName(
+          product.translations,
+          locale,
+          product.name,
+        );
+        const translatedDescription = this.getTranslatedDescription(
+          product.translations,
+          locale,
+          product.description,
+        );
+
         return {
           updatedAt: new Date(),
           id: product.id.toString(),
-          name: product.name,
-          description: product.description || '',
+          name: translatedName,
+          description: translatedDescription,
           price: Math.round(priceWithIva * 100) / 100, // IVA-included price
           stock: product.products_stock[0]?.quantity.toNumber() || 0,
           originalPrice: originalPriceWithIva
@@ -298,11 +387,23 @@ export class ProductsService {
           discount: discount,
           createdAt: product.created_at || new Date(),
           categories:
-            product.products_categories?.map((pc) => pc.categories.name) || [],
+            product.products_categories?.map((pc) =>
+              this.getTranslatedCategoryName(pc.categories, locale),
+            ) || [],
           images: product.product_images?.map((pi) => pi.image_url) || [],
           sku: product.sku || '',
-          units_per_box: product.units_per_box !== undefined && product.units_per_box !== null ? Number(product.units_per_box) : undefined,
+          units_per_box:
+            product.units_per_box !== undefined && product.units_per_box !== null
+              ? Number(product.units_per_box)
+              : undefined,
           iva: finalIvaValue,
+          translations: product.translations?.map(t => ({
+            id: t.id,
+            product_id: t.product_id,
+            locale: t.locale,
+            name: t.name,
+            description: t.description,
+          })) || [], // Include translations for admin view
         };
       }),
     );
@@ -315,8 +416,8 @@ export class ProductsService {
     return `products:public:${JSON.stringify(queryProductDto)}:user:${userId || 'anon'}`;
   }
 
-  private getFindOneCacheKey(id: number, userId?: string): string {
-    return `products:one:${id}:user:${userId || 'anon'}`;
+  private getFindOneCacheKey(id: number, userId?: string, locale?: string): string {
+    return `products:one:${id}:user:${userId || 'anon'}:locale:${locale || 'es'}`;
   }
 
   async findAllPublic(
@@ -335,6 +436,7 @@ export class ProductsService {
       searchName,
       categoryFilters,
       sortByPrice,
+      locale = 'es',
     } = queryProductDto;
     const skip = (page - 1) * limit;
 
@@ -348,19 +450,25 @@ export class ProductsService {
         { name: { contains: search, mode: 'insensitive' } },
         { sku: { contains: search, mode: 'insensitive' } },
         { description: { contains: search, mode: 'insensitive' } },
+        // Also search in translations
+        { translations: { some: { name: { contains: search, mode: 'insensitive' } } } },
+        { translations: { some: { description: { contains: search, mode: 'insensitive' } } } },
       ];
     } else if (searchName) {
-      where.name = { contains: searchName, mode: 'insensitive' };
+      where.OR = [
+        { name: { contains: searchName, mode: 'insensitive' } },
+        { translations: { some: { name: { contains: searchName, mode: 'insensitive' } } } },
+      ];
     }
 
     if (categoryFilters && categoryFilters.length > 0) {
       where.products_categories = {
         some: {
           categories: {
-            name: {
-              in: categoryFilters,
-              mode: 'insensitive',
-            },
+            OR: [
+              { name: { in: categoryFilters, mode: 'insensitive' } },
+              { translations: { some: { name: { in: categoryFilters, mode: 'insensitive' } } } },
+            ],
           },
         },
       };
@@ -382,7 +490,11 @@ export class ProductsService {
       include: {
         products_categories: {
           include: {
-            categories: true,
+            categories: {
+              include: {
+                translations: true,
+              },
+            },
           },
         },
         product_images: true,
@@ -391,6 +503,7 @@ export class ProductsService {
             units: true,
           },
         },
+        translations: true,
       },
     });
 
@@ -399,6 +512,7 @@ export class ProductsService {
     const mappedProducts = await this.mapToProductsResponseDto(
       productsData as ProductWithCategoriesForResponse[],
       userId,
+      locale,
     );
 
     const result: PaginatedProductResponseDto = {
@@ -412,8 +526,8 @@ export class ProductsService {
     return result;
   }
 
-  async findOne(id: number, userId?: string): Promise<ProductResponseDto> {
-    const cacheKey = this.getFindOneCacheKey(id, userId);
+  async findOne(id: number, userId?: string, locale: string = 'es'): Promise<ProductResponseDto> {
+    const cacheKey = this.getFindOneCacheKey(id, userId, locale);
     const cached = await this.cacheManager.get<ProductResponseDto>(cacheKey);
     if (cached) return cached;
     const product = await this.prisma.products.findUnique({
@@ -424,7 +538,11 @@ export class ProductsService {
       include: {
         products_categories: {
           include: {
-            categories: true, // Incluir los datos de la categoría
+            categories: {
+              include: {
+                translations: true,
+              },
+            }, // Incluir los datos de la categoría
           },
         },
         product_images: {
@@ -437,6 +555,7 @@ export class ProductsService {
             units: true,
           },
         },
+        translations: true,
       },
     });
 
@@ -449,6 +568,7 @@ export class ProductsService {
     const result = await this.mapToProductResponseDto(
       product as ProductWithCategoriesForResponse,
       userId,
+      locale,
     );
     await this.cacheManager.set(cacheKey, result, 300);
     return result;
@@ -874,6 +994,7 @@ export class ProductsService {
             units: true,
           },
         },
+        translations: true, // Include translations for admin view
       },
     });
 
@@ -892,7 +1013,7 @@ export class ProductsService {
     };
   }
 
-  async findAllCategories(limit?: number): Promise<CategoryResponseDto[]> {
+  async findAllCategories(limit?: number, locale: string = 'es', includeAllTranslations: boolean = false): Promise<CategoryResponseDto[]> {
     const categories = await this.prisma.categories.findMany({
       select: {
         id: true,
@@ -900,6 +1021,9 @@ export class ProductsService {
         image_url: true,
         parent_id: true,
         order: true,
+        translations: includeAllTranslations ? true : {
+          where: { locale },
+        },
       },
       orderBy: [
         { order: 'asc' },
@@ -910,15 +1034,24 @@ export class ProductsService {
 
     return categories.map((c) => ({
       id: c.id.toString(),
-      name: c.name,
+      name: includeAllTranslations ? c.name : (c.translations?.[0]?.name || c.name),
       parentId: c.parent_id?.toString() || '',
       image: c.image_url || '',
       order: c.order ?? 0,
+      ...(includeAllTranslations && {
+        translations: c.translations?.map(t => ({
+          id: t.id,
+          category_id: t.category_id,
+          locale: t.locale,
+          name: t.name,
+        })) || [],
+      }),
     }));
   }
 
   async findAllParentCategories(
     limit?: number,
+    locale: string = 'es',
   ): Promise<CategoryResponseDto[]> {
     const categories = await this.prisma.categories.findMany({
       where: {
@@ -929,6 +1062,9 @@ export class ProductsService {
         name: true,
         image_url: true,
         parent_id: true,
+        translations: {
+          where: { locale },
+        },
       },
       orderBy: {
         name: 'asc',
@@ -937,7 +1073,7 @@ export class ProductsService {
 
     return categories.map((c) => ({
       id: c.id.toString(),
-      name: c.name,
+      name: c.translations?.[0]?.name || c.name,
       parentId: c.parent_id?.toString() || '',
       image: c.image_url || '',
     }));
@@ -1003,5 +1139,220 @@ export class ProductsService {
     const hasProducts = await this.prisma.products_categories.findFirst({ where: { category_id: Number(id) } });
     if (hasProducts) throw new BadRequestException('No se puede eliminar una categoría que tiene productos asociados');
     await this.prisma.categories.delete({ where: { id: Number(id) } });
+  }
+
+  // Translation methods
+  async createProductTranslation(
+    productId: number,
+    locale: string,
+    name: string,
+    description?: string,
+  ): Promise<void> {
+    // Check if product exists
+    const product = await this.prisma.products.findUnique({
+      where: { id: productId },
+    });
+    if (!product) {
+      throw new NotFoundException(`Producto con ID "${productId}" no encontrado.`);
+    }
+
+    // Check if translation already exists
+    const existingTranslation = await this.prisma.product_translations.findUnique({
+      where: {
+        product_id_locale: {
+          product_id: productId,
+          locale,
+        },
+      },
+    });
+
+    if (existingTranslation) {
+      throw new BadRequestException(`Ya existe una traducción para el producto ${productId} en el idioma ${locale}`);
+    }
+
+    // Create translation
+    await this.prisma.product_translations.create({
+      data: {
+        product_id: productId,
+        locale,
+        name,
+        description,
+      },
+    });
+
+    // Clear cache
+    await this.clearProductCache();
+  }
+
+  async updateProductTranslation(
+    productId: number,
+    locale: string,
+    name: string,
+    description?: string,
+  ): Promise<void> {
+    // Check if translation exists
+    const existingTranslation = await this.prisma.product_translations.findUnique({
+      where: {
+        product_id_locale: {
+          product_id: productId,
+          locale,
+        },
+      },
+    });
+
+    if (!existingTranslation) {
+      throw new NotFoundException(`Traducción no encontrada para el producto ${productId} en el idioma ${locale}`);
+    }
+
+    // Update translation
+    await this.prisma.product_translations.update({
+      where: {
+        product_id_locale: {
+          product_id: productId,
+          locale,
+        },
+      },
+      data: {
+        name,
+        description,
+      },
+    });
+
+    // Clear cache
+    await this.clearProductCache();
+  }
+
+  async deleteProductTranslation(productId: number, locale: string): Promise<void> {
+    // Check if translation exists
+    const existingTranslation = await this.prisma.product_translations.findUnique({
+      where: {
+        product_id_locale: {
+          product_id: productId,
+          locale,
+        },
+      },
+    });
+
+    if (!existingTranslation) {
+      throw new NotFoundException(`Traducción no encontrada para el producto ${productId} en el idioma ${locale}`);
+    }
+
+    // Delete translation
+    await this.prisma.product_translations.delete({
+      where: {
+        product_id_locale: {
+          product_id: productId,
+          locale,
+        },
+      },
+    });
+
+    // Clear cache
+    await this.clearProductCache();
+  }
+
+  async createCategoryTranslation(
+    categoryId: number,
+    locale: string,
+    name: string,
+  ): Promise<void> {
+    // Check if category exists
+    const category = await this.prisma.categories.findUnique({
+      where: { id: categoryId },
+    });
+    if (!category) {
+      throw new NotFoundException(`Categoría con ID "${categoryId}" no encontrada.`);
+    }
+
+    // Check if translation already exists
+    const existingTranslation = await this.prisma.category_translations.findUnique({
+      where: {
+        category_id_locale: {
+          category_id: categoryId,
+          locale,
+        },
+      },
+    });
+
+    if (existingTranslation) {
+      throw new BadRequestException(`Ya existe una traducción para la categoría ${categoryId} en el idioma ${locale}`);
+    }
+
+    // Create translation
+    await this.prisma.category_translations.create({
+      data: {
+        category_id: categoryId,
+        locale,
+        name,
+      },
+    });
+
+    // Clear cache
+    await this.clearProductCache();
+  }
+
+  async updateCategoryTranslation(
+    categoryId: number,
+    locale: string,
+    name: string,
+  ): Promise<void> {
+    // Check if translation exists
+    const existingTranslation = await this.prisma.category_translations.findUnique({
+      where: {
+        category_id_locale: {
+          category_id: categoryId,
+          locale,
+        },
+      },
+    });
+
+    if (!existingTranslation) {
+      throw new NotFoundException(`Traducción no encontrada para la categoría ${categoryId} en el idioma ${locale}`);
+    }
+
+    // Update translation
+    await this.prisma.category_translations.update({
+      where: {
+        category_id_locale: {
+          category_id: categoryId,
+          locale,
+        },
+      },
+      data: {
+        name,
+      },
+    });
+
+    // Clear cache
+    await this.clearProductCache();
+  }
+
+  async deleteCategoryTranslation(categoryId: number, locale: string): Promise<void> {
+    // Check if translation exists
+    const existingTranslation = await this.prisma.category_translations.findUnique({
+      where: {
+        category_id_locale: {
+          category_id: categoryId,
+          locale,
+        },
+      },
+    });
+
+    if (!existingTranslation) {
+      throw new NotFoundException(`Traducción no encontrada para la categoría ${categoryId} en el idioma ${locale}`);
+    }
+
+    // Delete translation
+    await this.prisma.category_translations.delete({
+      where: {
+        category_id_locale: {
+          category_id: categoryId,
+          locale,
+        },
+      },
+    });
+
+    // Clear cache
+    await this.clearProductCache();
   }
 }

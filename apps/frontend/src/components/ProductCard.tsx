@@ -7,6 +7,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useFavorites } from '@/hooks/useFavorites';
 import { FaStar, FaRegStar } from 'react-icons/fa';
 import { useState } from 'react';
+import { useProductTranslations } from '@/hooks/useLocalizedAPI';
+import { useTranslation } from '@/contexts/I18nContext';
 
 export interface Product {
     id: string;
@@ -20,6 +22,11 @@ export interface Product {
     sku?: string;
     units_per_box?: number;
     iva?: number;
+    translations?: Array<{
+        locale: string;
+        name: string;
+        description?: string;
+    }>;
 }
 
 export const ProductCard = ({ product }: { product: Product }) => {
@@ -27,6 +34,12 @@ export const ProductCard = ({ product }: { product: Product }) => {
     const { user } = useAuth();
     const { isFavorite, toggleFavorite } = useFavorites();
     const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
+    const { getProductName, getProductDescription } = useProductTranslations();
+    const { t } = useTranslation();
+
+    // Get translated content
+    const displayName = getProductName(product);
+    const displayDescription = getProductDescription(product) || product.description;
 
     const handleFavoriteClick = async (e: React.MouseEvent) => {
         e.stopPropagation(); // Prevent navigation to product detail
@@ -48,7 +61,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
                         className={`absolute top-2 right-2 z-10 p-2 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 shadow-sm transition-all duration-200 hover:bg-white hover:scale-110 ${
                             isTogglingFavorite ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                         }`}
-                        aria-label={isFavorite(product.id) ? 'Eliminar de favoritos' : 'Agregar a favoritos'}
+                        aria-label={isFavorite(product.id) ? t('products.remove_from_favorites') : t('products.add_to_favorites')}
                     >
                         {isFavorite(product.id) ? (
                             <FaStar className="w-4 h-4 text-yellow-400" />
@@ -67,13 +80,13 @@ export const ProductCard = ({ product }: { product: Product }) => {
                     />
                 ) : (
                     <Text as="div" size="sm" color="gray-400" className="text-center">
-                        Sin imagen
+                        {t('products.no_image')}
                     </Text>
                 )}
                 {/* Quantity controls */}
                 <QuantityControls
                     productId={product.id}
-                    productName={product.name}
+                    productName={displayName}
                     productPrice={product.price}
                     productImage={product.images[0]}
                     unitsPerBox={product.units_per_box}
@@ -81,7 +94,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
             </div>
             <div className="p-4 flex flex-col flex-1">
                 <Text as="h3" size="lg" weight="bold" color="primary" testID={`product-name-${product.id}`} className="line-clamp-2 mb-2">
-                    {product.name}
+                    {displayName}
                 </Text>
                 <div className="flex items-center mt-2 mb-2">
                     <div className="flex flex-col">
@@ -120,7 +133,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
                     className="mb-4 line-clamp-2 flex-1"
                     testID={`product-description-${product.id}`}
                 >
-                    {product.description}
+                    {displayDescription}
                 </Text>
                 <div className="mt-auto">
                     <Button
@@ -128,7 +141,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
                             router.push(`/products/${product.id}`);
                         }}
                         type="primary"
-                        text="Ver Producto"
+                        text={t('products.view_details')}
                         testID={`add-to-cart-${product.id}`}
                         icon="FaShoppingCart"
                     />

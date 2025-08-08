@@ -10,6 +10,8 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/app/ui/components/Button';
 import { useCart } from '@/contexts/CartContext';
 import { useRef } from 'react';
+import { LanguageSelector, LanguageSelectorCompact } from '@/components/language/LanguageSelector';
+import { useTranslation } from '@/contexts/I18nContext';
 
 const SearchHeaderDesktop = () => {
   const { user } = useAuth();
@@ -17,6 +19,7 @@ const SearchHeaderDesktop = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
   const { openCart, cart } = useCart();
+  const { t } = useTranslation();
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -46,7 +49,7 @@ const SearchHeaderDesktop = () => {
                 </span>
                 <input
                   type="text"
-                  placeholder="Buscar"
+                  placeholder={t('common.search')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onBlur={handleSearch}
@@ -57,11 +60,14 @@ const SearchHeaderDesktop = () => {
             </div>
 
             <div className="flex items-center gap-4">
+              {/* Language Selector */}
+              <LanguageSelector />
+              
               {user ? (
                 <Button
                   onPress={() => router.push('/dashboard')}
                   type="primary"
-                  text="Mi perfil"
+                  text={t('navigation.profile')}
                   testID="profile-button"
                   icon="FaUser"
                   textProps={{
@@ -73,7 +79,7 @@ const SearchHeaderDesktop = () => {
                 <Button
                   onPress={() => setIsLoginModalOpen(true)}
                   type="primary"
-                  text="Iniciar sesión"
+                  text={t('navigation.login')}
                   testID="login-button"
                   icon="FaUser"
                   textProps={{
@@ -131,6 +137,7 @@ const SearchHeaderMobile = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const router = useRouter();
   const { openCart, cart } = useCart();
+  const { t } = useTranslation();
 
   return (
     <>
@@ -142,6 +149,9 @@ const SearchHeaderMobile = () => {
             </Link>
 
             <div className="flex items-center space-x-4">
+              {/* Language Selector - Compact for mobile */}
+              <LanguageSelectorCompact />
+              
               {user ? (
                 <Button
                   onPress={() => router.push('/dashboard')}
