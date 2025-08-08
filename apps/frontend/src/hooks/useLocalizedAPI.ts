@@ -107,26 +107,26 @@ export function getTranslatedField(
 export function useProductTranslations() {
   const { locale } = useI18n();
 
-  const getProductName = (product: {
+  const getProductName = useCallback((product: {
     name: string;
     translations?: Array<{ locale: string; name: string; description?: string }>;
   }): string => {
     return getTranslatedField(product.translations, locale, 'name', product.name) || product.name;
-  };
+  }, [locale]);
 
-  const getProductDescription = (product: {
+  const getProductDescription = useCallback((product: {
     description?: string;
     translations?: Array<{ locale: string; name: string; description?: string }>;
   }): string | undefined => {
     return getTranslatedField(product.translations, locale, 'description', product.description);
-  };
+  }, [locale]);
 
-  const getCategoryName = (category: {
+  const getCategoryName = useCallback((category: {
     name: string;
     translations?: Array<{ locale: string; name: string }>;
   }): string => {
     return getTranslatedField(category.translations, locale, 'name', category.name) || category.name;
-  };
+  }, [locale]);
 
   return {
     locale,
