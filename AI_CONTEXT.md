@@ -31,7 +31,7 @@ Aplicación construida con NestJS. **Todas las rutas de la API del backend está
             -   `complete-profile.dto.ts`: DTO para completar perfil de usuario con información empresarial.
         -   **Funcionalidad de Roles**: Sistema de asignación de roles que permite a los usuarios elegir entre 'consumer' y 'business' después de verificar su email.
             -   Endpoint `POST /auth/assign-role`: Asigna un rol específico a un usuario autenticado.
-            -   Los roles se almacenan en la tabla `user_roles` y se actualizan en los metadatos del usuario.
+            -   Los roles se almacenan en la tabla `roles` y se relacionan con usuarios a través de `user_roles`.
             -   Manejo automático de roles duplicados y creación de roles si no existen.
             -   **Redirección basada en roles**:
                 -   Usuarios con rol 'consumer' (Consumidor Final) son redirigidos a `/dashboard`
@@ -68,16 +68,41 @@ Aplicación construida con NestJS. **Todas las rutas de la API del backend está
             -   **Integración con Supabase**: Creación y actualización de usuarios en Supabase Auth con sincronización de roles en la base de datos local.
             -   **Datos Enriquecidos**: Incluye información de verificación de email, último acceso, metadatos del usuario y roles asignados.
     -   **`products/`**: Módulo para la gestión de productos.
-        -   `products.service.ts`: Lógica de negocio para productos, incluyendo CRUD, listado público con filtros/paginación, y gestión de descuentos.
+        -   `products.service.ts`: Lógica de negocio para productos, incluyendo CRUD, listado público con filtros/paginación, gestión de descuentos y **soporte multilenguaje**.
         -   `products.controller.ts`: Endpoints HTTP para productos.
-            -   `GET /products`: Listado público de productos (paginado, búsqueda por nombre, filtro por categorías, orden por precio).
-            -   `GET /products/:id`: Obtener un producto específico.
+            -   `GET /products`: Listado público de productos (paginado, búsqueda por nombre, filtro por categorías, orden por precio, **soporte multilenguaje**).
+            -   `GET /products/:id`: Obtener un producto específico (**soporte multilenguaje**).
             -   `POST /products`: Crear producto (protegido por AdminGuard).
             -   `PUT /products/:id`: Actualizar producto (protegido por AdminGuard).
             -   `DELETE /products/:id`: Eliminar lógicamente un producto (protegido por AdminGuard).
             -   `GET /products/discounts`: Obtener descuentos de productos para el usuario autenticado (puede filtrar por `productId`).
+            -   `GET /products/categories`: Obtener categorías de productos (**soporte multilenguaje**).
+            -   `GET /products/categories/parents`: Obtener categorías padre (**soporte multilenguaje**).
+            -   **Endpoints de Traducciones** (protegidos por AdminGuard):
+                -   `POST /products/:id/translations`: Crear traducción para un producto.
+                -   `PUT /products/:id/translations/:locale`: Actualizar traducción de un producto.
+                -   `DELETE /products/:id/translations/:locale`: Eliminar traducción de un producto.
+                -   `POST /products/categories/:id/translations`: Crear traducción para una categoría.
+                -   `PUT /products/categories/:id/translations/:locale`: Actualizar traducción de una categoría.
+                -   `DELETE /products/categories/:id/translations/:locale`: Eliminar traducción de una categoría.
         -   `products.module.ts`: Definición del módulo.
-        -   `dto/`: Data Transfer Objects para productos (creación, actualización, consulta, respuesta, descuentos).
+        -   `dto/`: Data Transfer Objects para productos (creación, actualización, consulta, respuesta, descuentos, **traducciones**).
+            -   `locale.dto.ts`: DTO para manejo de parámetros de idioma.
+            -   `create-product-translation.dto.ts`: DTO para crear traducciones de productos.
+            -   `create-category-translation.dto.ts`: DTO para crear traducciones de categorías.
+        -   **Funcionalidad de Productos**: Implementación de catálogo de productos con funcionalidades públicas y protegidas.
+            -   **Endpoints Públicos**: Los endpoints `GET /products` y `GET /products/:id` son públicos y no requieren autenticación.
+            -   **Precios Dinámicos**: Los precios se calculan dinámicamente basados en el rol del usuario (precio al por mayor para usuarios 'business').
+            -   **Gestión de IVA**: Los usuarios con rol 'business' ven precios al por mayor SIN IVA incluido, mientras que otros usuarios ven precios con IVA incluido.
+            -   **Descuentos Personalizados**: Sistema de descuentos específicos por usuario con fechas de validez.
+            -   **Filtros y Paginación**: Soporte para filtrado por categorías, búsqueda por nombre, ordenamiento por precio y paginación.
+            -   **Soporte Multilenguaje**: Sistema completo de traducciones para productos y categorías.
+                -   **Idiomas Soportados**: Español (es) por defecto y Chino (zh).
+                -   **Traducciones de Productos**: Nombre y descripción traducibles.
+                -   **Traducciones de Categorías**: Nombre traducible.
+                -   **Búsqueda Multilenguaje**: Búsqueda en contenido original y traducido.
+                -   **Fallback**: Si no existe traducción, se usa el contenido original.
+                -   **Gestión de Traducciones**: CRUD completo para traducciones (solo administradores).
     -   **`favorites/`**: Módulo para la gestión de productos favoritos de los usuarios.
         -   `favorites.service.ts`: Lógica de negocio para favoritos, incluyendo agregar, eliminar y obtener favoritos del usuario.
         -   `favorites.controller.ts`: Endpoints HTTP para favoritos.
@@ -172,6 +197,11 @@ Aplicación construida con Next.js.
 -   **Base de Datos**: La interacción con la base de datos se realiza principalmente a través de Prisma ORM, utilizando el archivo `schema.prisma` ubicado en `apps/backend/prisma/`. El `DatabaseModule` en el backend probablemente encapsula la lógica de acceso a la base de datos utilizando el cliente Prisma generado.
     -   **Acceso Multi-Esquema**: Prisma está configurado para acceder tanto al esquema `auth` (usuarios de Supabase) como al esquema `public` (datos de la aplicación).
     -   **Sincronización de Usuarios**: Los usuarios se crean en Supabase Auth y se sincronizan con roles en la base de datos local.
+    -   **Sistema de Traducciones**: Nuevas tablas `product_translations` y `category_translations` para soporte multilenguaje.
+        -   **product_translations**: Almacena traducciones de nombre y descripción de productos.
+        -   **category_translations**: Almacena traducciones de nombre de categorías.
+        -   **Relaciones**: Las traducciones están relacionadas con sus entidades principales mediante claves foráneas.
+        -   **Índices**: Optimización con índices en `product_id`, `category_id` y `locale`.
 -   **Sistema de Roles**: Implementación de roles de usuario (consumer/business/admin) con asignación automática después de la verificación de email.
     -   Los roles se almacenan en la tabla `roles` y se relacionan con usuarios a través de `user_roles`.
     -   Flujo de verificación de email mejorado con modal de selección de roles.
@@ -193,6 +223,14 @@ Aplicación construida con Next.js.
     -   **Gestión de IVA**: Los usuarios con rol 'business' ven precios al por mayor SIN IVA incluido, mientras que otros usuarios ven precios con IVA incluido.
     -   **Descuentos Personalizados**: Sistema de descuentos específicos por usuario con fechas de validez.
     -   **Filtros y Paginación**: Soporte para filtrado por categorías, búsqueda por nombre, ordenamiento por precio y paginación.
+    -   **Soporte Multilenguaje**: Sistema completo de traducciones para productos y categorías.
+        -   **Idiomas Soportados**: Español (es) por defecto y Chino (zh).
+        -   **Parámetro de Locale**: Todos los endpoints públicos aceptan parámetro `locale` (ej: `?locale=zh`).
+        -   **Traducciones de Productos**: Nombre y descripción traducibles con fallback al contenido original.
+        -   **Traducciones de Categorías**: Nombre traducible con fallback al contenido original.
+        -   **Búsqueda Multilenguaje**: Búsqueda en contenido original y traducido simultáneamente.
+        -   **Gestión de Traducciones**: CRUD completo para traducciones (solo administradores).
+        -   **Cache Inteligente**: Cache separado por locale para optimizar rendimiento.
 -   **Testing**: Ambos proyectos tienen configuraciones de Jest. El backend tiene tests unitarios para servicios y tests e2e. El frontend tiene tests para componentes.
 - **Endpoints**: Se pueden encontrar los endpoints disponibles para dev en http://localhost:3001/api-docs
 
@@ -205,6 +243,6 @@ Aplicación construida con Next.js.
 ---
 
 *Este archivo fue generado y actualizado el 2025-01-03 22:30:00.*
-*Última actualización: 2025-01-17 - Actualizado sistema de precios con gestión de IVA para usuarios business.*
+*Última actualización: 2025-01-17 - Implementado sistema completo de soporte multilenguaje para productos y categorías.*
 
 *Por favor, actualiza la fecha y cualquier información relevante cuando hagas cambios significativos.*

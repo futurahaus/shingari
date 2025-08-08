@@ -7,11 +7,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { User, MapPin, ShoppingBag } from 'lucide-react';
 import { api } from '@/lib/api';
 import { UserProfile } from '@/app/(main)/complete-profile/page';
+import { useTranslation } from '@/contexts/I18nContext';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState<UserProfile | null>(null);
   const { user: authUser } = useAuth();
+  const { t } = useTranslation();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -42,8 +44,8 @@ export default function Navbar() {
 
   // Sidebar navigation items for logged users
   const sidebarItems = [
-    { label: 'Datos Personales', href: '/dashboard', icon: User },
-    { label: 'Mi perfil', href: '/complete-profile' },
+    { label: t('navigation.dashboard'), href: '/dashboard', icon: User },
+    { label: t('navigation.profile'), href: '/complete-profile' },
     { label: 'Direcciones', href: '/dashboard/direcciones', icon: MapPin },
     { label: 'Mis Compras', href: '/dashboard/compras', icon: ShoppingBag },
   ];
@@ -61,19 +63,19 @@ export default function Navbar() {
                 <rect y="17" width="24" height="2" rx="1" fill="currentColor" />
               </svg>
               <Text as="span" size="md" color="white">
-                Categorías
+                {t('navigation.products')}
               </Text>
             </Link>
 
             <Link href="/about-us" className="flex flex-1 items-center justify-center h-full text-white hover:opacity-80 transition-opacity">
               <Text as="span" size="md" color="white">
-                Sobre Shingari
+                {t('navigation.about')}
               </Text>
             </Link>
 
             <Link href="/contacto" className="flex flex-1 items-center justify-center h-full text-white hover:opacity-80 transition-opacity">
               <Text as="span" size="md" color="white">
-                Contacto
+                {t('navigation.contact')}
               </Text>
             </Link>
           </div>
@@ -124,7 +126,7 @@ export default function Navbar() {
               >
                 <div className="flex items-center gap-2">
                   <Text as="span" size="md" color="white">
-                    Categorías
+                    {t('navigation.products')}
                   </Text>
                 </div>
               </Link>
@@ -134,7 +136,7 @@ export default function Navbar() {
                 className="block py-3 hover:bg-primary-dark transition-colors"
               >
                 <Text as="span" size="md" color="white">
-                  Sobre Shingari
+                  {t('navigation.about')}
                 </Text>
               </Link>
               <Link
@@ -143,7 +145,7 @@ export default function Navbar() {
                 className="block py-3 hover:bg-primary-dark transition-colors"
               >
                 <Text as="span" size="md" color="white">
-                  Contacto
+                  {t('navigation.contact')}
                 </Text>
               </Link>
 

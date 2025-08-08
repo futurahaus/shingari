@@ -7,6 +7,7 @@ import {
   IsString,
   IsArray,
   IsEnum,
+  IsIn,
 } from 'class-validator';
 
 export enum ProductSortByPrice {
@@ -101,4 +102,14 @@ export class QueryProductDto {
   @IsOptional()
   @IsEnum(SortDirection)
   sortDirection?: SortDirection;
-} 
+
+  @ApiPropertyOptional({
+    description: 'Locale for translations (es, zh)',
+    example: 'es',
+    default: 'es',
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(['es', 'zh'])
+  locale?: string = 'es';
+}

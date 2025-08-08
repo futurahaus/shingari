@@ -383,39 +383,41 @@ model public_users {
 }
 
 model categories {
-  id                  Int                   @id @default(autoincrement())
-  name                String                @unique @db.VarChar(100)
-  created_at          DateTime?             @default(now()) @db.Timestamp(6)
-  image_url           String?               @db.VarChar
-  parent_id           Int?
-  order               Int?
-  categories          categories?           @relation("categoriesTocategories", fields: [parent_id], references: [id], onUpdate: NoAction)
-  other_categories    categories[]          @relation("categoriesTocategories")
-  products_categories products_categories[]
+  id                    Int                     @id @default(autoincrement())
+  name                  String                  @unique @db.VarChar(100)
+  created_at            DateTime?               @default(now()) @db.Timestamp(6)
+  image_url             String?                 @db.VarChar
+  parent_id             Int?
+  order                 Int?
+  categories            categories?             @relation("categoriesTocategories", fields: [parent_id], references: [id], onUpdate: NoAction)
+  other_categories      categories[]            @relation("categoriesTocategories")
+  category_translations category_translations[]
+  products_categories   products_categories[]
 
   @@schema("public")
 }
 
 model products {
-  id                  Int                   @id @default(autoincrement())
-  name                String                @db.VarChar(150)
-  description         String?
-  image_url           String?
-  list_price          Decimal               @db.Decimal(10, 2)
-  created_at          DateTime?             @default(now()) @db.Timestamp(6)
-  status              product_states?
-  wholesale_price     Decimal               @db.Decimal
-  sku                 String                @unique @default("") @db.VarChar
-  iva                 Decimal?              @db.Decimal
-  grammage            String?
-  updated_at          DateTime?             @updatedAt @db.Timestamp(6)
-  units_per_box       BigInt?
-  favorites           favorites[]
-  order_lines         order_lines[]
-  product_images      product_images[]
-  products_categories products_categories[]
-  products_discounts  products_discounts[]
-  products_stock      products_stock[]
+  id                   Int                    @id @default(autoincrement())
+  name                 String                 @db.VarChar(150)
+  description          String?
+  image_url            String?
+  list_price           Decimal                @db.Decimal(10, 2)
+  created_at           DateTime?              @default(now()) @db.Timestamp(6)
+  status               product_states?
+  wholesale_price      Decimal                @db.Decimal
+  sku                  String                 @unique @default("") @db.VarChar
+  iva                  Decimal?               @db.Decimal
+  grammage             String?
+  updated_at           DateTime?              @updatedAt @db.Timestamp(6)
+  units_per_box        BigInt?
+  favorites            favorites[]
+  order_lines          order_lines[]
+  product_images       product_images[]
+  product_translations product_translations[]
+  products_categories  products_categories[]
+  products_discounts   products_discounts[]
+  products_stock       products_stock[]
 
   @@index([status], map: "idx_products_status")
   @@schema("public")
@@ -556,6 +558,33 @@ model favorites {
   users      auth_users @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([user_id, product_id])
+  @@schema("public")
+}
+
+model category_translations {
+  id          Int        @id @default(autoincrement())
+  category_id Int
+  locale      String     @db.VarChar(10)
+  name        String     @db.VarChar(100)
+  categories  categories @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([category_id, locale])
+  @@index([category_id])
+  @@index([locale])
+  @@schema("public")
+}
+
+model product_translations {
+  id          Int      @id @default(autoincrement())
+  product_id  Int
+  locale      String   @db.VarChar(10)
+  name        String   @db.VarChar(150)
+  description String?
+  products    products @relation(fields: [product_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([product_id, locale])
+  @@index([locale], map: "idx_product_translations_locale")
+  @@index([product_id])
   @@schema("public")
 }
 

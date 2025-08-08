@@ -11,6 +11,8 @@ import { Text } from '@/app/ui/components/Text';
 import { Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useLocalizedAPI } from '@/hooks/useLocalizedAPI';
+import { useTranslation } from '@/contexts/I18nContext';
 
 interface Category {
     id: string;
@@ -50,6 +52,7 @@ const CategorySidebar = ({
     onSelectFavorites: () => void;
 }) => {
     const { user } = useAuth();
+    const { t } = useTranslation();
     // Build a parent-children map
     const parentCategories = categories.filter(cat => !cat.parentId || cat.parentId === '');
     const childCategories = categories.filter(cat => cat.parentId && cat.parentId !== '');
@@ -72,7 +75,7 @@ const CategorySidebar = ({
                             color="primary-main"
                             className="transition-colors cursor-default"
                         >
-                            ⭐ Favoritos
+                            ⭐ {t('products.favorites')}
                         </Text>
                     ) : (
                         <a
@@ -90,7 +93,7 @@ const CategorySidebar = ({
                                 color="primary"
                                 className="transition-colors hover:text-black"
                             >
-                                ⭐ Favoritos
+                                ⭐ {t('products.favorites')}
                             </Text>
                         </a>
                     )}
@@ -98,7 +101,7 @@ const CategorySidebar = ({
             )}
 
             <Text as="h2" size="xl" weight="bold" color="primary" className="mb-4">
-                Categorías
+                {t('products.categories')}
             </Text>
             <ul className="space-y-2">
                 {parentCategories.map((parent) => {
@@ -189,16 +192,18 @@ const Breadcrumb = ({
     selectedCategory,
 }: {
     selectedCategory: string | null;
-}) => (
+}) => {
+    const { t } = useTranslation();
+    return (
     <div className="mb-4">
         <Text as="div" size="sm" color="tertiary">
             <Link href="/" className="hover:text-gray-700">
                 <Text as="span" size="sm" color="tertiary" className="hover:text-gray-700">
-                    Inicio
+                    {t('products.home')}
                 </Text>
             </Link> / <Link href="/products" className="hover:text-gray-700">
                 <Text as="span" size="sm" color="tertiary" className="hover:text-gray-700">
-                    Productos
+                    {t('products.title')}
                 </Text>
             </Link>
             {selectedCategory && (
@@ -208,7 +213,8 @@ const Breadcrumb = ({
             )}
         </Text>
     </div>
-);
+    );
+};
 
 const ProductFilters = ({
     filters,
@@ -216,7 +222,9 @@ const ProductFilters = ({
     categories,
 }: ProductFiltersProps & {
     categories: Category[];
-}) => (
+}) => {
+    const { t } = useTranslation();
+    return (
     <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative">
             <select
@@ -225,7 +233,7 @@ const ProductFilters = ({
                 onChange={onFilterChange}
                 className="w-full sm:w-auto appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
             >
-                <option value="">Categoría</option>
+                <option value="">{t('products.category_filter')}</option>
                 {categories.map((category) => (
                     <option key={category.id} value={category.name}>
                         {category.name}
@@ -241,9 +249,9 @@ const ProductFilters = ({
                 onChange={onFilterChange}
                 className="w-full sm:w-auto appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
             >
-                <option value="">Precio</option>
-                <option value="ASC">Menor a Mayor</option>
-                <option value="DESC">Mayor a Menor</option>
+                <option value="">{t('products.price_filter')}</option>
+                <option value="ASC">{t('products.price_low_to_high')}</option>
+                <option value="DESC">{t('products.price_high_to_low')}</option>
             </select>
             <ChevronDown className="h-5 w-5 text-[color:var(--list-item-color)] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
@@ -254,13 +262,14 @@ const ProductFilters = ({
                 onChange={onFilterChange}
                 className="w-full sm:w-auto appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
             >
-                <option value="">Venta por cajas</option>
+                <option value="">{t('products.bulk_sales')}</option>
                 {/* Add real stock types later */}
             </select>
             <ChevronDown className="h-5 w-5 text-[color:var(--list-item-color)] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
     </div>
-);
+    );
+};
 
 const ProductsSection = ({
     selectedCategory,
@@ -278,6 +287,7 @@ const ProductsSection = ({
     categories: Category[];
 }) => {
     const { favorites } = useFavorites();
+    const { t } = useTranslation();
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -480,7 +490,7 @@ const ProductsSection = ({
                 selectedCategory={selectedCategory}
             />
             <Text as="h1" size="4xl" weight="extrabold" color="primary" className="mb-6">
-                {isFavoritesSelected ? 'Mis Favoritos' : (selectedCategory || 'Todos los Productos')}
+                {isFavoritesSelected ? t('products.my_favorites') : (selectedCategory || t('products.all_products'))}
             </Text>
             <ProductFilters
                 filters={filters}
@@ -500,7 +510,7 @@ const ProductsSection = ({
             ) : products.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16">
                     <Text as="p" size="xl" color="secondary" className="mb-2" testID="empty-category-message">
-                        No se han encontrado productos para esta categoría.
+                        {t('products.no_products_found')}
                     </Text>
                 </div>
             ) : (
@@ -514,7 +524,7 @@ const ProductsSection = ({
                     <div className="text-center mt-8">
                         {bufferLoading && hasMore && (
                             <Text as="span" size="md" color="secondary">
-                                Cargando más productos...
+                                {t('products.loading_more')}
                             </Text>
                         )}
                     </div>
@@ -526,6 +536,7 @@ const ProductsSection = ({
 
 function ProductsPageContent() {
     const [categories, setCategories] = useState<Category[]>([]);
+    const localizedAPI = useLocalizedAPI();
     const router = useRouter();
     const searchParams = useSearchParams();
     const categoryFilter = searchParams.get('categoryFilters');
@@ -575,7 +586,7 @@ function ProductsPageContent() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const data = await api.get<Category[]>('/products/categories');
+                const data = await localizedAPI.get<Category[]>('/products/categories');
                 setCategories(data);
             } catch (error) {
                 console.error('Failed to fetch categories:', error);
@@ -583,7 +594,7 @@ function ProductsPageContent() {
         };
 
         fetchCategories();
-    }, []);
+    }, [localizedAPI]);
 
     return (
         <div className="mx-auto px-4 md:px-16 py-8 bg-white">
@@ -609,8 +620,10 @@ function ProductsPageContent() {
 }
 
 export default function ProductsPage() {
+    const { t } = useTranslation();
+
     return (
-        <Suspense fallback={<div>Cargando productos...</div>}>
+        <Suspense fallback={<div>{t('products.loading_products')}</div>}>
             <ProductsPageContent />
         </Suspense>
     );

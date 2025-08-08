@@ -1,5 +1,13 @@
 // Interfaces para la pantalla de administración de productos
 
+export interface ProductTranslation {
+  id: number;
+  product_id: number;
+  locale: string;
+  name: string;
+  description: string | null;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -20,6 +28,7 @@ export interface Product {
   unit_name?: string;
   units_per_box?: number;
   iva?: number;
+  translations?: ProductTranslation[];
 }
 
 export interface PaginatedProductsResponse {
@@ -63,8 +72,9 @@ export interface AdminProductRowProps {
   product: Product;
   onEdit: (product: Product) => void;
   onDelete: (product: Product) => void;
+  onTranslate: (product: Product) => void;
   isLast?: boolean;
-  lastProductRef?: React.Ref<HTMLTableRowElement>;
+  lastProductRef?: React.RefObject<HTMLTableRowElement>;
 }
 
 export interface CreationModalProps {

@@ -4,9 +4,11 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
+import { useTranslation } from '@/contexts/I18nContext';
 
 export const Banner = () => {
   const router = useRouter();
+  const { t } = useTranslation();
 
   return (
     <div className="h-[480px] relative my-8 mx-4 sm:mx-6 lg:mx-8 group">
@@ -14,7 +16,7 @@ export const Banner = () => {
         <div className="relative h-full overflow-hidden rounded-lg">
           <Image
             src="/9ee078916623dc2b5afcb79fe6e5d374dee50ff9.png"
-            alt="Banner principal"
+            alt={t('banner.alt_text')}
             fill
             className="object-cover transition-transform duration-300 group-hover:scale-105"
             priority
@@ -29,7 +31,7 @@ export const Banner = () => {
               className="mb-4 leading-tight"
               testID="banner-title"
             >
-              Venta al por mayor y menor de<br />Alimentos Japoneses.
+              {t('banner.title')}
             </Text>
             <Text 
               as="p" 
@@ -39,7 +41,7 @@ export const Banner = () => {
               className="mb-10"
               testID="banner-subtitle"
             >
-              Productos de alimentación singulares de asia y otros continentes.
+              {t('banner.subtitle')}
             </Text>
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full max-w-2xl justify-center">
               <Button
@@ -48,7 +50,7 @@ export const Banner = () => {
                   console.log('Navegar a tienda particulares');
                 }}
                 type="primary"
-                text="Tienda Online Particulares"
+                text={t('banner.button_individuals')}
                 testID="banner-button-particulares"
               />
               <Button
@@ -56,7 +58,7 @@ export const Banner = () => {
                   router.push('/products');
                 }}
                 type="primary"
-                text="Tienda Online Hosteleros"
+                text={t('banner.button_businesses')}
                 testID="banner-button-hosteleros"
               />
             </div>

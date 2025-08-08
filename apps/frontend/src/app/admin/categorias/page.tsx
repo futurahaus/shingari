@@ -6,10 +6,11 @@ import { useState } from 'react';
 import { Button } from '@/app/ui/components/Button';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
-import { FaEdit, FaTrash, FaPlus, FaFolder, FaExclamationTriangle } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaPlus, FaFolder, FaExclamationTriangle, FaGlobe, FaCheck } from 'react-icons/fa';
 import Image from 'next/image';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import React from 'react';
+import { CategoryTranslationModal } from './components/CategoryTranslationModal';
 
 interface CategoryFormState {
   id?: string;
@@ -34,7 +35,7 @@ function buildCategoryTree(categories: Category[]): CategoryWithChildren[] {
 }
 
 export default function AdminCategoriasPage() {
-  const { categories, loading, refetch } = useCategories();
+  const { categories, loading, refetch } = useCategories(true); // Include all translations for admin
   const { showSuccess, showError } = useNotificationContext();
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
@@ -42,6 +43,8 @@ export default function AdminCategoriasPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showTranslationModal, setShowTranslationModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
   const tree = buildCategoryTree(categories);
 
@@ -58,6 +61,15 @@ export default function AdminCategoriasPage() {
   const openDelete = (id: string) => setDeleteId(id);
   const closeModal = () => setShowModal(false);
   const closeDelete = () => setDeleteId(null);
+
+  const openTranslationModal = (category: Category) => {
+    setSelectedCategory(category);
+    setShowTranslationModal(true);
+  };
+
+  const handleTranslationUpdated = () => {
+    refetch();
+  };
 
   // Backend integration for add/edit
   const handleSubmit = async (e: React.FormEvent) => {
@@ -181,8 +193,34 @@ export default function AdminCategoriasPage() {
                           <FaFolder className="text-gray-400 w-4 h-4" />
                         )}
                       </span>
-                      <span className="font-medium text-gray-900 flex-1 truncate text-base" title={cat.name}>{cat.name}</span>
+                      <div className="flex-1">
+                        <span className="font-medium text-gray-900 truncate text-base" title={cat.name}>{cat.name}</span>
+                        {/* Translation indicator */}
+                        {cat.translations && cat.translations.length > 0 && (
+                          <div className="flex items-center mt-1">
+                            <FaCheck className="w-3 h-3 text-green-500 mr-1" />
+                            <span className="text-xs text-green-600 font-medium">
+                              Traducido ({cat.translations.map(t => t.locale).join(', ')})
+                            </span>
+                          </div>
+                        )}
+                      </div>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          onClick={() => openTranslationModal(cat)} 
+                          className={`p-1 rounded-lg transition ${
+                            cat.translations && cat.translations.length > 0
+                              ? 'text-green-600 hover:text-green-700'
+                              : 'text-gray-600 hover:text-blue-600'
+                          }`}
+                          title={cat.translations && cat.translations.length > 0
+                            ? `Traducir categoría (Ya traducido en: ${cat.translations.map(t => t.locale).join(', ')})`
+                            : 'Traducir categoría'
+                          }
+                          type="button"
+                        >
+                          <FaGlobe size={13} />
+                        </button>
                         <button onClick={() => openEditModal(cat)} className="p-1 text-gray-600 hover:text-blue-600 rounded-lg transition" title="Editar categoría" type="button"><FaEdit size={13} /></button>
                         <button onClick={() => openDelete(cat.id)} className="p-1 text-gray-600 hover:text-red-600 rounded-lg transition" title="Eliminar categoría" type="button"><FaTrash size={13} /></button>
                         <button onClick={() => openAddModal(cat.id)} className="p-1 text-gray-600 hover:text-green-600 rounded-lg transition" title="Agregar subcategoría" type="button"><FaPlus size={13} /></button>
@@ -278,6 +316,17 @@ export default function AdminCategoriasPage() {
           </div>
         </div>
       )}
+
+      {/* Translation Modal */}
+      <CategoryTranslationModal
+        isOpen={showTranslationModal}
+        onClose={() => {
+          setShowTranslationModal(false);
+          setSelectedCategory(null);
+        }}
+        category={selectedCategory}
+        onTranslationUpdated={handleTranslationUpdated}
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { useNotificationContext } from '@/contexts/NotificationContext';
+import { useTranslation } from '@/contexts/I18nContext';
 
 interface QuantityControlsProps {
     productId: string;
@@ -21,6 +22,7 @@ export const QuantityControls = ({
 }: QuantityControlsProps) => {
     const { cart, addToCart, updateQuantity, removeFromCart } = useCart();
     const { showSuccess, showInfo, showWarning } = useNotificationContext();
+    const { t } = useTranslation();
     const cartItem = cart.find((item) => item.id === productId);
     const [quantity, setQuantity] = useState(cartItem ? cartItem.quantity : 0);
     const [unitType, setUnitType] = useState<'units' | 'boxes'>('boxes');
@@ -31,7 +33,11 @@ export const QuantityControls = ({
         setQuantity(newQty);
         if (cartItem) {
             updateQuantity(productId, newQty);
-            showInfo('Cantidad actualizada', `Cantidad de "${productName}" actualizada a ${newQty}.`, 2000);
+            showInfo(
+                t('quantity_controls.quantity_updated'), 
+                t('quantity_controls.quantity_updated_to', { productName, quantity: newQty.toString() }), 
+                2000
+            );
         } else {
             addToCart({
                 id: productId,
@@ -41,7 +47,11 @@ export const QuantityControls = ({
                 quantity: increment,
                 units_per_box: unitsPerBox,
             });
-            showSuccess('Producto añadido', `"${productName}" añadido al carrito.`, 2000);
+            showSuccess(
+                t('quantity_controls.product_added'), 
+                t('quantity_controls.product_added_to_cart', { productName }), 
+                2000
+            );
         }
     };
 
@@ -52,10 +62,18 @@ export const QuantityControls = ({
             setQuantity(newQty);
             if (newQty === 0) {
                 removeFromCart(productId);
-                showWarning('Producto eliminado', `"${productName}" eliminado del carrito.`, 2000);
+                showWarning(
+                    t('quantity_controls.product_removed'), 
+                    t('quantity_controls.product_removed_from_cart', { productName }), 
+                    2000
+                );
             } else {
                 updateQuantity(productId, newQty);
-                showInfo('Cantidad actualizada', `Cantidad de "${productName}" actualizada a ${newQty}.`, 2000);
+                showInfo(
+                    t('quantity_controls.quantity_updated'), 
+                    t('quantity_controls.quantity_updated_to', { productName, quantity: newQty.toString() }), 
+                    2000
+                );
             }
         }
     };
@@ -71,7 +89,11 @@ export const QuantityControls = ({
 
             if (cartItem) {
                 updateQuantity(productId, newQuantity);
-                showInfo('Cantidad actualizada', `Cantidad de "${productName}" actualizada a ${newQuantity}.`, 2000);
+                showInfo(
+                    t('quantity_controls.quantity_updated'), 
+                    t('quantity_controls.quantity_updated_to', { productName, quantity: newQuantity.toString() }), 
+                    2000
+                );
             } else if (newQuantity > 0) {
                 addToCart({
                     id: productId,
@@ -81,7 +103,11 @@ export const QuantityControls = ({
                     quantity: newQuantity,
                     units_per_box: unitsPerBox,
                 });
-                showSuccess('Producto añadido', `"${productName}" añadido al carrito.`, 2000);
+                showSuccess(
+                    t('quantity_controls.product_added'), 
+                    t('quantity_controls.product_added_to_cart', { productName }), 
+                    2000
+                );
             }
             setQuantity(newQuantity);
         }
@@ -130,8 +156,8 @@ export const QuantityControls = ({
                 onClick={e => { e.preventDefault(); e.stopPropagation(); }}
                 onChange={handleUnitTypeChange}
             >
-                <option value="units">Unidades</option>
-                <option value="boxes">Cajas</option>
+                <option value="units">{t('quantity_controls.units')}</option>
+                <option value="boxes">{t('quantity_controls.boxes')}</option>
             </select>
         </div>
     );

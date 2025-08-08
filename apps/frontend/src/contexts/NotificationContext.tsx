@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useMemo } from 'react';
 import { useNotifications, Notification } from '@/hooks/useNotifications';
 import { NotificationContainer } from '@/components/ui/NotificationContainer';
 
@@ -30,8 +30,13 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 }) => {
   const notificationUtils = useNotifications();
 
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => notificationUtils, [
+    notificationUtils,
+  ]);
+
   return (
-    <NotificationContext.Provider value={notificationUtils}>
+    <NotificationContext.Provider value={contextValue}>
       {children}
       <NotificationContainer
         notifications={notificationUtils.notifications}

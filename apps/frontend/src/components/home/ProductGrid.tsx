@@ -1,11 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { api } from '@/lib/api';
 import { Product } from '../ProductCard';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Text } from '@/app/ui/components/Text';
+import { useLocalizedAPI } from '@/hooks/useLocalizedAPI';
+import { useTranslation } from '@/contexts/I18nContext';
 
 interface PaginatedProductsResponse {
     data: Product[];
@@ -20,16 +21,18 @@ export default function ProductGrid() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
+    const localizedAPI = useLocalizedAPI();
+    const { t } = useTranslation();
 
     useEffect(() => {
         const fetchProducts = async () => {
             try {
                 setLoading(true);
-                const response = await api.get<PaginatedProductsResponse>('/products?limit=6');
+                const response = await localizedAPI.get<PaginatedProductsResponse>('/products?limit=6');
                 setProducts(response.data);
                 setError(null);
             } catch (error) {
-                setError('Failed to fetch products');
+                setError(t('products.failed_to_fetch_products'));
                 console.error(error);
             } finally {
                 setLoading(false);
@@ -37,13 +40,13 @@ export default function ProductGrid() {
         };
 
         fetchProducts();
-    }, []);
+    }, [localizedAPI, t]);
 
     if (loading) {
         return (
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <Text as="h2" size="2xl" weight="bold" color="primary" className="mb-6 text-center">
-                    Descubre nuestros productos
+                    {t('products.discover_products')}
                 </Text>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
                     {[...Array(6)].map((_, i) => (
@@ -70,7 +73,7 @@ export default function ProductGrid() {
         return (
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <Text as="h2" size="2xl" weight="bold" color="primary" className="mb-6 text-center">
-                    Descubre nuestros productos
+                    {t('products.discover_products')}
                 </Text>
                 <Text as="p" size="md" color="error" className="text-center" testID="product-grid-error">
                     {error}
@@ -86,7 +89,7 @@ export default function ProductGrid() {
     return (
         <div className="w-full px-4 sm:px-6 lg:px-16 py-8" data-testid="product-grid">
             <Text as="h2" size="2xl" weight="bold" color="primary" className="mb-6">
-                Productos destacados
+                {t('products.featured_products')}
             </Text>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
@@ -106,7 +109,7 @@ export default function ProductGrid() {
                                 />
                             ) : (
                                 <Text as="div" size="sm" color="gray-400" className="w-full h-40 flex items-center justify-center bg-gray-100 rounded-t-2xl">
-                                    Sin imagen
+                                    {t('products.no_image')}
                                 </Text>
                             )}
                         </div>
