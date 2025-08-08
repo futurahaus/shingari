@@ -2,7 +2,6 @@
 
 import { ChevronDown } from 'lucide-react';
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { api } from '@/lib/api';
 import Link from 'next/link';
 import { ProductCard, Product } from '@/components/ProductCard';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -286,6 +285,7 @@ const ProductsSection = ({
     isFavoritesSelected: boolean;
     categories: Category[];
 }) => {
+    const localizedAPI = useLocalizedAPI();
     const { favorites } = useFavorites();
     const { t } = useTranslation();
     const [products, setProducts] = useState<Product[]>([]);
@@ -345,7 +345,7 @@ const ProductsSection = ({
         setError(null);
         try {
             const params = buildParams(pageNumber);
-            const response = await api.get<PaginatedProductsResponse>(`/products?${params.toString()}`);
+            const response = await localizedAPI.get<PaginatedProductsResponse>(`/products?${params.toString()}`);
             const newProducts = response.data;
             if (newProducts.length === 0 || response.page >= response.lastPage) {
                 setHasMore(false);
@@ -365,8 +365,7 @@ const ProductsSection = ({
         setBufferLoading(true);
         try {
             const params = buildParams(nextPage);
-            const response = await api.get<PaginatedProductsResponse>(`/products?${params.toString()}`);
-            console.log('response', response);
+            const response = await localizedAPI.get<PaginatedProductsResponse>(`/products?${params.toString()}`);
             setBufferedProducts(response.data);
         } catch {
             setBufferedProducts([]);
