@@ -44,6 +44,8 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoryResponseDto } from './dto/category-response.dto';
 import { UpdateCategoriesOrderDto } from './dto/update-category.dto';
+import { CreateProductTranslationDto } from './dto/create-product-translation.dto';
+import { CreateCategoryTranslationDto } from './dto/create-category-translation.dto';
 
 @ApiTags('Products')
 @Controller('products')
@@ -53,9 +55,13 @@ export class ProductsController {
   @Get('categories')
   @ApiOperation({ summary: 'Obtener una lista de todas las categorías de productos' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Número máximo de categorías a retornar' })
+  @ApiQuery({ name: 'locale', required: false, type: String, description: 'Locale for translations (es, zh)', example: 'es', default: 'es' })
   @ApiResponse({ status: 200, description: 'Lista de categorías obtenida exitosamente.', type: [ProductDiscountResponseDto] })
-  async findAllCategories(@Query('limit') limit?: number) {
-    return this.productsService.findAllCategories(limit);
+  async findAllCategories(
+    @Query('limit') limit?: number,
+    @Query('locale') locale: string = 'es',
+  ) {
+    return this.productsService.findAllCategories(limit, locale);
   }
 
   @Get('categories/parents')
@@ -68,13 +74,17 @@ export class ProductsController {
     type: Number,
     description: 'Número máximo de categorías padre a retornar',
   })
+  @ApiQuery({ name: 'locale', required: false, type: String, description: 'Locale for translations (es, zh)', example: 'es', default: 'es' })
   @ApiResponse({
     status: 200,
     description: 'Lista de categorías padre obtenida exitosamente.',
     type: [ProductDiscountResponseDto],
   })
-  async findAllParentCategories(@Query('limit') limit?: number) {
-    return this.productsService.findAllParentCategories(limit);
+  async findAllParentCategories(
+    @Query('limit') limit?: number,
+    @Query('locale') locale: string = 'es',
+  ) {
+    return this.productsService.findAllParentCategories(limit, locale);
   }
 
   // --- Public Endpoint ---
@@ -243,6 +253,13 @@ export class ProductsController {
     description: 'ID numérico del producto',
     type: 'integer',
   })
+  @ApiQuery({
+    name: 'locale',
+    description: 'Locale for translations (es, zh)',
+    example: 'es',
+    required: false,
+    default: 'es',
+  })
   @ApiResponse({
     status: 200,
     description: 'Detalles del producto obtenidos.',
@@ -251,9 +268,10 @@ export class ProductsController {
   @ApiResponse({ status: 404, description: 'Producto no encontrado.' })
   async findOne(
     @Param('id') id: string,
+    @Query('locale') locale: string = 'es',
     @NestRequest() req,
   ): Promise<ProductResponseDto> {
-    return this.productsService.findOne(+id, req.user?.id);
+    return this.productsService.findOne(+id, req.user?.id, locale);
   }
 
   @Post('categories')
@@ -296,6 +314,107 @@ export class ProductsController {
   @ApiResponse({ status: 200, description: 'Órdenes de categorías actualizadas exitosamente.' })
   async updateCategoriesOrder(@Body() dto: UpdateCategoriesOrderDto): Promise<void> {
     return this.productsService.updateCategoriesOrder(dto);
+  }
+
+  // Translation endpoints
+  @Post(':id/translations')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Crear traducción para un producto (Solo Admin)' })
+  @ApiParam({ name: 'id', description: 'ID del producto', type: 'integer' })
+  @ApiBody({ type: CreateProductTranslationDto })
+  @ApiResponse({ status: 201, description: 'Traducción creada exitosamente.' })
+  @ApiResponse({ status: 400, description: 'Ya existe una traducción para este idioma.' })
+  @ApiResponse({ status: 404, description: 'Producto no encontrado.' })
+  @HttpCode(HttpStatus.CREATED)
+  async createProductTranslation(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CreateProductTranslationDto,
+  ): Promise<void> {
+    return this.productsService.createProductTranslation(id, dto.locale, dto.name, dto.description);
+  }
+
+  @Put(':id/translations/:locale')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar traducción de un producto (Solo Admin)' })
+  @ApiParam({ name: 'id', description: 'ID del producto', type: 'integer' })
+  @ApiParam({ name: 'locale', description: 'Locale de la traducción', example: 'zh' })
+  @ApiBody({ type: CreateProductTranslationDto })
+  @ApiResponse({ status: 200, description: 'Traducción actualizada exitosamente.' })
+  @ApiResponse({ status: 404, description: 'Traducción no encontrada.' })
+  async updateProductTranslation(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('locale') locale: string,
+    @Body() dto: CreateProductTranslationDto,
+  ): Promise<void> {
+    return this.productsService.updateProductTranslation(id, locale, dto.name, dto.description);
+  }
+
+  @Delete(':id/translations/:locale')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Eliminar traducción de un producto (Solo Admin)' })
+  @ApiParam({ name: 'id', description: 'ID del producto', type: 'integer' })
+  @ApiParam({ name: 'locale', description: 'Locale de la traducción', example: 'zh' })
+  @ApiResponse({ status: 204, description: 'Traducción eliminada exitosamente.' })
+  @ApiResponse({ status: 404, description: 'Traducción no encontrada.' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteProductTranslation(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('locale') locale: string,
+  ): Promise<void> {
+    return this.productsService.deleteProductTranslation(id, locale);
+  }
+
+  @Post('categories/:id/translations')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Crear traducción para una categoría (Solo Admin)' })
+  @ApiParam({ name: 'id', description: 'ID de la categoría', type: 'string' })
+  @ApiBody({ type: CreateCategoryTranslationDto })
+  @ApiResponse({ status: 201, description: 'Traducción creada exitosamente.' })
+  @ApiResponse({ status: 400, description: 'Ya existe una traducción para este idioma.' })
+  @ApiResponse({ status: 404, description: 'Categoría no encontrada.' })
+  @HttpCode(HttpStatus.CREATED)
+  async createCategoryTranslation(
+    @Param('id') id: string,
+    @Body() dto: CreateCategoryTranslationDto,
+  ): Promise<void> {
+    return this.productsService.createCategoryTranslation(Number(id), dto.locale, dto.name);
+  }
+
+  @Put('categories/:id/translations/:locale')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar traducción de una categoría (Solo Admin)' })
+  @ApiParam({ name: 'id', description: 'ID de la categoría', type: 'string' })
+  @ApiParam({ name: 'locale', description: 'Locale de la traducción', example: 'zh' })
+  @ApiBody({ type: CreateCategoryTranslationDto })
+  @ApiResponse({ status: 200, description: 'Traducción actualizada exitosamente.' })
+  @ApiResponse({ status: 404, description: 'Traducción no encontrada.' })
+  async updateCategoryTranslation(
+    @Param('id') id: string,
+    @Param('locale') locale: string,
+    @Body() dto: CreateCategoryTranslationDto,
+  ): Promise<void> {
+    return this.productsService.updateCategoryTranslation(Number(id), locale, dto.name);
+  }
+
+  @Delete('categories/:id/translations/:locale')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Eliminar traducción de una categoría (Solo Admin)' })
+  @ApiParam({ name: 'id', description: 'ID de la categoría', type: 'string' })
+  @ApiParam({ name: 'locale', description: 'Locale de la traducción', example: 'zh' })
+  @ApiResponse({ status: 204, description: 'Traducción eliminada exitosamente.' })
+  @ApiResponse({ status: 404, description: 'Traducción no encontrada.' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteCategoryTranslation(
+    @Param('id') id: string,
+    @Param('locale') locale: string,
+  ): Promise<void> {
+    return this.productsService.deleteCategoryTranslation(Number(id), locale);
   }
 
   // @Post('upload-image')

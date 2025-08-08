@@ -104,8 +104,24 @@ class ApiClient {
     }
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      // Try to parse error response, but handle empty responses gracefully
+      let errorData = {};
+      try {
+        const text = await response.text();
+        if (text) {
+          errorData = JSON.parse(text);
+        }
+      } catch (e) {
+        // If parsing fails, use empty object
+        errorData = {};
+      }
+      
+      throw {
+        response: {
+          status: response.status,
+          data: errorData
+        }
+      };
     }
 
     // Handle 204 No Content - no response body to parse
@@ -117,10 +133,21 @@ class ApiClient {
     if (response.status === 200) {
       const text = await response.text();
       if (!text) return {} as T;
-      return JSON.parse(text);
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        // If JSON parsing fails, return empty object
+        return {} as T;
+      }
     }
 
-    return response.json();
+    // For other status codes, try to parse JSON
+    try {
+      return await response.json();
+    } catch (e) {
+      // If JSON parsing fails, return empty object
+      return {} as T;
+    }
   }
 
   // HTTP method wrappers

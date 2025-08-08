@@ -1,15 +1,22 @@
 import React from 'react';
 import Image from 'next/image';
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaGlobe, FaCheck } from 'react-icons/fa';
 import { AdminProductRowProps } from '../interfaces/product.interfaces';
 
 export const AdminProductRow: React.FC<AdminProductRowProps> = ({
     product,
     onEdit,
     onDelete,
+    onTranslate,
     isLast = false,
     lastProductRef
 }) => {
+    // Check if product has translations
+    const hasTranslations = product.translations && product.translations.length > 0;
+    const translationLocales = hasTranslations 
+        ? product.translations!.map(t => t.locale).join(', ')
+        : '';
+
     return (
         <tr
             className={`hover:bg-gray-50 ${isLast ? '' : 'border-b border-gray-200'}`}
@@ -39,6 +46,15 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
                     <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">{product.name}</div>
                         <div className="text-sm text-gray-500">SKU: {product.sku}</div>
+                        {/* Translation status indicator */}
+                        {hasTranslations && (
+                            <div className="flex items-center mt-1">
+                                <FaCheck className="w-3 h-3 text-green-500 mr-1" />
+                                <span className="text-xs text-green-600 font-medium">
+                                    Traducido ({translationLocales})
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
             </td>
@@ -78,6 +94,20 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
             {/* Acciones */}
             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div className="flex items-center justify-end gap-2">
+                    <button
+                        onClick={() => onTranslate(product)}
+                        className={`p-2 rounded-lg transition duration-200 cursor-pointer ${
+                            hasTranslations 
+                                ? 'text-green-600 hover:bg-green-50' 
+                                : 'text-blue-600 hover:bg-blue-50'
+                        }`}
+                        title={hasTranslations 
+                            ? `Traducir producto (Ya traducido en: ${translationLocales})` 
+                            : 'Traducir producto'
+                        }
+                    >
+                        <FaGlobe size={16} />
+                    </button>
                     <button
                         onClick={() => onEdit(product)}
                         className="p-2 text-black rounded-lg transition duration-200 hover:bg-gray-100 cursor-pointer"

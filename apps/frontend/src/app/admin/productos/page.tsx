@@ -3,6 +3,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { EditionModal } from './components/EditionModal';
 import { CreationModal } from './components/CreationModal';
 import { DeleteModal } from './components/DeleteModal';
+import { TranslationModal } from './components/TranslationModal';
 import { AdminProductRow } from './components/AdminProductRow';
 import { ProductsListSkeleton } from './components/ProductsListSkeleton';
 import { Button } from '@/app/ui/components/Button';
@@ -20,6 +21,7 @@ export default function AdminProductsPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showTranslationModal, setShowTranslationModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const lastProductRef = useRef<HTMLTableRowElement | null>(null);
@@ -46,6 +48,11 @@ export default function AdminProductsPage() {
     setShowDeleteModal(true);
   };
 
+  const openTranslationModal = (product: Product) => {
+    setSelectedProduct(product);
+    setShowTranslationModal(true);
+  };
+
   const handleProductUpdated = () => {
     refetch();
   };
@@ -55,6 +62,10 @@ export default function AdminProductsPage() {
   };
 
   const handleProductDeleted = () => {
+    refetch();
+  };
+
+  const handleTranslationUpdated = () => {
     refetch();
   };
 
@@ -201,6 +212,7 @@ export default function AdminProductsPage() {
                       product={product}
                       onEdit={openEditModal}
                       onDelete={openDeleteModal}
+                      onTranslate={openTranslationModal}
                       isLast={index === products.length - 1}
                       lastProductRef={lastProductRef}
                     />
@@ -328,6 +340,17 @@ export default function AdminProductsPage() {
         }}
         product={selectedProduct}
         onProductDeleted={handleProductDeleted}
+      />
+
+      {/* Translation Modal */}
+      <TranslationModal
+        isOpen={showTranslationModal}
+        onClose={() => {
+          setShowTranslationModal(false);
+          setSelectedProduct(null);
+        }}
+        product={selectedProduct}
+        onTranslationUpdated={handleTranslationUpdated}
       />
     </div>
   );

@@ -6,6 +6,7 @@ import HashBasedLoginModal from "@/components/auth/HashBasedLoginModal";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { CartProvider } from '@/contexts/CartContext';
 import { CartModal } from '@/components/cart/CartModal';
+import { I18nProvider } from '@/contexts/I18nContext';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,15 +24,17 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={inter.className}>
-        <NotificationProvider position="top-right" maxNotifications={5}>
-          <CartProvider>
-            <Providers>
-              {children}
-              <HashBasedLoginModal />
-              <CartModal />
-            </Providers>
-          </CartProvider>
-        </NotificationProvider>
+        <I18nProvider>
+          <NotificationProvider position="top-right" maxNotifications={5}>
+            <CartProvider>
+              <Providers>
+                {children}
+                <HashBasedLoginModal />
+                <CartModal />
+              </Providers>
+            </CartProvider>
+          </NotificationProvider>
+        </I18nProvider>
       </body>
     </html>
   );
