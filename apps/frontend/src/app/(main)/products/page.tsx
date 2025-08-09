@@ -1,31 +1,23 @@
 'use client';
 
 import { ChevronDown } from 'lucide-react';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
-import { ProductCard, Product } from '@/components/ProductCard';
+import { ProductCard } from '@/components/ProductCard';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ProductCardSkeleton from '@/components/ProductCardSkeleton';
 import { Text } from '@/app/ui/components/Text';
 import { Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useFavorites } from '@/hooks/useFavorites';
-import { useLocalizedAPI } from '@/hooks/useLocalizedAPI';
 import { useTranslation } from '@/contexts/I18nContext';
+import { useProductsInfinite, useProductCategories } from '@/hooks/useProductsQuery';
+import { ProductsWithQuery } from '@/components/ProductsWithQuery';
 
 interface Category {
     id: string;
     name: string;
     parentId?: string;
     image?: string;
-}
-
-interface PaginatedProductsResponse {
-    data: Product[];
-    total: number;
-    page: number;
-    limit: number;
-    lastPage: number;
 }
 
 interface ProductFiltersProps {
@@ -45,6 +37,7 @@ const CategorySidebar = ({
     onSelectFavorites,
 }: {
     categories: Category[];
+    categoriesLoading: boolean;
     selectedCategoryName: string | null;
     onSelectCategory: (name: string | null) => void;
     isFavoritesSelected: boolean;
@@ -194,24 +187,24 @@ const Breadcrumb = ({
 }) => {
     const { t } = useTranslation();
     return (
-    <div className="mb-4">
-        <Text as="div" size="sm" color="tertiary">
-            <Link href="/" className="hover:text-gray-700">
-                <Text as="span" size="sm" color="tertiary" className="hover:text-gray-700">
-                    {t('products.home')}
-                </Text>
-            </Link> / <Link href="/products" className="hover:text-gray-700">
-                <Text as="span" size="sm" color="tertiary" className="hover:text-gray-700">
-                    {t('products.title')}
-                </Text>
-            </Link>
-            {selectedCategory && (
-                <> / <Text as="span" size="sm" weight="semibold" color="secondary">
-                    {selectedCategory}
-                </Text></>
-            )}
-        </Text>
-    </div>
+        <div className="mb-4">
+            <Text as="div" size="sm" color="tertiary">
+                <Link href="/" className="hover:text-gray-700">
+                    <Text as="span" size="sm" color="tertiary" className="hover:text-gray-700">
+                        {t('products.home')}
+                    </Text>
+                </Link> / <Link href="/products" className="hover:text-gray-700">
+                    <Text as="span" size="sm" color="tertiary" className="hover:text-gray-700">
+                        {t('products.title')}
+                    </Text>
+                </Link>
+                {selectedCategory && (
+                    <> / <Text as="span" size="sm" weight="semibold" color="secondary">
+                        {selectedCategory}
+                    </Text></>
+                )}
+            </Text>
+        </div>
     );
 };
 
@@ -224,49 +217,49 @@ const ProductFilters = ({
 }) => {
     const { t } = useTranslation();
     return (
-    <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="relative">
-            <select
-                name="type"
-                value={filters.type}
-                onChange={onFilterChange}
-                className="w-full sm:w-auto appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
-            >
-                <option value="">{t('products.category_filter')}</option>
-                {categories.map((category) => (
-                    <option key={category.id} value={category.name}>
-                        {category.name}
-                    </option>
-                ))}
-            </select>
-            <ChevronDown className="h-5 w-5 text-[color:var(--list-item-color)] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="relative">
+                <select
+                    name="type"
+                    value={filters.type}
+                    onChange={onFilterChange}
+                    className="w-full sm:w-auto appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
+                >
+                    <option value="">{t('products.category_filter')}</option>
+                    {categories.map((category) => (
+                        <option key={category.id} value={category.name}>
+                            {category.name}
+                        </option>
+                    ))}
+                </select>
+                <ChevronDown className="h-5 w-5 text-[color:var(--list-item-color)] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+            <div className="relative">
+                <select
+                    name="price"
+                    value={filters.price}
+                    onChange={onFilterChange}
+                    className="w-full sm:w-auto appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
+                >
+                    <option value="">{t('products.price_filter')}</option>
+                    <option value="ASC">{t('products.price_low_to_high')}</option>
+                    <option value="DESC">{t('products.price_high_to_low')}</option>
+                </select>
+                <ChevronDown className="h-5 w-5 text-[color:var(--list-item-color)] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+            <div className="relative">
+                <select
+                    name="stock"
+                    value={filters.stock}
+                    onChange={onFilterChange}
+                    className="w-full sm:w-auto appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
+                >
+                    <option value="">{t('products.bulk_sales')}</option>
+                    {/* Add real stock types later */}
+                </select>
+                <ChevronDown className="h-5 w-5 text-[color:var(--list-item-color)] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
         </div>
-        <div className="relative">
-            <select
-                name="price"
-                value={filters.price}
-                onChange={onFilterChange}
-                className="w-full sm:w-auto appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
-            >
-                <option value="">{t('products.price_filter')}</option>
-                <option value="ASC">{t('products.price_low_to_high')}</option>
-                <option value="DESC">{t('products.price_high_to_low')}</option>
-            </select>
-            <ChevronDown className="h-5 w-5 text-[color:var(--list-item-color)] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-        </div>
-        <div className="relative">
-            <select
-                name="stock"
-                value={filters.stock}
-                onChange={onFilterChange}
-                className="w-full sm:w-auto appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
-            >
-                <option value="">{t('products.bulk_sales')}</option>
-                {/* Add real stock types later */}
-            </select>
-            <ChevronDown className="h-5 w-5 text-[color:var(--list-item-color)] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-        </div>
-    </div>
     );
 };
 
@@ -285,94 +278,42 @@ const ProductsSection = ({
     isFavoritesSelected: boolean;
     categories: Category[];
 }) => {
-    const localizedAPI = useLocalizedAPI();
-    const { favorites } = useFavorites();
     const { t } = useTranslation();
-    const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
+    const searchParams = useSearchParams();
+    const router = useRouter();
     const [filters, setFilters] = useState({
         type: selectedCategory || '',
         price: '',
         stock: '',
     });
-    // Buffer for next page
-    const [bufferedProducts, setBufferedProducts] = useState<Product[]>([]);
-    const [bufferLoading, setBufferLoading] = useState(false);
-    const observerRef = useRef<HTMLDivElement | null>(null);
-    const searchParams = useSearchParams();
 
-    // Helper to build params
-    const buildParams = (pageNumber: number) => {
-        const params = new URLSearchParams({
-            page: pageNumber.toString(),
-            limit: '10',
-        });
-        Object.entries(filters).forEach(([key, value]) => {
-            if (value) {
-                if (key === 'price') {
-                    params.append('sortByPrice', value);
-                } else if (key === 'type') {
-                    // Send category filter as categoryFilters to backend
-                    params.append('categoryFilters', value);
-                } else {
-                    params.append(key, value);
-                }
-            }
-        });
-        if (selectedParent && childNamesOfSelectedParent && childNamesOfSelectedParent.length > 0) {
-            childNamesOfSelectedParent.forEach(childName => {
-                params.append('categoryFilters', childName);
-            });
-        } else {
-            if (categoryFilter) {
-                params.append('categoryFilters', categoryFilter);
-            }
-        }
-        // Add search parameter if present
-        const searchQuery = searchParams.get('search');
-        if (searchQuery) {
-            params.append('search', searchQuery);
-        }
-        return params;
+    // Build filters for React Query
+    const searchQuery = searchParams.get('search');
+    const categoryFilters = selectedParent && childNamesOfSelectedParent && childNamesOfSelectedParent.length > 0
+        ? childNamesOfSelectedParent
+        : (categoryFilter || filters.type || undefined);
+
+    const productFilters = {
+        categoryFilters,
+        search: searchQuery || undefined,
+        sortByPrice: (filters.price as 'ASC' | 'DESC') || undefined,
+        limit: 10,
     };
 
-    // Fetch products for a given page
-    const fetchProducts = useCallback(async (pageNumber: number) => {
-        setLoading(true);
-        setError(null);
-        try {
-            const params = buildParams(pageNumber);
-            const response = await localizedAPI.get<PaginatedProductsResponse>(`/products?${params.toString()}`);
-            const newProducts = response.data;
-            if (newProducts.length === 0 || response.page >= response.lastPage) {
-                setHasMore(false);
-            } else {
-                setHasMore(true);
-            }
-            setProducts(pageNumber === 1 ? newProducts : prev => [...prev, ...newProducts]);
-        } catch (e: unknown) {
-            setError(e instanceof Error ? e.message : 'Unknown error');
-        } finally {
-            setLoading(false);
-        }
-    }, [filters, categoryFilter, selectedParent, childNamesOfSelectedParent, searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
+    // Use React Query for products
+    const {
+        data: infiniteData,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        isLoading,
+        error,
+    } = useProductsInfinite(productFilters);
 
-    // Buffer the next page
-    const bufferNextPage = useCallback(async (nextPage: number) => {
-        setBufferLoading(true);
-        try {
-            const params = buildParams(nextPage);
-            const response = await localizedAPI.get<PaginatedProductsResponse>(`/products?${params.toString()}`);
-            setBufferedProducts(response.data);
-        } catch {
-            setBufferedProducts([]);
-        } finally {
-            setBufferLoading(false);
-        }
-    }, [filters, categoryFilter, selectedParent, childNamesOfSelectedParent, searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
+    const observerRef = useRef<HTMLDivElement | null>(null);
+
+    // Get products from infinite query
+    const products = infiniteData?.pages.flatMap(page => page.data) || [];
 
     // Update filters when selectedCategory changes
     useEffect(() => {
@@ -382,99 +323,39 @@ const ProductsSection = ({
         }));
     }, [selectedCategory]);
 
-    // Handle favorites filtering
+    // IntersectionObserver for infinite scroll
     useEffect(() => {
-        if (isFavoritesSelected) {
-            setLoading(true);
-            // Convert favorites to products format and filter by current filters
-            const favoriteProducts: Product[] = favorites.map(fav => ({
-                id: fav.product_id.toString(),
-                name: fav.product.name,
-                price: parseFloat(fav.product.list_price),
-                description: fav.product.description || '',
-                images: fav.product.image_url ? [fav.product.image_url] : [],
-                categories: [],
-                sku: fav.product.sku,
-            }));
+        if (isFavoritesSelected || !hasNextPage || isFetchingNextPage) return;
 
-                         // Apply price sorting if selected
-             const sortedProducts = [...favoriteProducts];
-             if (filters.price === 'ASC') {
-                 sortedProducts.sort((a, b) => a.price - b.price);
-             } else if (filters.price === 'DESC') {
-                 sortedProducts.sort((a, b) => b.price - a.price);
-             }
-
-            setProducts(sortedProducts);
-            setHasMore(false); // No pagination for favorites
-            setBufferedProducts([]);
-            setLoading(false);
-            return;
-        }
-    }, [isFavoritesSelected, favorites, filters.price]);
-
-    // Initial load and when filters/searchParams change
-    useEffect(() => {
-        if (!isFavoritesSelected) {
-            setProducts([]);
-            setPage(1);
-            setHasMore(true);
-            setBufferedProducts([]);
-            fetchProducts(1);
-        }
-    }, [filters, categoryFilter, fetchProducts, isFavoritesSelected]);
-
-    // Buffer next page after main load (only if not favorites)
-    useEffect(() => {
-        if (!isFavoritesSelected && page === 1 && hasMore) {
-            bufferNextPage(2);
-        }
-    }, [page, hasMore, bufferNextPage, isFavoritesSelected]);
-
-    // When products or page changes, buffer the next page (only if not favorites)
-    useEffect(() => {
-        if (!isFavoritesSelected && page > 1 && hasMore) {
-            bufferNextPage(page + 1);
-        }
-    }, [page, hasMore, bufferNextPage, isFavoritesSelected]);
-
-    // IntersectionObserver for infinite scroll (only if not favorites)
-    useEffect(() => {
-        if (isFavoritesSelected || !hasMore || loading || bufferLoading) return;
         const observer = new window.IntersectionObserver(
             (entries) => {
-                if (entries[0].isIntersecting && bufferedProducts.length > 0) {
-                    setProducts(prev => [...prev, ...bufferedProducts]);
-                    setPage(prev => prev + 1);
-                    setBufferedProducts([]);
+                if (entries[0].isIntersecting) {
+                    fetchNextPage();
                 }
             },
             { root: null, rootMargin: '200px', threshold: 0.1 }
         );
+
         const sentinel = observerRef.current;
         if (sentinel) observer.observe(sentinel);
+
         return () => {
             if (sentinel) observer.unobserve(sentinel);
         };
-    }, [bufferedProducts, hasMore, loading, bufferLoading, isFavoritesSelected]);
+    }, [isFavoritesSelected, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
 
         if (name === 'type') {
             // Update URL when category filter changes
-            const newParams = new URLSearchParams();
+            const newParams = new URLSearchParams(searchParams.toString());
             if (value) {
                 newParams.set('categoryFilters', value);
+            } else {
+                newParams.delete('categoryFilters');
             }
-            // Preserve other URL parameters
-            const currentParams = new URLSearchParams(window.location.search);
-            currentParams.forEach((val, key) => {
-                if (key !== 'categoryFilters') {
-                    newParams.set(key, val);
-                }
-            });
-            window.history.pushState({}, '', `/products?${newParams.toString()}`);
+            router.push(`/products?${newParams.toString()}`);
         }
 
         setFilters((prevFilters) => ({
@@ -483,20 +364,41 @@ const ProductsSection = ({
         }));
     };
 
+    // If favorites are selected, use the ProductsWithQuery component
+    if (isFavoritesSelected) {
+        return (
+            <main className="flex-1">
+                <Breadcrumb selectedCategory={selectedCategory} />
+                <Text as="h1" size="4xl" weight="extrabold" color="primary" className="mb-6">
+                    {t('products.my_favorites')}
+                </Text>
+                <ProductFilters
+                    filters={filters}
+                    onFilterChange={handleFilterChange}
+                    categories={categories}
+                />
+                <ProductsWithQuery
+                    selectedCategory={selectedCategory}
+                    categoryFilter={categoryFilter}
+                    isFavoritesSelected={true}
+                    enableInfiniteScroll={false}
+                />
+            </main>
+        );
+    }
+
     return (
         <main className="flex-1">
-            <Breadcrumb
-                selectedCategory={selectedCategory}
-            />
+            <Breadcrumb selectedCategory={selectedCategory} />
             <Text as="h1" size="4xl" weight="extrabold" color="primary" className="mb-6">
-                {isFavoritesSelected ? t('products.my_favorites') : (selectedCategory || t('products.all_products'))}
+                {selectedCategory || t('products.all_products')}
             </Text>
             <ProductFilters
                 filters={filters}
                 onFilterChange={handleFilterChange}
                 categories={categories}
             />
-            {loading && products.length === 0 ? (
+            {isLoading && products.length === 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 3xl:grid-cols-6 gap-6 animate-pulse">
                     {[...Array(10)].map((_, i) => (
                         <ProductCardSkeleton key={i} />
@@ -504,7 +406,7 @@ const ProductsSection = ({
                 </div>
             ) : error ? (
                 <Text as="p" size="md" color="error" testID="error-message">
-                    {error}
+                    {error.message || t('products.error_loading')}
                 </Text>
             ) : products.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16">
@@ -521,7 +423,7 @@ const ProductsSection = ({
                     </div>
                     <div ref={observerRef} className="h-8 w-full" />
                     <div className="text-center mt-8">
-                        {bufferLoading && hasMore && (
+                        {isFetchingNextPage && (
                             <Text as="span" size="md" color="secondary">
                                 {t('products.loading_more')}
                             </Text>
@@ -534,8 +436,6 @@ const ProductsSection = ({
 };
 
 function ProductsPageContent() {
-    const [categories, setCategories] = useState<Category[]>([]);
-    const localizedAPI = useLocalizedAPI();
     const router = useRouter();
     const searchParams = useSearchParams();
     const categoryFilter = searchParams.get('categoryFilters');
@@ -543,11 +443,14 @@ function ProductsPageContent() {
     const isFavoritesSelected = favoritesFilter === 'true';
     const selectedCategory = isFavoritesSelected ? null : categoryFilter;
 
-    // New: Find if selectedCategory is a parent or child
+    // Use React Query for categories
+    const { data: categories = [], isLoading: categoriesLoading } = useProductCategories();
+
+    // Find if selectedCategory is a parent or child
     const parentCategories = categories.filter(cat => !cat.parentId || cat.parentId === '');
     const childCategories = categories.filter(cat => cat.parentId && cat.parentId !== '');
     const selectedParent = parentCategories.find(cat => cat.name === selectedCategory);
-    // New: Get all child names for selected parent
+    // Get all child names for selected parent
     const childNamesOfSelectedParent = selectedParent
         ? childCategories.filter(cat => cat.parentId === selectedParent.id).map(cat => cat.name)
         : [];
@@ -582,24 +485,12 @@ function ProductsPageContent() {
         router.push(`/products?${newParams.toString()}`);
     };
 
-    useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const data = await localizedAPI.get<Category[]>('/products/categories');
-                setCategories(data);
-            } catch (error) {
-                console.error('Failed to fetch categories:', error);
-            }
-        };
-
-        fetchCategories();
-    }, [localizedAPI]);
-
     return (
         <div className="mx-auto px-4 md:px-16 py-8 bg-white">
             <div className="flex">
                 <CategorySidebar
                     categories={categories}
+                    categoriesLoading={categoriesLoading}
                     selectedCategoryName={categoryFilter}
                     onSelectCategory={handleSelectCategory}
                     isFavoritesSelected={isFavoritesSelected}

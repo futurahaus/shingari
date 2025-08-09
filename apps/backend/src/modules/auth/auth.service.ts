@@ -398,10 +398,10 @@ export class AuthService {
         );
       }
 
-      // Update the user's password using the regular auth API
+      // Use Admin API to update password directly - no session required
       const { error: updateError } = await this.databaseService
-        .getClient()
-        .auth.updateUser({
+        .getAdminClient()
+        .auth.admin.updateUserById(user.id, {
           password: newPassword,
         });
 
@@ -409,8 +409,14 @@ export class AuthService {
         this.logger.logError('Password Reset Update', updateError);
         throw new BadRequestException('Error al restablecer la contraseña');
       }
+
+      this.logger.logInfo(`Password reset successfully for user ${user.id}`);
+
     } catch (error) {
       this.logger.logError('Password Reset Confirmation', error);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       throw new BadRequestException('Error al restablecer la contraseña');
     }
   }

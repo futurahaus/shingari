@@ -8,6 +8,7 @@ import ForgotPasswordModal from './ForgotPasswordModal';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
 import { Input } from '@/app/ui/components/Input';
+import { useTranslation } from '@/contexts/I18nContext';
 
 interface LoginFormData extends Record<string, unknown> {
   email: string;
@@ -23,6 +24,7 @@ interface LoginModalProps {
 export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModalProps) {
   const router = useRouter();
   const { login } = useAuth();
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: ''
@@ -52,14 +54,14 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Error al registrar usuario');
+        throw new Error(data.message || t('auth.register_error'));
       }
 
       setSuccessMessage(data.message);
       setFormData({ email: '', password: '' });
     } catch (err) {
       console.error('Registration error:', err);
-      setError(err instanceof Error ? err.message : 'Error al registrar usuario');
+      setError(err instanceof Error ? err.message : t('auth.register_error'));
     } finally {
       setIsLoadingRegister(false);
     }
@@ -86,7 +88,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Error al iniciar sesión');
+        throw new Error(data.message || t('auth.login_error'));
       }
 
       localStorage.setItem('accessToken', data.accessToken);
@@ -110,7 +112,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
         router.push('/dashboard');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
+      setError(err instanceof Error ? err.message : t('auth.login_error'));
     } finally {
       setIsLoadingLogin(false);
     }
@@ -125,13 +127,13 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
-            aria-label="Close modal"
+            aria-label={t('auth.close_modal')}
           >
             <FaTimes className="w-5 h-5" />
           </button>
           <div className="p-6">
             <Text as="h2" size="2xl" weight="semibold" color="primary" className="text-center mb-6">
-              Inicia sesión
+              {t('auth.login_title')}
             </Text>
             <div className="space-y-4">
               {error && (
@@ -150,21 +152,21 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
               )}
               
               <Input
-                label="Correo electrónico"
+                label={t('auth.email_label')}
                 value={formData.email}
                 onChangeValue={(value) => setFormData(prev => ({ ...prev, email: value }))}
                 type="email"
-                placeholder="tu@email.com"
+                placeholder={t('auth.email_placeholder')}
                 disabled={isLoadingLogin || isLoadingRegister}
                 testID="login-email-input"
               />
               
               <Input
-                label="Contraseña"
+                label={t('auth.password_label')}
                 value={formData.password}
                 onChangeValue={(value) => setFormData(prev => ({ ...prev, password: value }))}
                 type={showPassword ? "text" : "password"}
-                placeholder="Tu contraseña"
+                placeholder={t('auth.password_placeholder')}
                 iconRight={showPassword ? "FaEyeSlash" : "FaEye"}
                 iconRightOnPress={togglePasswordVisibility}
                 disabled={isLoadingLogin || isLoadingRegister}
@@ -180,7 +182,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
                   className="text-sm text-gray-600 hover:text-red-500"
                 >
                   <Text as="span" size="sm" color="secondary" className="hover:text-primary-main">
-                    ¿Has olvidado la contraseña?
+                    {t('auth.forgot_password_link')}
                   </Text>
                 </button>
               </div>
@@ -188,7 +190,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
               <Button
                 onPress={handleSubmitClick}
                 type="primary"
-                text={isLoadingLogin ? "Iniciando sesión..." : "Inicia Sesión"}
+                text={isLoadingLogin ? t('auth.logging_in') : t('auth.login_button')}
                 testID="login-submit-button"
               />
             </div>
@@ -196,13 +198,13 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
             <div className="mt-8 space-y-4">
               <div className="text-center">
                 <Text as="p" size="md" color="primary">
-                  ¿Aún no estás registrado?
+                  {t('auth.not_registered')}
                 </Text>
               </div>
               <Button
                 onPress={handleRegister}
                 type="primary"
-                text={isLoadingRegister ? "Registrando..." : "Regístrate"}
+                text={isLoadingRegister ? t('auth.registering') : t('auth.register_button')}
                 testID="register-button"
               />
             </div>

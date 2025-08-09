@@ -1,49 +1,23 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { api } from '@/lib/api';
-import { Product, ProductCard } from '../../../components/ProductCard';
-
-interface PaginatedProductsResponse {
-  data: Product[];
-  total: number;
-  page: number;
-  limit: number;
-  lastPage: number;
-}
+import { useState } from 'react';
+import { ProductCard } from '../../../components/ProductCard';
+import { useHomeProducts } from '@/hooks/useProductsQuery';
 
 const Products = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+
+  // Use React Query for products
+  const { data: products, isLoading: loading, error } = useHomeProducts(4);
 
   const nextSlide = () => {
-    const maxSlides = Math.ceil(products.length / 4) - 1;
+    const maxSlides = Math.ceil(products?.data.length || 0 / 4) - 1;
     setCurrentSlide(current => current < maxSlides ? current + 1 : 0);
   };
 
   const prevSlide = () => {
-    const maxSlides = Math.ceil(products.length / 4) - 1;
+    const maxSlides = Math.ceil(products?.data.length || 0 / 4) - 1;
     setCurrentSlide(current => current > 0 ? current - 1 : maxSlides);
   };
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get<PaginatedProductsResponse>('/products?limit=4');
-        setProducts(response.data);
-        setError(null);
-      } catch (error) {
-        setError('Failed to fetch products');
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
 
   if (loading) {
     return (
@@ -61,7 +35,7 @@ const Products = () => {
       <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-center mb-8">Nuestros Productos</h2>
-          <p className="text-center text-red-500">{error}</p>
+          <p className="text-center text-red-500">{error.message || 'Failed to fetch products'}</p>
         </div>
       </section>
     );
@@ -78,7 +52,7 @@ const Products = () => {
               style={{ transform: `translateX(-${currentSlide * 100}%)` }}
             >
               <div className="flex gap-4 min-w-full">
-                {products.slice(currentSlide * 4, (currentSlide + 1) * 4).map((product) => (
+                {products?.data.slice(currentSlide * 4, (currentSlide + 1) * 4).map((product) => (
                   <div key={product.id} className="w-1/4">
                     <ProductCard product={product} />
                   </div>
@@ -86,9 +60,9 @@ const Products = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Navigation buttons */}
-          {products.length > 4 && (
+          {products?.data.length && products?.data.length > 4 && (
             <div className="flex justify-between mt-4">
               <button
                 onClick={prevSlide}

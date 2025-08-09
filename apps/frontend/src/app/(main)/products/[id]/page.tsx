@@ -3,37 +3,42 @@
 import { ProductImageGallery } from "@/app/(main)/products/[id]/components/ProductImageGallery";
 import { ProductInfo } from "@/app/(main)/products/[id]/components/ProductInfo";
 import { ProductTabs } from "@/app/(main)/products/[id]/components/ProductTabs";
-import { useEffect, useState } from "react";
 import { useParams } from 'next/navigation';
-import { api } from "@/lib/api";
-import { Product } from "@/components/ProductCard";
+import { useProduct } from "@/hooks/useProductsQuery";
 import Link from 'next/link';
 import ProductDetailSkeleton from './components/ProductDetailSkeleton';
 import { SimilarProducts } from "./components/SimilarProducts";
 
 export default function ProductDetailPage() {
-  const [product, setProduct] = useState<Product | null>(null);
   const params = useParams();
   const { id } = params;
+  
+  // Use React Query for product details
+  const { data: product, isLoading, error } = useProduct(id as string);
 
-  useEffect(() => {
-    if (id) {
-      const fetchProduct = async () => {
-        try {
-          const data = await api.get<Product>(`/products/${id}`);
-          setProduct(data);
-        } catch (error) {
-          console.error(error);
-          // Handle error state, e.g., show a not found message
-        }
-      };
-
-      fetchProduct();
-    }
-  }, [id]);
-
-  if (!product) {
+  if (isLoading) {
     return <ProductDetailSkeleton />;
+  }
+  
+  if (error || !product) {
+    return (
+      <div className="mx-auto p-4 sm:px-6 lg:px-16">
+        <div className="text-center py-16">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Producto no encontrado
+          </h1>
+          <p className="text-gray-600 mb-8">
+            El producto que buscas no existe o no está disponible.
+          </p>
+          <Link 
+            href="/products" 
+            className="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600 transition-colors"
+          >
+            Ver todos los productos
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (

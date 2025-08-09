@@ -7,11 +7,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import LoginModal from '@/components/auth/LoginModal';
 import { QuantityControls } from '@/components/QuantityControls';
 import { useState, useEffect } from 'react';
+import { useTranslation } from '@/contexts/I18nContext';
 
 const CarritoPage = () => {
   const { cart, removeFromCart, removeAllFromCart } = useCart();
   const router = useRouter();
   const { user, isLoading } = useAuth();
+  const { t } = useTranslation();
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
@@ -32,9 +34,9 @@ const CarritoPage = () => {
     <div className="min-h-screen bg-[#F7F7F7] flex flex-col items-center">
       {/* Header */}
       <header className="w-full max-w-7xl px-6 py-6 flex flex-col gap-2">
-        <h1 className="text-2xl font-bold">Mi Carrito</h1>
+        <h1 className="text-2xl font-bold">{t('cart.my_cart')}</h1>
         <button className="text-red-500 text-sm underline self-end" onClick={removeAllFromCart} disabled={!user}>
-          Vaciar carrito
+          {t('cart.empty_cart')}
         </button>
       </header>
       <main className="w-full max-w-7xl flex flex-col lg:flex-row gap-8 px-6">
@@ -42,15 +44,15 @@ const CarritoPage = () => {
         <section className="flex-1 bg-white rounded-lg shadow p-4">
           {/* Desktop Header */}
           <div className="hidden md:flex font-bold text-lg mb-4">
-            <span className="flex-1">Producto</span>
-            <span className="w-32 text-center">Cantidad</span>
-            <span className="w-32 text-center">Precio</span>
-            <span className="w-32 text-right">Total</span>
+            <span className="flex-1">{t('cart.product')}</span>
+            <span className="w-32 text-center">{t('cart.quantity')}</span>
+            <span className="w-32 text-center">{t('cart.price')}</span>
+            <span className="w-32 text-right">{t('cart.total')}</span>
             <span className="w-20"></span>
           </div>
 
           {cart.length === 0 ? (
-            <div className="py-8 text-center text-gray-500">Tu carrito está vacío.</div>
+            <div className="py-8 text-center text-gray-500">{t('cart.empty')}</div>
           ) : (
             <div className="space-y-4">
               {cart.map((item) => (
@@ -67,7 +69,7 @@ const CarritoPage = () => {
                       </div>
                       <div>
                         <div className="font-semibold text-base">{item.name}</div>
-                        <div className="text-xs text-gray-500">{"Unidades"}</div>
+                        <div className="text-xs text-gray-500">{t('cart.units')}</div>
                       </div>
                     </div>
                     <div className="w-32 flex items-center justify-center">
@@ -91,7 +93,7 @@ const CarritoPage = () => {
                         className="text-xs text-red-500 hover:underline"
                         onClick={() => removeFromCart(item.id)}
                         disabled={!user}
-                      >Eliminar</button>
+                      >{t('cart.remove')}</button>
                     </div>
                   </div>
 
@@ -108,14 +110,14 @@ const CarritoPage = () => {
                         </div>
                         <div className="flex-1">
                           <div className="font-semibold text-sm">{item.name}</div>
-                          <div className="text-xs text-gray-500">{"Unidades"}</div>
+                          <div className="text-xs text-gray-500">{t('cart.units')}</div>
                         </div>
                       </div>
                       <button
                         className="text-xs text-red-500 hover:underline ml-2"
                         onClick={() => removeFromCart(item.id)}
                         disabled={!user}
-                      >Eliminar</button>
+                      >{t('cart.remove')}</button>
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -130,11 +132,11 @@ const CarritoPage = () => {
                         />
                       </div>
                       <div className="text-right">
-                        <div className="text-sm text-gray-500">Precio unitario</div>
+                        <div className="text-sm text-gray-500">{t('cart.unit_price')}</div>
                         <div className="font-semibold text-sm">
                           € {item.price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
                         </div>
-                        <div className="text-sm text-gray-500 mt-1">Total</div>
+                        <div className="text-sm text-gray-500 mt-1">{t('cart.total')}</div>
                         <div className="font-bold text-base">
                           € {(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
                         </div>
@@ -148,21 +150,21 @@ const CarritoPage = () => {
         </section>
         {/* Summary */}
         <aside className="w-full lg:w-96 bg-white rounded-lg shadow p-6 flex flex-col gap-4">
-          <h2 className="font-bold text-lg mb-2">Resumen de la compra</h2>
+          <h2 className="font-bold text-lg mb-2">{t('cart.purchase_summary')}</h2>
           <div className="flex justify-between text-sm">
-            <span>Precio de mis productos:</span>
+            <span>{t('cart.product_prices')}</span>
             <span>€{total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span>Descuentos:</span>
+            <span>{t('cart.discounts')}</span>
             <span>- €{discount.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
           </div>
           <div className="flex justify-between text-sm">
-            <span>Gastos del envío:</span>
+            <span>{t('cart.shipping_costs')}</span>
             <span>€{shipping.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
           </div>
           <div className="flex justify-between text-lg font-bold border-t pt-4 mt-4">
-            <span>Total de mis productos:</span>
+            <span>{t('cart.total_products')}</span>
             <span>€{(discountedTotal + shipping).toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
           </div>
           <div className="flex flex-col gap-2 mt-6">
@@ -176,13 +178,13 @@ const CarritoPage = () => {
                 router.push('/pagos');
               }}
             >
-              Continuar compra
+              {t('cart.continue_purchase')}
             </button>
             <button className="w-full bg-white border border-gray-300 text-gray-800 py-3 rounded-md font-semibold text-lg hover:bg-gray-100 transition cursor-pointer"
               onClick={() => {
                 router.push('/products');
               }}>
-              Ver más productos
+              {t('cart.view_more_products')}
             </button>
           </div>
         </aside>

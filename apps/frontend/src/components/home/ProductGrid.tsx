@@ -1,48 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Product } from '../ProductCard';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Text } from '@/app/ui/components/Text';
-import { useLocalizedAPI } from '@/hooks/useLocalizedAPI';
 import { useTranslation } from '@/contexts/I18nContext';
-
-interface PaginatedProductsResponse {
-    data: Product[];
-    total: number;
-    page: number;
-    limit: number;
-    lastPage: number;
-}
+import { useHomeProducts } from '@/hooks/useProductsQuery';
 
 export default function ProductGrid() {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-    const localizedAPI = useLocalizedAPI();
     const { t } = useTranslation();
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                setLoading(true);
-                const response = await localizedAPI.get<PaginatedProductsResponse>('/products?limit=6');
-                setProducts(response.data);
-                setError(null);
-            } catch (error) {
-                setError(t('products.failed_to_fetch_products'));
-                console.error(error);
-            } finally {
-                setLoading(false);
-            }
-        };
+    // Use React Query for products
+    const { data: products, isLoading, error } = useHomeProducts(6);
 
-        fetchProducts();
-    }, [localizedAPI, t]);
-
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <Text as="h2" size="2xl" weight="bold" color="primary" className="mb-6 text-center">
@@ -76,13 +47,13 @@ export default function ProductGrid() {
                     {t('products.discover_products')}
                 </Text>
                 <Text as="p" size="md" color="error" className="text-center" testID="product-grid-error">
-                    {error}
+                    {error.message}
                 </Text>
             </div>
         );
     }
 
-    if (products.length === 0) {
+    if (products?.data.length === 0) {
         return null;
     }
 
@@ -93,7 +64,7 @@ export default function ProductGrid() {
             </Text>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                {products.map(product => (
+                {products?.data.map(product => (
                     <div
                         key={product.id}
                         className="group rounded-2xl flex flex-col cursor-pointer"

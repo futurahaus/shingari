@@ -34,8 +34,8 @@ export const QuantityControls = ({
         if (cartItem) {
             updateQuantity(productId, newQty);
             showInfo(
-                t('quantity_controls.quantity_updated'), 
-                t('quantity_controls.quantity_updated_to', { productName, quantity: newQty.toString() }), 
+                t('quantity_controls.quantity_updated'),
+                t('quantity_controls.quantity_updated_to', { productName, quantity: newQty.toString() }),
                 2000
             );
         } else {
@@ -48,8 +48,8 @@ export const QuantityControls = ({
                 units_per_box: unitsPerBox,
             });
             showSuccess(
-                t('quantity_controls.product_added'), 
-                t('quantity_controls.product_added_to_cart', { productName }), 
+                t('quantity_controls.product_added'),
+                t('quantity_controls.product_added_to_cart', { productName }),
                 2000
             );
         }
@@ -63,15 +63,15 @@ export const QuantityControls = ({
             if (newQty === 0) {
                 removeFromCart(productId);
                 showWarning(
-                    t('quantity_controls.product_removed'), 
-                    t('quantity_controls.product_removed_from_cart', { productName }), 
+                    t('quantity_controls.product_removed'),
+                    t('quantity_controls.product_removed_from_cart', { productName }),
                     2000
                 );
             } else {
                 updateQuantity(productId, newQty);
                 showInfo(
-                    t('quantity_controls.quantity_updated'), 
-                    t('quantity_controls.quantity_updated_to', { productName, quantity: newQty.toString() }), 
+                    t('quantity_controls.quantity_updated'),
+                    t('quantity_controls.quantity_updated_to', { productName, quantity: newQty.toString() }),
                     2000
                 );
             }
@@ -90,8 +90,8 @@ export const QuantityControls = ({
             if (cartItem) {
                 updateQuantity(productId, newQuantity);
                 showInfo(
-                    t('quantity_controls.quantity_updated'), 
-                    t('quantity_controls.quantity_updated_to', { productName, quantity: newQuantity.toString() }), 
+                    t('quantity_controls.quantity_updated'),
+                    t('quantity_controls.quantity_updated_to', { productName, quantity: newQuantity.toString() }),
                     2000
                 );
             } else if (newQuantity > 0) {
@@ -104,8 +104,8 @@ export const QuantityControls = ({
                     units_per_box: unitsPerBox,
                 });
                 showSuccess(
-                    t('quantity_controls.product_added'), 
-                    t('quantity_controls.product_added_to_cart', { productName }), 
+                    t('quantity_controls.product_added'),
+                    t('quantity_controls.product_added_to_cart', { productName }),
                     2000
                 );
             }
