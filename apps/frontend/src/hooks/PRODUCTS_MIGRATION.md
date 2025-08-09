@@ -189,19 +189,27 @@ function ProductsLayout() {
 
 ## 📋 Query Keys Estructuradas
 
-Sistema de keys organizado para gestión eficiente del cache:
+Sistema de keys organizado para gestión eficiente del cache con **soporte para internacionalización**:
 
 ```tsx
 const productsKeys = {
-  all: ['products'],
-  lists: () => ['products', 'list'],
-  list: (filters) => ['products', 'list', filters],
-  details: () => ['products', 'detail'],
-  detail: (id) => ['products', 'detail', id],
-  categories: () => ['products', 'categories'],
-  infinite: (filters) => ['products', 'list', 'infinite', filters],
+  all: (locale) => ['products', locale],
+  lists: (locale) => ['products', locale, 'list'],
+  list: (locale, filters) => ['products', locale, 'list', filters],
+  details: (locale) => ['products', locale, 'detail'],
+  detail: (locale, id) => ['products', locale, 'detail', id],
+  categories: (locale) => ['products', locale, 'categories'],
+  infinite: (locale, filters) => ['products', locale, 'list', 'infinite', filters],
 };
 ```
+
+### 🌍 **Actualización Automática por Locale**
+
+**Los queries se actualizan automáticamente cuando cambia el idioma:**
+- ✅ Query keys incluyen el `locale` actual
+- ✅ Cambio de idioma invalida cache automáticamente
+- ✅ Datos se refrescan en el nuevo idioma
+- ✅ Sin requests duplicados por idioma
 
 ## 🔧 Helper Functions
 

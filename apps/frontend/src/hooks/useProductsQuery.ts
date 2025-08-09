@@ -1,5 +1,6 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { useLocalizedAPI } from './useLocalizedAPI';
+import { useI18n } from '@/contexts/I18nContext';
 import { api } from '@/lib/api';
 import { Product } from '@/components/ProductCard';
 import { Category } from '@/app/admin/productos/hooks/useCategories.hook';
@@ -21,15 +22,15 @@ export interface ProductFilters {
   limit?: number;
 }
 
-// Query keys for products
+// Query keys for products (now include locale for reactivity)
 export const productsKeys = {
-  all: ['products'] as const,
-  lists: () => [...productsKeys.all, 'list'] as const,
-  list: (filters: ProductFilters) => [...productsKeys.lists(), filters] as const,
-  details: () => [...productsKeys.all, 'detail'] as const,
-  detail: (id: string) => [...productsKeys.details(), id] as const,
-  categories: () => [...productsKeys.all, 'categories'] as const,
-  infinite: (filters: Omit<ProductFilters, 'page'>) => [...productsKeys.lists(), 'infinite', filters] as const,
+  all: (locale: string) => ['products', locale] as const,
+  lists: (locale: string) => [...productsKeys.all(locale), 'list'] as const,
+  list: (locale: string, filters: ProductFilters) => [...productsKeys.lists(locale), filters] as const,
+  details: (locale: string) => [...productsKeys.all(locale), 'detail'] as const,
+  detail: (locale: string, id: string) => [...productsKeys.details(locale), id] as const,
+  categories: (locale: string) => [...productsKeys.all(locale), 'categories'] as const,
+  infinite: (locale: string, filters: Omit<ProductFilters, 'page'>) => [...productsKeys.lists(locale), 'infinite', filters] as const,
 };
 
 // Helper function to build query params
@@ -57,9 +58,10 @@ export function buildProductParams(filters: ProductFilters): URLSearchParams {
 // Hook for paginated products list
 export function useProductsList(filters: ProductFilters = {}) {
   const localizedAPI = useLocalizedAPI();
+  const { locale } = useI18n();
   
   return useQuery({
-    queryKey: productsKeys.list(filters),
+    queryKey: productsKeys.list(locale, filters),
     queryFn: async () => {
       const params = buildProductParams(filters);
       const url = params.toString() ? `/products?${params.toString()}` : '/products';
@@ -74,9 +76,10 @@ export function useProductsList(filters: ProductFilters = {}) {
 // Hook for infinite scroll products
 export function useProductsInfinite(filters: Omit<ProductFilters, 'page'> = {}) {
   const localizedAPI = useLocalizedAPI();
+  const { locale } = useI18n();
   
   return useInfiniteQuery({
-    queryKey: productsKeys.infinite(filters),
+    queryKey: productsKeys.infinite(locale, filters),
     queryFn: async ({ pageParam = 1 }) => {
       const params = buildProductParams({ ...filters, page: pageParam });
       const url = params.toString() ? `/products?${params.toString()}` : '/products';
@@ -94,10 +97,15 @@ export function useProductsInfinite(filters: Omit<ProductFilters, 'page'> = {}) 
 
 // Hook for individual product details
 export function useProduct(id: string) {
+  const { locale } = useI18n();
+  
   return useQuery({
-    queryKey: productsKeys.detail(id),
+    queryKey: productsKeys.detail(locale, id),
     queryFn: async () => {
-      return api.get<Product>(`/products/${id}`);
+      // For individual products, we might not need localized API since product details 
+      // are usually the same, but include locale for consistency
+      const separator = '?';
+      return api.get<Product>(`/products/${id}${separator}locale=${locale}`);
     },
     enabled: !!id,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -109,9 +117,10 @@ export function useProduct(id: string) {
 // Hook for product categories
 export function useProductCategories() {
   const localizedAPI = useLocalizedAPI();
+  const { locale } = useI18n();
   
   return useQuery({
-    queryKey: productsKeys.categories(),
+    queryKey: productsKeys.categories(locale),
     queryFn: () => localizedAPI.get<Category[]>('/products/categories'),
     staleTime: 10 * 60 * 1000, // 10 minutes - categories don't change often
     gcTime: 30 * 60 * 1000, // 30 minutes
@@ -152,6 +161,7 @@ export function useSearchProducts(searchTerm: string, limit: number = 10) {
 
 // Main hook that combines products list with common patterns
 export function useProductsQuery(filters: ProductFilters = {}) {
+  const { locale } = useI18n();
   const productsQuery = useProductsList(filters);
   const categoriesQuery = useProductCategories();
   
@@ -186,5 +196,8 @@ export function useProductsQuery(filters: ProductFilters = {}) {
     // Status
     isSuccess: productsQuery.isSuccess && categoriesQuery.isSuccess,
     isError: productsQuery.isError || categoriesQuery.isError,
+    
+    // Locale info for debugging
+    locale,
   };
 }
