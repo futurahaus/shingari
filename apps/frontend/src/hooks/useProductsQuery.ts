@@ -58,7 +58,7 @@ export function buildProductParams(filters: ProductFilters): URLSearchParams {
 // Hook for paginated products list
 export function useProductsList(filters: ProductFilters = {}) {
   const localizedAPI = useLocalizedAPI();
-  const { locale } = useI18n();
+  const { locale, isReady } = useI18n();
   
   return useQuery({
     queryKey: productsKeys.list(locale, filters),
@@ -67,6 +67,7 @@ export function useProductsList(filters: ProductFilters = {}) {
       const url = params.toString() ? `/products?${params.toString()}` : '/products';
       return localizedAPI.get<PaginatedProductsResponse>(url);
     },
+    enabled: isReady, // Only fetch when i18n is ready
     staleTime: 3 * 60 * 1000, // 3 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: 1,
@@ -76,7 +77,7 @@ export function useProductsList(filters: ProductFilters = {}) {
 // Hook for infinite scroll products
 export function useProductsInfinite(filters: Omit<ProductFilters, 'page'> = {}) {
   const localizedAPI = useLocalizedAPI();
-  const { locale } = useI18n();
+  const { locale, isReady } = useI18n();
   
   return useInfiniteQuery({
     queryKey: productsKeys.infinite(locale, filters),
@@ -89,6 +90,7 @@ export function useProductsInfinite(filters: Omit<ProductFilters, 'page'> = {}) 
     getNextPageParam: (lastPage) => {
       return lastPage.page < lastPage.lastPage ? lastPage.page + 1 : undefined;
     },
+    enabled: isReady, // Only fetch when i18n is ready
     staleTime: 3 * 60 * 1000, // 3 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: 1,
@@ -117,11 +119,12 @@ export function useProduct(id: string) {
 // Hook for product categories
 export function useProductCategories() {
   const localizedAPI = useLocalizedAPI();
-  const { locale } = useI18n();
+  const { locale, isReady } = useI18n();
   
   return useQuery({
     queryKey: productsKeys.categories(locale),
     queryFn: () => localizedAPI.get<Category[]>('/products/categories'),
+    enabled: isReady, // Only fetch when i18n is ready
     staleTime: 10 * 60 * 1000, // 10 minutes - categories don't change often
     gcTime: 30 * 60 * 1000, // 30 minutes
     retry: 2,

@@ -12,6 +12,7 @@ interface I18nContextType {
   setLocale: (locale: string) => void;
   t: (key: string, params?: Record<string, string | number>) => string;
   availableLocales: string[];
+  isReady: boolean;
 }
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
@@ -51,23 +52,18 @@ interface I18nProviderProps {
   children: ReactNode;
 }
 
+// Helper to get initial locale synchronously
+function getInitialLocale(): string {
+  if (typeof window === 'undefined') return DEFAULT_LOCALE;
+  
+  const savedLocale = localStorage.getItem('locale') || navigator.language.split('-')[0];
+  return AVAILABLE_LOCALES.includes(savedLocale) ? savedLocale : DEFAULT_LOCALE;
+}
+
 export function I18nProvider({ children }: I18nProviderProps) {
-  const [locale, setLocaleState] = useState<string>(DEFAULT_LOCALE);
+  const [locale, setLocaleState] = useState<string>(() => getInitialLocale());
   const [translations, setTranslations] = useState<TranslationFiles>({});
   const [isLoading, setIsLoading] = useState(true);
-
-  // Load initial locale from localStorage or browser
-  useEffect(() => {
-    const savedLocale = typeof window !== 'undefined' 
-      ? localStorage.getItem('locale') || navigator.language.split('-')[0] 
-      : DEFAULT_LOCALE;
-    
-    const initialLocale = AVAILABLE_LOCALES.includes(savedLocale) ? savedLocale : DEFAULT_LOCALE;
-    
-    if (initialLocale !== locale) {
-      setLocaleState(initialLocale);
-    }
-  }, [locale]);
 
   // Load translations when locale changes
   useEffect(() => {
@@ -146,6 +142,7 @@ export function I18nProvider({ children }: I18nProviderProps) {
     setLocale,
     t,
     availableLocales: AVAILABLE_LOCALES,
+    isReady: !isLoading,
   };
 
   return (
