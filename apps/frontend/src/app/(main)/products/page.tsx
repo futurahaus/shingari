@@ -37,6 +37,7 @@ const CategorySidebar = ({
     onSelectFavorites,
 }: {
     categories: Category[];
+    categoriesLoading: boolean;
     selectedCategoryName: string | null;
     onSelectCategory: (name: string | null) => void;
     isFavoritesSelected: boolean;
@@ -484,39 +485,12 @@ function ProductsPageContent() {
         router.push(`/products?${newParams.toString()}`);
     };
 
-    // Show loading skeleton while categories load
-    if (categoriesLoading) {
-        return (
-            <div className="mx-auto px-4 md:px-16 py-8 bg-white">
-                <div className="flex">
-                    <aside className="w-64 pr-8 hidden md:block">
-                        <div className="animate-pulse">
-                            <div className="h-6 bg-gray-200 rounded mb-4"></div>
-                            {[...Array(5)].map((_, i) => (
-                                <div key={i} className="h-4 bg-gray-200 rounded mb-2"></div>
-                            ))}
-                        </div>
-                    </aside>
-                    <main className="flex-1">
-                        <div className="animate-pulse">
-                            <div className="h-8 bg-gray-200 rounded mb-6"></div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 3xl:grid-cols-6 gap-6">
-                                {[...Array(10)].map((_, i) => (
-                                    <ProductCardSkeleton key={i} />
-                                ))}
-                            </div>
-                        </div>
-                    </main>
-                </div>
-            </div>
-        );
-    }
-
     return (
         <div className="mx-auto px-4 md:px-16 py-8 bg-white">
             <div className="flex">
                 <CategorySidebar
                     categories={categories}
+                    categoriesLoading={categoriesLoading}
                     selectedCategoryName={categoryFilter}
                     onSelectCategory={handleSelectCategory}
                     isFavoritesSelected={isFavoritesSelected}
