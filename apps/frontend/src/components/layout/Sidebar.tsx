@@ -2,24 +2,26 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ReactNode } from 'react';
-import { User, MapPin, ShoppingBag, LogOut } from 'lucide-react';
+import { User, MapPin, ShoppingBag, LogOut, UserCheck } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from '@/contexts/I18nContext';
 
 interface SidebarProps {
   className?: string;
   children?: ReactNode;
 }
 
-const navItems = [
-  { label: 'Datos Personales', href: '/dashboard', icon: User },
-  { label: 'Mi perfil', href: '/complete-profile' },
-  { label: 'Direcciones', href: '/dashboard/direcciones', icon: MapPin },
-  { label: 'Mis Compras', href: '/dashboard/compras', icon: ShoppingBag },
-];
-
 export default function Sidebar({ className = '', children }: SidebarProps) {
   const pathname = usePathname();
   const { logout } = useAuth();
+  const { t } = useTranslation();
+
+  const navItems = [
+    { label: t('navigation.personal_data'), href: '/dashboard', icon: User },
+    { label: t('navigation.profile'), href: '/complete-profile', icon: UserCheck },
+    { label: t('navigation.addresses'), href: '/dashboard/direcciones', icon: MapPin },
+    { label: t('navigation.my_orders'), href: '/dashboard/compras', icon: ShoppingBag },
+  ];
 
   return (
     <aside className={`bg-white w-full max-w-xs hidden md:block ${className}`}>
@@ -45,7 +47,7 @@ export default function Sidebar({ className = '', children }: SidebarProps) {
           className="flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors text-gray-700 hover:bg-red-100 cursor-pointer"
         >
           <LogOut size={20} />
-          Cerrar Sesión
+          {t('navigation.logout')}
         </button>
       </nav>
       {children}

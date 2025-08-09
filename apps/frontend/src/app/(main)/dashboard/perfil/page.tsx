@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import Sidebar from '@/components/layout/Sidebar';
+import { useTranslation } from '@/contexts/I18nContext';
 
 interface UserProfile extends Record<string, unknown> {
   nombre: string;
@@ -24,6 +25,7 @@ interface UserProfile extends Record<string, unknown> {
 export default function ProfilePage() {
   const router = useRouter();
   const { accessToken } = useAuth();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<UserProfile>({
@@ -32,7 +34,7 @@ export default function ProfilePage() {
     localidad: '',
     provincia: '',
     trade_name: '',
-    pais: 'España',
+    pais: t('dashboard.spain'),
     tax_name: '',
     telefono: '',
     tax_id: '',
@@ -82,9 +84,9 @@ export default function ProfilePage() {
     try {
       await api.put('/auth/profile', formData);
       // Show success message or redirect
-      alert('Perfil actualizado correctamente');
+      alert(t('dashboard.profile_updated'));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al actualizar el perfil');
+      setError(err instanceof Error ? err.message : t('dashboard.profile_update_error'));
     }
   };
 
@@ -123,7 +125,7 @@ export default function ProfilePage() {
                 onClick={() => router.push('/dashboard')}
                 className="button mt-4 text-sm font-medium text-red-600 hover:text-red-500"
               >
-                Volver al dashboard
+                {t('dashboard.back_to_dashboard')}
               </button>
             </div>
           </div>
@@ -139,10 +141,10 @@ export default function ProfilePage() {
         <div className="flex-1 bg-white shadow-sm rounded-lg p-6">
           <div className="pb-5 border-b border-gray-200">
             <h3 className="text-2xl leading-6 font-medium text-gray-900">
-              Mi Perfil
+              {t('dashboard.my_profile')}
             </h3>
             <p className="mt-2 text-sm text-gray-600">
-              Actualiza tu información personal
+              {t('dashboard.update_personal_info')}
             </p>
           </div>
 
@@ -152,7 +154,7 @@ export default function ProfilePage() {
                 {/* Personal Information */}
                 <div>
                   <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
-                    Nombre
+                    {t('profile.name')}
                   </label>
                   <input
                     type="text"
@@ -167,7 +169,7 @@ export default function ProfilePage() {
 
                 <div>
                   <label htmlFor="apellidos" className="block text-sm font-medium text-gray-700">
-                    Apellidos
+                    {t('profile.last_name')}
                   </label>
                   <input
                     type="text"
@@ -182,7 +184,7 @@ export default function ProfilePage() {
 
                 <div>
                   <label htmlFor="localidad" className="block text-sm font-medium text-gray-700">
-                    Localidad
+                    {t('profile.city')}
                   </label>
                   <input
                     type="text"
@@ -197,7 +199,7 @@ export default function ProfilePage() {
 
                 <div>
                   <label htmlFor="provincia" className="block text-sm font-medium text-gray-700">
-                    Provincia
+                    {t('profile.province')}
                   </label>
                   <input
                     type="text"
@@ -212,7 +214,7 @@ export default function ProfilePage() {
 
                 <div>
                   <label htmlFor="trade_name" className="block text-sm font-medium text-gray-700">
-                    Nombre Comercial
+                    {t('profile.trade_name')}
                   </label>
                   <input
                     type="text"
@@ -227,7 +229,7 @@ export default function ProfilePage() {
 
                 <div>
                   <label htmlFor="pais" className="block text-sm font-medium text-gray-700">
-                    País
+                    {t('profile.country')}
                   </label>
                   <input
                     type="text"
@@ -242,7 +244,7 @@ export default function ProfilePage() {
 
                 <div>
                   <label htmlFor="tax_name" className="block text-sm font-medium text-gray-700">
-                    Nombre Fiscal
+                    {t('profile.tax_name')}
                   </label>
                   <input
                     type="text"
@@ -257,7 +259,7 @@ export default function ProfilePage() {
 
                 <div>
                   <label htmlFor="telefono" className="block text-sm font-medium text-gray-700">
-                    Teléfono
+                    {t('profile.phone')}
                   </label>
                   <input
                     type="tel"
@@ -265,7 +267,7 @@ export default function ProfilePage() {
                     name="telefono"
                     required
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                    placeholder="+034567890"
+                    placeholder={t('profile.phone_placeholder')}
                     value={formData.telefono}
                     onChange={handleChange}
                   />
@@ -273,7 +275,7 @@ export default function ProfilePage() {
 
                 <div>
                   <label htmlFor="tax_id" className="block text-sm font-medium text-gray-700">
-                    NIF
+                    {t('profile.tax_id')}
                   </label>
                   <input
                     type="text"
@@ -288,7 +290,7 @@ export default function ProfilePage() {
 
                 <div>
                   <label htmlFor="billing_address" className="block text-sm font-medium text-gray-700">
-                    Dirección Fiscal
+                    {t('profile.billing_address')}
                   </label>
                   <input
                     type="text"
@@ -303,7 +305,7 @@ export default function ProfilePage() {
 
                 <div>
                   <label htmlFor="shipping_address" className="block text-sm font-medium text-gray-700">
-                    Dirección de Entrega
+                    {t('profile.shipping_address')}
                   </label>
                   <input
                     type="text"
@@ -318,7 +320,7 @@ export default function ProfilePage() {
 
                 <div>
                   <label htmlFor="cp" className="block text-sm font-medium text-gray-700">
-                    C.P.
+                    {t('profile.postal_code')}
                   </label>
                   <input
                     type="text"
@@ -326,7 +328,7 @@ export default function ProfilePage() {
                     name="cp"
                     required
                     className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                    placeholder="12345"
+                    placeholder={t('profile.postal_code_placeholder')}
                     value={formData.cp}
                     onChange={handleChange}
                   />
@@ -334,7 +336,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="mt-6">
-                <p className="text-sm font-medium text-gray-700 mb-2">¿Cómo nos conociste?</p>
+                <p className="text-sm font-medium text-gray-700 mb-2">{t('profile.how_did_you_find_us')}</p>
                 <div className="flex space-x-6">
                   <label className="flex items-center">
                     <input
@@ -345,7 +347,7 @@ export default function ProfilePage() {
                       checked={formData.referral_source === 'redes'}
                       onChange={handleChange}
                     />
-                    <span className="ml-2 text-sm text-gray-600">Redes Sociales</span>
+                    <span className="ml-2 text-sm text-gray-600">{t('profile.social_media')}</span>
                   </label>
                   <label className="flex items-center">
                     <input
@@ -356,7 +358,7 @@ export default function ProfilePage() {
                       checked={formData.referral_source === 'recomendacion'}
                       onChange={handleChange}
                     />
-                    <span className="ml-2 text-sm text-gray-600">Recomendación</span>
+                    <span className="ml-2 text-sm text-gray-600">{t('profile.recommendation')}</span>
                   </label>
                   <label className="flex items-center">
                     <input
@@ -367,7 +369,7 @@ export default function ProfilePage() {
                       checked={formData.referral_source === 'publicidad'}
                       onChange={handleChange}
                     />
-                    <span className="ml-2 text-sm text-gray-600">Publicidad</span>
+                    <span className="ml-2 text-sm text-gray-600">{t('profile.advertising')}</span>
                   </label>
                   <label className="flex items-center">
                     <input
@@ -378,7 +380,7 @@ export default function ProfilePage() {
                       checked={formData.referral_source === 'otros'}
                       onChange={handleChange}
                     />
-                    <span className="ml-2 text-sm text-gray-600">Otros</span>
+                    <span className="ml-2 text-sm text-gray-600">{t('profile.others')}</span>
                   </label>
                 </div>
               </div>
@@ -388,7 +390,7 @@ export default function ProfilePage() {
                   type="submit"
                   className="button w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                 >
-                  Guardar Perfil
+                  {t('profile.save_profile')}
                 </button>
               </div>
             </form>

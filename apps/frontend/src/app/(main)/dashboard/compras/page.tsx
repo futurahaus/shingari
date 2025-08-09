@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
 import { api } from '@/lib/api';
+import { useTranslation, useI18n } from '@/contexts/I18nContext';
 
 interface OrderLine {
   id: string;
@@ -50,11 +51,11 @@ interface Order {
   order_payments: OrderPayment[];
 }
 
-const getStatusConfig = (status: string) => {
+const getStatusConfig = (status: string, t: (key: string) => string) => {
   switch (status.toLowerCase()) {
     case 'pending':
       return {
-        label: 'Pendiente',
+        label: t('order_status.pending'),
         bgColor: 'bg-yellow-100',
         textColor: 'text-yellow-800',
         borderColor: 'border-yellow-200'
@@ -62,22 +63,21 @@ const getStatusConfig = (status: string) => {
     case 'completed':
     case 'paid':
       return {
-        label: 'Compra facturada',
+        label: t('order_status.completed'),
         bgColor: 'bg-green-100',
         textColor: 'text-green-800',
         borderColor: 'border-green-200'
       };
     case 'cancelled':
-    case 'cancelled':
       return {
-        label: 'Compra cancelada',
+        label: t('order_status.cancelled'),
         bgColor: 'bg-red-100',
         textColor: 'text-red-800',
         borderColor: 'border-red-200'
       };
     case 'processing':
       return {
-        label: 'En proceso',
+        label: t('order_status.processing'),
         bgColor: 'bg-blue-100',
         textColor: 'text-blue-800',
         borderColor: 'border-blue-200'
@@ -92,14 +92,14 @@ const getStatusConfig = (status: string) => {
   }
 };
 
-const formatDate = (dateString: string) => {
+const formatDate = (dateString: string, locale: string = 'es-ES') => {
   const date = new Date(dateString);
   const options: Intl.DateTimeFormatOptions = {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
   };
-  return date.toLocaleDateString('es-ES', options);
+  return date.toLocaleDateString(locale, options);
 };
 
 const formatOrderId = (id: string) => {
@@ -136,6 +136,8 @@ const OrderCardSkeleton = () => (
 
 export default function ComprasPage() {
   const router = useRouter();
+  const { t } = useTranslation();
+  const { locale } = useI18n();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -147,7 +149,7 @@ export default function ComprasPage() {
         setOrders(ordersData);
       } catch (error) {
         console.error('Error fetching orders:', error);
-        setError('Error al cargar las órdenes');
+        setError(t('dashboard.loading_orders'));
       } finally {
         setLoading(false);
       }
@@ -162,7 +164,7 @@ export default function ComprasPage() {
         <div className="flex flex-col lg:flex-row gap-8">
           <Sidebar />
           <div className="flex-1">
-            <h2 className="text-xl sm:text-2xl font-bold mb-6">Mis Compras</h2>
+            <h2 className="text-xl sm:text-2xl font-bold mb-6">{t('dashboard.my_orders')}</h2>
             <div className="space-y-4">
               {[...Array(4)].map((_, i) => (
                 <OrderCardSkeleton key={i} />
@@ -194,16 +196,16 @@ export default function ComprasPage() {
       <div className="flex flex-col lg:flex-row gap-8">
         <Sidebar />
         <div className="flex-1">
-          <h2 className="text-xl sm:text-2xl font-bold mb-6">Mis Compras</h2>
+          <h2 className="text-xl sm:text-2xl font-bold mb-6">{t('dashboard.my_orders')}</h2>
 
           {orders.length === 0 ? (
             <div className="bg-white shadow-sm rounded-lg p-4 sm:p-6 text-center">
-              <p className="text-gray-600">No tienes compras registradas.</p>
+              <p className="text-gray-600">{t('dashboard.no_orders')}</p>
             </div>
           ) : (
             <div className="space-y-4">
               {orders.map((order) => {
-                const statusConfig = getStatusConfig(order.status);
+                const statusConfig = getStatusConfig(order.status, t);
 
                 return (
                   <div key={order.id} className="bg-white border border-gray-200 rounded-xl p-4">
@@ -218,17 +220,17 @@ export default function ComprasPage() {
 
                           {/* Order ID */}
                           <span className="text-sm font-medium text-gray-900">
-                            Orden {formatOrderId(order.id)}
+                            {t('dashboard.order')} {formatOrderId(order.id)}
                           </span>
                         </div>
 
                         {/* Order Details */}
                         <div className="space-y-1">
                           <p className="text-xs sm:text-sm text-gray-600">
-                            Fecha de compra: {formatDate(order.created_at)}
+                            {t('dashboard.purchase_date')}: {formatDate(order.created_at, locale === 'zh' ? 'zh-CN' : 'es-ES')}
                           </p>
                           <p className="text-xs sm:text-sm text-gray-600">
-                            Total: €{Number(order.total_amount).toFixed(2)}
+                            {t('dashboard.total')}: €{Number(order.total_amount).toFixed(2)}
                           </p>
                         </div>
                       </div>
@@ -241,7 +243,7 @@ export default function ComprasPage() {
                           }}
                           className="w-full sm:w-auto px-4 py-2 border border-gray-900 text-gray-900 rounded text-sm font-medium hover:bg-gray-50 transition-colors cursor-pointer"
                         >
-                          Ver detalle
+                          {t('dashboard.view_detail')}
                         </button>
                       </div>
                     </div>

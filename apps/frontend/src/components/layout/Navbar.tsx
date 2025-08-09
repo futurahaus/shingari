@@ -46,8 +46,8 @@ export default function Navbar() {
   const sidebarItems = [
     { label: t('navigation.dashboard'), href: '/dashboard', icon: User },
     { label: t('navigation.profile'), href: '/complete-profile' },
-    { label: 'Direcciones', href: '/dashboard/direcciones', icon: MapPin },
-    { label: 'Mis Compras', href: '/dashboard/compras', icon: ShoppingBag },
+    { label: t('navigation.addresses'), href: '/dashboard/direcciones', icon: MapPin },
+    { label: t('navigation.my_orders'), href: '/dashboard/compras', icon: ShoppingBag },
   ];
 
   return (

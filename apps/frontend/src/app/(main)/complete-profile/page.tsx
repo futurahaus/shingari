@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import Sidebar from '@/components/layout/Sidebar';
 import { Button } from '@/app/ui/components/Button';
+import { useTranslation } from '@/contexts/I18nContext';
 
 export interface UserProfile extends Record<string, unknown> {
   nombre: string;
@@ -25,6 +26,7 @@ export interface UserProfile extends Record<string, unknown> {
 export default function CompleteProfilePage() {
   const router = useRouter();
   const { accessToken } = useAuth();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<UserProfile>({
@@ -33,7 +35,7 @@ export default function CompleteProfilePage() {
     localidad: '',
     provincia: '',
     trade_name: '',
-    pais: 'España',
+    pais: t('dashboard.spain'),
     tax_name: '',
     telefono: '',
     tax_id: '',
@@ -65,7 +67,7 @@ export default function CompleteProfilePage() {
         }));
       } catch (err) {
         console.error('Error fetching user data:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch user data');
+        setError(err instanceof Error ? err.message : t('dashboard.profile_update_error'));
         if (err instanceof Error && err.message === 'Authentication required') {
           window.location.hash = '#login?from=/complete-profile';
         }
@@ -85,7 +87,7 @@ export default function CompleteProfilePage() {
       await api.put('/auth/profile', formData);
       router.push('/dashboard');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al actualizar el perfil');
+      setError(err instanceof Error ? err.message : t('dashboard.profile_update_error'));
     }
   };
 
@@ -141,7 +143,7 @@ export default function CompleteProfilePage() {
     <div className="flex-1 bg-white shadow-sm rounded-lg p-4 sm:p-6">
       <div className="pb-5 border-b border-gray-200">
         <h3 className="text-xl sm:text-2xl leading-6 font-medium text-gray-900">
-          Mi Perfil
+          {t('dashboard.my_profile')}
         </h3>
       </div>
       <div className="mt-6">
@@ -151,7 +153,7 @@ export default function CompleteProfilePage() {
             onClick={() => router.push('/')}
             className="mt-4 text-sm font-medium text-red-600 hover:text-red-500"
           >
-            Volver al inicio
+            {t('dashboard.back_to_login')}
           </button>
         </div>
       </div>
@@ -170,10 +172,10 @@ export default function CompleteProfilePage() {
           <div className="flex-1 bg-white shadow-sm rounded-lg p-4 sm:p-6">
             <div className="pb-5 border-b border-gray-200">
               <h3 className="text-xl sm:text-2xl leading-6 font-medium text-gray-900">
-                Mi Perfil
+                {t('dashboard.my_profile')}
               </h3>
               <p className="mt-2 text-sm text-gray-600">
-                Completa tu información personal para continuar
+                {t('complete_profile.subtitle')}
               </p>
             </div>
 
@@ -183,7 +185,7 @@ export default function CompleteProfilePage() {
                   {/* Personal Information */}
                   <div>
                     <label htmlFor="nombre" className="block text-sm font-medium text-gray-700">
-                      Nombre
+                      {t('profile.name')}
                     </label>
                     <input
                       type="text"
@@ -198,7 +200,7 @@ export default function CompleteProfilePage() {
 
                   <div>
                     <label htmlFor="apellidos" className="block text-sm font-medium text-gray-700">
-                      Apellidos
+                      {t('profile.last_name')}
                     </label>
                     <input
                       type="text"
@@ -213,7 +215,7 @@ export default function CompleteProfilePage() {
 
                   <div>
                     <label htmlFor="localidad" className="block text-sm font-medium text-gray-700">
-                      Localidad
+                      {t('profile.city')}
                     </label>
                     <input
                       type="text"
@@ -228,7 +230,7 @@ export default function CompleteProfilePage() {
 
                   <div>
                     <label htmlFor="provincia" className="block text-sm font-medium text-gray-700">
-                      Provincia
+                      {t('profile.province')}
                     </label>
                     <input
                       type="text"
@@ -243,7 +245,7 @@ export default function CompleteProfilePage() {
 
                   <div>
                     <label htmlFor="trade_name" className="block text-sm font-medium text-gray-700">
-                      Nombre Comercial
+                      {t('profile.trade_name')}
                     </label>
                     <input
                       type="text"
@@ -258,7 +260,7 @@ export default function CompleteProfilePage() {
 
                   <div>
                     <label htmlFor="pais" className="block text-sm font-medium text-gray-700">
-                      País
+                      {t('profile.country')}
                     </label>
                     <input
                       type="text"
@@ -273,7 +275,7 @@ export default function CompleteProfilePage() {
 
                   <div>
                     <label htmlFor="tax_name" className="block text-sm font-medium text-gray-700">
-                      Nombre Fiscal
+                      {t('profile.tax_name')}
                     </label>
                     <input
                       type="text"
@@ -288,7 +290,7 @@ export default function CompleteProfilePage() {
 
                   <div>
                     <label htmlFor="telefono" className="block text-sm font-medium text-gray-700">
-                      Teléfono
+                      {t('profile.phone')}
                     </label>
                     <input
                       type="tel"
@@ -296,7 +298,7 @@ export default function CompleteProfilePage() {
                       name="telefono"
                       required
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                      placeholder="+034567890"
+                      placeholder={t('profile.phone_placeholder')}
                       value={formData.telefono}
                       onChange={handleChange}
                     />
@@ -304,7 +306,7 @@ export default function CompleteProfilePage() {
 
                   <div>
                     <label htmlFor="tax_id" className="block text-sm font-medium text-gray-700">
-                      NIF
+                      {t('profile.tax_id')}
                     </label>
                     <input
                       type="text"
@@ -319,7 +321,7 @@ export default function CompleteProfilePage() {
 
                   <div>
                     <label htmlFor="billing_address" className="block text-sm font-medium text-gray-700">
-                      Dirección Fiscal
+                      {t('profile.billing_address')}
                     </label>
                     <input
                       type="text"
@@ -334,7 +336,7 @@ export default function CompleteProfilePage() {
 
                   <div>
                     <label htmlFor="shipping_address" className="block text-sm font-medium text-gray-700">
-                      Dirección de Entrega
+                      {t('profile.shipping_address')}
                     </label>
                     <input
                       type="text"
@@ -349,7 +351,7 @@ export default function CompleteProfilePage() {
 
                   <div>
                     <label htmlFor="cp" className="block text-sm font-medium text-gray-700">
-                      C.P.
+                      {t('profile.postal_code')}
                     </label>
                     <input
                       type="text"
@@ -357,7 +359,7 @@ export default function CompleteProfilePage() {
                       name="cp"
                       required
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500"
-                      placeholder="12345"
+                      placeholder={t('profile.postal_code_placeholder')}
                       value={formData.cp}
                       onChange={handleChange}
                     />
@@ -365,7 +367,7 @@ export default function CompleteProfilePage() {
                 </div>
 
                 <div className="mt-6">
-                  <p className="text-sm font-medium text-gray-700 mb-3">¿Cómo nos conociste?</p>
+                  <p className="text-sm font-medium text-gray-700 mb-3">{t('profile.how_did_you_find_us')}</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                     <label className="flex items-center">
                       <input
@@ -376,7 +378,7 @@ export default function CompleteProfilePage() {
                         checked={formData.referral_source === 'redes'}
                         onChange={handleChange}
                       />
-                      <span className="ml-2 text-sm text-gray-600">Redes Sociales</span>
+                      <span className="ml-2 text-sm text-gray-600">{t('profile.social_media')}</span>
                     </label>
                     <label className="flex items-center">
                       <input
@@ -387,7 +389,7 @@ export default function CompleteProfilePage() {
                         checked={formData.referral_source === 'recomendacion'}
                         onChange={handleChange}
                       />
-                      <span className="ml-2 text-sm text-gray-600">Recomendación</span>
+                      <span className="ml-2 text-sm text-gray-600">{t('profile.recommendation')}</span>
                     </label>
                     <label className="flex items-center">
                       <input
@@ -398,7 +400,7 @@ export default function CompleteProfilePage() {
                         checked={formData.referral_source === 'publicidad'}
                         onChange={handleChange}
                       />
-                      <span className="ml-2 text-sm text-gray-600">Publicidad</span>
+                      <span className="ml-2 text-sm text-gray-600">{t('profile.advertising')}</span>
                     </label>
                     <label className="flex items-center">
                       <input
@@ -409,7 +411,7 @@ export default function CompleteProfilePage() {
                         checked={formData.referral_source === 'otros'}
                         onChange={handleChange}
                       />
-                      <span className="ml-2 text-sm text-gray-600">Otros</span>
+                      <span className="ml-2 text-sm text-gray-600">{t('profile.others')}</span>
                     </label>
                   </div>
                 </div>
@@ -420,7 +422,7 @@ export default function CompleteProfilePage() {
                     htmlType="submit"
                     onPress={() => {}} // Form submit will handle this
                     testID="save-profile-button"
-                    text="Guardar Perfil"
+                    text={t('profile.save_profile')}
                   />
                 </div>
               </form>

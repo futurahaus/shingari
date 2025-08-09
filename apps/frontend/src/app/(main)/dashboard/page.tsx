@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import Sidebar from '@/components/layout/Sidebar';
+import { useTranslation } from '@/contexts/I18nContext';
 
 interface UserData {
   id: string;
@@ -15,6 +16,7 @@ interface UserData {
 export default function DashboardPage() {
   const router = useRouter();
   const { logout, accessToken } = useAuth();
+  const { t } = useTranslation();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,7 +79,7 @@ export default function DashboardPage() {
           <div className="flex-1 bg-white shadow-sm rounded-lg p-6">
             <div className="pb-5 border-b border-gray-200">
               <h3 className="text-2xl leading-6 font-medium text-gray-900">
-                Panel de Control
+                {t('dashboard.title')}
               </h3>
             </div>
             <div className="mt-6">
@@ -87,7 +89,7 @@ export default function DashboardPage() {
                   onClick={() => router.push('/')}
                   className="mt-4 text-sm font-medium text-red-600 hover:text-red-500"
                 >
-                  Volver al inicio de sesión
+                  {t('dashboard.back_to_login')}
                 </button>
               </div>
             </div>
@@ -96,23 +98,23 @@ export default function DashboardPage() {
           <div className="flex-1 bg-white shadow-sm rounded-lg p-6">
             <div className="pb-5 border-b border-gray-200">
               <h3 className="text-2xl leading-6 font-medium text-gray-900">
-                Panel de Control
+                {t('dashboard.title')}
               </h3>
             </div>
 
             <div className="mt-6">
               <div className="bg-gray-50 p-6 rounded-lg">
                 <h4 className="text-lg font-medium text-gray-900 mb-4">
-                  Información del Usuario
+                  {t('dashboard.user_info')}
                 </h4>
                 {userData && (
                   <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
                     <div>
-                      <dt className="text-sm font-medium text-gray-500">Email</dt>
+                      <dt className="text-sm font-medium text-gray-500">{t('dashboard.email')}</dt>
                       <dd className="mt-1 text-sm text-gray-900">{userData.email}</dd>
                     </div>
                     <div>
-                      <dt className="text-sm font-medium text-gray-500">ID</dt>
+                      <dt className="text-sm font-medium text-gray-500">{t('dashboard.id')}</dt>
                       <dd className="mt-1 text-sm text-gray-900">{userData.id}</dd>
                     </div>
                     {/* Add more user data fields as needed */}
@@ -125,7 +127,7 @@ export default function DashboardPage() {
                   onClick={logout}
                   className="button inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 cursor-pointer"
                 >
-                  Cerrar Sesión
+                  {t('dashboard.logout')}
                 </button>
               </div>
             </div>

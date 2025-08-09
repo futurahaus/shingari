@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Sidebar from '@/components/layout/Sidebar';
 import { api } from '@/lib/api';
+import { useTranslation, useI18n } from '@/contexts/I18nContext';
 
 interface OrderLine {
   id: string;
@@ -52,11 +53,11 @@ interface Order {
   order_payments: OrderPayment[];
 }
 
-const getStatusConfig = (status: string) => {
+const getStatusConfig = (status: string, t: (key: string) => string) => {
   switch (status.toLowerCase()) {
     case 'pending':
       return {
-        label: 'Pendiente',
+        label: t('order_status.pending'),
         bgColor: 'bg-yellow-100',
         textColor: 'text-yellow-800',
         borderColor: 'border-yellow-200'
@@ -64,21 +65,21 @@ const getStatusConfig = (status: string) => {
     case 'completed':
     case 'paid':
       return {
-        label: 'Compra facturada',
+        label: t('order_status.completed'),
         bgColor: 'bg-blue-100',
         textColor: 'text-blue-800',
         borderColor: 'border-blue-200'
       };
     case 'cancelled':
       return {
-        label: 'Compra cancelada',
+        label: t('order_status.cancelled'),
         bgColor: 'bg-red-100',
         textColor: 'text-red-800',
         borderColor: 'border-red-200'
       };
     case 'processing':
       return {
-        label: 'En proceso',
+        label: t('order_status.processing'),
         bgColor: 'bg-blue-100',
         textColor: 'text-blue-800',
         borderColor: 'border-blue-200'
@@ -93,14 +94,14 @@ const getStatusConfig = (status: string) => {
   }
 };
 
-const formatDate = (dateString: string) => {
+const formatDate = (dateString: string, locale: string = 'es-ES') => {
   const date = new Date(dateString);
   const options: Intl.DateTimeFormatOptions = {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
   };
-  return date.toLocaleDateString('es-ES', options);
+  return date.toLocaleDateString(locale, options);
 };
 
 const formatOrderId = (id: string) => {
@@ -242,6 +243,8 @@ const OrderDetailSkeleton = () => (
 export default function OrderDetailPage() {
   const params = useParams();
   const orderId = params.id as string;
+  const { t } = useTranslation();
+  const { locale } = useI18n();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -256,7 +259,7 @@ export default function OrderDetailPage() {
         setOrder(orderData);
       } catch (error) {
         console.error('Error fetching order:', error);
-        setError('Error al cargar los detalles de la orden');
+        setError(t('dashboard.loading_order_details'));
       } finally {
         setLoading(false);
       }
@@ -283,7 +286,7 @@ export default function OrderDetailPage() {
           <Sidebar />
           <div className="flex-1">
             <div className="text-center text-red-600">
-              <p>{error || 'No se pudo cargar la orden'}</p>
+              <p>{error || t('dashboard.order_not_found')}</p>
             </div>
           </div>
         </div>
@@ -291,7 +294,7 @@ export default function OrderDetailPage() {
     );
   }
 
-  const statusConfig = getStatusConfig(order.status);
+  const statusConfig = getStatusConfig(order.status, t);
   const shippingAddress = order.order_addresses.find(addr => addr.type === 'shipping');
   const payment = order.order_payments[0];
 
@@ -309,11 +312,11 @@ export default function OrderDetailPage() {
                     {statusConfig.label}
                   </div>
                   <span className="text-sm font-bold text-gray-900">
-                    Orden {formatOrderId(order.id)}
+                    {t('dashboard.order')} {formatOrderId(order.id)}
                   </span>
                 </div>
                 <p className="text-xs sm:text-sm text-gray-600">
-                  Fecha de compra: {formatDate(order.created_at)}
+                  {t('dashboard.purchase_date')}: {formatDate(order.created_at, locale === 'zh' ? 'zh-CN' : 'es-ES')}
                 </p>
               </div>
               <div className="sm:ml-4">
@@ -324,7 +327,7 @@ export default function OrderDetailPage() {
                   }}
                   className="w-full sm:w-auto px-4 py-2 bg-[#EA3D15] text-white rounded text-sm font-medium hover:bg-[#d43e0e] transition-colors cursor-pointer"
                 >
-                  Repetir compra
+                  {t('dashboard.repeat_order')}
                 </button>
               </div>
             </div>
@@ -333,34 +336,34 @@ export default function OrderDetailPage() {
           {/* Delivery Details Card */}
           <div className="bg-white border border-gray-200 rounded-xl p-4">
             <div className="mb-4">
-              <h3 className="text-sm font-bold text-gray-900">Detalle de entrega</h3>
+              <h3 className="text-sm font-bold text-gray-900">{t('order_details.delivery_details')}</h3>
             </div>
             <div className="space-y-3">
               <div className="flex flex-col sm:flex-row sm:gap-1">
-                <span className="text-xs sm:text-sm text-gray-600">Tipo de entrega:</span>
-                <span className="text-xs sm:text-sm font-medium text-gray-900">Envío a domicilio</span>
+                <span className="text-xs sm:text-sm text-gray-600">{t('order_details.delivery_type')}</span>
+                <span className="text-xs sm:text-sm font-medium text-gray-900">{t('order_details.home_delivery')}</span>
               </div>
               <div className="flex flex-col sm:flex-row sm:gap-1">
-                <span className="text-xs sm:text-sm text-gray-600">Entrega en:</span>
+                <span className="text-xs sm:text-sm text-gray-600">{t('order_details.delivery_to')}</span>
                 <span className="text-xs sm:text-sm font-medium text-gray-900">
-                  {shippingAddress ? `${shippingAddress.address_line1}, ${shippingAddress.city}, ${shippingAddress.country}` : 'No especificada'}
+                  {shippingAddress ? `${shippingAddress.address_line1}, ${shippingAddress.city}, ${shippingAddress.country}` : t('order_details.not_specified')}
                 </span>
               </div>
               <div className="flex flex-col sm:flex-row sm:gap-1">
-                <span className="text-xs sm:text-sm text-gray-600">Fecha de entrega:</span>
+                <span className="text-xs sm:text-sm text-gray-600">{t('order_details.delivery_date')}</span>
                 <span className="text-xs sm:text-sm font-medium text-gray-900">
-                  {formatDate(order.created_at)} de 9:00a.m. a 3:00p.m.
+                  {formatDate(order.created_at, locale === 'zh' ? 'zh-CN' : 'es-ES')} {t('order_details.time_range')}
                 </span>
               </div>
               <div className="space-y-2">
                 <div className="flex flex-col sm:flex-row sm:gap-1">
-                  <span className="text-xs sm:text-sm text-gray-600">Código de seguimiento:</span>
+                  <span className="text-xs sm:text-sm text-gray-600">{t('order_details.tracking_code')}</span>
                   <span className="text-xs sm:text-sm font-medium text-gray-900">
                     {order.id.slice(0, 8).toUpperCase()}-{order.id.slice(8, 12).toUpperCase()}
                   </span>
                 </div>
                 <button className="w-full sm:w-auto px-4 py-2 bg-[#EA3D15] text-white rounded text-sm font-medium hover:bg-[#d43e0e] transition-colors cursor-pointer">
-                  Seguir compra
+                  {t('dashboard.track_order')}
                 </button>
               </div>
             </div>
@@ -371,19 +374,19 @@ export default function OrderDetailPage() {
             {/* Payment Details Card */}
             <div className="bg-white border border-gray-200 rounded-xl p-4">
               <div className="mb-4">
-                <h3 className="text-sm font-bold text-gray-900">Detalle de pago</h3>
+                <h3 className="text-sm font-bold text-gray-900">{t('order_details.payment_details')}</h3>
               </div>
               <div className="space-y-2">
                 <p className="text-sm font-medium text-gray-900">
-                  {payment?.payment_method === 'card' ? 'Tarjeta de crédito' : payment?.payment_method}
+                  {payment?.payment_method === 'card' ? t('order_details.credit_card') : payment?.payment_method}
                 </p>
                 <p className="text-sm text-gray-900">
-                  {formatCurrency(order.total_amount)} - 1 pago de {formatCurrency(order.total_amount)}
+                  {formatCurrency(order.total_amount)} - {t('order_details.payment_single')} {formatCurrency(order.total_amount)}
                 </p>
               </div>
               <div className="mt-4">
                 <button className="w-full px-4 py-2 border border-gray-700 text-gray-700 rounded text-sm font-bold hover:bg-gray-50 transition-colors cursor-pointer">
-                  Ver factura
+                  {t('dashboard.view_invoice')}
                 </button>
               </div>
             </div>
@@ -391,24 +394,24 @@ export default function OrderDetailPage() {
             {/* Summary Card */}
             <div className="bg-white border border-gray-200 rounded-xl p-4">
               <div className="mb-4">
-                <h3 className="text-sm font-bold text-gray-900">Resumen</h3>
+                <h3 className="text-sm font-bold text-gray-900">{t('order_details.summary')}</h3>
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-sm font-medium text-gray-900">Subtotal</span>
+                  <span className="text-sm font-medium text-gray-900">{t('order_details.subtotal')}</span>
                   <span className="text-sm text-gray-900">{formatCurrency(order.total_amount)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm font-medium text-gray-900">Descuentos</span>
+                  <span className="text-sm font-medium text-gray-900">{t('order_details.discounts')}</span>
                   <span className="text-sm text-gray-900">-€0,00</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm font-medium text-gray-900">Envío</span>
+                  <span className="text-sm font-medium text-gray-900">{t('order_details.shipping')}</span>
                   <span className="text-sm text-gray-900">€0,00</span>
                 </div>
                 <div className="border-t pt-2 mt-2">
                   <div className="flex justify-between">
-                    <span className="text-sm font-bold text-gray-900">Total</span>
+                    <span className="text-sm font-bold text-gray-900">{t('dashboard.total')}</span>
                     <span className="text-sm font-bold text-gray-900">{formatCurrency(order.total_amount)}</span>
                   </div>
                 </div>
@@ -419,13 +422,13 @@ export default function OrderDetailPage() {
           {/* Products Card */}
           <div className="bg-white border border-gray-200 rounded-xl p-4">
             <div className="mb-4">
-              <h3 className="text-sm font-medium text-gray-900 mb-3">Productos</h3>
+              <h3 className="text-sm font-medium text-gray-900 mb-3">{t('order_details.products')}</h3>
               {/* Desktop Headers */}
               <div className="hidden sm:flex justify-between items-center text-xs font-medium text-gray-500 border-b border-gray-100 pb-2">
-                <span className="flex-1">Producto</span>
+                <span className="flex-1">{t('order_details.product')}</span>
                 <div className="flex gap-4">
-                  <span className="w-20 text-center">Precio</span>
-                  <span className="w-20 text-center">Subtotal</span>
+                  <span className="w-20 text-center">{t('order_details.price')}</span>
+                  <span className="w-20 text-center">{t('order_details.subtotal')}</span>
                 </div>
               </div>
             </div>
@@ -453,16 +456,16 @@ export default function OrderDetailPage() {
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium text-gray-900 mb-1">{line.product_name}</p>
-                        <p className="text-xs text-gray-500">Cantidad: {line.quantity}</p>
+                        <p className="text-xs text-gray-500">{t('order_details.quantity')}: {line.quantity}</p>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div className="text-center">
-                        <p className="text-gray-500 text-xs mb-1">Precio unitario</p>
+                        <p className="text-gray-500 text-xs mb-1">{t('order_details.unit_price')}</p>
                         <p className="font-medium text-gray-900">{formatCurrency(line.unit_price)}</p>
                       </div>
                       <div className="text-center">
-                        <p className="text-gray-500 text-xs mb-1">Subtotal</p>
+                        <p className="text-gray-500 text-xs mb-1">{t('order_details.subtotal')}</p>
                         <p className="font-medium text-gray-900">{formatCurrency(line.total_price)}</p>
                       </div>
                     </div>
@@ -486,7 +489,7 @@ export default function OrderDetailPage() {
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium text-gray-900">{line.product_name}</p>
-                        <p className="text-xs text-gray-500">Cantidad: {line.quantity}</p>
+                        <p className="text-xs text-gray-500">{t('order_details.quantity')}: {line.quantity}</p>
                       </div>
                     </div>
                     <div className="flex gap-4">
