@@ -346,5 +346,20 @@
     "city": "城市",
     "client": "客户",
     "spain": "西班牙"
+  },
+  "congrats": {
+    "title": "购买确认",
+    "thank_you": "非常感谢您的购买，{{name}}！",
+    "order": "订单",
+    "total": "总计",
+    "status": "状态",
+    "confirmation_email": "我们将发送确认邮件，包含您的订单详情！",
+    "go_to_orders": "查看我的订单",
+    "back_to_home": "返回首页",
+    "error": "错误",
+    "no_order_id": "未提供订单ID",
+    "order_fetch_error": "获取订单详情时出错",
+    "order_not_found": "无法加载订单",
+    "client": "客户"
   }
 }

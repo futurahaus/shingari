@@ -3,6 +3,7 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
+import { useTranslation } from '@/contexts/I18nContext';
 
 interface OrderLine {
   id: string;
@@ -100,6 +101,7 @@ const CongratsContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId');
+  const { t } = useTranslation();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -108,7 +110,7 @@ const CongratsContent = () => {
   useEffect(() => {
     const fetchOrder = async () => {
       if (!orderId) {
-        setError('No se proporcionó ID de orden');
+        setError(t('congrats.no_order_id'));
         setLoading(false);
         return;
       }
@@ -118,7 +120,7 @@ const CongratsContent = () => {
         setOrder(orderData);
       } catch (error) {
         console.error('Error al obtener la orden:', error);
-        setError('Error al obtener los detalles de la orden');
+        setError(t('congrats.order_fetch_error'));
       } finally {
         setLoading(false);
       }
@@ -140,13 +142,13 @@ const CongratsContent = () => {
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
             </svg>
           </div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">Error</h2>
-          <p className="text-gray-600 mb-4">{error || 'No se pudo cargar la orden'}</p>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">{t('congrats.error')}</h2>
+          <p className="text-gray-600 mb-4">{error || t('congrats.order_not_found')}</p>
           <button
             onClick={() => router.push('/')}
             className="bg-[#EA3D15] text-white py-2 px-4 rounded-[10px] font-medium text-sm hover:bg-[#d43e0e] transition-colors"
           >
-            Volver al inicio
+            {t('congrats.back_to_home')}
           </button>
         </div>
       </div>
@@ -155,7 +157,7 @@ const CongratsContent = () => {
 
   // Obtener la dirección de facturación para mostrar el nombre
   const billingAddress = order.order_addresses.find(addr => addr.type === 'billing');
-  const customerName = billingAddress?.full_name || 'Cliente';
+  const customerName = billingAddress?.full_name || t('congrats.client');
 
   return (
     <div className="min-h-screen bg-white">
@@ -164,7 +166,7 @@ const CongratsContent = () => {
         {/* Breadcrumb */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-base font-bold text-[#121417]">
-            Confirmación de compra
+            {t('congrats.title')}
           </h1>
         </div>
 
@@ -185,19 +187,19 @@ const CongratsContent = () => {
 
               {/* Main Message */}
               <h2 className="text-2xl font-semibold text-black leading-tight">
-                ¡Muchas gracias por tu compra, {customerName}!
+                {t('congrats.thank_you', { name: customerName })}
               </h2>
 
               {/* Order Details */}
               <div className="text-sm text-gray-600 space-y-2">
-                <p>Orden #{order.id.slice(0, 8).toUpperCase()}</p>
-                <p>Total: €{Number(order.total_amount).toFixed(2)}</p>
-                <p>Estado: {order.status}</p>
+                <p>{t('congrats.order')} #{order.id.slice(0, 8).toUpperCase()}</p>
+                <p>{t('congrats.total')}: €{Number(order.total_amount).toFixed(2)}</p>
+                <p>{t('congrats.status')}: {order.status}</p>
               </div>
 
               {/* Subtitle */}
               <p className="text-sm font-medium text-black leading-relaxed max-w-md">
-                Enviaremos un mail de confirmación con los detalles de tu orden!
+                {t('congrats.confirmation_email')}
               </p>
 
               {/* Action Buttons */}
@@ -208,7 +210,7 @@ const CongratsContent = () => {
                   }}
                   className="flex-1 bg-[#EA3D15] text-white py-3 px-4 rounded-[10px] font-medium text-sm hover:bg-[#d43e0e] transition-colors cursor-pointer"
                 >
-                  Ir a mis compras
+                  {t('congrats.go_to_orders')}
                 </button>
               </div>
             </div>
@@ -221,7 +223,7 @@ const CongratsContent = () => {
             onClick={() => router.push('/')}
             className="bg-[#EA3D15] text-white py-3 px-4 rounded-[10px] font-medium text-sm hover:bg-[#d43e0e] transition-colors cursor-pointer"
           >
-            Volver al inicio
+            {t('congrats.back_to_home')}
           </button>
         </div>
       </main>

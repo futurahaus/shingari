@@ -346,5 +346,20 @@
     "city": "Ciudad",
     "client": "Cliente",
     "spain": "España"
+  },
+  "congrats": {
+    "title": "Confirmación de compra",
+    "thank_you": "¡Muchas gracias por tu compra, {{name}}!",
+    "order": "Orden",
+    "total": "Total",
+    "status": "Estado",
+    "confirmation_email": "Enviaremos un mail de confirmación con los detalles de tu orden!",
+    "go_to_orders": "Ir a mis compras",
+    "back_to_home": "Volver al inicio",
+    "error": "Error",
+    "no_order_id": "No se proporcionó ID de orden",
+    "order_fetch_error": "Error al obtener los detalles de la orden",
+    "order_not_found": "No se pudo cargar la orden",
+    "client": "Cliente"
   }
 }
