@@ -5,6 +5,12 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import { useTranslation } from '@/contexts/I18nContext';
 
+interface UserProfile {
+  nombre: string;
+  apellidos: string;
+  [key: string]: unknown;
+}
+
 interface OrderLine {
   id: string;
   product_id: number;
@@ -104,11 +110,12 @@ const CongratsContent = () => {
   const { t } = useTranslation();
 
   const [order, setOrder] = useState<Order | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchOrder = async () => {
+    const fetchData = async () => {
       if (!orderId) {
         setError(t('congrats.no_order_id'));
         setLoading(false);
@@ -116,18 +123,24 @@ const CongratsContent = () => {
       }
 
       try {
-        const orderData = await api.get<Order>(`/orders/${orderId}`);
+        // Obtener la orden y el usuario en paralelo
+        const [orderData, userData] = await Promise.all([
+          api.get<Order>(`/orders/${orderId}`),
+          api.get<UserProfile>('/auth/me')
+        ]);
+        
         setOrder(orderData);
+        setUser(userData);
       } catch (error) {
-        console.error('Error al obtener la orden:', error);
+        console.error('Error al obtener los datos:', error);
         setError(t('congrats.order_fetch_error'));
       } finally {
         setLoading(false);
       }
     };
 
-    fetchOrder();
-  }, [orderId]);
+    fetchData();
+  }, [orderId, t]);
 
   if (loading) {
     return <CongratsSkeleton />;
@@ -155,9 +168,10 @@ const CongratsContent = () => {
     );
   }
 
-  // Obtener la dirección de facturación para mostrar el nombre
-  const billingAddress = order.order_addresses.find(addr => addr.type === 'billing');
-  const customerName = billingAddress?.full_name || t('congrats.client');
+  // Obtener el nombre del usuario logueado
+  const customerName = user?.nombre ? 
+    `${user.nombre}${user.apellidos ? ` ${user.apellidos}` : ''}` : 
+    t('congrats.client');
 
   return (
     <div className="min-h-screen bg-white">
