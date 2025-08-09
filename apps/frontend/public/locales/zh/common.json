@@ -75,6 +75,7 @@
     "price_high_to_low": "价格从高到低",
     "bulk_sales": "批量销售",
     "no_products_found": "该类别下没有找到产品。",
+    "no_favorites_found": "您还没有收藏的产品。",
     "loading_more": "加载更多产品...",
     "loading_products": "加载产品中..."
   },

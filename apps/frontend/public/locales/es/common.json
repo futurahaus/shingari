@@ -75,6 +75,7 @@
     "price_high_to_low": "Mayor a Menor",
     "bulk_sales": "Venta por cajas",
     "no_products_found": "No se han encontrado productos para esta categoría.",
+    "no_favorites_found": "No tienes productos favoritos aún.",
     "loading_more": "Cargando más productos...",
     "loading_products": "Cargando productos..."
   },
