@@ -5,10 +5,12 @@ import { useCart } from '@/contexts/CartContext';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { Button } from '@/app/ui/components/Button';
+import { useTranslation } from '@/contexts/I18nContext';
 
 export default function PagosPage() {
   const { cart, clearCart } = useCart();
   const router = useRouter();
+  const { t } = useTranslation();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
   const [cardData, setCardData] = useState({
     cardNumber: '',
@@ -57,11 +59,11 @@ export default function PagosPage() {
 
   const handlePaymentConfirmation = async () => {
     if (!selectedPaymentMethod) {
-      alert('Por favor selecciona un método de pago');
+      alert(t('payment.select_payment_method'));
       return;
     }
     if (selectedPaymentMethod === 'card' && (!cardData.cardNumber || !cardData.expiry || !cardData.cvc || !cardData.cardholderName || !cardData.id)) {
-      alert('Por favor completa todos los campos de la tarjeta');
+      alert(t('payment.complete_card_fields'));
       return;
     }
 
@@ -81,20 +83,20 @@ export default function PagosPage() {
         order_addresses: [
           {
             type: 'billing',
-            full_name: cardData.cardholderName || 'Cliente',
-            address_line1: 'Dirección de facturación',
-            city: 'Ciudad',
+            full_name: cardData.cardholderName || t('payment.client'),
+            address_line1: t('payment.billing_address'),
+            city: t('payment.city'),
             postal_code: '00000',
-            country: 'España',
+            country: t('payment.spain'),
             phone: '',
           },
           {
             type: 'shipping',
-            full_name: cardData.cardholderName || 'Cliente',
-            address_line1: 'Dirección de envío',
-            city: 'Ciudad',
+            full_name: cardData.cardholderName || t('payment.client'),
+            address_line1: t('payment.shipping_address'),
+            city: t('payment.city'),
             postal_code: '00000',
-            country: 'España',
+            country: t('payment.spain'),
             phone: '',
           },
         ],
@@ -120,7 +122,7 @@ export default function PagosPage() {
       router.push(`/congrats?orderId=${order.id}`);
     } catch (error) {
       console.error('Error al procesar el pago:', error);
-      alert('Error al procesar el pago. Por favor, inténtalo de nuevo.');
+      alert(t('payment.payment_error'));
     } finally {
       setIsLoading(false);
     }
@@ -133,14 +135,14 @@ export default function PagosPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
           <div className="bg-white rounded-lg p-8 flex flex-col items-center shadow-lg">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#EA3D15] mb-4"></div>
-            <span className="text-gray-700 font-medium">Procesando pedido...</span>
+            <span className="text-gray-700 font-medium">{t('payment.processing_order')}</span>
           </div>
         </div>
       )}
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 md:px-16 py-8">
         <div className="">
-          <h1 className="text-xl font-bold text-black mb-8">Selecciona método de pago</h1>
+          <h1 className="text-xl font-bold text-black mb-8">{t('payment.title')}</h1>
 
           {/* Payment Methods */}
           <div className="space-y-4">
@@ -185,7 +187,7 @@ export default function PagosPage() {
                     <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
                   </svg>
                   <span className={selectedPaymentMethod === 'cash' ? 'text-white' : 'text-gray-600'}>
-                    Efectivo
+                    {t('payment.cash')}
                   </span>
                 </div>
               </div>
@@ -194,7 +196,7 @@ export default function PagosPage() {
             {/* Card Form */}
             {selectedPaymentMethod === 'card' && (
               <div className="mt-8">
-                <h2 className="text-sm font-semibold text-black mb-4">Tarjetas de Crédito y Débito</h2>
+                <h2 className="text-sm font-semibold text-black mb-4">{t('payment.credit_debit_cards')}</h2>
 
                 <div className="flex gap-6">
                   {/* Form Fields */}
@@ -202,11 +204,11 @@ export default function PagosPage() {
                     {/* Card Number */}
                     <div>
                       <label className="block text-sm font-semibold text-black mb-2">
-                        Número de tarjeta *
+                        {t('payment.card_number')} *
                       </label>
                       <input
                         type="text"
-                        placeholder="xxxx xxxx xxxx xxxx"
+                        placeholder={t('payment.card_number_placeholder')}
                         value={cardData.cardNumber}
                         onChange={(e) => handleCardDataChange('cardNumber', formatCardNumber(e.target.value))}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#EA3D15]"
@@ -218,11 +220,11 @@ export default function PagosPage() {
                     <div className="flex gap-4">
                       <div className="flex-1">
                         <label className="block text-sm font-semibold text-black mb-2">
-                          Vencimiento *
+                          {t('payment.expiry')} *
                         </label>
                         <input
                           type="text"
-                          placeholder="mm/aa"
+                          placeholder={t('payment.expiry_placeholder')}
                           value={cardData.expiry}
                           onChange={(e) => handleCardDataChange('expiry', formatExpiry(e.target.value))}
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#EA3D15]"
@@ -231,11 +233,11 @@ export default function PagosPage() {
                       </div>
                       <div className="flex-1">
                         <label className="block text-sm font-semibold text-black mb-2">
-                          CVC *
+                          {t('payment.cvc')} *
                         </label>
                         <input
                           type="text"
-                          placeholder="123"
+                          placeholder={t('payment.cvc_placeholder')}
                           value={cardData.cvc}
                           onChange={(e) => handleCardDataChange('cvc', e.target.value.replace(/\D/g, ''))}
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#EA3D15]"
@@ -247,11 +249,11 @@ export default function PagosPage() {
                     {/* Cardholder Name */}
                     <div>
                       <label className="block text-sm font-semibold text-black mb-2">
-                        Nombre en la tarjeta *
+                        {t('payment.cardholder_name')} *
                       </label>
                       <input
                         type="text"
-                        placeholder="Nombre"
+                        placeholder={t('payment.name_placeholder')}
                         value={cardData.cardholderName}
                         onChange={(e) => handleCardDataChange('cardholderName', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#EA3D15]"
@@ -261,11 +263,11 @@ export default function PagosPage() {
                     {/* ID */}
                     <div>
                       <label className="block text-sm font-semibold text-black mb-2">
-                        ID *
+                        {t('payment.id')} *
                       </label>
                       <input
                         type="text"
-                        placeholder="987654321"
+                        placeholder={t('payment.id_placeholder')}
                         value={cardData.id}
                         onChange={(e) => handleCardDataChange('id', e.target.value.replace(/\D/g, ''))}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#EA3D15]"
@@ -288,8 +290,8 @@ export default function PagosPage() {
                       </div>
                       <div className="flex justify-between items-end">
                         <div>
-                          <div className="text-xs font-semibold mb-1">NOMBRE COMPLETO</div>
-                          <div className="text-sm">{cardData.cardholderName || 'NOMBRE COMPLETO'}</div>
+                          <div className="text-xs font-semibold mb-1">{t('payment.full_name').toUpperCase()}</div>
+                          <div className="text-sm">{cardData.cardholderName || t('payment.full_name').toUpperCase()}</div>
                         </div>
                         <div>
                           <div className="text-xs font-semibold mb-1">MM / AA</div>
@@ -306,13 +308,13 @@ export default function PagosPage() {
           <div className="mt-8">
             <div className="bg-white border border-gray-200 rounded-lg p-4">
               <h3 className="text-sm font-bold text-black border-b border-gray-200 pb-2 mb-4">
-                Resumen de la compra
+                {t('payment.order_summary')}
               </h3>
 
               <div className="space-y-4">
                 {/* Products */}
                 <div className="flex justify-between">
-                  <span className="text-sm font-bold text-black">Precio de mis productos:</span>
+                  <span className="text-sm font-bold text-black">{t('payment.product_prices')}</span>
                   <span className="text-sm font-bold text-black">
                     €{total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
                   </span>
@@ -333,7 +335,7 @@ export default function PagosPage() {
 
                 {/* Shipping */}
                 <div className="flex justify-between">
-                  <span className="text-sm font-bold text-black">Gastos del envío</span>
+                  <span className="text-sm font-bold text-black">{t('payment.shipping_costs')}</span>
                   <span className="text-sm font-bold text-black">
                     €{shipping.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
                   </span>
@@ -341,7 +343,7 @@ export default function PagosPage() {
 
                 {/* Discount */}
                 <div className="flex justify-between">
-                  <span className="text-sm font-bold text-black">Descuento por puntos:</span>
+                  <span className="text-sm font-bold text-black">{t('payment.points_discount')}</span>
                   <span className="text-sm font-bold text-black">
                     €{discount.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
                   </span>
@@ -349,7 +351,7 @@ export default function PagosPage() {
 
                 {/* Total */}
                 <div className="flex justify-between border-t border-gray-200 pt-4">
-                  <span className="text-lg font-bold text-black">Total de mis productos:</span>
+                  <span className="text-lg font-bold text-black">{t('payment.total_products')}</span>
                   <span className="text-lg font-bold text-black">
                     €{finalTotal.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
                   </span>
@@ -361,7 +363,7 @@ export default function PagosPage() {
                 <Button
                   onPress={handlePaymentConfirmation}
                   type="primary"
-                  text="Confirmar pedido"
+                  text={t('payment.confirm_order')}
                   testID="pay-button"
                   disabled={isLoading}
                 />

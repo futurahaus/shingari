@@ -314,5 +314,37 @@
   },
   "complete_profile": {
     "subtitle": "完善您的个人信息以继续"
+  },
+  "payment": {
+    "title": "选择付款方式",
+    "processing_order": "正在处理订单...",
+    "select_payment_method": "请选择付款方式",
+    "complete_card_fields": "请填写完整的卡片信息",
+    "payment_error": "付款处理失败，请重试。",
+    "credit_debit_card": "信用卡/借记卡",
+    "cash": "现金",
+    "credit_debit_cards": "信用卡和借记卡",
+    "card_number": "卡号",
+    "card_number_placeholder": "xxxx xxxx xxxx xxxx",
+    "expiry": "有效期",
+    "expiry_placeholder": "mm/yy",
+    "cvc": "CVC",
+    "cvc_placeholder": "123",
+    "cardholder_name": "持卡人姓名",
+    "name_placeholder": "姓名",
+    "id": "身份证号",
+    "id_placeholder": "987654321",
+    "full_name": "持卡人姓名",
+    "order_summary": "订单摘要",
+    "product_prices": "产品价格：",
+    "shipping_costs": "运费",
+    "points_discount": "积分折扣：",
+    "total_products": "产品总计：",
+    "confirm_order": "确认订单",
+    "billing_address": "账单地址",
+    "shipping_address": "送货地址",
+    "city": "城市",
+    "client": "客户",
+    "spain": "西班牙"
   }
 }

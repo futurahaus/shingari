@@ -314,5 +314,37 @@
   },
   "complete_profile": {
     "subtitle": "Completa tu información personal para continuar"
+  },
+  "payment": {
+    "title": "Selecciona método de pago",
+    "processing_order": "Procesando pedido...",
+    "select_payment_method": "Por favor selecciona un método de pago",
+    "complete_card_fields": "Por favor completa todos los campos de la tarjeta",
+    "payment_error": "Error al procesar el pago. Por favor, inténtalo de nuevo.",
+    "credit_debit_card": "Tarjeta de débito/crédito",
+    "cash": "Efectivo",
+    "credit_debit_cards": "Tarjetas de Crédito y Débito",
+    "card_number": "Número de tarjeta",
+    "card_number_placeholder": "xxxx xxxx xxxx xxxx",
+    "expiry": "Vencimiento",
+    "expiry_placeholder": "mm/aa",
+    "cvc": "CVC",
+    "cvc_placeholder": "123",
+    "cardholder_name": "Nombre en la tarjeta",
+    "name_placeholder": "Nombre",
+    "id": "ID",
+    "id_placeholder": "987654321",
+    "full_name": "NOMBRE COMPLETO",
+    "order_summary": "Resumen de la compra",
+    "product_prices": "Precio de mis productos:",
+    "shipping_costs": "Gastos del envío",
+    "points_discount": "Descuento por puntos:",
+    "total_products": "Total de mis productos:",
+    "confirm_order": "Confirmar pedido",
+    "billing_address": "Dirección de facturación",
+    "shipping_address": "Dirección de envío",
+    "city": "Ciudad",
+    "client": "Cliente",
+    "spain": "España"
   }
 }
