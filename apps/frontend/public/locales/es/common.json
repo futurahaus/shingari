@@ -80,11 +80,11 @@
   },
   "quantity_controls": {
     "quantity_updated": "Cantidad actualizada",
-    "quantity_updated_to": "Cantidad de \"{productName}\" actualizada a {quantity}.",
+    "quantity_updated_to": "Cantidad de \"{{productName}}\" actualizada a {{quantity}}.",
     "product_added": "Producto añadido",
-    "product_added_to_cart": "\"{productName}\" añadido al carrito.",
+    "product_added_to_cart": "\"{{productName}}\" añadido al carrito.",
     "product_removed": "Producto eliminado",
-    "product_removed_from_cart": "\"{productName}\" eliminado del carrito.",
+    "product_removed_from_cart": "\"{{productName}}\" eliminado del carrito.",
     "units": "Unidades",
     "boxes": "Cajas"
   },

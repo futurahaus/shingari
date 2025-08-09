@@ -80,11 +80,11 @@
   },
   "quantity_controls": {
     "quantity_updated": "数量已更新",
-    "quantity_updated_to": "\"{productName}\" 的数量已更新为 {quantity}。",
+    "quantity_updated_to": "\"{{productName}}\" 的数量已更新为 {{quantity}}。",
     "product_added": "产品已添加",
-    "product_added_to_cart": "\"{productName}\" 已添加到购物车。",
+    "product_added_to_cart": "\"{{productName}}\" 已添加到购物车。",
     "product_removed": "产品已移除",
-    "product_removed_from_cart": "\"{productName}\" 已从购物车移除。",
+    "product_removed_from_cart": "\"{{productName}}\" 已从购物车移除。",
     "units": "单位",
     "boxes": "箱"
   },
