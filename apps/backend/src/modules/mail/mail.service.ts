@@ -61,15 +61,8 @@ export class MailService {
             return;
         }
 
-        // Formatear número a formato internacional si no lo está
-        let formattedNumber = adminWhatsApp.replace(/\D/g, '');
-        if (formattedNumber.length === 9 && (formattedNumber.startsWith('6') || formattedNumber.startsWith('7'))) {
-            formattedNumber = '34' + formattedNumber;
-        }
-        formattedNumber = formattedNumber + '@c.us';
-
         const payload: WhatsAppMessage = {
-            number: formattedNumber,
+            number: adminWhatsApp,
             text: message
         };
 
