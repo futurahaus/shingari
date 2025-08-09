@@ -46,7 +46,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
         if (isTogglingFavorite) return;
 
         setIsTogglingFavorite(true);
-        await toggleFavorite(product.id, product.name);
+        await toggleFavorite(product.id);
         setIsTogglingFavorite(false);
     };
 
