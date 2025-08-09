@@ -121,12 +121,12 @@ export class OrdersController {
             const result = await this.ordersService.create(createOrderDto);
             this.logger.log('Order created successfully:', result.id);
             
-            // Enviar notificación por email
+            // Enviar notificación al admin (email + WhatsApp)
             try {
                 await this.mailService.sendOrderNotification(result, req.user?.id);
-                this.logger.log('Notification email sent successfully');
-            } catch (emailError) {
-                this.logger.error('Error sending notification email:', emailError);
+                this.logger.log('Admin notification sent successfully');
+            } catch (notificationError) {
+                this.logger.error('Error sending admin notification:', notificationError);
                 // No lanzamos el error para no afectar la creación de la orden
             }
             
