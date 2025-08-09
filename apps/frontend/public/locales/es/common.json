@@ -126,19 +126,34 @@
   },
   "auth": {
     "login": "Iniciar Sesión",
+    "login_title": "Inicia sesión",
+    "login_button": "Inicia Sesión",
+    "logging_in": "Iniciando sesión...",
     "register": "Registrarse",
+    "register_title": "Regístrate",
+    "register_button": "Regístrate",
+    "registering": "Registrando...",
     "email": "Correo Electrónico",
+    "email_label": "Correo electrónico",
+    "email_placeholder": "tu@email.com",
     "password": "Contraseña",
+    "password_label": "Contraseña",
+    "password_placeholder": "Tu contraseña",
     "confirm_password": "Confirmar Contraseña",
     "forgot_password": "¿Olvidaste tu contraseña?",
+    "forgot_password_link": "¿Has olvidado la contraseña?",
     "remember_me": "Recordarme",
     "create_account": "Crear Cuenta",
     "already_have_account": "¿Ya tienes una cuenta?",
     "dont_have_account": "¿No tienes una cuenta?",
+    "not_registered": "¿Aún no estás registrado?",
     "reset_password": "Restablecer Contraseña",
     "profile": "Perfil",
     "account_settings": "Configuración de Cuenta",
-    "logout_confirm": "¿Estás seguro de que quieres cerrar sesión?"
+    "logout_confirm": "¿Estás seguro de que quieres cerrar sesión?",
+    "close_modal": "Cerrar modal",
+    "login_error": "Error al iniciar sesión",
+    "register_error": "Error al registrar usuario"
   },
   "banner": {
     "title": "Venta al por mayor y menor de Alimentos Japoneses.",
@@ -202,5 +217,16 @@
     "no_results": "No se encontraron resultados",
     "operation_successful": "Operación exitosa",
     "operation_failed": "Operación fallida"
+  },
+  "footer": {
+    "home": "Home",
+    "offers": "Ofertas",
+    "contact": "Contacto",
+    "others": "Otros",
+    "brands": "Marcas",
+    "instagram": "Instagram",
+    "twitter": "Twitter",
+    "facebook": "Facebook",
+    "all_rights_reserved": "@2025 Todos los derechos reservados."
   }
 }

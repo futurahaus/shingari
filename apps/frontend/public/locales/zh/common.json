@@ -126,19 +126,34 @@
   },
   "auth": {
     "login": "登录",
+    "login_title": "登录",
+    "login_button": "登录",
+    "logging_in": "登录中...",
     "register": "注册",
+    "register_title": "注册",
+    "register_button": "注册",
+    "registering": "注册中...",
     "email": "电子邮箱",
+    "email_label": "电子邮箱",
+    "email_placeholder": "your@email.com",
     "password": "密码",
+    "password_label": "密码",
+    "password_placeholder": "您的密码",
     "confirm_password": "确认密码",
     "forgot_password": "忘记密码？",
+    "forgot_password_link": "忘记密码？",
     "remember_me": "记住我",
     "create_account": "创建账户",
     "already_have_account": "已有账户？",
     "dont_have_account": "没有账户？",
+    "not_registered": "还没有注册？",
     "reset_password": "重置密码",
     "profile": "档案",
     "account_settings": "账户设置",
-    "logout_confirm": "确定要登出吗？"
+    "logout_confirm": "确定要登出吗？",
+    "close_modal": "关闭模态框",
+    "login_error": "登录错误",
+    "register_error": "注册用户错误"
   },
   "banner": {
     "title": "日本食品批发零售",
@@ -202,5 +217,16 @@
     "no_results": "未找到结果",
     "operation_successful": "操作成功",
     "operation_failed": "操作失败"
+  },
+  "footer": {
+    "home": "首页",
+    "offers": "优惠",
+    "contact": "联系",
+    "others": "其他",
+    "brands": "品牌",
+    "instagram": "Instagram",
+    "twitter": "Twitter",
+    "facebook": "Facebook",
+    "all_rights_reserved": "@2025 保留所有权利。"
   }
 }
