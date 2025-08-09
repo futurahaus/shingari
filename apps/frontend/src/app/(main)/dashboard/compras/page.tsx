@@ -156,7 +156,7 @@ export default function ComprasPage() {
     };
 
     fetchOrders();
-  }, []);
+  }, [t]);
 
   if (loading) {
     return (

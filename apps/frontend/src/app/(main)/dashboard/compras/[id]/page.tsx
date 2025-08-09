@@ -266,7 +266,7 @@ export default function OrderDetailPage() {
     };
 
     fetchOrder();
-  }, [orderId]);
+  }, [orderId, t]);
 
   if (loading) {
     return (

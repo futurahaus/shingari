@@ -77,7 +77,7 @@ export default function CompleteProfilePage() {
     };
 
     fetchUserData();
-  }, [accessToken, router]);
+  }, [accessToken, router, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
