@@ -14,6 +14,11 @@ const Footer = () => {
             <li className="font-normal text-[14px] leading-6 tracking-[0px] text-center" style={{ fontFamily: 'Instrument Sans', color: '#6B7582' }}>{t('footer.contact')}</li>
             <li className="font-normal text-[14px] leading-6 tracking-[0px] text-center" style={{ fontFamily: 'Instrument Sans', color: '#6B7582' }}>{t('footer.others')}</li>
             <li className="font-normal text-[14px] leading-6 tracking-[0px] text-center" style={{ fontFamily: 'Instrument Sans', color: '#6B7582' }}>{t('footer.brands')}</li>
+            <li className="font-normal text-[14px] leading-6 tracking-[0px] text-center" style={{ fontFamily: 'Instrument Sans', color: '#6B7582' }}>
+              <a href="/privacy-policy" className="hover:text-blue-600 transition-colors">
+                {t('footer.privacy_policy')}
+              </a>
+            </li>
           </ul>
         </nav>
         {/* Redes sociales */}
@@ -40,4 +45,4 @@ const Footer = () => {
   );
 };
 
-export default Footer; 
+export default Footer;
