@@ -232,7 +232,8 @@
     "twitter": "Twitter",
     "facebook": "Facebook",
     "all_rights_reserved": "@2025 保留所有权利。",
-    "privacy_policy": "隐私政策"
+    "privacy_policy": "隐私政策",
+    "cookie_policy": "Cookie政策"
   },
   "dashboard": {
     "title": "控制面板",
@@ -316,6 +317,9 @@
   "complete_profile": {
     "subtitle": "完善您的个人信息以继续"
   },
+  "cookie_policy": {
+    "title": "Cookie政策"
+  },
   "payment": {
     "title": "选择付款方式",
     "processing_order": "正在处理订单...",
@@ -362,5 +366,15 @@
     "order_fetch_error": "获取订单详情时出错",
     "order_not_found": "无法加载订单",
     "client": "客户"
+  },
+  "privacy_policy": {
+    "title": "隐私政策",
+    "subtitle": "隐私政策",
+    "content": "隐私政策内容"
+  },
+  "cookie_policy": {
+    "title": "Cookie政策",
+    "subtitle": "Cookie政策",
+    "content": "Cookie政策内容"
   }
 }

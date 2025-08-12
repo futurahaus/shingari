@@ -232,7 +232,8 @@
     "twitter": "Twitter",
     "facebook": "Facebook",
     "all_rights_reserved": "@2025 Todos los derechos reservados.",
-    "privacy_policy": "Política de privacidad"
+    "privacy_policy": "Política de privacidad",
+    "cookie_policy": "Políticas de cookies"
   },
   "dashboard": {
     "title": "Panel de Control",
@@ -316,6 +317,9 @@
   "complete_profile": {
     "subtitle": "Completa tu información personal para continuar"
   },
+  "cookie_policy": {
+    "title": "Política de cookies"
+  },
   "payment": {
     "title": "Selecciona método de pago",
     "processing_order": "Procesando pedido...",
@@ -362,5 +366,15 @@
     "order_fetch_error": "Error al obtener los detalles de la orden",
     "order_not_found": "No se pudo cargar la orden",
     "client": "Cliente"
+  },
+  "privacy_policy": {
+    "title": "Política de privacidad",
+    "subtitle": "Política de privacidad",
+    "content": "Política de privacidad"
+  },
+  "cookie_policy": {
+    "title": "Políticas de cookies",
+    "subtitle": "Políticas de cookies",
+    "content": "Políticas de cookies"
   }
 }

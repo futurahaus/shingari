@@ -10,13 +10,16 @@ const Footer = () => {
         <nav className="w-full mb-8">
           <ul className="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-24">
             <li className="font-normal text-[14px] leading-6 tracking-[0px] text-center" style={{ fontFamily: 'Instrument Sans', color: '#6B7582' }}>{t('footer.home')}</li>
-            <li className="font-normal text-[14px] leading-6 tracking-[0px] text-center" style={{ fontFamily: 'Instrument Sans', color: '#6B7582' }}>{t('footer.offers')}</li>
             <li className="font-normal text-[14px] leading-6 tracking-[0px] text-center" style={{ fontFamily: 'Instrument Sans', color: '#6B7582' }}>{t('footer.contact')}</li>
-            <li className="font-normal text-[14px] leading-6 tracking-[0px] text-center" style={{ fontFamily: 'Instrument Sans', color: '#6B7582' }}>{t('footer.others')}</li>
             <li className="font-normal text-[14px] leading-6 tracking-[0px] text-center" style={{ fontFamily: 'Instrument Sans', color: '#6B7582' }}>{t('footer.brands')}</li>
             <li className="font-normal text-[14px] leading-6 tracking-[0px] text-center" style={{ fontFamily: 'Instrument Sans', color: '#6B7582' }}>
               <a href="/privacy-policy" className="hover:text-blue-600 transition-colors">
                 {t('footer.privacy_policy')}
+              </a>
+            </li>
+            <li className="font-normal text-[14px] leading-6 tracking-[0px] text-center" style={{ fontFamily: 'Instrument Sans', color: '#6B7582' }}>
+              <a href="/cookie-policy" className="hover:text-blue-600 transition-colors">
+                {t('footer.cookie_policy')}
               </a>
             </li>
           </ul>

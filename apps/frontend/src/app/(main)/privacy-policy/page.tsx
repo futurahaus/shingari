@@ -1,13 +1,16 @@
 'use client';
 
+import { useTranslation } from '@/contexts/I18nContext';
+
 const PrivacyPolicyPage = () => {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Política de privacidad
+            {t('privacy_policy.title')}
           </h1>
           <div className="w-24 h-1 bg-red-600 mx-auto"></div>
         </div>
