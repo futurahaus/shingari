@@ -376,5 +376,16 @@
     "title": "Políticas de cookies",
     "subtitle": "Políticas de cookies",
     "content": "Políticas de cookies"
+  },
+  "cookie_banner": {
+    "title": "TÚ PUEDES CONTROLAR EL USO DE LAS COOKIES",
+    "description": "En Shingari utilizamos cookies en nuestra página. Algunas son estrictamente necesarias para el funcionamiento de la página, y otras son opcionales y se utilizan para:",
+    "analytics": "Medir cómo se utiliza la página web",
+    "personalization": "Habilitar la personalización de la página web",
+    "marketing": "Para funciones de publicidad, marketing y redes sociales",
+    "accept_text": "Al hacer clic en 'Aceptar todas', aceptas la instalación de todas las cookies.",
+    "accept_button": "Aceptar todas",
+    "config_cookies": "Configurar cookies",
+    "accept_text_2": "Para obtener más información, visite nuestra política de cookies."
   }
 }

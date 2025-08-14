@@ -6,6 +6,7 @@ import HashBasedLoginModal from "@/components/auth/HashBasedLoginModal";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import { CartProvider } from '@/contexts/CartContext';
 import { CartModal } from '@/components/cart/CartModal';
+import CookieBanner from '@/components/ui/FloatingBanner';
 import { I18nProvider } from '@/contexts/I18nContext';
 
 const inter = Inter({ subsets: ["latin"] });
@@ -31,6 +32,7 @@ export default function RootLayout({
                 {children}
                 <HashBasedLoginModal />
                 <CartModal />
+                <CookieBanner />
               </Providers>
             </CartProvider>
           </NotificationProvider>

@@ -317,9 +317,6 @@
   "complete_profile": {
     "subtitle": "完善您的个人信息以继续"
   },
-  "cookie_policy": {
-    "title": "Cookie政策"
-  },
   "payment": {
     "title": "选择付款方式",
     "processing_order": "正在处理订单...",
@@ -376,5 +373,16 @@
     "title": "Cookie政策",
     "subtitle": "Cookie政策",
     "content": "Cookie政策内容"
+  },
+  "cookie_banner": {
+    "title": "您可以控制Cookie的使用",
+    "description": "在Shingari，我们在网页中使用Cookie。有些是网站运行所必需的，其他是可选的，用于：",
+    "analytics": "测量网站使用情况",
+    "personalization": "启用网站个性化",
+    "marketing": "用于广告、营销和社交媒体功能",
+    "accept_text": "点击“接受全部”，即表示您同意安装所有Cookie。",
+    "accept_button": "接受全部",
+    "config_cookies": "配置Cookie",
+    "accept_text_2": "更多信息，请访问我们的Cookie政策。"
   }
 }
