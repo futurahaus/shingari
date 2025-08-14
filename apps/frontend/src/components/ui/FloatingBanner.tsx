@@ -80,7 +80,7 @@ const CookieBanner: React.FC = () => {
                         </div>
 
                         {/* Botones de acción */}
-                        <div className="flex flex-1 flex-col sm:flex-row gap-3 flex-shrink-0">
+                        <div className="flex flex-row flex-1 gap-3">
                             <Button
                                 onPress={handleConfigCookies}
                                 type="tertiary"
