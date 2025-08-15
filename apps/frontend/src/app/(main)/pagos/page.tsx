@@ -26,6 +26,87 @@ export default function PagosPage() {
     }
     return iva.toFixed(0);
   };
+
+  // Helper function to group cart items by IVA value (same as carrito page)
+  const groupCartItemsByIva = (cartItems: typeof cart) => {
+    if (!isBusinessUser) {
+      return [{ ivaValue: null, items: cartItems }];
+    }
+
+    const grouped = cartItems.reduce((groups, item) => {
+      const ivaKey = item.iva !== undefined ? formatIvaDisplay(item.iva) : 'sin-iva';
+      
+      if (!groups[ivaKey]) {
+        groups[ivaKey] = {
+          ivaValue: item.iva,
+          items: []
+        };
+      }
+      
+      groups[ivaKey].items.push(item);
+      return groups;
+    }, {} as Record<string, { ivaValue: number | undefined; items: typeof cart }>);
+
+    return Object.entries(grouped)
+      .map(([key, value]) => ({
+        ivaKey: key,
+        ivaValue: value.ivaValue,
+        items: value.items
+      }))
+      .sort((a, b) => {
+        if (a.ivaValue === undefined && b.ivaValue === undefined) return 0;
+        if (a.ivaValue === undefined) return 1;
+        if (b.ivaValue === undefined) return -1;
+        return a.ivaValue - b.ivaValue;
+      });
+  };
+
+  // Helper function to calculate IVA amounts for a group
+  const calculateGroupIvaBreakdown = (items: typeof cart, ivaValue?: number) => {
+    const subtotal = items.reduce((total, item) => total + (item.price * item.quantity), 0);
+    
+    if (!ivaValue || !isBusinessUser) {
+      return {
+        subtotal,
+        ivaAmount: 0,
+        total: subtotal
+      };
+    }
+
+    const ivaAmount = subtotal * (ivaValue / 100);
+    const total = subtotal + ivaAmount;
+
+    return {
+      subtotal,
+      ivaAmount,
+      total
+    };
+  };
+
+  // Calculate grand totals
+  const calculateGrandTotals = () => {
+    const groupedItems = groupCartItemsByIva(cart);
+    let grandSubtotal = 0;
+    let grandIvaAmount = 0;
+    let grandTotal = 0;
+
+    groupedItems.forEach(group => {
+      const breakdown = calculateGroupIvaBreakdown(group.items, group.ivaValue);
+      grandSubtotal += breakdown.subtotal;
+      grandIvaAmount += breakdown.ivaAmount;
+      grandTotal += breakdown.total;
+    });
+
+    return {
+      grandSubtotal,
+      grandIvaAmount,
+      grandTotal
+    };
+  };
+
+  const grandTotals = calculateGrandTotals();
+  const groupedCartItems = groupCartItemsByIva(cart);
+
   const [cardData, setCardData] = useState({
     cardNumber: '',
     expiry: '',
@@ -39,7 +120,11 @@ export default function PagosPage() {
   const total = cart.reduce((sum, p) => sum + p.price * p.quantity, 0);
   const shipping = 0; // Gastos de envío
   const discount = 0; // Descuento por puntos
-  const finalTotal = total + shipping - discount;
+  
+  // Use IVA calculations for business users, regular calculations for others
+  const finalTotal = isBusinessUser 
+    ? grandTotals.grandTotal + shipping - discount
+    : total + shipping - discount;
 
   const handleCardDataChange = (field: string, value: string) => {
     setCardData(prev => ({
@@ -326,49 +411,119 @@ export default function PagosPage() {
               </h3>
 
               <div className="space-y-4">
-                {/* Products */}
-                <div className="flex justify-between">
-                  <span className="text-sm font-bold text-black">{t('payment.product_prices')}</span>
-                  <span className="text-sm font-bold text-black">
-                    €{total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
+                {isBusinessUser ? (
+                  // Business user: show IVA breakdown by groups
+                  <>
+                    {/* IVA Groups Breakdown */}
+                    {groupedCartItems.map((group) => {
+                      const breakdown = calculateGroupIvaBreakdown(group.items, group.ivaValue);
+                      return (
+                        <div key={group.ivaKey} className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-sm font-bold text-black">
+                              {group.ivaValue !== undefined 
+                                ? `Productos IVA ${formatIvaDisplay(group.ivaValue)}% (sin IVA)`
+                                : 'Productos sin IVA'
+                              }
+                            </span>
+                            <span className="text-sm font-bold text-black">
+                              €{breakdown.subtotal.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                            </span>
+                          </div>
+                          
+                          {/* Individual products in group */}
+                          {group.items.map((item) => (
+                            <div key={item.id} className="flex justify-between ml-4">
+                              <div className="flex items-center gap-1">
+                                <span className="text-xs font-medium text-gray-600">{item.name}</span>
+                                <span className="text-xs font-medium text-gray-600">x{item.quantity}</span>
+                              </div>
+                              <span className="text-xs font-medium text-gray-600">
+                                €{(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                              </span>
+                            </div>
+                          ))}
+                          
+                          {/* IVA amount for this group */}
+                          {group.ivaValue && breakdown.ivaAmount > 0 && (
+                            <div className="flex justify-between">
+                              <span className="text-sm font-medium text-black">
+                                IVA {formatIvaDisplay(group.ivaValue)}%
+                              </span>
+                              <span className="text-sm font-medium text-black">
+                                €{breakdown.ivaAmount.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
 
-                {/* Product Items */}
-                {cart.map((item) => (
-                  <div key={item.id} className="flex justify-between">
-                    <div className="flex items-center gap-1 flex-col items-start">
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs font-medium text-black">{item.name}</span>
-                        <span className="text-xs font-medium text-black">x{item.quantity}</span>
+                    {/* Total breakdown */}
+                    <div className="border-t border-gray-200 pt-4 space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm font-bold text-black">Subtotal (sin IVA)</span>
+                        <span className="text-sm font-bold text-black">
+                          €{grandTotals.grandSubtotal.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                        </span>
                       </div>
-                      {isBusinessUser && item.iva && (
-                        <span className="text-xs text-gray-600">IVA: {formatIvaDisplay(item.iva)}%</span>
-                      )}
+                      <div className="flex justify-between">
+                        <span className="text-sm font-bold text-black">IVA Total</span>
+                        <span className="text-sm font-bold text-black">
+                          €{grandTotals.grandIvaAmount.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm font-bold text-black">{t('payment.shipping_costs')}</span>
+                        <span className="text-sm font-bold text-black">
+                          €{shipping.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-sm font-medium text-black">
-                      €{(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                ))}
+                  </>
+                ) : (
+                  // Regular user: show normal breakdown
+                  <>
+                    {/* Products */}
+                    <div className="flex justify-between">
+                      <span className="text-sm font-bold text-black">{t('payment.product_prices')}</span>
+                      <span className="text-sm font-bold text-black">
+                        €{total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
 
-                {/* Shipping */}
-                <div className="flex justify-between">
-                  <span className="text-sm font-bold text-black">{t('payment.shipping_costs')}</span>
-                  <span className="text-sm font-bold text-black">
-                    €{shipping.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
+                    {/* Product Items */}
+                    {cart.map((item) => (
+                      <div key={item.id} className="flex justify-between">
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs font-medium text-black">{item.name}</span>
+                          <span className="text-xs font-medium text-black">x{item.quantity}</span>
+                        </div>
+                        <span className="text-sm font-medium text-black">
+                          €{(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    ))}
 
-                {/* Discount */}
-                <div className="flex justify-between">
-                  <span className="text-sm font-bold text-black">{t('payment.points_discount')}</span>
-                  <span className="text-sm font-bold text-black">
-                    €{discount.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
+                    {/* Shipping */}
+                    <div className="flex justify-between">
+                      <span className="text-sm font-bold text-black">{t('payment.shipping_costs')}</span>
+                      <span className="text-sm font-bold text-black">
+                        €{shipping.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
 
-                {/* Total */}
+                    {/* Discount */}
+                    <div className="flex justify-between">
+                      <span className="text-sm font-bold text-black">{t('payment.points_discount')}</span>
+                      <span className="text-sm font-bold text-black">
+                        €{discount.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
+                  </>
+                )}
+
+                {/* Final Total */}
                 <div className="flex justify-between border-t border-gray-200 pt-4">
                   <span className="text-lg font-bold text-black">{t('payment.total_products')}</span>
                   <span className="text-lg font-bold text-black">
