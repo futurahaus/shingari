@@ -83,14 +83,14 @@ const CookieBanner: React.FC = () => {
                         <div className="flex flex-row flex-1 gap-3">
                             <Button
                                 onPress={handleConfigCookies}
-                                type="tertiary"
+                                type="secondary"
                                 text={t('cookie_banner.config_cookies')}
                                 testID="cookie-reject-button"
                                 size="md"
                             />
                             <Button
                                 onPress={handleAcceptCookies}
-                                type="primary"
+                                type="primary-admin"
                                 text={t('cookie_banner.accept_button')}
                                 testID="cookie-accept-button"
                                 size="md"
