@@ -16,6 +16,108 @@ const CarritoPage = () => {
   const { t } = useTranslation();
   const [showLoginModal, setShowLoginModal] = useState(false);
 
+  // Helper function to check if user is business
+  const isBusinessUser = user?.roles?.includes('business') || false;
+
+  // Helper function to format IVA display
+  const formatIvaDisplay = (iva: number | undefined): string => {
+    if (iva === undefined) return '0';
+    // Ensure it's displayed as percentage
+    if (iva < 1 && iva > 0) {
+      return (iva * 100).toFixed(0);
+    }
+    return iva.toFixed(0);
+  };
+
+  // Helper function to group cart items by IVA value
+  const groupCartItemsByIva = (cartItems: typeof cart) => {
+    if (!isBusinessUser) {
+      // For non-business users, don't group by IVA
+      return [{ ivaKey: 'no-iva', ivaValue: undefined, items: cartItems }];
+    }
+
+    const grouped = cartItems.reduce((groups, item) => {
+      // Use a normalized IVA key for grouping
+      const ivaKey = item.iva !== undefined ? formatIvaDisplay(item.iva) : 'sin-iva';
+
+      if (!groups[ivaKey]) {
+        groups[ivaKey] = {
+          ivaValue: item.iva,
+          items: []
+        };
+      }
+
+      groups[ivaKey].items.push(item);
+      return groups;
+    }, {} as Record<string, { ivaValue: number | undefined; items: typeof cart }>);
+
+    // Convert to array and sort by IVA value
+    return Object.entries(grouped)
+      .map(([key, value]) => ({
+        ivaKey: key,
+        ivaValue: value.ivaValue,
+        items: value.items
+      }))
+      .sort((a, b) => {
+        // Sort groups: items with IVA first (by IVA value), then items without IVA
+        if (a.ivaValue === undefined && b.ivaValue === undefined) return 0;
+        if (a.ivaValue === undefined) return 1;
+        if (b.ivaValue === undefined) return -1;
+        return a.ivaValue - b.ivaValue;
+      });
+  };
+
+  const groupedCartItems = groupCartItemsByIva(cart);
+
+  // Helper function to calculate group totals
+  const calculateGroupTotal = (items: typeof cart) => {
+    return items.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
+
+  // Helper function to calculate IVA amounts for a group
+  const calculateGroupIvaBreakdown = (items: typeof cart, ivaValue?: number) => {
+    const subtotal = calculateGroupTotal(items);
+
+    if (!ivaValue || !isBusinessUser) {
+      return {
+        subtotal,
+        ivaAmount: 0,
+        total: subtotal
+      };
+    }
+
+    const ivaAmount = subtotal * (ivaValue / 100);
+    const total = subtotal + ivaAmount;
+
+    return {
+      subtotal,
+      ivaAmount,
+      total
+    };
+  };
+
+  // Calculate grand totals
+  const calculateGrandTotals = () => {
+    let grandSubtotal = 0;
+    let grandIvaAmount = 0;
+    let grandTotal = 0;
+
+    groupedCartItems.forEach(group => {
+      const breakdown = calculateGroupIvaBreakdown(group.items, group.ivaValue);
+      grandSubtotal += breakdown.subtotal;
+      grandIvaAmount += breakdown.ivaAmount;
+      grandTotal += breakdown.total;
+    });
+
+    return {
+      grandSubtotal,
+      grandIvaAmount,
+      grandTotal
+    };
+  };
+
+  const grandTotals = calculateGrandTotals();
+
   useEffect(() => {
     if (!isLoading && !user) {
       setShowLoginModal(true);
@@ -54,9 +156,13 @@ const CarritoPage = () => {
           {cart.length === 0 ? (
             <div className="py-8 text-center text-gray-500">{t('cart.empty')}</div>
           ) : (
-            <div className="space-y-4">
-              {cart.map((item) => (
-                <div key={item.id} className="border border-gray-200 rounded-lg p-4">
+            <div className="space-y-6">
+                            {groupedCartItems.map((group) => (
+                <div key={group.ivaKey} className="space-y-4">
+                  {/* IVA Group Header (only for business users) */}
+                  {/* Products in this IVA group */}
+                  {group.items.map((item) => (
+                <div key={item.id} className={`border rounded-lg p-4 ${isBusinessUser ? 'border-gray-100 bg-white shadow-sm ml-4' : 'border-gray-200'}`}>
                   {/* Desktop Layout */}
                   <div className="hidden md:flex items-center">
                     <div className="flex-1 flex items-center">
@@ -80,13 +186,14 @@ const CarritoPage = () => {
                         productImage={item.image || ''}
                         unitsPerBox={item.units_per_box}
                         variant="inline"
+                        iva={item.iva}
                       />
                     </div>
                     <div className="w-32 text-center font-semibold">
-                      € {item.price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                      € {item.price.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
                     <div className="w-32 text-right font-semibold">
-                      € {(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                      € {(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
                     <div className="w-20 flex justify-end">
                       <button
@@ -129,20 +236,64 @@ const CarritoPage = () => {
                           productImage={item.image || ''}
                           unitsPerBox={item.units_per_box}
                           variant="inline"
+                          iva={item.iva}
                         />
                       </div>
                       <div className="text-right">
                         <div className="text-sm text-gray-500">{t('cart.unit_price')}</div>
                         <div className="font-semibold text-sm">
-                          € {item.price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                          € {item.price.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                         <div className="text-sm text-gray-500 mt-1">{t('cart.total')}</div>
                         <div className="font-bold text-base">
-                          € {(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                          € {(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                       </div>
                     </div>
                   </div>
+                </div>
+                  ))}
+
+                  {/* IVA Group Totals (only for business users) */}
+                  {isBusinessUser && (() => {
+                    const breakdown = calculateGroupIvaBreakdown(group.items, group.ivaValue);
+                    return (
+                      <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200 shadow-sm ml-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-bold text-sm text-green-800">
+                              Totales del grupo {group.ivaValue !== undefined
+                                ? `IVA ${formatIvaDisplay(group.ivaValue)}%`
+                                : 'Sin IVA'
+                              }
+                            </h4>
+                          </div>
+                          <div className="text-right space-y-1">
+                            <div className="flex justify-between items-center gap-4">
+                              <span className="text-xs text-green-600">Subtotal:</span>
+                              <span className="font-semibold text-sm text-green-800">
+                                €{breakdown.subtotal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </span>
+                            </div>
+                            {group.ivaValue && breakdown.ivaAmount > 0 && (
+                              <div className="flex justify-between items-center gap-4">
+                                <span className="text-xs text-green-600">IVA ({formatIvaDisplay(group.ivaValue)}%):</span>
+                                <span className="font-semibold text-sm text-green-800">
+                                  €{breakdown.ivaAmount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </span>
+                              </div>
+                            )}
+                            <div className="flex justify-between items-center gap-4 pt-1 border-t border-green-200">
+                              <span className="text-sm font-semibold text-green-700">Total:</span>
+                              <span className="font-bold text-lg text-green-800">
+                                €{breakdown.total.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               ))}
             </div>
@@ -151,22 +302,48 @@ const CarritoPage = () => {
         {/* Summary */}
         <aside className="w-full lg:w-96 bg-white rounded-lg shadow p-6 flex flex-col gap-4">
           <h2 className="font-bold text-lg mb-2">{t('cart.purchase_summary')}</h2>
-          <div className="flex justify-between text-sm">
-            <span>{t('cart.product_prices')}</span>
-            <span>€{total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span>{t('cart.discounts')}</span>
-            <span>- €{discount.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span>{t('cart.shipping_costs')}</span>
-            <span>€{shipping.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
-          </div>
-          <div className="flex justify-between text-lg font-bold border-t pt-4 mt-4">
-            <span>{t('cart.total_products')}</span>
-            <span>€{(discountedTotal + shipping).toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
-          </div>
+
+          {isBusinessUser ? (
+            // Business user: show IVA breakdown
+            <>
+              <div className="flex justify-between text-sm">
+                <span>Subtotal (sin IVA)</span>
+                <span>€{grandTotals.grandSubtotal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>IVA Total</span>
+                <span>€{grandTotals.grandIvaAmount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>{t('cart.shipping_costs')}</span>
+                <span>€{shipping.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="flex justify-between text-lg font-bold border-t pt-4 mt-4">
+                <span>{t('cart.total_products')}</span>
+                <span>€{(grandTotals.grandTotal + shipping).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+            </>
+          ) : (
+            // Regular user: show normal breakdown
+            <>
+              <div className="flex justify-between text-sm">
+                <span>{t('cart.product_prices')}</span>
+                <span>€{total.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>{t('cart.discounts')}</span>
+                <span>- €{discount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>{t('cart.shipping_costs')}</span>
+                <span>€{shipping.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="flex justify-between text-lg font-bold border-t pt-4 mt-4">
+                <span>{t('cart.total_products')}</span>
+                <span>€{(discountedTotal + shipping).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              </div>
+            </>
+          )}
           <div className="flex flex-col gap-2 mt-6">
             <button
               className="w-full bg-[#EA3D15] text-white py-3 rounded-md font-semibold text-lg hover:bg-[#d43e0e] transition cursor-pointer"

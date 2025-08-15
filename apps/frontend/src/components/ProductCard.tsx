@@ -90,6 +90,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
                     productPrice={product.price}
                     productImage={product.images[0]}
                     unitsPerBox={product.units_per_box}
+                    iva={product.iva}
                 />
             </div>
             <div className="p-4 flex flex-col flex-1">
