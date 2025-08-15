@@ -50,8 +50,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       // Fetch product data for items missing IVA
       const productPromises = itemsNeedingMigration.map(async (item) => {
         try {
-          const response = await api.get(`/products/${item.id}`);
-          return { id: item.id, iva: response.data.iva };
+          const response = await api.get(`/products/${item.id}`) as { data?: { iva?: number } };
+          return { id: item.id, iva: response.data?.iva };
         } catch (error) {
           console.warn(`Failed to fetch IVA for product ${item.id}:`, error);
           return { id: item.id, iva: undefined };

@@ -19,7 +19,8 @@ export default function PagosPage() {
   const isBusinessUser = user?.roles?.includes('business') || false;
   
   // Helper function to format IVA display
-  const formatIvaDisplay = (iva: number): string => {
+  const formatIvaDisplay = (iva: number | undefined): string => {
+    if (iva === undefined) return '0';
     // Ensure it's displayed as percentage
     if (iva < 1 && iva > 0) {
       return (iva * 100).toFixed(0);
@@ -30,7 +31,7 @@ export default function PagosPage() {
   // Helper function to group cart items by IVA value (same as carrito page)
   const groupCartItemsByIva = (cartItems: typeof cart) => {
     if (!isBusinessUser) {
-      return [{ ivaValue: null, items: cartItems }];
+      return [{ ivaKey: 'no-iva', ivaValue: undefined, items: cartItems }];
     }
 
     const grouped = cartItems.reduce((groups, item) => {
