@@ -162,11 +162,11 @@ const CarritoPage = () => {
                   {/* IVA Group Header (only for business users) */}
                   {/* Products in this IVA group */}
                   {group.items.map((item) => (
-                <div key={item.id} className={`border rounded-lg p-4 ${isBusinessUser ? 'border-gray-100 bg-white shadow-sm ml-4' : 'border-gray-200'}`}>
+                <div key={item.id} className={`border rounded-lg p-4 ${isBusinessUser ? 'border-gray-100 bg-white shadow-sm' : 'border-gray-200'}`}>
                   {/* Desktop Layout */}
                   <div className="hidden md:flex items-center">
                     <div className="flex-1 flex items-center">
-                      <div className="w-16 h-16 bg-gray-200 flex items-center justify-center rounded mr-4">
+                      <div className="bg-gray-200 flex items-center justify-center rounded mr-4">
                         {item.image ? (
                           <Image src={item.image} alt={item.name} width={64} height={64} className="object-cover rounded" />
                         ) : (
@@ -178,7 +178,7 @@ const CarritoPage = () => {
                         <div className="text-xs text-gray-500">{t('cart.units')}</div>
                       </div>
                     </div>
-                    <div className="w-32 flex items-center justify-center">
+                    <div className="flex items-center justify-center">
                       <QuantityControls
                         productId={item.id}
                         productName={item.name}
@@ -221,13 +221,13 @@ const CarritoPage = () => {
                         </div>
                       </div>
                       <button
-                        className="text-xs text-red-500 hover:underline ml-2"
+                        className="text-xs text-red-500 hover:underline"
                         onClick={() => removeFromCart(item.id)}
                         disabled={!user}
                       >{t('cart.remove')}</button>
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col items-center justify-between">
                       <div className="flex items-center gap-2">
                         <QuantityControls
                           productId={item.id}
@@ -239,7 +239,7 @@ const CarritoPage = () => {
                           iva={item.iva}
                         />
                       </div>
-                      <div className="text-right">
+                      <div className="flex flex-col items-center justify-between">
                         <div className="text-sm text-gray-500">{t('cart.unit_price')}</div>
                         <div className="font-semibold text-sm">
                           € {item.price.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -258,7 +258,7 @@ const CarritoPage = () => {
                   {isBusinessUser && (() => {
                     const breakdown = calculateGroupIvaBreakdown(group.items, group.ivaValue);
                     return (
-                      <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200 shadow-sm ml-4">
+                      <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200 shadow-sm">
                         <div className="flex justify-between items-start">
                           <div>
                             <h4 className="font-bold text-sm text-green-800">

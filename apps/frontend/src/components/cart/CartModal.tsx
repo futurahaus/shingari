@@ -16,7 +16,6 @@ export const CartModal = () => {
     removeAllFromCart,
     isCartOpen,
     closeCart,
-    refreshCartData,
   } = useCart();
 
   const router = useRouter();
