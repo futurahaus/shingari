@@ -15,6 +15,18 @@ const CarritoPage = () => {
   const { user, isLoading } = useAuth();
   const { t } = useTranslation();
   const [showLoginModal, setShowLoginModal] = useState(false);
+  
+  // Helper function to check if user is business
+  const isBusinessUser = user?.roles?.includes('business') || false;
+  
+  // Helper function to format IVA display
+  const formatIvaDisplay = (iva: number): string => {
+    // Ensure it's displayed as percentage
+    if (iva < 1 && iva > 0) {
+      return (iva * 100).toFixed(0);
+    }
+    return iva.toFixed(0);
+  };
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -69,6 +81,11 @@ const CarritoPage = () => {
                       </div>
                       <div>
                         <div className="font-semibold text-base">{item.name}</div>
+                        {isBusinessUser && item.iva && (
+                          <div className="text-xs text-gray-600">
+                            IVA: {formatIvaDisplay(item.iva)}%
+                          </div>
+                        )}
                         <div className="text-xs text-gray-500">{t('cart.units')}</div>
                       </div>
                     </div>
@@ -80,6 +97,7 @@ const CarritoPage = () => {
                         productImage={item.image || ''}
                         unitsPerBox={item.units_per_box}
                         variant="inline"
+                        iva={item.iva}
                       />
                     </div>
                     <div className="w-32 text-center font-semibold">
@@ -110,6 +128,11 @@ const CarritoPage = () => {
                         </div>
                         <div className="flex-1">
                           <div className="font-semibold text-sm">{item.name}</div>
+                          {isBusinessUser && item.iva && (
+                            <div className="text-xs text-gray-600">
+                              IVA: {formatIvaDisplay(item.iva)}%
+                            </div>
+                          )}
                           <div className="text-xs text-gray-500">{t('cart.units')}</div>
                         </div>
                       </div>
@@ -129,6 +152,7 @@ const CarritoPage = () => {
                           productImage={item.image || ''}
                           unitsPerBox={item.units_per_box}
                           variant="inline"
+                          iva={item.iva}
                         />
                       </div>
                       <div className="text-right">

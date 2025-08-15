@@ -1,32 +1,32 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class ProductTranslationDto {
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'ID de la traducción',
     example: 1,
   })
   id: number;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'ID del producto',
     example: 1,
   })
   product_id: number;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Locale de la traducción',
     example: 'zh',
     enum: ['es', 'zh'],
   })
   locale: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Nombre traducido del producto',
     example: 'Product Name in Chinese',
   })
   name: string;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Descripción traducida del producto',
     example: 'Product description in Chinese',
   })
@@ -34,49 +34,49 @@ export class ProductTranslationDto {
 }
 
 export class ProductResponseDto {
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'ID único del producto',
     example: 'clxpb2xzo0000a8b4c2defgh1',
   })
   id: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Nombre del producto',
     example: 'Laptop Gamer XYZ',
   })
   name: string;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Descripción detallada del producto',
     example: 'Una laptop potente para gaming y trabajo.',
   })
   description?: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Precio del producto (con descuento, si aplica)',
     example: 1299.99,
   })
   price: number;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Precio original del producto sin descuento',
     example: 1499.99,
   })
   originalPrice?: number;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Porcentaje de descuento aplicado al producto',
     example: 10,
   })
   discount: number;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Stock disponible del producto',
     example: 50,
   })
   stock?: number;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Unidades por caja',
     example: 12,
   })
@@ -94,45 +94,45 @@ export class ProductResponseDto {
   @ApiProperty({ description: 'SKU del producto', example: '123456' })
   sku: string;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Categorías a las que pertenece el producto (ej. nombres o slugs)',
     example: ['electronics', 'gaming', 'laptops'],
     type: [String],
   })
   categories?: string[]; // Esto dependerá de cómo se modele en Prisma (relación o array)
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Precio mayorista del producto',
     example: 999.99,
   })
   wholesalePrice?: number;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Estado del producto',
     example: 'active',
     enum: ['active', 'draft', 'paused', 'deleted'],
   })
   status?: string;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'ID de la unidad para el stock',
     example: 1,
   })
   unit_id?: number;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Nombre de la unidad para el stock',
     example: 'kg',
   })
   unit_name?: string;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'IVA del producto (porcentaje)',
     example: 21.0,
   })
   iva?: number;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     description: 'Traducciones del producto',
     type: [ProductTranslationDto],
   })
@@ -156,4 +156,4 @@ export class PaginatedProductResponseDto {
 
   @ApiProperty({ description: 'Cantidad de productos por página', example: 10 })
   limit: number;
-} 
+}

@@ -10,6 +10,7 @@ interface QuantityControlsProps {
     productImage: string;
     unitsPerBox?: number;
     variant?: 'overlay' | 'inline';
+    iva?: number;
 }
 
 export const QuantityControls = ({
@@ -18,7 +19,8 @@ export const QuantityControls = ({
     productPrice,
     productImage,
     unitsPerBox,
-    variant = 'overlay'
+    variant = 'overlay',
+    iva
 }: QuantityControlsProps) => {
     const { cart, addToCart, updateQuantity, removeFromCart } = useCart();
     const { showSuccess, showInfo, showWarning } = useNotificationContext();
@@ -46,6 +48,7 @@ export const QuantityControls = ({
                 image: productImage,
                 quantity: increment,
                 units_per_box: unitsPerBox,
+                iva: iva,
             });
             showSuccess(
                 t('quantity_controls.product_added'),
@@ -102,6 +105,7 @@ export const QuantityControls = ({
                     image: productImage,
                     quantity: newQuantity,
                     units_per_box: unitsPerBox,
+                    iva: iva,
                 });
                 showSuccess(
                     t('quantity_controls.product_added'),

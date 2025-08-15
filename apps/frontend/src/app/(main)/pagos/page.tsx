@@ -6,12 +6,26 @@ import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { Button } from '@/app/ui/components/Button';
 import { useTranslation } from '@/contexts/I18nContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function PagosPage() {
   const { cart, clearCart } = useCart();
   const router = useRouter();
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
+  
+  // Helper function to check if user is business
+  const isBusinessUser = user?.roles?.includes('business') || false;
+  
+  // Helper function to format IVA display
+  const formatIvaDisplay = (iva: number): string => {
+    // Ensure it's displayed as percentage
+    if (iva < 1 && iva > 0) {
+      return (iva * 100).toFixed(0);
+    }
+    return iva.toFixed(0);
+  };
   const [cardData, setCardData] = useState({
     cardNumber: '',
     expiry: '',
@@ -323,9 +337,14 @@ export default function PagosPage() {
                 {/* Product Items */}
                 {cart.map((item) => (
                   <div key={item.id} className="flex justify-between">
-                    <div className="flex items-center gap-1">
-                      <span className="text-xs font-medium text-black">{item.name}</span>
-                      <span className="text-xs font-medium text-black">x{item.quantity}</span>
+                    <div className="flex items-center gap-1 flex-col items-start">
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs font-medium text-black">{item.name}</span>
+                        <span className="text-xs font-medium text-black">x{item.quantity}</span>
+                      </div>
+                      {isBusinessUser && item.iva && (
+                        <span className="text-xs text-gray-600">IVA: {formatIvaDisplay(item.iva)}%</span>
+                      )}
                     </div>
                     <span className="text-sm font-medium text-black">
                       €{(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2 })}

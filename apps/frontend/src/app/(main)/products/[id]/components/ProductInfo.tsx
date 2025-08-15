@@ -49,6 +49,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
             productImage={product.images[0]}
             unitsPerBox={product.units_per_box}
             variant="inline"
+            iva={product.iva}
           />
         </div>
       </div>

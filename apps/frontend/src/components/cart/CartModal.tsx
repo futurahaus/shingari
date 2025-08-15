@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { QuantityControls } from '../QuantityControls';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { useTranslation } from '@/contexts/I18nContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const CartModal = () => {
   const {
@@ -15,14 +16,28 @@ export const CartModal = () => {
     removeAllFromCart,
     isCartOpen,
     closeCart,
+    refreshCartData,
   } = useCart();
 
   const router = useRouter();
   const { t } = useTranslation();
+  const { user } = useAuth();
 
   const modalRef = useRef<HTMLDivElement>(null);
 
   const { showWarning } = useNotificationContext();
+  
+  // Helper function to check if user is business
+  const isBusinessUser = user?.roles?.includes('business') || false;
+  
+  // Helper function to format IVA display
+  const formatIvaDisplay = (iva: number): string => {
+    // Ensure it's displayed as percentage
+    if (iva < 1 && iva > 0) {
+      return (iva * 100).toFixed(0);
+    }
+    return iva.toFixed(0);
+  };
 
   // Close on Escape key
   useEffect(() => {
@@ -85,6 +100,17 @@ export const CartModal = () => {
                     <div className="text-xs text-gray-500">{t('cart.product')}</div>
                     <div className="font-bold text-sm mb-1">{item.name}</div>
                     <div className="text-lg font-semibold mb-2">€ {item.price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</div>
+                    {isBusinessUser && item.iva && (
+                      <div className="text-xs text-gray-600 mb-2">
+                        IVA: {formatIvaDisplay(item.iva)}%
+                      </div>
+                    )}
+                    {/* Debug IVA information */}
+                    {process.env.NODE_ENV === 'development' && (
+                      <div className="text-xs text-red-500 mb-1">
+                        Debug: isBusinessUser={isBusinessUser.toString()}, iva={item.iva?.toString() || 'undefined'}
+                      </div>
+                    )}
                     <div className="flex items-center gap-2 mb-2">
                       <QuantityControls
                         productId={item.id}
@@ -93,6 +119,7 @@ export const CartModal = () => {
                         productImage={item.image || ''}
                         unitsPerBox={item.units_per_box}
                         variant="inline"
+                        iva={item.iva}
                       />
                       {/* Box indicator */}
                       {item.units_per_box && item.quantity && item.quantity > 0 && typeof window !== 'undefined' && (() => {
@@ -129,6 +156,17 @@ export const CartModal = () => {
               showWarning(t('cart.cart_emptied'), t('cart.all_products_removed'), 2000);
             }}
           >{t('cart.remove_all')}</button>
+          
+          {/* Debug: Refresh cart data button (development only) */}
+          {process.env.NODE_ENV === 'development' && (
+            <button
+              className="text-xs text-blue-500 hover:underline cursor-pointer ml-4"
+              onClick={() => {
+                refreshCartData();
+                showWarning('Debug', 'Cart data refreshed', 2000);
+              }}
+            >Refresh Cart Data</button>
+          )}
           <div className="text-sm space-y-1 mb-6">
             <div className="flex justify-between">
               <span>{t('cart.product_prices')}</span>

@@ -193,9 +193,10 @@ export class ProductsService {
       `[DEBUG] Product ${product.id}: userId=${userId}, userRole=${userRole}, userDiscountPrice=${userDiscountPrice}`,
     );
 
-    if (userRole !== 'business') {
-      // Check if IVA is stored as decimal (0.21) or percentage (21)
-      let ivaValue = product.iva ? product.iva.toNumber() : 21;
+    // Normalize IVA value for consistent display (always as percentage)
+    let normalizedIvaValue: number | undefined = undefined;
+    if (product.iva) {
+      let ivaValue = product.iva.toNumber();
 
       // If IVA value is very small (< 1), it's likely stored as decimal (0.21 for 21%)
       // Convert it to percentage format
@@ -203,28 +204,32 @@ export class ProductsService {
         ivaValue = ivaValue * 100;
       }
 
-      // Default to 21% if no IVA is set
-      if (!product.iva) {
-        ivaValue = 21;
-      }
+      normalizedIvaValue = ivaValue;
+    }
+
+    if (userRole !== 'business') {
+      // For non-business users, apply IVA to prices
+      const ivaValue = normalizedIvaValue || 21; // Default to 21% if no IVA is set
 
       priceWithIva = price * (1 + ivaValue / 100);
       originalPriceWithIva = originalPrice
         ? originalPrice * (1 + ivaValue / 100)
         : undefined;
-      finalIvaValue = product.iva ? ivaValue : undefined;
+
       console.log(
         `[DEBUG] Non-business user: applying IVA ${ivaValue}%, price ${price} -> ${priceWithIva}`,
       );
     } else {
-      // For business users, show prices without IVA
+      // For business users, show prices without IVA but still include IVA info for display
       priceWithIva = price;
       originalPriceWithIva = originalPrice;
-      finalIvaValue = undefined;
       console.log(
         `[DEBUG] Business user: NO IVA applied, price remains ${priceWithIva}`,
       );
     }
+
+    // Always include normalized IVA value in response for display purposes
+    finalIvaValue = normalizedIvaValue;
 
     // Get translated name and description
     const translatedName = this.getTranslatedName(
@@ -334,9 +339,10 @@ export class ProductsService {
           );
         }
 
-        if (userRole !== 'business') {
-          // Check if IVA is stored as decimal (0.21) or percentage (21)
-          let ivaValue = product.iva ? product.iva.toNumber() : 21;
+        // Normalize IVA value for consistent display (always as percentage)
+        let normalizedIvaValue: number | undefined = undefined;
+        if (product.iva) {
+          let ivaValue = product.iva.toNumber();
 
           // If IVA value is very small (< 1), it's likely stored as decimal (0.21 for 21%)
           // Convert it to percentage format
@@ -344,22 +350,25 @@ export class ProductsService {
             ivaValue = ivaValue * 100;
           }
 
-          // Default to 21% if no IVA is set
-          if (!product.iva) {
-            ivaValue = 21;
-          }
+          normalizedIvaValue = ivaValue;
+        }
+
+        if (userRole !== 'business') {
+          // For non-business users, apply IVA to prices
+          const ivaValue = normalizedIvaValue || 21; // Default to 21% if no IVA is set
 
           priceWithIva = price * (1 + ivaValue / 100);
           originalPriceWithIva = originalPrice
             ? originalPrice * (1 + ivaValue / 100)
             : undefined;
-          finalIvaValue = product.iva ? ivaValue : undefined;
         } else {
-          // For business users, show prices without IVA
+          // For business users, show prices without IVA but still include IVA info for display
           priceWithIva = price;
           originalPriceWithIva = originalPrice;
-          finalIvaValue = undefined;
         }
+
+        // Always include normalized IVA value in response for display purposes
+        finalIvaValue = normalizedIvaValue;
 
         // Get translated name and description
         const translatedName = this.getTranslatedName(
