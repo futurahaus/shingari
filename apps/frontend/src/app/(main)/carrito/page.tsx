@@ -190,10 +190,10 @@ const CarritoPage = () => {
                       />
                     </div>
                     <div className="w-32 text-center font-semibold">
-                      € {item.price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                      € {item.price.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
                     <div className="w-32 text-right font-semibold">
-                      € {(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                      € {(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
                     <div className="w-20 flex justify-end">
                       <button
@@ -242,11 +242,11 @@ const CarritoPage = () => {
                       <div className="text-right">
                         <div className="text-sm text-gray-500">{t('cart.unit_price')}</div>
                         <div className="font-semibold text-sm">
-                          € {item.price.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                          € {item.price.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                         <div className="text-sm text-gray-500 mt-1">{t('cart.total')}</div>
                         <div className="font-bold text-base">
-                          € {(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                          € {(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </div>
                       </div>
                     </div>
@@ -272,21 +272,21 @@ const CarritoPage = () => {
                             <div className="flex justify-between items-center gap-4">
                               <span className="text-xs text-green-600">Subtotal:</span>
                               <span className="font-semibold text-sm text-green-800">
-                                €{breakdown.subtotal.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                                €{breakdown.subtotal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </span>
                             </div>
                             {group.ivaValue && breakdown.ivaAmount > 0 && (
                               <div className="flex justify-between items-center gap-4">
                                 <span className="text-xs text-green-600">IVA ({formatIvaDisplay(group.ivaValue)}%):</span>
                                 <span className="font-semibold text-sm text-green-800">
-                                  €{breakdown.ivaAmount.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                                  €{breakdown.ivaAmount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </span>
                               </div>
                             )}
                             <div className="flex justify-between items-center gap-4 pt-1 border-t border-green-200">
                               <span className="text-sm font-semibold text-green-700">Total:</span>
                               <span className="font-bold text-lg text-green-800">
-                                €{breakdown.total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                                €{breakdown.total.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </span>
                             </div>
                           </div>
@@ -308,19 +308,19 @@ const CarritoPage = () => {
             <>
               <div className="flex justify-between text-sm">
                 <span>Subtotal (sin IVA)</span>
-                <span>€{grandTotals.grandSubtotal.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
+                <span>€{grandTotals.grandSubtotal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>IVA Total</span>
-                <span>€{grandTotals.grandIvaAmount.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
+                <span>€{grandTotals.grandIvaAmount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>{t('cart.shipping_costs')}</span>
-                <span>€{shipping.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
+                <span>€{shipping.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between text-lg font-bold border-t pt-4 mt-4">
                 <span>{t('cart.total_products')}</span>
-                <span>€{(grandTotals.grandTotal + shipping).toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
+                <span>€{(grandTotals.grandTotal + shipping).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             </>
           ) : (
@@ -328,19 +328,19 @@ const CarritoPage = () => {
             <>
               <div className="flex justify-between text-sm">
                 <span>{t('cart.product_prices')}</span>
-                <span>€{total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
+                <span>€{total.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>{t('cart.discounts')}</span>
-                <span>- €{discount.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
+                <span>- €{discount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>{t('cart.shipping_costs')}</span>
-                <span>€{shipping.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
+                <span>€{shipping.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between text-lg font-bold border-t pt-4 mt-4">
                 <span>{t('cart.total_products')}</span>
-                <span>€{(discountedTotal + shipping).toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
+                <span>€{(discountedTotal + shipping).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
             </>
           )}

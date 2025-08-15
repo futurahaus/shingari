@@ -427,7 +427,7 @@ export default function PagosPage() {
                               }
                             </span>
                             <span className="text-sm font-bold text-black">
-                              €{breakdown.subtotal.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                              €{breakdown.subtotal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </span>
                           </div>
                           
@@ -439,7 +439,7 @@ export default function PagosPage() {
                                 <span className="text-xs font-medium text-gray-600">x{item.quantity}</span>
                               </div>
                               <span className="text-xs font-medium text-gray-600">
-                                €{(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                                €{(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </span>
                             </div>
                           ))}
@@ -451,7 +451,7 @@ export default function PagosPage() {
                                 IVA {formatIvaDisplay(group.ivaValue)}%
                               </span>
                               <span className="text-sm font-medium text-black">
-                                €{breakdown.ivaAmount.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                                €{breakdown.ivaAmount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </span>
                             </div>
                           )}
@@ -464,19 +464,19 @@ export default function PagosPage() {
                       <div className="flex justify-between">
                         <span className="text-sm font-bold text-black">Subtotal (sin IVA)</span>
                         <span className="text-sm font-bold text-black">
-                          €{grandTotals.grandSubtotal.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                          €{grandTotals.grandSubtotal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm font-bold text-black">IVA Total</span>
                         <span className="text-sm font-bold text-black">
-                          €{grandTotals.grandIvaAmount.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                          €{grandTotals.grandIvaAmount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm font-bold text-black">{t('payment.shipping_costs')}</span>
                         <span className="text-sm font-bold text-black">
-                          €{shipping.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                          €{shipping.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </div>
                     </div>
@@ -488,7 +488,7 @@ export default function PagosPage() {
                     <div className="flex justify-between">
                       <span className="text-sm font-bold text-black">{t('payment.product_prices')}</span>
                       <span className="text-sm font-bold text-black">
-                        €{total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                        €{total.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </div>
 
@@ -500,7 +500,7 @@ export default function PagosPage() {
                           <span className="text-xs font-medium text-black">x{item.quantity}</span>
                         </div>
                         <span className="text-sm font-medium text-black">
-                          €{(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                          €{(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </div>
                     ))}
@@ -509,7 +509,7 @@ export default function PagosPage() {
                     <div className="flex justify-between">
                       <span className="text-sm font-bold text-black">{t('payment.shipping_costs')}</span>
                       <span className="text-sm font-bold text-black">
-                        €{shipping.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                        €{shipping.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </div>
 
@@ -517,7 +517,7 @@ export default function PagosPage() {
                     <div className="flex justify-between">
                       <span className="text-sm font-bold text-black">{t('payment.points_discount')}</span>
                       <span className="text-sm font-bold text-black">
-                        €{discount.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                        €{discount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </div>
                   </>
@@ -527,7 +527,7 @@ export default function PagosPage() {
                 <div className="flex justify-between border-t border-gray-200 pt-4">
                   <span className="text-lg font-bold text-black">{t('payment.total_products')}</span>
                   <span className="text-lg font-bold text-black">
-                    €{finalTotal.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                    €{finalTotal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                 </div>
               </div>
