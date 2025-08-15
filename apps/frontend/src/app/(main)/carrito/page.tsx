@@ -20,7 +20,8 @@ const CarritoPage = () => {
   const isBusinessUser = user?.roles?.includes('business') || false;
 
   // Helper function to format IVA display
-  const formatIvaDisplay = (iva: number): string => {
+  const formatIvaDisplay = (iva: number | undefined): string => {
+    if (iva === undefined) return '0';
     // Ensure it's displayed as percentage
     if (iva < 1 && iva > 0) {
       return (iva * 100).toFixed(0);
@@ -32,7 +33,7 @@ const CarritoPage = () => {
   const groupCartItemsByIva = (cartItems: typeof cart) => {
     if (!isBusinessUser) {
       // For non-business users, don't group by IVA
-      return [{ ivaValue: null, items: cartItems }];
+      return [{ ivaKey: 'no-iva', ivaValue: undefined, items: cartItems }];
     }
 
     const grouped = cartItems.reduce((groups, item) => {
@@ -156,52 +157,9 @@ const CarritoPage = () => {
             <div className="py-8 text-center text-gray-500">{t('cart.empty')}</div>
           ) : (
             <div className="space-y-6">
-              {groupedCartItems.map((group) => (
+                            {groupedCartItems.map((group) => (
                 <div key={group.ivaKey} className="space-y-4">
                   {/* IVA Group Header (only for business users) */}
-                  {isBusinessUser && (() => {
-                    const breakdown = calculateGroupIvaBreakdown(group.items, group.ivaValue);
-                    return (
-                      <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200 shadow-sm">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="font-bold text-base text-blue-800">
-                              {group.ivaValue !== undefined
-                                ? `IVA: ${formatIvaDisplay(group.ivaValue)}%`
-                                : 'Sin IVA'
-                              }
-                            </h3>
-                            <p className="text-sm text-blue-600">
-                              {group.items.length} {group.items.length === 1 ? 'producto' : 'productos'}
-                            </p>
-                          </div>
-                          <div className="text-right space-y-1">
-                            <div className="flex justify-between items-center gap-4">
-                              <span className="text-xs text-blue-600">Subtotal:</span>
-                              <span className="font-semibold text-sm text-blue-800">
-                                €{breakdown.subtotal.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
-                              </span>
-                            </div>
-                            {group.ivaValue && breakdown.ivaAmount > 0 && (
-                              <div className="flex justify-between items-center gap-4">
-                                <span className="text-xs text-blue-600">IVA ({formatIvaDisplay(group.ivaValue)}%):</span>
-                                <span className="font-semibold text-sm text-blue-800">
-                                  €{breakdown.ivaAmount.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
-                                </span>
-                              </div>
-                            )}
-                            <div className="flex justify-between items-center gap-4 pt-1 border-t border-blue-200">
-                              <span className="text-sm font-semibold text-blue-700">Total:</span>
-                              <span className="font-bold text-lg text-blue-800">
-                                €{breakdown.total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })()}
-
                   {/* Products in this IVA group */}
                   {group.items.map((item) => (
                 <div key={item.id} className={`border rounded-lg p-4 ${isBusinessUser ? 'border-gray-100 bg-white shadow-sm ml-4' : 'border-gray-200'}`}>
@@ -295,6 +253,47 @@ const CarritoPage = () => {
                   </div>
                 </div>
                   ))}
+
+                  {/* IVA Group Totals (only for business users) */}
+                  {isBusinessUser && (() => {
+                    const breakdown = calculateGroupIvaBreakdown(group.items, group.ivaValue);
+                    return (
+                      <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200 shadow-sm ml-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-bold text-sm text-green-800">
+                              Totales del grupo {group.ivaValue !== undefined
+                                ? `IVA ${formatIvaDisplay(group.ivaValue)}%`
+                                : 'Sin IVA'
+                              }
+                            </h4>
+                          </div>
+                          <div className="text-right space-y-1">
+                            <div className="flex justify-between items-center gap-4">
+                              <span className="text-xs text-green-600">Subtotal:</span>
+                              <span className="font-semibold text-sm text-green-800">
+                                €{breakdown.subtotal.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                              </span>
+                            </div>
+                            {group.ivaValue && breakdown.ivaAmount > 0 && (
+                              <div className="flex justify-between items-center gap-4">
+                                <span className="text-xs text-green-600">IVA ({formatIvaDisplay(group.ivaValue)}%):</span>
+                                <span className="font-semibold text-sm text-green-800">
+                                  €{breakdown.ivaAmount.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                                </span>
+                              </div>
+                            )}
+                            <div className="flex justify-between items-center gap-4 pt-1 border-t border-green-200">
+                              <span className="text-sm font-semibold text-green-700">Total:</span>
+                              <span className="font-bold text-lg text-green-800">
+                                €{breakdown.total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               ))}
             </div>
