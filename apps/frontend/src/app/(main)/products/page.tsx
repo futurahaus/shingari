@@ -35,6 +35,8 @@ const CategorySidebar = ({
     onSelectCategory,
     isFavoritesSelected,
     onSelectFavorites,
+    isRedeemableSelected,
+    onSelectRedeemable,
 }: {
     categories: Category[];
     categoriesLoading: boolean;
@@ -42,6 +44,8 @@ const CategorySidebar = ({
     onSelectCategory: (name: string | null) => void;
     isFavoritesSelected: boolean;
     onSelectFavorites: () => void;
+    isRedeemableSelected: boolean;
+    onSelectRedeemable: () => void;
 }) => {
     const { user } = useAuth();
     const { t } = useTranslation();
@@ -91,6 +95,28 @@ const CategorySidebar = ({
                     )}
                 </div>
             )}
+
+            {/* Canjeables Link. Show always. When is selected, add redeemable_with_points to the URL */}
+            <div className="mb-6">
+                                 <a
+                     href="#"
+                     onClick={(e) => {
+                         e.preventDefault();
+                         onSelectRedeemable();
+                     }}
+                     className="block"
+                 >
+                                         <Text
+                         as="span"
+                         size="lg"
+                         weight="bold"
+                         color={isRedeemableSelected ? "primary-main" : "primary"}
+                         className={`transition-colors ${isRedeemableSelected ? "cursor-default" : "hover:text-black"}`}
+                     >
+                         🎁 Canjeables
+                     </Text>
+                 </a>
+            </div>
 
             <Text as="h2" size="xl" weight="bold" color="primary" className="mb-4">
                 {t('products.categories')}
@@ -297,6 +323,7 @@ const ProductsSection = ({
         categoryFilters,
         search: searchQuery || undefined,
         sortByPrice: (filters.price as 'ASC' | 'DESC') || undefined,
+        redeemable_with_points: searchParams.get('redeemable_with_points') === 'true' ? true : undefined,
         limit: 10,
     };
 
@@ -440,8 +467,10 @@ function ProductsPageContent() {
     const searchParams = useSearchParams();
     const categoryFilter = searchParams.get('categoryFilters');
     const favoritesFilter = searchParams.get('favorites');
+    const redeemableFilter = searchParams.get('redeemable_with_points');
     const isFavoritesSelected = favoritesFilter === 'true';
-    const selectedCategory = isFavoritesSelected ? null : categoryFilter;
+    const isRedeemableSelected = redeemableFilter === 'true';
+    const selectedCategory = (isFavoritesSelected || isRedeemableSelected) ? null : categoryFilter;
 
     // Use React Query for categories
     const { data: categories = [], isLoading: categoriesLoading } = useProductCategories();
@@ -458,8 +487,9 @@ function ProductsPageContent() {
     const handleSelectCategory = (categoryName: string | null) => {
         const newParams = new URLSearchParams(searchParams.toString());
 
-        // Clear favorites when selecting a category
+        // Clear favorites and redeemable when selecting a category
         newParams.delete('favorites');
+        newParams.delete('redeemable_with_points');
 
         if (categoryName === null || categoryName === selectedCategory) {
             newParams.delete('categoryFilters');
@@ -475,11 +505,28 @@ function ProductsPageContent() {
 
         // Clear category filters when selecting favorites
         newParams.delete('categoryFilters');
+        newParams.delete('redeemable_with_points');
 
         if (isFavoritesSelected) {
             newParams.delete('favorites');
         } else {
             newParams.set('favorites', 'true');
+        }
+
+        router.push(`/products?${newParams.toString()}`);
+    };
+
+    const handleSelectRedeemable = () => {
+        const newParams = new URLSearchParams(searchParams.toString());
+
+        // Clear category filters when selecting redeemable
+        newParams.delete('categoryFilters');
+        newParams.delete('favorites');
+
+        if (isRedeemableSelected) {
+            newParams.delete('redeemable_with_points');
+        } else {
+            newParams.set('redeemable_with_points', 'true');
         }
 
         router.push(`/products?${newParams.toString()}`);
@@ -495,6 +542,8 @@ function ProductsPageContent() {
                     onSelectCategory={handleSelectCategory}
                     isFavoritesSelected={isFavoritesSelected}
                     onSelectFavorites={handleSelectFavorites}
+                    isRedeemableSelected={isRedeemableSelected}
+                    onSelectRedeemable={handleSelectRedeemable}
                 />
                 <ProductsSection
                     selectedCategory={selectedCategory}

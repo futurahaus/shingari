@@ -70,7 +70,7 @@ Aplicación construida con NestJS. **Todas las rutas de la API del backend está
     -   **`products/`**: Módulo para la gestión de productos.
         -   `products.service.ts`: Lógica de negocio para productos, incluyendo CRUD, listado público con filtros/paginación, gestión de descuentos y **soporte multilenguaje**.
         -   `products.controller.ts`: Endpoints HTTP para productos.
-            -   `GET /products`: Listado público de productos (paginado, búsqueda por nombre, filtro por categorías, orden por precio, **soporte multilenguaje**).
+            -   `GET /products`: Listado público de productos (paginado, búsqueda por nombre, filtro por categorías, orden por precio, **filtro por productos canjeables con puntos**, **soporte multilenguaje**).
             -   `GET /products/:id`: Obtener un producto específico (**soporte multilenguaje**).
             -   `POST /products`: Crear producto (protegido por AdminGuard).
             -   `PUT /products/:id`: Actualizar producto (protegido por AdminGuard).
@@ -95,7 +95,7 @@ Aplicación construida con NestJS. **Todas las rutas de la API del backend está
             -   **Precios Dinámicos**: Los precios se calculan dinámicamente basados en el rol del usuario (precio al por mayor para usuarios 'business').
             -   **Gestión de IVA**: Los usuarios con rol 'business' ven precios al por mayor SIN IVA incluido, mientras que otros usuarios ven precios con IVA incluido.
             -   **Descuentos Personalizados**: Sistema de descuentos específicos por usuario con fechas de validez.
-            -   **Filtros y Paginación**: Soporte para filtrado por categorías, búsqueda por nombre, ordenamiento por precio y paginación.
+            -   **Filtros y Paginación**: Soporte para filtrado por categorías, búsqueda por nombre, ordenamiento por precio, **filtro por productos canjeables con puntos** y paginación.
             -   **Soporte Multilenguaje**: Sistema completo de traducciones para productos y categorías.
                 -   **Idiomas Soportados**: Español (es) por defecto y Chino (zh).
                 -   **Traducciones de Productos**: Nombre y descripción traducibles.
@@ -243,6 +243,6 @@ Aplicación construida con Next.js.
 ---
 
 *Este archivo fue generado y actualizado el 2025-01-03 22:30:00.*
-*Última actualización: 2025-01-17 - Implementado sistema completo de soporte multilenguaje para productos y categorías.*
+*Última actualización: 2025-01-17 - Implementado sistema completo de soporte multilenguaje para productos y categorías. Agregado filtro por productos canjeables con puntos.*
 
 *Por favor, actualiza la fecha y cualquier información relevante cuando hagas cambios significativos.*

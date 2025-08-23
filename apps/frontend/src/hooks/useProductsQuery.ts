@@ -18,6 +18,7 @@ export interface ProductFilters {
   categoryFilters?: string | string[];
   search?: string;
   sortByPrice?: 'ASC' | 'DESC';
+  redeemable_with_points?: boolean;
   page?: number;
   limit?: number;
 }
@@ -41,6 +42,7 @@ export function buildProductParams(filters: ProductFilters): URLSearchParams {
   if (filters.limit) params.append('limit', filters.limit.toString());
   if (filters.search) params.append('search', filters.search);
   if (filters.sortByPrice) params.append('sortByPrice', filters.sortByPrice);
+  if (filters.redeemable_with_points !== undefined) params.append('redeemable_with_points', filters.redeemable_with_points.toString());
   
   if (filters.categoryFilters) {
     if (Array.isArray(filters.categoryFilters)) {

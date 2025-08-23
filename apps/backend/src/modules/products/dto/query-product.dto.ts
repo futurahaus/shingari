@@ -8,6 +8,7 @@ import {
   IsArray,
   IsEnum,
   IsIn,
+  IsBoolean,
 } from 'class-validator';
 
 export enum ProductSortByPrice {
@@ -112,4 +113,17 @@ export class QueryProductDto {
   @IsString()
   @IsIn(['es', 'zh'])
   locale?: string = 'es';
+
+  @ApiPropertyOptional({
+    description: 'Filtrar productos que se pueden canjear con puntos',
+    type: Boolean,
+  })
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
+  @IsBoolean()
+  redeemable_with_points?: boolean;
 }
