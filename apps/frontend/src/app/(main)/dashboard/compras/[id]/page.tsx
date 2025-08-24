@@ -48,6 +48,7 @@ interface Order {
   currency: string;
   created_at: string;
   updated_at: string;
+  used_points: number;
   order_lines: OrderLine[];
   order_addresses: OrderAddress[];
   order_payments: OrderPayment[];
@@ -191,6 +192,16 @@ const OrderDetailSkeleton = () => (
           <div className="flex justify-between">
             <div className="w-12 h-4 bg-gray-200 rounded"></div>
             <div className="w-16 h-4 bg-gray-200 rounded"></div>
+          </div>
+          <div className="border-t border-gray-100 pt-2 mt-2">
+            <div className="flex justify-between">
+              <div className="w-24 h-4 bg-gray-200 rounded"></div>
+              <div className="w-16 h-4 bg-gray-200 rounded"></div>
+            </div>
+            <div className="flex justify-between mt-1">
+              <div className="w-20 h-3 bg-gray-200 rounded"></div>
+              <div className="w-12 h-3 bg-gray-200 rounded"></div>
+            </div>
           </div>
           <div className="border-t pt-2 mt-2">
             <div className="flex justify-between">
@@ -409,6 +420,17 @@ export default function OrderDetailPage() {
                   <span className="text-sm font-medium text-gray-900">{t('order_details.shipping')}</span>
                   <span className="text-sm text-gray-900">€0,00</span>
                 </div>
+                
+                {/* Points Used Section */}
+                {order.used_points > 0 && (
+                  <div className="border-t border-gray-100 pt-2 mt-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-gray-900">🎁 Puntos utilizados</span>
+                      <span className="text-sm font-medium text-green-600">{order.used_points} puntos</span>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="border-t pt-2 mt-2">
                   <div className="flex justify-between">
                     <span className="text-sm font-bold text-gray-900">{t('dashboard.total')}</span>

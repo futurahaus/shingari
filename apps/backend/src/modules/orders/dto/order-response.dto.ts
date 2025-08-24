@@ -19,7 +19,10 @@ export class OrderLineResponseDto {
   @ApiProperty({ description: 'Precio total de la línea' })
   total_price: number;
 
-  @ApiProperty({ description: 'URL de la imagen del producto', required: false })
+  @ApiProperty({
+    description: 'URL de la imagen del producto',
+    required: false,
+  })
   product_image?: string;
 }
 
@@ -109,12 +112,24 @@ export class OrderResponseDto {
   @ApiProperty({ description: 'Fecha de actualización' })
   updated_at: Date;
 
-  @ApiProperty({ description: 'Líneas de la orden', type: [OrderLineResponseDto] })
+  @ApiProperty({
+    description: 'Líneas de la orden',
+    type: [OrderLineResponseDto],
+  })
   order_lines: OrderLineResponseDto[];
 
-  @ApiProperty({ description: 'Direcciones de la orden', type: [OrderAddressResponseDto] })
+  @ApiProperty({
+    description: 'Direcciones de la orden',
+    type: [OrderAddressResponseDto],
+  })
   order_addresses: OrderAddressResponseDto[];
 
-  @ApiProperty({ description: 'Pagos de la orden', type: [OrderPaymentResponseDto] })
+  @ApiProperty({
+    description: 'Pagos de la orden',
+    type: [OrderPaymentResponseDto],
+  })
   order_payments: OrderPaymentResponseDto[];
-} 
+
+  @ApiProperty({ description: 'Puntos utilizados' })
+  used_points?: number;
+}
