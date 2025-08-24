@@ -30,7 +30,7 @@ const CarritoPage = () => {
     };
 
     fetchUserData();
-  }, []);
+  }, [setAvailablePoints]);
 
   const { t } = useTranslation();
   const [showLoginModal, setShowLoginModal] = useState(false);
