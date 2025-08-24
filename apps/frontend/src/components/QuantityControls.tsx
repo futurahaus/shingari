@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { useTranslation } from '@/contexts/I18nContext';
+import { Product } from './ProductCard';
 
 interface QuantityControlsProps {
+    product: Product;
     productId: string;
     productName: string;
     productPrice: number;
@@ -14,6 +16,7 @@ interface QuantityControlsProps {
 }
 
 export const QuantityControls = ({
+    product,
     productId,
     productName,
     productPrice,
@@ -49,6 +52,7 @@ export const QuantityControls = ({
                 quantity: increment,
                 units_per_box: unitsPerBox,
                 iva: iva,
+                redeemable_with_points: product.redeemable_with_points,
             });
             showSuccess(
                 t('quantity_controls.product_added'),
@@ -106,6 +110,7 @@ export const QuantityControls = ({
                     quantity: newQuantity,
                     units_per_box: unitsPerBox,
                     iva: iva,
+                    redeemable_with_points: product.redeemable_with_points,
                 });
                 showSuccess(
                     t('quantity_controls.product_added'),

@@ -217,6 +217,7 @@ const CarritoPage = () => {
                     </div>
                     <div className="flex items-center justify-center">
                       <QuantityControls
+                        product={item}
                         productId={item.id}
                         productName={item.name}
                         productPrice={item.price}
@@ -267,6 +268,7 @@ const CarritoPage = () => {
                     <div className="flex flex-col items-center justify-between">
                       <div className="flex items-center gap-2">
                         <QuantityControls
+                          product={item}
                           productId={item.id}
                           productName={item.name}
                           productPrice={item.price}
@@ -341,7 +343,7 @@ const CarritoPage = () => {
           <h2 className="font-bold text-lg mb-2">{t('cart.purchase_summary')}</h2>
 
           {/* Points Checkbox - Only show if user has redeemable products */}
-          {hasRedeemableProducts && (
+          {hasRedeemableProducts && availablePoints > 0 && (
             <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
               <div className="flex items-center justify-between mb-2">
                 <label className="flex items-center space-x-2 cursor-pointer">

@@ -598,12 +598,14 @@ export default function PagosPage() {
                     )}
 
                     {/* Discount */}
+                    {pointsDiscount > 0 && (
                     <div className="flex justify-between">
                       <span className="text-sm font-bold text-black">{t('payment.points_discount')}</span>
                       <span className="text-sm font-bold text-black">
                         €{discount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </span>
-                    </div>
+                        </span>
+                      </div>
+                    )}
                   </>
                 )}
 

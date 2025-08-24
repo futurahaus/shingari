@@ -86,6 +86,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
                 )}
                 {/* Quantity controls */}
                 <QuantityControls
+                    product={product}
                     productId={product.id}
                     productName={displayName}
                     productPrice={product.price}
