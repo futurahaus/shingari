@@ -264,6 +264,7 @@ export class ProductsService {
           ? Number(product.units_per_box)
           : undefined,
       iva: finalIvaValue,
+      redeemable_with_points: product.redeemable_with_points ?? false,
     };
   }
 
@@ -407,6 +408,7 @@ export class ProductsService {
               ? Number(product.units_per_box)
               : undefined,
           iva: finalIvaValue,
+          redeemable_with_points: product.redeemable_with_points ?? false,
           product_translations:
             product.product_translations?.map((t) => ({
               id: t.id,

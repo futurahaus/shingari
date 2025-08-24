@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { api } from '@/lib/api';
+import { Product } from '@/components/ProductCard';
 
 export interface CartProduct {
   id: string;
@@ -11,6 +12,7 @@ export interface CartProduct {
   quantity: number;
   units_per_box?: number;
   iva?: number;
+  redeemable_with_points?: boolean;
 }
 
 interface CartContextType {
@@ -24,6 +26,10 @@ interface CartContextType {
   openCart: () => void;
   closeCart: () => void;
   refreshCartData: () => Promise<void>;
+  usePoints: boolean;
+  setUsePoints: (use: boolean) => void;
+  availablePoints: number;
+  setAvailablePoints: (points: number) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -37,35 +43,52 @@ export const useCart = () => {
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<CartProduct[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
-
-  // Migration function to add missing IVA data to existing cart items
+  const [usePoints, setUsePoints] = useState(false);
+  const [availablePoints, setAvailablePoints] = useState(0);
+  // Migration function to add missing IVA and redeemable_with_points data to existing cart items
   const migrateCartItems = async (cartItems: CartProduct[]): Promise<CartProduct[]> => {
-    const itemsNeedingMigration = cartItems.filter(item => item.iva === undefined);
+    const itemsNeedingMigration = cartItems.filter(item => 
+      item.iva === undefined || item.redeemable_with_points === undefined
+    );
     
     if (itemsNeedingMigration.length === 0) {
       return cartItems;
     }
 
     try {
-      // Fetch product data for items missing IVA
+      // Fetch product data for items missing IVA or redeemable_with_points
       const productPromises = itemsNeedingMigration.map(async (item) => {
         try {
-          const response = await api.get(`/products/${item.id}`) as { data?: { iva?: number } };
-          return { id: item.id, iva: response.data?.iva };
+          const response = await api.get<Product>(`/products/${item.id}`)
+          return { 
+            id: item.id, 
+            iva: response.iva,
+            redeemable_with_points: response.redeemable_with_points
+          };
         } catch (error) {
-          console.warn(`Failed to fetch IVA for product ${item.id}:`, error);
-          return { id: item.id, iva: undefined };
+          console.warn(`Failed to fetch data for product ${item.id}:`, error);
+          return { 
+            id: item.id, 
+            iva: undefined,
+            redeemable_with_points: undefined
+          };
         }
       });
 
       const productData = await Promise.all(productPromises);
-      const ivaMap = new Map(productData.map(p => [p.id, p.iva]));
+      const dataMap = new Map(productData.map(p => [p.id, p]));
 
-      // Update cart items with IVA data
-      return cartItems.map(item => ({
-        ...item,
-        iva: item.iva !== undefined ? item.iva : ivaMap.get(item.id)
-      }));
+      // Update cart items with missing data
+      return cartItems.map(item => {
+        const fetchedData = dataMap.get(item.id);
+        return {
+          ...item,
+          iva: item.iva !== undefined ? item.iva : fetchedData?.iva,
+          redeemable_with_points: item.redeemable_with_points !== undefined 
+            ? item.redeemable_with_points 
+            : fetchedData?.redeemable_with_points
+        };
+      });
     } catch (error) {
       console.error('Cart migration failed:', error);
       return cartItems;
@@ -136,7 +159,22 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, removeFromCart, removeAllFromCart, updateQuantity, clearCart, isCartOpen, openCart, closeCart, refreshCartData }}
+      value={{ 
+        cart, 
+        addToCart, 
+        removeFromCart, 
+        removeAllFromCart, 
+        updateQuantity, 
+        clearCart, 
+        isCartOpen, 
+        openCart, 
+        closeCart, 
+        refreshCartData,
+        usePoints,
+        setUsePoints,
+        availablePoints,
+        setAvailablePoints
+      }}
     >
       {children}
     </CartContext.Provider>

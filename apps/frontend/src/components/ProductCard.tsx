@@ -22,6 +22,7 @@ export interface Product {
     sku?: string;
     units_per_box?: number;
     iva?: number;
+    redeemable_with_points?: boolean;
     translations?: Array<{
         locale: string;
         name: string;

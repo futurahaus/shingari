@@ -132,6 +132,12 @@ export class ProductResponseDto {
   })
   iva?: number;
 
+  @ApiProperty({
+    description: 'Indica si el producto se puede canjear con puntos',
+    example: true,
+  })
+  redeemable_with_points: boolean;
+
   @ApiPropertyOptional({
     description: 'Traducciones del producto',
     type: [ProductTranslationDto],

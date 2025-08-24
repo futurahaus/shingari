@@ -10,7 +10,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from '@/contexts/I18nContext';
 
 const CarritoPage = () => {
-  const { cart, removeFromCart, removeAllFromCart } = useCart();
+  const { cart, removeFromCart, removeAllFromCart, usePoints, setUsePoints, availablePoints, setAvailablePoints } = useCart();
   const router = useRouter();
   const { user, isLoading } = useAuth();
   const { t } = useTranslation();
@@ -18,6 +18,23 @@ const CarritoPage = () => {
 
   // Helper function to check if user is business
   const isBusinessUser = user?.roles?.includes('business') || false;
+
+  // Helper function to check if cart has redeemable products
+  const hasRedeemableProducts = cart.some(item => item.redeemable_with_points === true);
+  
+  // Helper function to calculate points discount
+  const calculatePointsDiscount = () => {
+    if (!usePoints || !hasRedeemableProducts) return 0;
+    
+    // Calculate total of redeemable products only
+    const redeemableTotal = cart
+      .filter(item => item.redeemable_with_points === true)
+      .reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    // Points discount: 1 point = 1 euro, but can't exceed the redeemable total
+    const maxDiscount = Math.min(availablePoints, redeemableTotal);
+    return maxDiscount;
+  };
 
   // Helper function to format IVA display
   const formatIvaDisplay = (iva: number | undefined): string => {
@@ -126,9 +143,21 @@ const CarritoPage = () => {
     }
   }, [user, isLoading]);
 
+  // Load user points when authenticated
+  useEffect(() => {
+    if (user) {
+      // TODO: Replace with actual API call to get user points
+      // For now, using a placeholder value
+      setAvailablePoints(50); // Placeholder: 50 points
+    } else {
+      setAvailablePoints(0);
+    }
+  }, [user, setAvailablePoints]);
+
   // Calculate totals
   const total = cart.reduce((sum, p) => sum + p.price * p.quantity, 0);
-  const discount = 0; // Placeholder for discounts
+  const pointsDiscount = calculatePointsDiscount();
+  const discount = pointsDiscount; // Points discount
   const discountedTotal = total - discount;
   const shipping = 0; // Placeholder shipping `cost`
 
@@ -303,6 +332,34 @@ const CarritoPage = () => {
         <aside className="w-full lg:w-96 bg-white rounded-lg shadow p-6 flex flex-col gap-4">
           <h2 className="font-bold text-lg mb-2">{t('cart.purchase_summary')}</h2>
 
+          {/* Points Checkbox - Only show if user has redeemable products */}
+          {hasRedeemableProducts && (
+            <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+              <div className="flex items-center justify-between mb-2">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={usePoints}
+                    onChange={(e) => setUsePoints(e.target.checked)}
+                    className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                    disabled={!user}
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    Usar puntos acumulados
+                  </span>
+                </label>
+                <span className="text-sm text-gray-600">
+                  {availablePoints} puntos disponibles
+                </span>
+              </div>
+              {usePoints && (
+                <div className="text-xs text-gray-500">
+                  Solo se aplican a productos canjeables. 1 punto = 1€ de descuento.
+                </div>
+              )}
+            </div>
+          )}
+
           {isBusinessUser ? (
             // Business user: show IVA breakdown
             <>
@@ -330,6 +387,12 @@ const CarritoPage = () => {
                 <span>{t('cart.product_prices')}</span>
                 <span>€{total.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
+              {pointsDiscount > 0 && (
+                <div className="flex justify-between text-sm text-green-600">
+                  <span>Descuento por puntos</span>
+                  <span>- €{pointsDiscount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm">
                 <span>{t('cart.discounts')}</span>
                 <span>- €{discount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
