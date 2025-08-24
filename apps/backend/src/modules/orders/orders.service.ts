@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { UserService } from '../user/user.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderResponseDto } from './dto/order-response.dto';
 
@@ -7,7 +8,10 @@ import { OrderResponseDto } from './dto/order-response.dto';
 export class OrdersService {
   private readonly logger = new Logger(OrdersService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly userService: UserService,
+  ) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
     this.logger.log(
@@ -15,7 +19,8 @@ export class OrdersService {
       JSON.stringify(createOrderDto, null, 2),
     );
 
-    const { order_lines, order_addresses, order_payments, ...orderData } = createOrderDto;
+    const { order_lines, order_addresses, order_payments, ...orderData } =
+      createOrderDto;
 
     try {
       const { user_id, ...orderDataWithoutUserId } = orderData;
@@ -26,6 +31,7 @@ export class OrdersService {
         data: {
           user_id,
           ...orderDataWithoutUserId,
+          used_points: createOrderDto.used_points,
           order_lines: {
             create: order_lines.map((line) => ({
               product_id: line.product_id,
@@ -63,7 +69,28 @@ export class OrdersService {
         },
       });
 
-      this.logger.log('Order created successfully:', (order as { id: string }).id);
+      this.logger.log(
+        'Order created successfully:',
+        (order as { id: string }).id,
+      );
+
+      // Discount points if used in the order
+      if (createOrderDto.used_points && createOrderDto.used_points > 0) {
+        try {
+          const remainingPoints = await this.userService.discountPointsToUser(
+            user_id,
+            createOrderDto.used_points,
+          );
+          this.logger.log(
+            `Points discounted successfully. Remaining points: ${remainingPoints}`,
+          );
+        } catch (error) {
+          this.logger.error('Error discounting points:', error);
+          // Note: We don't throw here to avoid rolling back the order creation
+          // The order is still valid even if points discount fails
+        }
+      }
+
       return this.mapToOrderResponse(order);
     } catch (error) {
       this.logger.error('Error creating order:', error);
@@ -117,7 +144,7 @@ export class OrdersService {
       },
     });
 
-    return orders.map(order => this.mapToOrderResponse(order));
+    return orders.map((order) => this.mapToOrderResponse(order));
   }
 
   async findAll(): Promise<OrderResponseDto[]> {
@@ -146,15 +173,15 @@ export class OrdersService {
     page = 1,
     limit = 20,
     sortField = 'created_at',
-    sortDirection = 'desc'
+    sortDirection = 'desc',
   ): Promise<[OrderResponseDto[], number]> {
     // Define valid sort fields and their mappings
     const sortFieldMap: Record<string, any> = {
-      'created_at': { created_at: sortDirection },
-      'updated_at': { updated_at: sortDirection },
-      'total_amount': { total_amount: sortDirection },
-      'status': { status: sortDirection },
-      'user_name': { users: { users: { first_name: sortDirection } } },
+      created_at: { created_at: sortDirection },
+      updated_at: { updated_at: sortDirection },
+      total_amount: { total_amount: sortDirection },
+      status: { status: sortDirection },
+      user_name: { users: { users: { first_name: sortDirection } } },
     };
 
     const orderBy = sortFieldMap[sortField] || { created_at: 'desc' };
@@ -193,9 +220,10 @@ export class OrdersService {
       id: order.id,
       user_id: order.user_id,
       user_email: order.users?.email || null,
-      user_name: order.users?.users?.first_name && order.users?.users?.last_name
-        ? `${order.users.users.first_name} ${order.users.users.last_name}`.trim()
-        : order.users?.users?.trade_name || null,
+      user_name:
+        order.users?.users?.first_name && order.users?.users?.last_name
+          ? `${order.users.users.first_name} ${order.users.users.last_name}`.trim()
+          : order.users?.users?.trade_name || null,
       user_trade_name: order.users?.users?.trade_name || null,
       status: order.status,
       total_amount: order.total_amount,

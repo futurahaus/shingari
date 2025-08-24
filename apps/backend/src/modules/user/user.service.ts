@@ -64,7 +64,7 @@ export class UserService {
   constructor(
     private readonly supabaseService: DatabaseService,
     private readonly prismaService: PrismaService,
-  ) { }
+  ) {}
 
   async updateUserProfile(
     userId: string,
@@ -162,7 +162,7 @@ export class UserService {
 
   async getUserById(userId: string): Promise<UserDetailsResponse> {
     try {
-      const user = await this.prismaService.auth_users.findUnique({
+      const user = (await this.prismaService.auth_users.findUnique({
         where: { id: userId },
         select: {
           id: true,
@@ -179,13 +179,14 @@ export class UserService {
           },
           users: true,
         },
-      }) as AdminUser | null;
+      })) as AdminUser | null;
 
       if (!user) {
         throw new NotFoundException('User not found');
       }
 
-      const publicProfile: Partial<PublicUser> = user.users as Partial<PublicUser>;
+      const publicProfile: Partial<PublicUser> =
+        user.users as Partial<PublicUser>;
 
       return {
         id: user.id,
@@ -194,7 +195,9 @@ export class UserService {
         updated_at: user.updated_at,
         email_confirmed_at: user.email_confirmed_at,
         last_sign_in_at: user.last_sign_in_at,
-        roles: Array.isArray(user.user_roles) ? user.user_roles.map((ur) => ur.roles.name) : [],
+        roles: Array.isArray(user.user_roles)
+          ? user.user_roles.map((ur) => ur.roles.name)
+          : [],
         meta_data: user.raw_user_meta_data,
         first_name: publicProfile?.first_name ?? '',
         last_name: publicProfile?.last_name ?? '',
@@ -255,7 +258,7 @@ export class UserService {
 
   async updateUser(
     userId: string,
-    userData: { email?: string; roles?: string[];[key: string]: any },
+    userData: { email?: string; roles?: string[]; [key: string]: any },
   ): Promise<UserDetailsResponse> {
     try {
       // Update user in Supabase auth if email is provided
@@ -460,16 +463,19 @@ export class UserService {
     }
 
     // Check if a special price already exists for this user and product
-    const existingDiscount = await this.prismaService.products_discounts.findFirst({
-      where: {
-        user_id: user_id,
-        product_id: product_id,
-        is_active: true,
-      },
-    });
+    const existingDiscount =
+      await this.prismaService.products_discounts.findFirst({
+        where: {
+          user_id: user_id,
+          product_id: product_id,
+          is_active: true,
+        },
+      });
 
     if (existingDiscount) {
-      throw new Error('A special price already exists for this user and product');
+      throw new Error(
+        'A special price already exists for this user and product',
+      );
     }
 
     // Create the special price
@@ -511,7 +517,7 @@ export class UserService {
       is_active?: boolean;
       valid_from?: string;
       valid_to?: string;
-    }
+    },
   ) {
     const {
       user_id,
@@ -523,9 +529,10 @@ export class UserService {
     } = updateSpecialPriceData;
 
     // Verify that the special price exists
-    const existingSpecialPrice = await this.prismaService.products_discounts.findUnique({
-      where: { id: parseInt(specialPriceId) },
-    });
+    const existingSpecialPrice =
+      await this.prismaService.products_discounts.findUnique({
+        where: { id: parseInt(specialPriceId) },
+      });
 
     if (!existingSpecialPrice) {
       throw new Error('Special price not found');
@@ -550,42 +557,47 @@ export class UserService {
     }
 
     // Check if another special price already exists for this user and product (excluding current one)
-    const existingDiscount = await this.prismaService.products_discounts.findFirst({
-      where: {
-        user_id: user_id,
-        product_id: product_id,
-        is_active: true,
-        id: { not: parseInt(specialPriceId) },
-      },
-    });
+    const existingDiscount =
+      await this.prismaService.products_discounts.findFirst({
+        where: {
+          user_id: user_id,
+          product_id: product_id,
+          is_active: true,
+          id: { not: parseInt(specialPriceId) },
+        },
+      });
 
     if (existingDiscount) {
-      throw new Error('A special price already exists for this user and product');
+      throw new Error(
+        'A special price already exists for this user and product',
+      );
     }
 
     // Update the special price
-    const updatedSpecialPrice = await this.prismaService.products_discounts.update({
-      where: { id: parseInt(specialPriceId) },
-      data: {
-        user_id,
-        product_id,
-        price: new Prisma.Decimal(price),
-        is_active,
-        valid_from: valid_from ? new Date(valid_from) : null,
-        valid_to: valid_to ? new Date(valid_to) : null,
-      },
-      include: {
-        products: {
-          select: { name: true, list_price: true, wholesale_price: true },
+    const updatedSpecialPrice =
+      await this.prismaService.products_discounts.update({
+        where: { id: parseInt(specialPriceId) },
+        data: {
+          user_id,
+          product_id,
+          price: new Prisma.Decimal(price),
+          is_active,
+          valid_from: valid_from ? new Date(valid_from) : null,
+          valid_to: valid_to ? new Date(valid_to) : null,
         },
-      },
-    });
+        include: {
+          products: {
+            select: { name: true, list_price: true, wholesale_price: true },
+          },
+        },
+      });
 
     return {
       id: updatedSpecialPrice.id,
       product: updatedSpecialPrice.products?.name || '',
       priceRetail: updatedSpecialPrice.products?.list_price?.toString() || '',
-      priceWholesale: updatedSpecialPrice.products?.wholesale_price?.toString() || '',
+      priceWholesale:
+        updatedSpecialPrice.products?.wholesale_price?.toString() || '',
       priceClient: updatedSpecialPrice.price?.toString() || '',
       isActive: updatedSpecialPrice.is_active,
       validFrom: updatedSpecialPrice.valid_from,
@@ -596,12 +608,13 @@ export class UserService {
   // Delete a special price for a user
   async deleteSpecialPrice(userId: string, specialPriceId: string) {
     // Verify that the special price exists and belongs to the user
-    const existingSpecialPrice = await this.prismaService.products_discounts.findFirst({
-      where: {
-        id: parseInt(specialPriceId),
-        user_id: userId,
-      },
-    });
+    const existingSpecialPrice =
+      await this.prismaService.products_discounts.findFirst({
+        where: {
+          id: parseInt(specialPriceId),
+          user_id: userId,
+        },
+      });
 
     if (!existingSpecialPrice) {
       throw new Error('Special price not found');
@@ -613,5 +626,48 @@ export class UserService {
     });
 
     return { success: true, message: 'Special price deleted successfully' };
+  }
+
+  /**
+   * Discount points from user's account
+   * @param userId - The user ID
+   * @param pointsToDiscount - Number of points to discount
+   * @returns Updated user points
+   */
+  async discountPointsToUser(
+    userId: string,
+    pointsToDiscount: number,
+  ): Promise<number> {
+    if (pointsToDiscount <= 0) {
+      return 0; // No points to discount
+    }
+
+    // Get current user points
+    const user = await this.prismaService.public_users.findUnique({
+      where: { uuid: userId },
+      select: { points: true },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const currentPoints = user.points || 0;
+
+    // Check if user has enough points
+    if (currentPoints < pointsToDiscount) {
+      throw new Error('Insufficient points');
+    }
+
+    // Calculate new points balance
+    const newPointsBalance = currentPoints - pointsToDiscount;
+
+    // Update user points
+    await this.prismaService.public_users.update({
+      where: { uuid: userId },
+      data: { points: newPointsBalance },
+    });
+
+    return newPointsBalance;
   }
 }

@@ -192,6 +192,7 @@ export default function PagosPage() {
         total_amount: finalTotal,
         currency: 'EUR',
         status: 'pending',
+        used_points: pointsDiscount,
         order_lines: cart.map(item => ({
           product_id: item.id,
           product_name: item.name,
