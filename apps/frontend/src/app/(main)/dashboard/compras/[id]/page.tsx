@@ -425,8 +425,8 @@ export default function OrderDetailPage() {
                 {order.used_points > 0 && (
                   <div className="border-t border-gray-100 pt-2 mt-2">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-900">🎁 Puntos utilizados</span>
-                      <span className="text-sm font-medium text-green-600">{order.used_points} puntos</span>
+                      <span className="text-sm font-medium text-gray-900">🎁 {t('order_details.points_used')}</span>
+                      <span className="text-sm font-medium text-green-600">{order.used_points} {t('order_details.points')}</span>
                     </div>
                   </div>
                 )}

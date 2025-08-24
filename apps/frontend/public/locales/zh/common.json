@@ -80,7 +80,8 @@
     "no_products_found": "该类别下没有找到产品。",
     "no_favorites_found": "您还没有收藏的产品。",
     "loading_more": "加载更多产品...",
-    "loading_products": "加载产品中..."
+    "loading_products": "加载产品中...",
+    "redeemable_products": "可兑换产品"
   },
   "quantity_controls": {
     "quantity_updated": "数量已更新",
@@ -126,7 +127,16 @@
     "update_quantity": "更新数量",
     "product_removed": "产品已移除",
     "cart_emptied": "购物车已清空",
-    "all_products_removed": "所有产品已从购物车中移除。"
+    "all_products_removed": "所有产品已从购物车中移除。",
+    "use_accumulated_points": "使用累积积分",
+    "points_available": "积分可用",
+    "points_info": "仅适用于可兑换产品。1积分 = 1欧元折扣。",
+    "points_discount": "积分折扣",
+    "subtotal_no_iva": "小计（不含增值税）",
+    "total_iva": "增值税总计",
+    "group_totals": "组总计",
+    "iva_percentage": "增值税",
+    "no_iva": "无增值税"
   },
   "auth": {
     "login": "登录",
@@ -290,7 +300,9 @@
     "product": "产品",
     "price": "价格",
     "unit_price": "单价",
-    "quantity": "数量"
+    "quantity": "数量",
+    "points_used": "使用的积分",
+    "points": "积分"
   },
   "profile": {
     "name": "姓名",
@@ -347,7 +359,17 @@
     "shipping_address": "送货地址",
     "city": "城市",
     "client": "客户",
-    "spain": "西班牙"
+    "spain": "西班牙",
+    "redeemable_products": "可兑换产品",
+    "products": "产品",
+    "available_points": "可用积分",
+    "points_applied_discount": "已应用积分折扣",
+    "points_used": "已使用积分",
+    "subtotal_no_iva": "小计（不含增值税）",
+    "total_iva": "增值税总计",
+    "products_iva": "产品增值税",
+    "products_no_iva": "无增值税产品",
+    "iva_percentage": "增值税"
   },
   "congrats": {
     "title": "购买确认",

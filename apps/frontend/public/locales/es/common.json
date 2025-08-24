@@ -80,7 +80,8 @@
     "no_products_found": "No se han encontrado productos para esta categoría.",
     "no_favorites_found": "No tienes productos favoritos aún.",
     "loading_more": "Cargando más productos...",
-    "loading_products": "Cargando productos..."
+    "loading_products": "Cargando productos...",
+    "redeemable_products": "Productos Canjeables"
   },
   "quantity_controls": {
     "quantity_updated": "Cantidad actualizada",
@@ -126,7 +127,16 @@
     "update_quantity": "Actualizar Cantidad",
     "product_removed": "Producto eliminado",
     "cart_emptied": "Carrito vacío",
-    "all_products_removed": "Todos los productos eliminados del carrito."
+    "all_products_removed": "Todos los productos eliminados del carrito.",
+    "use_accumulated_points": "Usar puntos acumulados",
+    "points_available": "puntos disponibles",
+    "points_info": "Solo se aplican a productos canjeables. 1 punto = 1€ de descuento.",
+    "points_discount": "Descuento por puntos",
+    "subtotal_no_iva": "Subtotal (sin IVA)",
+    "total_iva": "IVA Total",
+    "group_totals": "Totales del grupo",
+    "iva_percentage": "IVA",
+    "no_iva": "Sin IVA"
   },
   "auth": {
     "login": "Iniciar Sesión",
@@ -290,7 +300,9 @@
     "product": "Producto",
     "price": "Precio",
     "unit_price": "Precio unitario",
-    "quantity": "Cantidad"
+    "quantity": "Cantidad",
+    "points_used": "Puntos utilizados",
+    "points": "puntos"
   },
   "profile": {
     "name": "Nombre",
@@ -350,7 +362,17 @@
     "shipping_address": "Dirección de envío",
     "city": "Ciudad",
     "client": "Cliente",
-    "spain": "España"
+    "spain": "España",
+    "redeemable_products": "Productos canjeables",
+    "products": "productos",
+    "available_points": "Puntos disponibles",
+    "points_applied_discount": "Descuento por puntos aplicado",
+    "points_used": "Puntos utilizados",
+    "subtotal_no_iva": "Subtotal (sin IVA)",
+    "total_iva": "IVA Total",
+    "products_iva": "Productos IVA",
+    "products_no_iva": "Productos sin IVA",
+    "iva_percentage": "IVA"
   },
   "congrats": {
     "title": "Confirmación de compra",

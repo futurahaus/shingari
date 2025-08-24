@@ -301,29 +301,29 @@ const CarritoPage = () => {
                         <div className="flex justify-between items-start">
                           <div>
                             <h4 className="font-bold text-sm text-green-800">
-                              Totales del grupo {group.ivaValue !== undefined
-                                ? `IVA ${formatIvaDisplay(group.ivaValue)}%`
-                                : 'Sin IVA'
+                              {t('cart.group_totals')} {group.ivaValue !== undefined
+                                ? `${t('cart.iva_percentage')} ${formatIvaDisplay(group.ivaValue)}%`
+                                : t('cart.no_iva')
                               }
                             </h4>
                           </div>
                           <div className="text-right space-y-1">
                             <div className="flex justify-between items-center gap-4">
-                              <span className="text-xs text-green-600">Subtotal:</span>
+                              <span className="text-xs text-green-600">{t('cart.subtotal')}:</span>
                               <span className="font-semibold text-sm text-green-800">
                                 €{breakdown.subtotal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </span>
                             </div>
                             {group.ivaValue && breakdown.ivaAmount > 0 && (
                               <div className="flex justify-between items-center gap-4">
-                                <span className="text-xs text-green-600">IVA ({formatIvaDisplay(group.ivaValue)}%):</span>
+                                <span className="text-xs text-green-600">{t('cart.iva_percentage')} ({formatIvaDisplay(group.ivaValue)}%):</span>
                                 <span className="font-semibold text-sm text-green-800">
                                   €{breakdown.ivaAmount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </span>
                               </div>
                             )}
                             <div className="flex justify-between items-center gap-4 pt-1 border-t border-green-200">
-                              <span className="text-sm font-semibold text-green-700">Total:</span>
+                              <span className="text-sm font-semibold text-green-700">{t('cart.total')}:</span>
                               <span className="font-bold text-lg text-green-800">
                                 €{breakdown.total.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </span>
@@ -355,16 +355,16 @@ const CarritoPage = () => {
                     disabled={!user}
                   />
                   <span className="text-sm font-medium text-gray-700">
-                    Usar puntos acumulados
+                    {t('cart.use_accumulated_points')}
                   </span>
                 </label>
                 <span className="text-sm text-gray-600">
-                  {availablePoints} puntos disponibles
+                  {availablePoints} {t('cart.points_available')}
                 </span>
               </div>
               {usePoints && (
                 <div className="text-xs text-gray-500">
-                  Solo se aplican a productos canjeables. 1 punto = 1€ de descuento.
+                  {t('cart.points_info')}
                 </div>
               )}
             </div>
@@ -374,11 +374,11 @@ const CarritoPage = () => {
             // Business user: show IVA breakdown
             <>
               <div className="flex justify-between text-sm">
-                <span>Subtotal (sin IVA)</span>
+                <span>{t('cart.subtotal_no_iva')}</span>
                 <span>€{grandTotals.grandSubtotal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span>IVA Total</span>
+                <span>{t('cart.total_iva')}</span>
                 <span>€{grandTotals.grandIvaAmount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
               <div className="flex justify-between text-sm">
@@ -399,7 +399,7 @@ const CarritoPage = () => {
               </div>
               {pointsDiscount > 0 && (
                 <div className="flex justify-between text-sm text-green-600">
-                  <span>Descuento por puntos</span>
+                  <span>{t('cart.points_discount')}</span>
                   <span>- €{pointsDiscount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
               )}

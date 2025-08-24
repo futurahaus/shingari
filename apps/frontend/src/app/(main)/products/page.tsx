@@ -113,7 +113,7 @@ const CategorySidebar = ({
                          color={isRedeemableSelected ? "primary-main" : "primary"}
                          className={`transition-colors ${isRedeemableSelected ? "cursor-default" : "hover:text-black"}`}
                      >
-                         🎁 Canjeables
+                         🎁 {t('products.redeemable_products')}
                      </Text>
                  </a>
             </div>
@@ -296,6 +296,7 @@ const ProductsSection = ({
     categoryFilter,
     isFavoritesSelected,
     categories,
+    isRedeemableSelected,
 }: {
     selectedCategory: string | null;
     selectedParent?: Category | null;
@@ -303,6 +304,7 @@ const ProductsSection = ({
     categoryFilter: string | null;
     isFavoritesSelected: boolean;
     categories: Category[];
+    isRedeemableSelected: boolean;
 }) => {
     const { t } = useTranslation();
     const searchParams = useSearchParams();
@@ -418,7 +420,7 @@ const ProductsSection = ({
         <main className="flex-1">
             <Breadcrumb selectedCategory={selectedCategory} />
             <Text as="h1" size="4xl" weight="extrabold" color="primary" className="mb-6">
-                {selectedCategory || t('products.all_products')}
+                {isRedeemableSelected ? t('products.redeemable_products') : selectedCategory || t('products.all_products')}
             </Text>
             <ProductFilters
                 filters={filters}
@@ -552,6 +554,7 @@ function ProductsPageContent() {
                     categoryFilter={categoryFilter}
                     isFavoritesSelected={isFavoritesSelected}
                     categories={categories}
+                    isRedeemableSelected={isRedeemableSelected}
                 />
             </div>
         </div>

@@ -442,8 +442,8 @@ export default function PagosPage() {
                           <div className="flex justify-between">
                             <span className="text-sm font-bold text-black">
                               {group.ivaValue !== undefined 
-                                ? `Productos IVA ${formatIvaDisplay(group.ivaValue)}% (sin IVA)`
-                                : 'Productos sin IVA'
+                                ? `${t('payment.products_iva')} ${formatIvaDisplay(group.ivaValue)}% (${t('payment.subtotal_no_iva')})`
+                                : t('payment.products_no_iva')
                               }
                             </span>
                             <span className="text-sm font-bold text-black">
@@ -468,7 +468,7 @@ export default function PagosPage() {
                           {group.ivaValue && breakdown.ivaAmount > 0 && (
                             <div className="flex justify-between">
                               <span className="text-sm font-medium text-black">
-                                IVA {formatIvaDisplay(group.ivaValue)}%
+                                {t('payment.iva_percentage')} {formatIvaDisplay(group.ivaValue)}%
                               </span>
                               <span className="text-sm font-medium text-black">
                                 €{breakdown.ivaAmount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -482,13 +482,13 @@ export default function PagosPage() {
                     {/* Total breakdown */}
                     <div className="border-t border-gray-200 pt-4 space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-sm font-bold text-black">Subtotal (sin IVA)</span>
+                        <span className="text-sm font-bold text-black">{t('payment.subtotal_no_iva')}</span>
                         <span className="text-sm font-bold text-black">
                           €{grandTotals.grandSubtotal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm font-bold text-black">IVA Total</span>
+                        <span className="text-sm font-bold text-black">{t('payment.total_iva')}</span>
                         <span className="text-sm font-bold text-black">
                           €{grandTotals.grandIvaAmount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
@@ -504,28 +504,28 @@ export default function PagosPage() {
                       {hasRedeemableProducts && usePoints && (
                         <>
                           <div className="flex justify-between">
-                            <span className="text-sm font-medium text-gray-600">Productos canjeables</span>
+                            <span className="text-sm font-medium text-gray-600">{t('payment.redeemable_products')}</span>
                             <span className="text-sm font-medium text-gray-600">
-                              {cart.filter(item => item.redeemable_with_points === true).length} productos
+                              {cart.filter(item => item.redeemable_with_points === true).length} {t('payment.products')}
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-sm font-medium text-gray-600">Puntos disponibles</span>
+                            <span className="text-sm font-medium text-gray-600">{t('payment.available_points')}</span>
                             <span className="text-sm font-medium text-gray-600">
-                              {availablePoints} puntos
+                              {availablePoints} {t('order_details.points')}
                             </span>
                           </div>
                           {pointsDiscount > 0 && (
                             <>
                               <div className="flex justify-between text-green-600">
-                                <span className="text-sm font-bold">Descuento por puntos aplicado</span>
+                                <span className="text-sm font-bold">{t('payment.points_applied_discount')}</span>
                                 <span className="text-sm font-bold">
                                   -€{pointsDiscount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </span>
                               </div>
                               <div className="flex justify-between text-xs text-gray-500">
-                                <span>Puntos utilizados</span>
-                                <span>{pointsDiscount} puntos</span>
+                                <span>{t('payment.points_used')}</span>
+                                <span>{pointsDiscount} {t('order_details.points')}</span>
                               </div>
                             </>
                           )}
@@ -569,28 +569,28 @@ export default function PagosPage() {
                     {hasRedeemableProducts && usePoints && (
                       <div className="border-t border-gray-200 pt-4 space-y-2">
                         <div className="flex justify-between">
-                          <span className="text-sm font-medium text-gray-600">Productos canjeables</span>
+                          <span className="text-sm font-medium text-gray-600">{t('payment.redeemable_products')}</span>
                           <span className="text-sm font-medium text-gray-600">
-                            {cart.filter(item => item.redeemable_with_points === true).length} productos
+                            {cart.filter(item => item.redeemable_with_points === true).length} {t('payment.products')}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-sm font-medium text-gray-600">Puntos disponibles</span>
+                          <span className="text-sm font-medium text-gray-600">{t('payment.available_points')}</span>
                           <span className="text-sm font-medium text-gray-600">
-                            {availablePoints} puntos
+                            {availablePoints} {t('order_details.points')}
                           </span>
                         </div>
                         {pointsDiscount > 0 && (
                           <>
                             <div className="flex justify-between text-green-600">
-                              <span className="text-sm font-bold">Descuento por puntos aplicado</span>
+                              <span className="text-sm font-bold">{t('payment.points_applied_discount')}</span>
                               <span className="text-sm font-bold">
                                 -€{pointsDiscount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </span>
                             </div>
                             <div className="flex justify-between text-xs text-gray-500">
-                              <span>Puntos utilizados</span>
-                              <span>{pointsDiscount} puntos</span>
+                              <span>{t('payment.points_used')}</span>
+                              <span>{pointsDiscount} {t('order_details.points')}</span>
                             </div>
                           </>
                         )}
