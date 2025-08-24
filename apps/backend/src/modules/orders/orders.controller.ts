@@ -8,7 +8,6 @@ import {
   Request as NestRequest,
   ParseUUIDPipe,
   Logger,
-  BadRequestException,
   Query,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
