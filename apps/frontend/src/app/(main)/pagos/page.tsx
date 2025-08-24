@@ -9,7 +9,7 @@ import { useTranslation } from '@/contexts/I18nContext';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function PagosPage() {
-  const { cart, clearCart } = useCart();
+  const { cart, clearCart, usePoints, availablePoints } = useCart();
   const router = useRouter();
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -17,6 +17,23 @@ export default function PagosPage() {
   
   // Helper function to check if user is business
   const isBusinessUser = user?.roles?.includes('business') || false;
+
+  // Helper function to check if cart has redeemable products
+  const hasRedeemableProducts = cart.some(item => item.redeemable_with_points === true);
+
+  // Helper function to calculate points discount
+  const calculatePointsDiscount = () => {
+    if (!usePoints || !hasRedeemableProducts) return 0;
+    
+    // Calculate total of redeemable products only
+    const redeemableTotal = cart
+      .filter(item => item.redeemable_with_points === true)
+      .reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    // Points discount: 1 point = 1 euro, but can't exceed the redeemable total
+    const maxDiscount = Math.min(availablePoints, redeemableTotal);
+    return maxDiscount;
+  };
   
   // Helper function to format IVA display
   const formatIvaDisplay = (iva: number | undefined): string => {
@@ -120,7 +137,8 @@ export default function PagosPage() {
   // Calcular totales
   const total = cart.reduce((sum, p) => sum + p.price * p.quantity, 0);
   const shipping = 0; // Gastos de envío
-  const discount = 0; // Descuento por puntos
+  const pointsDiscount = calculatePointsDiscount(); // Descuento por puntos
+  const discount = pointsDiscount; // Descuento total
   
   // Use IVA calculations for business users, regular calculations for others
   const finalTotal = isBusinessUser 
@@ -480,6 +498,38 @@ export default function PagosPage() {
                           €{shipping.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </div>
+
+                      {/* Points Information for Business Users */}
+                      {hasRedeemableProducts && usePoints && (
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-sm font-medium text-gray-600">Productos canjeables</span>
+                            <span className="text-sm font-medium text-gray-600">
+                              {cart.filter(item => item.redeemable_with_points === true).length} productos
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm font-medium text-gray-600">Puntos disponibles</span>
+                            <span className="text-sm font-medium text-gray-600">
+                              {availablePoints} puntos
+                            </span>
+                          </div>
+                          {pointsDiscount > 0 && (
+                            <>
+                              <div className="flex justify-between text-green-600">
+                                <span className="text-sm font-bold">Descuento por puntos aplicado</span>
+                                <span className="text-sm font-bold">
+                                  -€{pointsDiscount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-xs text-gray-500">
+                                <span>Puntos utilizados</span>
+                                <span>{pointsDiscount} puntos</span>
+                              </div>
+                            </>
+                          )}
+                        </>
+                      )}
                     </div>
                   </>
                 ) : (
@@ -513,6 +563,38 @@ export default function PagosPage() {
                         €{shipping.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </div>
+
+                    {/* Points Information */}
+                    {hasRedeemableProducts && usePoints && (
+                      <div className="border-t border-gray-200 pt-4 space-y-2">
+                        <div className="flex justify-between">
+                          <span className="text-sm font-medium text-gray-600">Productos canjeables</span>
+                          <span className="text-sm font-medium text-gray-600">
+                            {cart.filter(item => item.redeemable_with_points === true).length} productos
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm font-medium text-gray-600">Puntos disponibles</span>
+                          <span className="text-sm font-medium text-gray-600">
+                            {availablePoints} puntos
+                          </span>
+                        </div>
+                        {pointsDiscount > 0 && (
+                          <>
+                            <div className="flex justify-between text-green-600">
+                              <span className="text-sm font-bold">Descuento por puntos aplicado</span>
+                              <span className="text-sm font-bold">
+                                -€{pointsDiscount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-xs text-gray-500">
+                              <span>Puntos utilizados</span>
+                              <span>{pointsDiscount} puntos</span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
 
                     {/* Discount */}
                     <div className="flex justify-between">
