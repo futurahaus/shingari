@@ -28,6 +28,9 @@ export default function AdminProductsPage() {
 
   const [sortField, setSortField] = useState<'created_at' | 'updated_at'>('created_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  
+  // Filter states
+  const [redeemableWithPoints, setRedeemableWithPoints] = useState<boolean | undefined>(undefined);
 
   // Usar el hook para obtener productos con searchQuery (no searchTerm)
   const {
@@ -36,7 +39,7 @@ export default function AdminProductsPage() {
     error,
     lastPage,
     refetch
-  } = useAdminProducts({ page, limit: 10, search: searchQuery, sortField, sortDirection });
+  } = useAdminProducts({ page, limit: 10, search: searchQuery, sortField, sortDirection, redeemableWithPoints });
 
   const openEditModal = (product: Product) => {
     setSelectedProduct(product);
@@ -125,42 +128,74 @@ export default function AdminProductsPage() {
             Gestiona control de mercadería
           </Text>
 
-          {/* Buscador y Ordenador */}
-          <div className="flex flex-col md:flex-row md:items-center gap-4">
-            <div className="relative max-w-md flex-1">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FaSearch className="h-5 w-5 text-gray-400" />
+          {/* Buscador, Filtros y Ordenador */}
+          <div className="flex flex-col gap-4">
+            {/* Buscador */}
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
+              <div className="relative max-w-md flex-1">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaSearch className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Buscar por SKU, nombre o ID..."
+                  value={searchTerm}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  onBlur={handleSearchSubmit}
+                  onKeyPress={handleKeyPress}
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-black focus:border-black"
+                />
               </div>
-              <input
-                type="text"
-                placeholder="Buscar por SKU, nombre o ID..."
-                value={searchTerm}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                onBlur={handleSearchSubmit}
-                onKeyPress={handleKeyPress}
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-black focus:border-black"
-              />
+              <div className="flex gap-2 items-center">
+                <label htmlFor="sortField" className="text-sm text-gray-600">Ordenar por:</label>
+                <select
+                  id="sortField"
+                  value={sortField}
+                  onChange={e => setSortField(e.target.value as 'created_at' | 'updated_at')}
+                  className="border border-gray-300 rounded-lg px-2 py-1 text-sm"
+                >
+                  <option value="created_at">Más recientes</option>
+                  <option value="updated_at">Última actualización</option>
+                </select>
+                <select
+                  id="sortDirection"
+                  value={sortDirection}
+                  onChange={e => setSortDirection(e.target.value as 'asc' | 'desc')}
+                  className="border border-gray-300 rounded-lg px-2 py-1 text-sm"
+                >
+                  <option value="desc">Descendente</option>
+                  <option value="asc">Ascendente</option>
+                </select>
+              </div>
             </div>
-            <div className="flex gap-2 items-center">
-              <label htmlFor="sortField" className="text-sm text-gray-600">Ordenar por:</label>
-              <select
-                id="sortField"
-                value={sortField}
-                onChange={e => setSortField(e.target.value as 'created_at' | 'updated_at')}
-                className="border border-gray-300 rounded-lg px-2 py-1 text-sm"
-              >
-                <option value="created_at">Más recientes</option>
-                <option value="updated_at">Última actualización</option>
-              </select>
-              <select
-                id="sortDirection"
-                value={sortDirection}
-                onChange={e => setSortDirection(e.target.value as 'asc' | 'desc')}
-                className="border border-gray-300 rounded-lg px-2 py-1 text-sm"
-              >
-                <option value="desc">Descendente</option>
-                <option value="asc">Ascendente</option>
-              </select>
+
+            {/* Filtros */}
+            <div className="flex flex-wrap gap-4 items-center">
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-700">Filtros:</label>
+              </div>
+              
+              {/* Filtro de productos canjeables con puntos */}
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-gray-600">Canjeables con puntos:</label>
+                <select
+                  value={redeemableWithPoints === undefined ? 'all' : redeemableWithPoints.toString()}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === 'all') {
+                      setRedeemableWithPoints(undefined);
+                    } else {
+                      setRedeemableWithPoints(value === 'true');
+                    }
+                    setPage(1); // Resetear a la primera página cuando se cambia el filtro
+                  }}
+                  className="border border-gray-300 rounded-lg px-2 py-1 text-sm"
+                >
+                  <option value="all">Todos los productos</option>
+                  <option value="true">Solo canjeables</option>
+                  <option value="false">Solo no canjeables</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>

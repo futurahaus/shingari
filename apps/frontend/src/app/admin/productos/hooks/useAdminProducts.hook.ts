@@ -5,7 +5,7 @@ import { useNotificationContext } from '@/contexts/NotificationContext';
 import { PaginatedProductsResponse } from '../interfaces/product.interfaces';
 
 // Función para obtener productos paginados
-const fetchAdminProducts = async (page: number, limit: number = 20, search?: string, sortField?: string, sortDirection?: string): Promise<PaginatedProductsResponse> => {
+const fetchAdminProducts = async (page: number, limit: number = 20, search?: string, sortField?: string, sortDirection?: string, redeemableWithPoints?: boolean): Promise<PaginatedProductsResponse> => {
     const params = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
@@ -21,6 +21,9 @@ const fetchAdminProducts = async (page: number, limit: number = 20, search?: str
     if (sortDirection) {
         params.append('sortDirection', sortDirection);
     }
+    if (redeemableWithPoints !== undefined) {
+        params.append('redeemable_with_points', redeemableWithPoints.toString());
+    }
 
     const response = await api.get<PaginatedProductsResponse>(`/products/admin/all?${params.toString()}`);
     return response;
@@ -32,10 +35,11 @@ interface UseAdminProductsOptions {
     search?: string;
     sortField?: string;
     sortDirection?: string;
+    redeemableWithPoints?: boolean;
     enabled?: boolean;
 }
 
-export const useAdminProducts = ({ page, limit = 20, search = '', sortField = 'created_at', sortDirection = 'desc', enabled = true }: UseAdminProductsOptions) => {
+export const useAdminProducts = ({ page, limit = 20, search = '', sortField = 'created_at', sortDirection = 'desc', redeemableWithPoints, enabled = true }: UseAdminProductsOptions) => {
     const { showError } = useNotificationContext();
 
     const {
@@ -44,8 +48,8 @@ export const useAdminProducts = ({ page, limit = 20, search = '', sortField = 'c
         error,
         refetch
     } = useQuery({
-        queryKey: ['admin-products', page, limit, search, sortField, sortDirection],
-        queryFn: () => fetchAdminProducts(page, limit, search, sortField, sortDirection),
+        queryKey: ['admin-products', page, limit, search, sortField, sortDirection, redeemableWithPoints],
+        queryFn: () => fetchAdminProducts(page, limit, search, sortField, sortDirection, redeemableWithPoints),
         staleTime: 2 * 60 * 1000, // 2 minutos - los productos pueden cambiar
         gcTime: 5 * 60 * 1000, // 5 minutos en cache
         retry: 2,

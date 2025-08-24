@@ -982,6 +982,7 @@ export class ProductsService {
       search,
       sortField = 'created_at',
       sortDirection = 'desc',
+      redeemable_with_points,
     } = queryProductDto;
 
     const skip = (page - 1) * limit;
@@ -1019,6 +1020,11 @@ export class ProductsService {
               },
             ]),
       ];
+    }
+
+    // Agregar filtro de productos canjeables con puntos si se proporciona
+    if (redeemable_with_points !== undefined) {
+      where.redeemable_with_points = redeemable_with_points;
     }
 
     const orderBy: object = {};
