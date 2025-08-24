@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from '@/contexts/I18nContext';
 import { UserProfile } from "../complete-profile/page";
 import { api } from "@/lib/api";
+import { Button } from "@/app/ui/components/Button";
 
 const CarritoPage = () => {
   const { cart, removeFromCart, removeAllFromCart, usePoints, setUsePoints, availablePoints, setAvailablePoints } = useCart();
@@ -418,24 +419,29 @@ const CarritoPage = () => {
             </>
           )}
           <div className="flex flex-col gap-2 mt-6">
-            <button
-              className="w-full bg-[#EA3D15] text-white py-3 rounded-md font-semibold text-lg hover:bg-[#d43e0e] transition cursor-pointer"
-              onClick={() => {
+            <Button
+              testID="continue-purchase-button"
+              type="primary"  
+              size="lg"
+              text={t('cart.continue_purchase')}
+              onPress={() => {
                 if (!user) {
                   setShowLoginModal(true);
                   return;
                 }
                 router.push('/pagos');
               }}
-            >
-              {t('cart.continue_purchase')}
-            </button>
-            <button className="w-full bg-white border border-gray-300 text-gray-800 py-3 rounded-md font-semibold text-lg hover:bg-gray-100 transition cursor-pointer"
-              onClick={() => {
+              disabled={!user || cart.length === 0}
+            />
+            <Button
+              testID="view-more-products-button"
+              type="secondary"
+              size="lg"
+              text={t('cart.view_more_products')}
+              onPress={() => {
                 router.push('/products');
-              }}>
-              {t('cart.view_more_products')}
-            </button>
+              }}
+            />
           </div>
         </aside>
       </main>
