@@ -19,6 +19,7 @@ interface PublicUser {
   shipping_address?: string;
   postal_code?: string;
   internal_id?: string;
+  points?: number;
 }
 
 interface AdminUser {
@@ -57,6 +58,7 @@ export interface UserDetailsResponse {
   postal_code?: string;
   internal_id?: string;
   public_profile: Partial<PublicUser>;
+  points: number;
 }
 
 @Injectable()
@@ -198,6 +200,7 @@ export class UserService {
         roles: Array.isArray(user.user_roles)
           ? user.user_roles.map((ur) => ur.roles.name)
           : [],
+        points: publicProfile?.points ?? 0,
         meta_data: user.raw_user_meta_data,
         first_name: publicProfile?.first_name ?? '',
         last_name: publicProfile?.last_name ?? '',

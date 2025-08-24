@@ -21,6 +21,7 @@ interface UserDetails {
   postal_code?: string;
   internal_id?: string;
   roles?: string[];
+  points?: number;
 }
 
 interface UserInfoProps {
@@ -119,6 +120,10 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, onUserLoaded }) => {
         <div>
           <div className="text-xs text-gray-500">Perfil Completo</div>
           <div className="font-medium text-gray-900">{user.profile_is_complete ? 'Sí' : 'No'}</div>
+        </div>
+        <div>
+          <div className="text-xs text-gray-500">Puntos</div>
+          <div className="font-medium text-gray-900">{user.points || '-'}</div>
         </div>
         <div>
           <div className="text-xs text-gray-500">Roles</div>
