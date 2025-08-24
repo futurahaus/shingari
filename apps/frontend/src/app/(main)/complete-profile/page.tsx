@@ -21,6 +21,7 @@ export interface UserProfile extends Record<string, unknown> {
   shipping_address: string;
   cp: string;
   referral_source: string;
+  points?: number;
 }
 
 export default function CompleteProfilePage() {
@@ -42,7 +43,7 @@ export default function CompleteProfilePage() {
     billing_address: '',
     shipping_address: '',
     cp: '',
-    referral_source: ''
+    referral_source: '',
   });
 
   useEffect(() => {

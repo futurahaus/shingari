@@ -227,7 +227,10 @@ export class AuthService {
       });
 
       // Get user data from Supabase
-      const { data: { user }, error } = await this.databaseService
+      const {
+        data: { user },
+        error,
+      } = await this.databaseService
         .getAdminClient()
         .auth.admin.getUserById(payload.sub);
 
@@ -247,7 +250,9 @@ export class AuthService {
         throw rolesError;
       }
 
-      const customRoles = (userRoles || []).map((ur: { roles: { name: string }[] }) => ur.roles[0]?.name).filter(Boolean);
+      const customRoles = (userRoles || [])
+        .map((ur: { roles: { name: string }[] }) => ur.roles[0]?.name)
+        .filter(Boolean);
       const roles = ['authenticated', ...customRoles];
 
       // Create enriched user object with roles
@@ -411,7 +416,6 @@ export class AuthService {
       }
 
       this.logger.logInfo(`Password reset successfully for user ${user.id}`);
-
     } catch (error) {
       this.logger.logError('Password Reset Confirmation', error);
       if (error instanceof BadRequestException) {
@@ -426,21 +430,23 @@ export class AuthService {
       const { userId, role } = assignRoleDto;
 
       // First, check if the role exists in the roles table
-      const { data: existingRole, error: roleError } = await this.databaseService
-        .getAdminClient()
-        .from('roles')
-        .select('id')
-        .eq('name', role)
-        .single();
+      const { data: existingRole, error: roleError } =
+        await this.databaseService
+          .getAdminClient()
+          .from('roles')
+          .select('id')
+          .eq('name', role)
+          .single();
 
       if (roleError || !existingRole) {
         // Role doesn't exist, create it
-        const { data: newRole, error: createRoleError } = await this.databaseService
-          .getAdminClient()
-          .from('roles')
-          .insert({ name: role, description: `${role} role` })
-          .select('id')
-          .single();
+        const { data: newRole, error: createRoleError } =
+          await this.databaseService
+            .getAdminClient()
+            .from('roles')
+            .insert({ name: role, description: `${role} role` })
+            .select('id')
+            .single();
 
         if (createRoleError) {
           this.logger.logError('Role Creation', createRoleError);
@@ -496,7 +502,9 @@ export class AuthService {
         throw new BadRequestException('Failed to update user metadata');
       }
 
-      this.logger.logInfo(`Role ${role} assigned successfully to user ${userId}`);
+      this.logger.logInfo(
+        `Role ${role} assigned successfully to user ${userId}`,
+      );
     } catch (error) {
       this.logger.logError('Role Assignment', error);
       throw error;
@@ -525,12 +533,13 @@ export class AuthService {
       };
 
       // Update the public.users table with all the data
-      const { data: userProfile, error: profileError } = await this.databaseService
-        .getAdminClient()
-        .from('users')
-        .upsert(profileData, { onConflict: 'uuid' })
-        .select()
-        .single();
+      const { data: userProfile, error: profileError } =
+        await this.databaseService
+          .getAdminClient()
+          .from('users')
+          .upsert(profileData, { onConflict: 'uuid' })
+          .select()
+          .single();
 
       if (profileError) {
         this.logger.logError('Profile Update', profileError);
@@ -548,12 +557,13 @@ export class AuthService {
   async getCompleteUserProfile(userId: string) {
     try {
       // Get user profile data from public.users table
-      const { data: userProfile, error: profileError } = await this.databaseService
-        .getAdminClient()
-        .from('users')
-        .select('*')
-        .eq('uuid', userId)
-        .single();
+      const { data: userProfile, error: profileError } =
+        await this.databaseService
+          .getAdminClient()
+          .from('users')
+          .select('*')
+          .eq('uuid', userId)
+          .single();
 
       if (profileError && profileError.code !== 'PGRST116') {
         // PGRST116 is "not found" error, which is fine for new users
@@ -562,7 +572,10 @@ export class AuthService {
       }
 
       // Get user email from auth.users table
-      const { data: { user }, error: userError } = await this.databaseService
+      const {
+        data: { user },
+        error: userError,
+      } = await this.databaseService
         .getAdminClient()
         .auth.admin.getUserById(userId);
 
@@ -589,6 +602,7 @@ export class AuthService {
         billing_address: userProfile?.billing_address || null,
         shipping_address: userProfile?.shipping_address || null,
         referral_source: userProfile?.referral_source || null,
+        points: userProfile?.points || 0,
       };
 
       return completeProfile;

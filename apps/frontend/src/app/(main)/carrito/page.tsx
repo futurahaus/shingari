@@ -8,11 +8,30 @@ import LoginModal from '@/components/auth/LoginModal';
 import { QuantityControls } from '@/components/QuantityControls';
 import { useState, useEffect } from 'react';
 import { useTranslation } from '@/contexts/I18nContext';
+import { UserProfile } from "../complete-profile/page";
+import { api } from "@/lib/api";
 
 const CarritoPage = () => {
   const { cart, removeFromCart, removeAllFromCart, usePoints, setUsePoints, availablePoints, setAvailablePoints } = useCart();
   const router = useRouter();
   const { user, isLoading } = useAuth();
+  
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const data = await api.get<UserProfile>('/auth/me');
+        setAvailablePoints(data.points || 0);
+      } catch (err) {
+        console.error('Error fetching user data:', err);
+        if (err instanceof Error && err.message === 'Authentication required') {
+          window.location.hash = '#login?from=/complete-profile';
+        }
+      } 
+    };
+
+    fetchUserData();
+  }, []);
+
   const { t } = useTranslation();
   const [showLoginModal, setShowLoginModal] = useState(false);
 
@@ -142,17 +161,6 @@ const CarritoPage = () => {
       setShowLoginModal(false);
     }
   }, [user, isLoading]);
-
-  // Load user points when authenticated
-  useEffect(() => {
-    if (user) {
-      // TODO: Replace with actual API call to get user points
-      // For now, using a placeholder value
-      setAvailablePoints(50); // Placeholder: 50 points
-    } else {
-      setAvailablePoints(0);
-    }
-  }, [user, setAvailablePoints]);
 
   // Calculate totals
   const total = cart.reduce((sum, p) => sum + p.price * p.quantity, 0);
