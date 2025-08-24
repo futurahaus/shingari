@@ -28,6 +28,7 @@ export interface Product {
   unit_name?: string;
   units_per_box?: number;
   iva?: number;
+  redeemable_with_points?: boolean;
   translations?: ProductTranslation[];
 }
 
@@ -51,6 +52,7 @@ export interface CreateProductData {
   unit_id?: number;
   units_per_box?: number;
   iva?: number;
+  redeemable_with_points?: boolean;
 }
 
 export interface UpdateProductData {
@@ -65,6 +67,7 @@ export interface UpdateProductData {
   unit_id?: number;
   units_per_box?: number;
   iva?: number;
+  redeemable_with_points?: boolean;
 }
 
 // Props interfaces para componentes

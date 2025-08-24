@@ -309,13 +309,23 @@ export class UserService {
         'nombrefiscal',
         'tax_name',
         'internal_id',
+        'points',
       ];
 
       const publicData: Record<string, any> = {};
 
       for (const key of publicFields) {
         if (key in userData) {
-          publicData[key] = userData[key];
+          // Special handling for points field to ensure it's saved as number
+          if (key === 'points') {
+            const pointsValue = userData[key];
+            publicData[key] =
+              pointsValue !== null && pointsValue !== undefined
+                ? parseInt(pointsValue.toString(), 10)
+                : 0;
+          } else {
+            publicData[key] = userData[key];
+          }
         }
       }
 

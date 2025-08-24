@@ -87,6 +87,23 @@ export const EditUserModal: React.FC<EditUserModalProps> = ({
               <label className="block text-xs text-gray-500">ID Interno</label>
               <input name="internal_id" value={editForm.internal_id || ''} onChange={handleEditChange} className="w-full border rounded px-2 py-1 text-gray-900" />
             </div>
+            <div>
+              <label className="block text-xs text-gray-500">Puntos Acumulados</label>
+              <input 
+                name="points" 
+                type="number" 
+                min="0" 
+                step="1"
+                value={editForm.points || 0} 
+                onChange={handleEditChange} 
+                className="w-full border rounded px-2 py-1 text-gray-900" 
+                placeholder="0"
+                title="Cantidad de puntos que tiene el usuario para canjear productos"
+              />
+              <div className="text-xs text-gray-400 mt-1">
+                1 punto = 1€ de descuento en productos canjeables
+              </div>
+            </div>
           </div>
 
           {/* Role Management Section */}

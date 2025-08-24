@@ -51,6 +51,7 @@ interface Order {
   order_lines: OrderLine[];
   order_addresses: OrderAddress[];
   order_payments: OrderPayment[];
+  used_points?: number;
 }
 
 const formatCurrency = (amount: string) => {
@@ -122,7 +123,7 @@ export default function AdminOrderDetailPage() {
             </div>
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
               <div className="text-gray-500">Puntos</div>
-              <div className="text-gray-900 text-right">-</div>
+              <div className="text-gray-900 text-right">{order.used_points || '-'}</div>
             </div>
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
               <div className="text-gray-500">Total</div>

@@ -27,6 +27,7 @@ export interface UserDetails {
   postal_code?: string;
   internal_id?: string;
   roles?: string[];
+  points?: number;
 }
 
 export default function UserDetailsPage() {

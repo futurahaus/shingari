@@ -770,6 +770,7 @@ export class ProductsService {
       images,
       unit_id = 1,
       iva,
+      redeemable_with_points,
     } = updateProductDto;
 
     const existingProduct = await this.prisma.products.findUnique({
@@ -784,6 +785,7 @@ export class ProductsService {
       data: {
         name,
         description,
+        redeemable_with_points,
         list_price:
           listPrice !== undefined ? new Prisma.Decimal(listPrice) : undefined,
         wholesale_price:

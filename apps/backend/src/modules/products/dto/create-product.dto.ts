@@ -8,6 +8,7 @@ import {
   IsArray,
   ArrayMinSize,
   IsInt,
+  IsBoolean,
 } from 'class-validator';
 
 // Ejemplo de un DTO para un item de metadatos, si los productos tuvieran campos flexibles
@@ -60,7 +61,8 @@ export class CreateProductDto {
   stock?: number;
 
   @ApiPropertyOptional({
-    description: 'IDs o nombres de las categorías a las que pertenece el producto',
+    description:
+      'IDs o nombres de las categorías a las que pertenece el producto',
     example: ['electronics', 'gaming', 'laptops'],
     type: [String],
   })
@@ -127,6 +129,15 @@ export class CreateProductDto {
   @IsOptional()
   iva?: number;
 
+  @ApiPropertyOptional({
+    description: 'Si el producto es redimible con puntos',
+    example: true,
+    type: Boolean,
+  })
+  @IsBoolean()
+  @IsOptional()
+  redeemable_with_points?: boolean;
+
   // Si tuvieras metadatos o atributos customizables podrías usar algo como:
   // @ApiPropertyOptional({ type: [ProductMetadataDto], description: 'Metadatos adicionales del producto' })
   // @IsArray()
@@ -134,4 +145,4 @@ export class CreateProductDto {
   // @Type(() => ProductMetadataDto)
   // @IsOptional()
   // metadata?: ProductMetadataDto[];
-} 
+}

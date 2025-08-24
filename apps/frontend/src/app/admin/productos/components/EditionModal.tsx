@@ -23,6 +23,7 @@ export const EditionModal: React.FC<EditionModalProps> = ({
     stock: 0,
     categoryIds: [],
     iva: 0,
+    redeemable_with_points: false,
   });
 
   // Initialize form when product changes
@@ -40,6 +41,7 @@ export const EditionModal: React.FC<EditionModalProps> = ({
         unit_id: product.unit_id ?? undefined,
         units_per_box: product.units_per_box ?? 0,
         iva: product.iva ?? 0,
+        redeemable_with_points: product.redeemable_with_points ?? false,
       });
     }
   }, [product]);
@@ -64,6 +66,7 @@ export const EditionModal: React.FC<EditionModalProps> = ({
         stock: 0,
         categoryIds: [],
         iva: 0,
+        redeemable_with_points: false,
       });
       onProductUpdated();
       showSuccess('Producto Actualizado', 'El producto se ha actualizado exitosamente');
@@ -170,6 +173,21 @@ export const EditionModal: React.FC<EditionModalProps> = ({
                     onChange={(e) => setEditForm({ ...editForm, iva: parseFloat(e.target.value) || 0 })}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Canjeable con puntos</label>
+                  <div className="flex items-center mt-2">
+                    <input
+                      type="checkbox"
+                      id="redeemable_with_points"
+                      checked={editForm.redeemable_with_points || false}
+                      onChange={(e) => setEditForm({ ...editForm, redeemable_with_points: e.target.checked })}
+                      className="h-4 w-4 text-black focus:ring-black border-gray-300 rounded"
+                    />
+                    <label htmlFor="redeemable_with_points" className="ml-2 text-sm text-gray-700">
+                      Este producto se puede canjear con puntos
+                    </label>
+                  </div>
                 </div>
               </div>
               <div>
