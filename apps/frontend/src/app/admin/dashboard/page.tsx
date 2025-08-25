@@ -217,7 +217,7 @@ export default function AdminDashboardPage() {
       },
       {
         label: 'Ingresos mensuales',
-        value: `€${dashboardData.orders.monthlyRevenue.toFixed(2)}`,
+        value: `€${+dashboardData.orders.monthlyRevenue}`,
         change: '+8%', // Mock change
         changeType: 'positive'
       }
