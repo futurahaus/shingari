@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrderResponseDto } from './dto/order-response.dto';
 
 @Injectable()
@@ -94,6 +95,53 @@ export class OrdersService {
     }
 
     return this.mapToOrderResponse(order);
+  }
+
+  async update(id: string, updateOrderDto: UpdateOrderDto): Promise<OrderResponseDto> {
+    this.logger.log(`Updating order ${id} with data:`, JSON.stringify(updateOrderDto, null, 2));
+
+    // Verificar que la orden existe
+    const existingOrder = await this.prisma.orders.findUnique({
+      where: { id },
+    });
+
+    if (!existingOrder) {
+      throw new NotFoundException(`Order with ID ${id} not found`);
+    }
+
+    try {
+      const updatedOrder = await this.prisma.orders.update({
+        where: { id },
+        data: {
+          ...updateOrderDto,
+          updated_at: new Date(),
+        },
+        include: {
+          order_lines: {
+            include: {
+              products: {
+                select: {
+                  image_url: true,
+                },
+              },
+            },
+          },
+          order_addresses: true,
+          order_payments: true,
+          users: {
+            include: {
+              users: true,
+            },
+          },
+        },
+      });
+
+      this.logger.log(`Order ${id} updated successfully`);
+      return this.mapToOrderResponse(updatedOrder);
+    } catch (error) {
+      this.logger.error(`Error updating order ${id}:`, error);
+      throw error;
+    }
   }
 
   async findByUserId(userId: string): Promise<OrderResponseDto[]> {

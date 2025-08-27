@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Text } from "@/app/ui/components/Text";
 import { OrdersListSkeleton } from "./components/OrdersListSkeleton";
+import { StatusChip } from "./components/StatusChip";
 import { useAdminOrders } from "./hooks/useAdminOrders.hook";
 import { FaSearch, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import { Button } from "@/app/ui/components/Button";
@@ -143,7 +144,10 @@ export default function AdminOrdersPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">€{Number(order.total_amount).toFixed(2)}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${order.status === "Completada" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"}`}>{order.status}</span>
+                    <StatusChip 
+                      orderId={order.id} 
+                      currentStatus={order.status}
+                    />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString()}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
