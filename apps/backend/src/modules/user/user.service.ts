@@ -152,6 +152,7 @@ export class UserService {
           city: publicProfile?.city ?? '',
           province: publicProfile?.province ?? '',
           country: publicProfile?.country ?? '',
+          tax_name: publicProfile?.tax_name ?? '',
           phone: publicProfile?.phone ?? '',
           profile_is_complete: publicProfile?.profile_is_complete ?? false,
         };

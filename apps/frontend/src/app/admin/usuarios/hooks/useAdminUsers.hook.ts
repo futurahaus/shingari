@@ -10,6 +10,7 @@ export interface User {
   first_name?: string;
   last_name?: string;
   trade_name?: string;
+  tax_name?: string;
   city?: string;
   province?: string;
   country?: string;
