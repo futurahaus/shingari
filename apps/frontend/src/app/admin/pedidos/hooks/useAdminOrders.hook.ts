@@ -14,7 +14,6 @@ export interface Order {
   currency: string;
   created_at: string;
   updated_at: string;
-  used_points?: number;
   earned_points?: number;
   // Add more fields as needed
 }
@@ -23,7 +22,6 @@ export interface UpdateOrderData extends Record<string, unknown> {
   status?: string;
   total_amount?: number;
   currency?: string;
-  used_points?: number;
   earned_points?: number;
 }
 

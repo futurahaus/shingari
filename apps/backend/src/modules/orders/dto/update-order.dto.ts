@@ -5,50 +5,41 @@ enum OrderStates {
   pending = 'pending',
   accepted = 'accepted',
   delivered = 'delivered',
-  cancelled = 'cancelled'
+  cancelled = 'cancelled',
 }
 
 export class UpdateOrderDto {
-  @ApiProperty({ 
-    description: 'Estado de la orden', 
+  @ApiProperty({
+    description: 'Estado de la orden',
     enum: OrderStates,
     example: 'accepted',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsEnum(OrderStates)
   status?: OrderStates;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Monto total de la orden',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsNumber()
   total_amount?: number;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Moneda',
     example: 'EUR',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
   currency?: string;
 
-  @ApiProperty({ 
-    description: 'Puntos utilizados en la orden',
-    required: false,
-    default: 0
-  })
-  @IsOptional()
-  @IsNumber()
-  used_points?: number;
-
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Puntos ganados en la orden',
     required: false,
-    default: 0
+    default: 0,
   })
   @IsOptional()
   @IsNumber()

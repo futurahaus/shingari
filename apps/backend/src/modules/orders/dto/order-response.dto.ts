@@ -120,9 +120,6 @@ export class OrderResponseDto {
   @ApiProperty({ description: 'Fecha de actualización' })
   updated_at: Date;
 
-  @ApiProperty({ description: 'Puntos utilizados en la orden', required: false })
-  used_points?: number;
-
   @ApiProperty({ description: 'Líneas de la orden', type: [OrderLineResponseDto] })
   order_lines: OrderLineResponseDto[];
 

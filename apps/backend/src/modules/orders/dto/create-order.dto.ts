@@ -125,11 +125,6 @@ export class CreateOrderDto {
   @IsString()
   currency?: string;
 
-  @ApiProperty({ description: 'Puntos utilizados en la orden', required: false, default: 0 })
-  @IsOptional()
-  @IsNumber()
-  used_points?: number;
-
   @ApiProperty({ description: 'Líneas de la orden', type: [CreateOrderLineDto] })
   @IsArray()
   @ValidateNested({ each: true })
