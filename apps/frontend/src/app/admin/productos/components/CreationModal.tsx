@@ -30,6 +30,8 @@ export const CreationModal: React.FC<CreationModalProps> = ({
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileButtonClick = (e?: React.MouseEvent) => {
@@ -77,21 +79,80 @@ export const CreationModal: React.FC<CreationModalProps> = ({
   const handleRemoveImage = (idx: number) => {
     const newFiles = [...selectedFiles];
     const newPreviews = [...previewUrls];
+    const newUploadedUrls = [...uploadedImageUrls];
     newFiles.splice(idx, 1);
     newPreviews.splice(idx, 1);
+    newUploadedUrls.splice(idx, 1);
     setSelectedFiles(newFiles);
     setPreviewUrls(newPreviews);
+    setUploadedImageUrls(newUploadedUrls);
+  };
+
+  // Subir imágenes a Supabase
+  const uploadImagesToSupabase = async (files: File[]): Promise<string[]> => {
+    const uploadedUrls: string[] = [];
+    
+    for (const file of files) {
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const token = localStorage.getItem('accessToken');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/products/upload-image`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Error al subir imagen: ${response.status} ${response.statusText} - ${errorText}`);
+        }
+
+        const result = await response.json();
+        uploadedUrls.push(result.url);
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        throw error;
+      }
+    }
+
+    return uploadedUrls;
   };
 
   const handleCreateProduct = async () => {
     try {
+      setUploadingImages(true);
+
+      // Subir imágenes si hay archivos seleccionados
+      let imageUrls: string[] = [];
+      if (selectedFiles.length > 0) {
+        try {
+          imageUrls = await uploadImagesToSupabase(selectedFiles);
+          setUploadedImageUrls(imageUrls);
+        } catch {
+          showError('Error al subir imágenes', 'No se pudieron subir las imágenes. Por favor, inténtalo de nuevo.');
+          setUploadingImages(false);
+          return;
+        }
+      }
+
+      // Preparar payload con las URLs de las imágenes
+      const payload = { 
+        ...createForm,
+        images: imageUrls // Array con todas las URLs de las imágenes
+      };
+
       // Only include unit_id if valid
-      const payload = { ...createForm };
       if (!payload.unit_id || isNaN(Number(payload.unit_id))) {
         delete payload.unit_id;
       }
 
       await api.post('/products', payload as unknown as Record<string, unknown>);
+      
+      // Limpiar formulario y estados
       onClose();
       setCreateForm({
         name: '',
@@ -102,14 +163,20 @@ export const CreationModal: React.FC<CreationModalProps> = ({
         categoryIds: [],
         iva: 0,
       });
+      setSelectedFiles([]);
+      setPreviewUrls([]);
+      setUploadedImageUrls([]);
+      
       onProductCreated();
-      showSuccess('Producto Creado', 'El producto se ha creado exitosamente');
+      showSuccess('Producto Creado', 'El producto se ha creado exitosamente con sus imágenes');
     } catch (err: unknown) {
       if (err instanceof Error) {
         showError('Error al Crear', 'Error al crear producto: ' + (err.message || 'Error desconocido'));
       } else {
         showError('Error al Crear', 'Error al crear producto: Error desconocido');
       }
+    } finally {
+      setUploadingImages(false);
     }
   };
 
@@ -158,7 +225,14 @@ export const CreationModal: React.FC<CreationModalProps> = ({
               </div>
               {/* Sección de subida de imágenes */}
               <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-2">
-                <label className="block text-lg font-semibold text-gray-900 mb-4">Subir fotos</label>
+                <label className="block text-lg font-semibold text-gray-900 mb-4">
+                  Subir fotos
+                  {uploadingImages && (
+                    <span className="ml-2 text-sm text-blue-600 font-normal">
+                      (Subiendo imágenes...)
+                    </span>
+                  )}
+                </label>
                 <div className="flex items-center gap-4 mb-6">
                   <Button
                     onPress={handleFileButtonClick}
@@ -167,6 +241,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                     testID="select-files-button"
                     inline
                     htmlType="button"
+                    disabled={uploadingImages}
                   />
                   <input
                     ref={fileInputRef}
@@ -339,9 +414,10 @@ export const CreationModal: React.FC<CreationModalProps> = ({
               <Button
                 onPress={handleCreateProduct}
                 type="primary-admin"
-                text="Subir Producto"
+                text={uploadingImages ? "Subiendo..." : "Subir Producto"}
                 testID="create-product-button"
                 inline
+                disabled={uploadingImages}
               />
             </div>
           </form>

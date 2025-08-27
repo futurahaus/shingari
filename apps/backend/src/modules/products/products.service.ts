@@ -4,7 +4,9 @@ import {
   NotFoundException,
   BadRequestException,
   Inject,
+  Logger,
 } from '@nestjs/common';
+import { DatabaseService } from '../database/database.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   Prisma,
@@ -51,9 +53,12 @@ type DiscountWithProductDetails = ProductDiscountPrismaType & {
 
 @Injectable()
 export class ProductsService {
+  private readonly logger = new Logger(ProductsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly databaseService: DatabaseService,
   ) {} // Inyectar PrismaService
 
   async getUserRole(userId: string): Promise<string | null> {
@@ -1477,5 +1482,78 @@ export class ProductsService {
 
     // Clear cache
     await this.clearProductCache();
+  }
+
+  async uploadImage(file: Express.Multer.File): Promise<{ url: string; path: string }> {
+    try {
+      // Validar el archivo
+      if (!file) {
+        throw new BadRequestException('No se proporcionó ningún archivo.');
+      }
+
+      // Validar tipo de archivo
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.mimetype)) {
+        throw new BadRequestException('Tipo de archivo no válido. Solo se permiten imágenes JPEG, PNG y WebP.');
+      }
+
+      // Validar tamaño (máximo 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        throw new BadRequestException('El archivo es demasiado grande. El tamaño máximo es 5MB.');
+      }
+
+      // Generar nombre único para el archivo
+      const timestamp = Date.now();
+      const fileExtension = file.originalname.split('.').pop();
+      const fileName = `product_image_${timestamp}.${fileExtension}`;
+      const filePath = `products/${fileName}`;
+
+      // Subir archivo a Supabase Storage
+      const { error } = await this.databaseService.getAdminClient().storage
+        .from('shingari')
+        .upload(filePath, file.buffer, {
+          contentType: file.mimetype,
+          cacheControl: '3600',
+        });
+
+      if (error) {
+        this.logger.error('Error uploading image to Supabase:', error);
+        throw new Error('Error al subir la imagen');
+      }
+
+      // Obtener la URL pública del archivo
+      const { data: urlData } = this.databaseService.getAdminClient().storage
+        .from('shingari')
+        .getPublicUrl(filePath);
+
+      this.logger.log(`Image uploaded successfully: ${filePath}`);
+
+      return {
+        url: urlData.publicUrl,
+        path: filePath,
+      };
+    } catch (error) {
+      this.logger.error('Error in uploadImage:', error);
+      throw error;
+    }
+  }
+
+  async deleteImage(filePath: string): Promise<void> {
+    try {
+      const { error } = await this.databaseService.getAdminClient().storage
+        .from('shingari')
+        .remove([filePath]);
+
+      if (error) {
+        this.logger.error('Error deleting image from Supabase:', error);
+        throw new Error('Error al eliminar la imagen');
+      }
+
+      this.logger.log(`Image deleted successfully: ${filePath}`);
+    } catch (error) {
+      this.logger.error('Error in deleteImage:', error);
+      throw error;
+    }
   }
 }
