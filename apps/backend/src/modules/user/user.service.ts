@@ -148,6 +148,7 @@ export class UserService {
           first_name: publicProfile?.first_name ?? '',
           last_name: publicProfile?.last_name ?? '',
           trade_name: publicProfile?.trade_name ?? '',
+          internal_id: publicProfile?.internal_id ?? '',
           city: publicProfile?.city ?? '',
           province: publicProfile?.province ?? '',
           country: publicProfile?.country ?? '',

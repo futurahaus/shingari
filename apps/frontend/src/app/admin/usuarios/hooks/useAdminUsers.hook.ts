@@ -21,6 +21,7 @@ export interface User {
   email_confirmed_at?: string;
   roles: string[];
   meta_data?: unknown;
+  internal_id?: string;
 }
 
 // Función para obtener usuarios

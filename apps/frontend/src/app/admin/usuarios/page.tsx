@@ -306,7 +306,7 @@ export default function AdminUsersPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-700 underline">{user.email}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.phone || '-'}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-center text-gray-900">{user.compras ?? '-'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-900">#{user.id.slice(0, 6)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-900">#{user.internal_id}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="inline-block bg-gray-100 px-4 py-1 rounded-full font-semibold text-gray-700">
                           {user.points ?? '0'}
