@@ -82,6 +82,7 @@ export default function AdminOrderDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<Array<{ url: string; path: string; name: string }>>([]);
 
   useEffect(() => {
@@ -174,28 +175,14 @@ export default function AdminOrderDetailPage() {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('📁 handleFileChange iniciado');
-    const file = e.target.files?.[0] || null;
-    console.log('📄 Archivo seleccionado:', file);
-    
+    const file = e.target.files?.[0] || null;    
     setSelectedFile(file);
-    
-    // Subir automáticamente cuando se selecciona un archivo
-    if (file) {
-      console.log('⏰ Programando subida automática...');
-      // Pequeño delay para que el usuario vea que se seleccionó el archivo
-      setTimeout(() => {
-        console.log('🚀 Ejecutando subida automática...');
-        handleFileUpload();
-      }, 100);
-    } else {
-      console.log('❌ No se seleccionó ningún archivo');
-    }
   };
 
   const handleDeleteFile = async (filePath: string) => {
     if (!confirm('¿Estás seguro de que quieres eliminar este archivo?')) return;
 
+    setDeleting(true);
     try {
       const token = localStorage.getItem('accessToken');
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/orders/${orderId}/documents/${filePath}`, {
@@ -230,6 +217,8 @@ export default function AdminOrderDetailPage() {
     } catch (error) {
       console.error('Error al eliminar archivo:', error);
       showError('Error al eliminar archivo', 'No se pudo eliminar el archivo. Por favor, inténtalo de nuevo.');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -395,22 +384,30 @@ export default function AdminOrderDetailPage() {
                       <p className="text-xs text-gray-500">Factura subida</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <a
-                      href={file.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                    >
-                      Ver archivo
-                    </a>
-                    <button
-                      onClick={() => handleDeleteFile(file.path)}
-                      className="text-red-600 hover:text-red-800 text-sm font-medium"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
+                                     <div className="flex items-center gap-2">
+                     <a
+                       href={file.url}
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                     >
+                       Ver archivo
+                     </a>
+                     <button
+                       onClick={() => handleDeleteFile(file.path.split('/').pop() || '')}
+                       disabled={deleting}
+                       className={`text-sm font-medium transition-colors ${
+                         deleting 
+                           ? 'text-gray-400 cursor-not-allowed' 
+                           : 'text-red-600 hover:text-red-800'
+                       }`}
+                     >
+                       {deleting ? 'Eliminando...' : 'Eliminar'}
+                     </button>
+                     {deleting && (
+                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                     )}
+                   </div>
                 </div>
               ))}
             </div>
