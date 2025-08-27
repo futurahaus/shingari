@@ -13,7 +13,8 @@
     "dashboard": "Panel",
     "personal_data": "Datos Personales",
     "addresses": "Direcciones",
-    "my_orders": "Mis Compras"
+    "my_orders": "Mis Compras",
+    "my_points": "Mis Puntos"
   },
   "language": {
     "spanish": "ESP",
@@ -261,7 +262,21 @@
     "repeat_order": "Repetir compra",
     "track_order": "Seguir compra",
     "view_invoice": "Ver factura",
-    "spain": "España"
+    "spain": "España",
+    "my_points": "Mis Puntos",
+    "total_points": "Puntos Totales",
+    "points_transactions": "Transacciones de Puntos",
+    "transaction_type": "Tipo",
+    "points": "Puntos",
+    "date": "Fecha",
+    "description": "Descripción",
+    "earned": "Ganados",
+    "used": "Usados",
+    "expired": "Expirados",
+    "purchase_bonus": "Bono por compra",
+    "referral_bonus": "Bono por referido",
+    "points_used": "Puntos utilizados",
+    "points_expired": "Puntos expirados"
   },
   "order_status": {
     "pending": "Pendiente",
