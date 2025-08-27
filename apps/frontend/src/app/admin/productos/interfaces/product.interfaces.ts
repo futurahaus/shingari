@@ -1,5 +1,14 @@
 // Interfaces para la pantalla de administración de productos
 
+export interface Category {
+  id: string;
+  name: string;
+  parent_id?: string;
+  sort_order?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface ProductTranslation {
   id: number;
   product_id: number;

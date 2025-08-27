@@ -116,6 +116,7 @@ export class ProductsController {
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Número de página', example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Cantidad de productos por página', example: 20 })
   @ApiQuery({ name: 'search', required: false, type: String, description: 'Término de búsqueda (SKU, nombre, ID)', example: 'laptop' })
+  @ApiQuery({ name: 'categoryId', required: false, type: String, description: 'ID de categoría para filtrar productos. Use "none" para productos sin categoría', example: '1' })
   @ApiResponse({
     status: 200,
     description: 'Lista de productos paginada obtenida exitosamente.',

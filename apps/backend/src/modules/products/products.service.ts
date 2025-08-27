@@ -942,7 +942,7 @@ export class ProductsService {
   async findAllForAdmin(
     queryProductDto: QueryProductDto,
   ): Promise<PaginatedProductResponseDto> {
-    const { page = 1, limit = 20, search, sortField = 'created_at', sortDirection = 'desc' } = queryProductDto as any;
+    const { page = 1, limit = 20, search, sortField = 'created_at', sortDirection = 'desc', categoryId } = queryProductDto as any;
     const skip = (page - 1) * limit;
 
     const where: Prisma.productsWhereInput = {
@@ -978,6 +978,23 @@ export class ProductsService {
             },
           ]),
       ];
+    }
+
+    // Agregar filtro de categoría si se proporciona
+    if (categoryId) {
+      if (categoryId === 'none') {
+        // Filtrar productos que no pertenecen a ninguna categoría
+        where.products_categories = {
+          none: {},
+        };
+      } else {
+        // Filtrar productos que pertenecen a la categoría específica
+        where.products_categories = {
+          some: {
+            category_id: parseInt(categoryId),
+          },
+        };
+      }
     }
 
     const orderBy: any = {};
