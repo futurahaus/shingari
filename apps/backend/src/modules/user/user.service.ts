@@ -387,16 +387,43 @@ export class UserService {
     }
   }
 
-  // Get order history for a user (mock data for now)
+  // Get order history for a user
   async getUserOrders(userId: string) {
-    // TODO: Replace with real order data if available
-    return [
-      // { id: '123456', date: '2024-07-15', total: '$250.00' },
-      // { id: '123456', date: '2024-07-01', total: '$180.00' },
-      // { id: '123456', date: '2024-06-15', total: '$320.00' },
-      // { id: '123456', date: '2024-06-01', total: '$200.00' },
-      // { id: '123456', date: '2024-05-15', total: '$150.00' },
-    ];
+    try {
+      const orders = await this.prismaService.orders.findMany({
+        where: {
+          user_id: userId,
+        },
+        include: {
+          order_lines: {
+            include: {
+              products: {
+                select: {
+                  name: true,
+                  image_url: true,
+                },
+              },
+            },
+          },
+          order_payments: true,
+          order_addresses: true,
+        },
+        orderBy: {
+          created_at: 'desc',
+        },
+      });
+
+      // Serialize BigInt values for JSON response
+      const serializedOrders = JSON.parse(
+        JSON.stringify(orders, (key, value) =>
+          typeof value === 'bigint' ? Number(value) : value,
+        ),
+      ) as typeof orders;
+
+      return serializedOrders;
+    } catch (error) {
+      throw new Error(`Failed to fetch user orders: ${error.message}`);
+    }
   }
 
   // Get special prices for a user
