@@ -38,6 +38,11 @@ interface OrderPayment {
   metadata?: Record<string, unknown>;
 }
 
+interface DocumentUploadResponse {
+  url: string;
+  path: string;
+}
+
 interface Order {
   id: string;
   user_id?: string;
@@ -73,6 +78,8 @@ export default function AdminOrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<Array<{ url: string; path: string; name: string }>>([]);
 
   useEffect(() => {
     if (!orderId) return;
@@ -82,6 +89,119 @@ export default function AdminOrderDetailPage() {
       .catch(() => setError('No se pudo cargar la orden.'))
       .finally(() => setLoading(false));
   }, [orderId]);
+
+  // Log para verificar variables de entorno
+  useEffect(() => {
+    console.log('🔧 Variables de entorno:');
+    console.log('NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
+    console.log('orderId:', orderId);
+  }, [orderId]);
+
+  const handleFileUpload = async () => {
+    console.log('🔄 handleFileUpload iniciado');
+    console.log('selectedFile:', selectedFile);
+    console.log('orderId:', orderId);
+    
+    if (!selectedFile || !orderId) {
+      console.log('❌ No hay archivo seleccionado o orderId');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('documentType', 'invoice');
+
+      const token = localStorage.getItem('accessToken');
+      console.log('🔑 Token:', token ? 'Presente' : 'No encontrado');
+      
+      if (!token) {
+        throw new Error('No se encontró el token de autenticación. Por favor, inicia sesión nuevamente.');
+      }
+      
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/orders/${orderId}/upload-document`;
+      console.log('🌐 URL del API:', apiUrl);
+
+      // Intentar con fetch primero
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      console.log('📡 Respuesta del servidor:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Error en la respuesta:', errorText);
+        throw new Error(`Error al subir archivo: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+
+      const result: DocumentUploadResponse = await response.json();
+      console.log('✅ Resultado exitoso:', result);
+
+      setUploadedFiles(prev => [...prev, {
+        url: result.url,
+        path: result.path,
+        name: selectedFile.name
+      }]);
+      
+      setSelectedFile(null);
+      alert('Archivo subido exitosamente');
+    } catch (error) {
+      console.error('❌ Error al subir archivo:', error);
+      alert(`Error al subir el archivo: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('📁 handleFileChange iniciado');
+    const file = e.target.files?.[0] || null;
+    console.log('📄 Archivo seleccionado:', file);
+    
+    setSelectedFile(file);
+    
+    // Subir automáticamente cuando se selecciona un archivo
+    if (file) {
+      console.log('⏰ Programando subida automática...');
+      // Pequeño delay para que el usuario vea que se seleccionó el archivo
+      setTimeout(() => {
+        console.log('🚀 Ejecutando subida automática...');
+        handleFileUpload();
+      }, 100);
+    } else {
+      console.log('❌ No se seleccionó ningún archivo');
+    }
+  };
+
+  const handleDeleteFile = async (filePath: string, index: number) => {
+    if (!confirm('¿Estás seguro de que quieres eliminar este archivo?')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/orders/${orderId}/documents/${filePath}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al eliminar archivo');
+      }
+
+      setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+      alert('Archivo eliminado exitosamente');
+    } catch (error) {
+      console.error('Error al eliminar archivo:', error);
+      alert('Error al eliminar el archivo. Por favor, inténtalo de nuevo.');
+    }
+  };
 
   if (loading) {
     return <OrdersDetailSkeleton />;
@@ -189,18 +309,65 @@ export default function AdminOrderDetailPage() {
           <div className="flex-1">
             <label className="block font-medium mb-2">Subir factura</label>
             <div className="flex items-center gap-2 p-3 border rounded-xl bg-gray-50">
-              <label className="bg-black text-white px-4 py-2 rounded cursor-pointer hover:bg-gray-800 transition-colors">
-                Seleccionar Archivo
+              <label className={`px-4 py-2 rounded cursor-pointer transition-colors ${
+                uploading 
+                  ? 'bg-gray-400 text-white cursor-not-allowed' 
+                  : 'bg-black text-white hover:bg-gray-800'
+              }`}>
+                {uploading ? 'Subiendo...' : 'Seleccionar Archivo'}
                 <input
                   type="file"
                   className="hidden"
-                  onChange={e => setSelectedFile(e.target.files?.[0] || null)}
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.gif"
+                  onChange={handleFileChange}
+                  disabled={uploading}
                 />
               </label>
               <span className="text-gray-500 text-sm">
-                {selectedFile ? selectedFile.name : 'Ningún archivo seleccionado'}
+                {uploading ? 'Subiendo archivo...' : selectedFile ? selectedFile.name : 'Ningún archivo seleccionado'}
               </span>
+              {selectedFile && !uploading && (
+                <button
+                  onClick={handleFileUpload}
+                  className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors"
+                >
+                  Subir Manualmente
+                </button>
+              )}
+              {uploading && (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              )}
             </div>
+            
+            {/* Lista de archivos subidos */}
+            {uploadedFiles.length > 0 && (
+              <div className="mt-4">
+                <h4 className="font-medium mb-2">Archivos subidos:</h4>
+                <div className="space-y-2">
+                  {uploadedFiles.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <span className="text-sm text-gray-700">{file.name}</span>
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={file.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 text-sm"
+                        >
+                          Ver archivo
+                        </a>
+                        <button
+                          onClick={() => handleDeleteFile(file.path, index)}
+                          className="text-red-600 hover:text-red-800 text-sm"
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           <button
             className="mt-2 md:mt-0 px-6 py-2 border border-gray-400 rounded-xl text-gray-900 font-medium hover:bg-gray-100 transition-colors"

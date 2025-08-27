@@ -3,19 +3,24 @@ import {
     Get,
     Post,
     Put,
+    Delete,
     Body,
     Param,
     UseGuards,
+    UseInterceptors,
+    UploadedFile,
     Request as NestRequest,
     ParseUUIDPipe,
     Logger,
     BadRequestException,
     Query,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrderResponseDto } from './dto/order-response.dto';
+import { DocumentUploadResponseDto } from './dto/document-upload-response.dto';
 import { MailService } from '../mail/mail.service';
 import {
     ApiTags,
@@ -167,6 +172,94 @@ export class OrdersController {
             return result;
         } catch (error) {
             this.logger.error(`Error updating order ${id}:`, error);
+            throw error;
+        }
+    }
+
+    @Post(':id/upload-document')
+    @UseGuards(JwtAuthGuard)
+    @UseInterceptors(FileInterceptor('file'))
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Subir documento para una orden específica' })
+    @ApiParam({ name: 'id', description: 'ID de la orden' })
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                file: {
+                    type: 'string',
+                    format: 'binary',
+                    description: 'Archivo a subir (PDF, DOC, DOCX, XLS, XLSX, TXT, JPG, PNG, GIF)',
+                },
+                documentType: {
+                    type: 'string',
+                    description: 'Tipo de documento (opcional, por defecto: general)',
+                    example: 'invoice',
+                },
+            },
+        },
+    })
+    @ApiResponse({
+        status: 201,
+        description: 'Documento subido exitosamente.',
+        type: DocumentUploadResponseDto,
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'Archivo no válido o error en la subida.',
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'Orden no encontrada.',
+    })
+    async uploadDocument(
+        @Param('id', ParseUUIDPipe) orderId: string,
+        @UploadedFile() file: Express.Multer.File,
+        @Body('documentType') documentType: string = 'general',
+    ) {
+        this.logger.log(`Received document upload request for order ID: ${orderId}`);
+        this.logger.log('File info:', {
+            originalname: file?.originalname,
+            mimetype: file?.mimetype,
+            size: file?.size,
+        });
+
+        try {
+            const result = await this.ordersService.uploadDocument(file, orderId, documentType);
+            this.logger.log(`Document uploaded successfully for order ${orderId}`);
+            return result;
+        } catch (error) {
+            this.logger.error(`Error uploading document for order ${orderId}:`, error);
+            throw error;
+        }
+    }
+
+    @Delete(':id/documents/:filePath')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Eliminar documento de una orden' })
+    @ApiParam({ name: 'id', description: 'ID de la orden' })
+    @ApiParam({ name: 'filePath', description: 'Ruta del archivo a eliminar' })
+    @ApiResponse({
+        status: 200,
+        description: 'Documento eliminado exitosamente.',
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'Orden o archivo no encontrado.',
+    })
+    async deleteDocument(
+        @Param('id', ParseUUIDPipe) orderId: string,
+        @Param('filePath') filePath: string,
+    ) {
+        this.logger.log(`Received document deletion request for order ID: ${orderId}, file: ${filePath}`);
+
+        try {
+            await this.ordersService.deleteDocument(filePath);
+            this.logger.log(`Document deleted successfully for order ${orderId}`);
+            return { message: 'Documento eliminado exitosamente' };
+        } catch (error) {
+            this.logger.error(`Error deleting document for order ${orderId}:`, error);
             throw error;
         }
     }
