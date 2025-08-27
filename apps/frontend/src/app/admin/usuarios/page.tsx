@@ -285,7 +285,7 @@ export default function AdminUsersPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Compras</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scoring</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Puntos</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roles</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Últ. Login</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
@@ -309,7 +309,7 @@ export default function AdminUsersPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-gray-900">#{user.id.slice(0, 6)}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="inline-block bg-gray-100 px-4 py-1 rounded-full font-semibold text-gray-700">
-                          {user.scoring ?? '0'}
+                          {user.points ?? '0'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -394,9 +394,9 @@ export default function AdminUsersPage() {
                       <span className="ml-1 text-gray-900">{user.compras ?? '-'}</span>
                     </div>
                     <div>
-                      <span className="text-gray-500">Scoring:</span>
+                      <span className="text-gray-500">Puntos:</span>
                       <span className="ml-1 bg-gray-100 px-2 py-0.5 rounded-full text-gray-700">
-                        {user.scoring ?? '0'}
+                        {user.points ?? '0'}
                       </span>
                     </div>
                   </div>

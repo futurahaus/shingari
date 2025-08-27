@@ -16,7 +16,7 @@ export interface User {
   phone?: string;
   profile_is_complete?: boolean;
   compras?: number;
-  scoring?: number;
+  points?: number;
   last_sign_in_at?: string;
   email_confirmed_at?: string;
   roles: string[];

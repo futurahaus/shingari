@@ -20,7 +20,7 @@ export const UsersTableSkeleton: React.FC<UsersTableSkeletonProps> = ({
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Compras</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scoring</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Puntos</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Últ. Login</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
             </tr>
@@ -74,7 +74,7 @@ const UserRowSkeleton: React.FC = () => {
         <div className="h-4 bg-gray-300 rounded w-12"></div>
       </td>
       
-      {/* Scoring */}
+      {/* Points */}
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="h-6 bg-gray-300 rounded-full w-12"></div>
       </td>
