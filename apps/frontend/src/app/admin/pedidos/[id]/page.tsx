@@ -6,6 +6,7 @@ import { OrdersDetailSkeleton } from '../components/OrdersDetailSkeleton';
 import { StatusChip } from '../components/StatusChip';
 import { api } from '@/lib/api';
 import { Button } from '@/app/ui/components/Button';
+import { useNotificationContext } from '@/contexts/NotificationContext';
 
 interface OrderLine {
   id: string;
@@ -74,6 +75,7 @@ const formatDate = (dateString: string) => {
 export default function AdminOrderDetailPage() {
   const params = useParams();
   const orderId = params.id as string;
+  const { showSuccess, showError } = useNotificationContext();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -162,10 +164,10 @@ export default function AdminOrderDetailPage() {
       }]);
       
       setSelectedFile(null);
-      alert('Archivo subido exitosamente');
+      showSuccess('Archivo subido', 'La factura se ha subido exitosamente');
     } catch (error) {
       console.error('❌ Error al subir archivo:', error);
-      alert(`Error al subir el archivo: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      showError('Error al subir archivo', error instanceof Error ? error.message : 'Error desconocido');
     } finally {
       setUploading(false);
     }
@@ -224,10 +226,10 @@ export default function AdminOrderDetailPage() {
       }
 
       setUploadedFiles([]);
-      alert('Archivo eliminado exitosamente');
+      showSuccess('Archivo eliminado', 'La factura se ha eliminado exitosamente');
     } catch (error) {
       console.error('Error al eliminar archivo:', error);
-      alert('Error al eliminar el archivo. Por favor, inténtalo de nuevo.');
+      showError('Error al eliminar archivo', 'No se pudo eliminar el archivo. Por favor, inténtalo de nuevo.');
     }
   };
 
@@ -333,74 +335,86 @@ export default function AdminOrderDetailPage() {
               : 'No especificada'}
           </div>
         </div>
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-4 px-8">
-          <div className="flex-1">
-            <label className="block font-medium mb-2">Subir factura</label>
-            <div className="flex justify-between items-center gap-2 p-3 border rounded-xl bg-gray-50">
-              <label className={`px-4 py-2 rounded cursor-pointer transition-colors ${
-                uploading 
-                  ? 'bg-gray-400 text-white cursor-not-allowed' 
-                  : 'bg-black text-white hover:bg-gray-800'
-              }`}>
-                {uploading ? 'Subiendo...' : 'Seleccionar Archivo'}
-                <input
-                  type="file"
-                  className="hidden"
-                  accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.gif"
-                  onChange={handleFileChange}
-                  disabled={uploading}
-                />
-              </label>
-              <span className="text-gray-500 text-sm">
-                {uploading ? 'Subiendo archivo...' : selectedFile ? selectedFile.name : 'Ningún archivo seleccionado'}
-              </span>
-              {selectedFile && !uploading && (
-                <Button
-                  onPress={handleFileUpload}
-                  type="primary-admin"
-                  text="Subir Archivo"
-                  testID="upload-button"
-                  inline
-                  textProps={{
-                    size: 'sm',
-                  }}
-                />
-              )}
-              {uploading && (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-              )}
-            </div>
-            
-            {/* Lista de archivos subidos */}
-            {uploadedFiles.length > 0 && (
-              <div className="mt-4">
-                <h4 className="font-medium mb-2">Archivos subidos:</h4>
-                <div className="space-y-2">
-                  {uploadedFiles.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                      <span className="text-sm text-gray-700">{file.name}</span>
-                      <div className="flex items-center gap-2">
-                        <a
-                          href={file.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800 text-sm"
-                        >
-                          Ver archivo
-                        </a>
-                        <button
-                          onClick={() => handleDeleteFile(file.path)}
-                          className="text-red-600 hover:text-red-800 text-sm"
-                        >
-                          Eliminar
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+        <div className="mb-4 px-8">
+          <h3 className="font-bold text-lg mb-4">Factura</h3>
+          
+          {/* Mostrar input solo si no hay factura cargada */}
+          {uploadedFiles.length === 0 && (
+            <div className="flex-1">
+              <label className="block font-medium mb-2">Subir factura</label>
+              <div className="flex justify-between items-center gap-2 p-3 border rounded-xl bg-gray-50">
+                <label className={`px-4 py-2 rounded cursor-pointer transition-colors ${
+                  uploading 
+                    ? 'bg-gray-400 text-white cursor-not-allowed' 
+                    : 'bg-black text-white hover:bg-gray-800'
+                }`}>
+                  {uploading ? 'Subiendo...' : 'Seleccionar Archivo'}
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.gif"
+                    onChange={handleFileChange}
+                    disabled={uploading}
+                  />
+                </label>
+                <span className="text-gray-500 text-sm">
+                  {uploading ? 'Subiendo archivo...' : selectedFile ? selectedFile.name : 'Ningún archivo seleccionado'}
+                </span>
+                {selectedFile && !uploading && (
+                  <Button
+                    onPress={handleFileUpload}
+                    type="primary-admin"
+                    text="Subir Archivo"
+                    testID="upload-button"
+                    inline
+                    textProps={{
+                      size: 'sm',
+                    }}
+                  />
+                )}
+                {uploading && (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                )}
               </div>
-            )}
-          </div>
+            </div>
+          )}
+          
+          {/* Mostrar factura cargada */}
+          {uploadedFiles.length > 0 && (
+            <div className="space-y-2">
+              {uploadedFiles.map((file, index) => (
+                <div key={index} className="flex items-center justify-between p-3 border rounded-xl bg-gray-50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-900">{file.name}</span>
+                      <p className="text-xs text-gray-500">Factura subida</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={file.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    >
+                      Ver archivo
+                    </a>
+                    <button
+                      onClick={() => handleDeleteFile(file.path)}
+                      className="text-red-600 hover:text-red-800 text-sm font-medium"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
