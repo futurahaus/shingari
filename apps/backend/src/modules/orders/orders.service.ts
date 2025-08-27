@@ -202,6 +202,7 @@ export class OrdersService {
       currency: order.currency,
       created_at: order.created_at,
       updated_at: order.updated_at,
+      used_points: order.used_points || 0,
       order_lines: order.order_lines.map((line: any) => ({
         id: line.id,
         product_id: line.product_id,

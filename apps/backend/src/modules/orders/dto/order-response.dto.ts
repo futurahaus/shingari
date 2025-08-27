@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+enum OrderStates {
+  pending = 'pending',
+  accepted = 'accepted',
+  delivered = 'delivered',
+  cancelled = 'cancelled'
+}
+
 export class OrderLineResponseDto {
   @ApiProperty({ description: 'ID de la línea de orden' })
   id: string;
@@ -94,8 +101,12 @@ export class OrderResponseDto {
   @ApiProperty({ description: 'Nombre comercial del usuario' })
   user_trade_name?: string;
 
-  @ApiProperty({ description: 'Estado de la orden' })
-  status: string;
+  @ApiProperty({ 
+    description: 'Estado de la orden',
+    enum: OrderStates,
+    example: 'pending'
+  })
+  status: OrderStates;
 
   @ApiProperty({ description: 'Monto total de la orden' })
   total_amount: number;
@@ -108,6 +119,9 @@ export class OrderResponseDto {
 
   @ApiProperty({ description: 'Fecha de actualización' })
   updated_at: Date;
+
+  @ApiProperty({ description: 'Puntos utilizados en la orden', required: false })
+  used_points?: number;
 
   @ApiProperty({ description: 'Líneas de la orden', type: [OrderLineResponseDto] })
   order_lines: OrderLineResponseDto[];

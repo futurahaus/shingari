@@ -1,6 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, IsArray, ValidateNested, IsUUID, IsNotEmpty, Min, IsPositive } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsArray, ValidateNested, IsUUID, IsNotEmpty, Min, IsPositive, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
+
+enum OrderStates {
+  pending = 'pending',
+  accepted = 'accepted',
+  delivered = 'delivered',
+  cancelled = 'cancelled'
+}
 
 export class CreateOrderLineDto {
   @ApiProperty({ description: 'ID del producto' })
@@ -98,10 +105,15 @@ export class CreateOrderDto {
   @IsUUID(undefined, { message: 'user_id debe ser un UUID válido' })
   user_id?: string;
 
-  @ApiProperty({ description: 'Estado de la orden', default: 'pending' })
+  @ApiProperty({ 
+    description: 'Estado de la orden', 
+    default: 'pending',
+    enum: OrderStates,
+    example: 'pending'
+  })
   @IsOptional()
-  @IsString()
-  status?: string;
+  @IsEnum(OrderStates)
+  status?: OrderStates;
 
   @ApiProperty({ description: 'Monto total de la orden' })
   @IsNumber()
@@ -112,6 +124,11 @@ export class CreateOrderDto {
   @IsOptional()
   @IsString()
   currency?: string;
+
+  @ApiProperty({ description: 'Puntos utilizados en la orden', required: false, default: 0 })
+  @IsOptional()
+  @IsNumber()
+  used_points?: number;
 
   @ApiProperty({ description: 'Líneas de la orden', type: [CreateOrderLineDto] })
   @IsArray()
