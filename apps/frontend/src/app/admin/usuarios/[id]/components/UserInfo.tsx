@@ -101,6 +101,10 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, onUserLoaded }) => {
           <div className="font-medium text-gray-900">{user.trade_name || '-'}</div>
         </div>
         <div>
+          <div className="text-xs text-gray-500">Nombre Fiscal</div>
+          <div className="font-medium text-gray-900">{user.tax_name || '-'}</div>
+        </div>
+        <div>
           <div className="text-xs text-gray-500">Ciudad</div>
           <div className="font-medium text-gray-900">{user.city || '-'}</div>
         </div>

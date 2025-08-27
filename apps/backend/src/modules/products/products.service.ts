@@ -54,7 +54,7 @@ export class ProductsService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) { } // Inyectar PrismaService
+  ) {} // Inyectar PrismaService
 
   async getUserRole(userId: string): Promise<string | null> {
     const userRole = await this.prisma.user_roles.findFirst({
@@ -161,7 +161,6 @@ export class ProductsService {
     userId?: string,
     locale: string = 'es',
   ): Promise<ProductResponseDto> {
-
     let userDiscountPrice: number | undefined;
     let userRole: string | null = null;
 
@@ -403,17 +402,19 @@ export class ProductsService {
           images: product.product_images?.map((pi) => pi.image_url) || [],
           sku: product.sku || '',
           units_per_box:
-            product.units_per_box !== undefined && product.units_per_box !== null
+            product.units_per_box !== undefined &&
+            product.units_per_box !== null
               ? Number(product.units_per_box)
               : undefined,
           iva: finalIvaValue,
-          product_translations: product.product_translations?.map(t => ({
-            id: t.id,
-            product_id: t.product_id,
-            locale: t.locale,
-            name: t.name,
-            description: t.description,
-          })) || [], // Include translations for admin view
+          product_translations:
+            product.product_translations?.map((t) => ({
+              id: t.id,
+              product_id: t.product_id,
+              locale: t.locale,
+              name: t.name,
+              description: t.description,
+            })) || [], // Include translations for admin view
         };
       }),
     );
@@ -426,7 +427,11 @@ export class ProductsService {
     return `products:public:${JSON.stringify(queryProductDto)}:user:${userId || 'anon'}`;
   }
 
-  private getFindOneCacheKey(id: number, userId?: string, locale?: string): string {
+  private getFindOneCacheKey(
+    id: number,
+    userId?: string,
+    locale?: string,
+  ): string {
     return `products:one:${id}:user:${userId || 'anon'}:locale:${locale || 'es'}`;
   }
 
@@ -434,7 +439,6 @@ export class ProductsService {
     queryProductDto: QueryProductDto,
     userId?: string,
   ): Promise<PaginatedProductResponseDto> {
-
     const cacheKey = this.getFindAllPublicCacheKey(queryProductDto, userId);
     const cached =
       await this.cacheManager.get<PaginatedProductResponseDto>(cacheKey);
@@ -461,13 +465,25 @@ export class ProductsService {
         { sku: { contains: search, mode: 'insensitive' } },
         { description: { contains: search, mode: 'insensitive' } },
         // Also search in translations
-        { product_translations: { some: { name: { contains: search, mode: 'insensitive' } } } },
-        { product_translations: { some: { description: { contains: search, mode: 'insensitive' } } } },
+        {
+          product_translations: {
+            some: { name: { contains: search, mode: 'insensitive' } },
+          },
+        },
+        {
+          product_translations: {
+            some: { description: { contains: search, mode: 'insensitive' } },
+          },
+        },
       ];
     } else if (searchName) {
       where.OR = [
         { name: { contains: searchName, mode: 'insensitive' } },
-        { product_translations: { some: { name: { contains: searchName, mode: 'insensitive' } } } },
+        {
+          product_translations: {
+            some: { name: { contains: searchName, mode: 'insensitive' } },
+          },
+        },
       ];
     }
 
@@ -477,7 +493,11 @@ export class ProductsService {
           categories: {
             OR: [
               { name: { in: categoryFilters, mode: 'insensitive' } },
-              { category_translations: { some: { name: { in: categoryFilters, mode: 'insensitive' } } } },
+              {
+                category_translations: {
+                  some: { name: { in: categoryFilters, mode: 'insensitive' } },
+                },
+              },
             ],
           },
         },
@@ -536,7 +556,11 @@ export class ProductsService {
     return result;
   }
 
-  async findOne(id: number, userId?: string, locale: string = 'es'): Promise<ProductResponseDto> {
+  async findOne(
+    id: number,
+    userId?: string,
+    locale: string = 'es',
+  ): Promise<ProductResponseDto> {
     const cacheKey = this.getFindOneCacheKey(id, userId, locale);
     const cached = await this.cacheManager.get<ProductResponseDto>(cacheKey);
     if (cached) return cached;
@@ -593,9 +617,9 @@ export class ProductsService {
       // Solo si es Redis store
       const redis = (store as any).getClient(); // eslint-disable-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
       if (redis) {
-        const keys: string[] = await (redis as any).keys('products:*'); // eslint-disable-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+        const keys: string[] = await redis.keys('products:*'); // eslint-disable-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         if (keys.length > 0) {
-          await (redis as any).del(keys); // eslint-disable-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+          await redis.del(keys); // eslint-disable-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         }
       }
       return;
@@ -646,7 +670,10 @@ export class ProductsService {
           ? (product_states[status as keyof typeof product_states] ??
             product_states.active)
           : product_states.active,
-        units_per_box: typeof createProductDto.units_per_box === 'number' ? createProductDto.units_per_box : undefined,
+        units_per_box:
+          typeof createProductDto.units_per_box === 'number'
+            ? createProductDto.units_per_box
+            : undefined,
         iva: iva !== undefined ? new Prisma.Decimal(iva) : undefined,
       },
       include: {
@@ -736,6 +763,7 @@ export class ProductsService {
       images,
       unit_id = 1,
       iva,
+      sku,
     } = updateProductDto;
 
     const existingProduct = await this.prisma.products.findUnique({
@@ -764,6 +792,7 @@ export class ProductsService {
             ? updateProductDto.units_per_box
             : undefined,
         iva: iva !== undefined ? new Prisma.Decimal(iva) : undefined,
+        sku: sku,
       },
       include: {
         products_categories: { include: { categories: true } },
@@ -942,7 +971,14 @@ export class ProductsService {
   async findAllForAdmin(
     queryProductDto: QueryProductDto,
   ): Promise<PaginatedProductResponseDto> {
-    const { page = 1, limit = 20, search, sortField = 'created_at', sortDirection = 'desc' } = queryProductDto as any;
+    const {
+      page = 1,
+      limit = 20,
+      search,
+      sortField = 'created_at',
+      sortDirection = 'desc',
+      categoryId,
+    } = queryProductDto as any;
     const skip = (page - 1) * limit;
 
     const where: Prisma.productsWhereInput = {
@@ -973,11 +1009,28 @@ export class ProductsService {
         ...(isNaN(Number(searchTerm))
           ? []
           : [
-            {
-              id: parseInt(searchTerm),
-            },
-          ]),
+              {
+                id: parseInt(searchTerm),
+              },
+            ]),
       ];
+    }
+
+    // Agregar filtro de categoría si se proporciona
+    if (categoryId) {
+      if (categoryId === 'none') {
+        // Filtrar productos que no pertenecen a ninguna categoría
+        where.products_categories = {
+          none: {},
+        };
+      } else {
+        // Filtrar productos que pertenecen a la categoría específica
+        where.products_categories = {
+          some: {
+            category_id: parseInt(categoryId),
+          },
+        };
+      }
     }
 
     const orderBy: any = {};
@@ -1004,7 +1057,7 @@ export class ProductsService {
             units: true,
           },
         },
-        product_translations: true
+        product_translations: true,
       },
     });
 
@@ -1023,7 +1076,11 @@ export class ProductsService {
     };
   }
 
-  async findAllCategories(limit?: number, locale: string = 'es', includeAllTranslations: boolean = false): Promise<CategoryResponseDto[]> {
+  async findAllCategories(
+    limit?: number,
+    locale: string = 'es',
+    includeAllTranslations: boolean = false,
+  ): Promise<CategoryResponseDto[]> {
     const categories = await this.prisma.categories.findMany({
       select: {
         id: true,
@@ -1031,30 +1088,32 @@ export class ProductsService {
         image_url: true,
         parent_id: true,
         order: true,
-        category_translations: includeAllTranslations ? true : {
-          where: { locale },
-        },
+        category_translations: includeAllTranslations
+          ? true
+          : {
+              where: { locale },
+            },
       },
-      orderBy: [
-        { order: 'asc' },
-        { name: 'asc' },
-      ],
+      orderBy: [{ order: 'asc' }, { name: 'asc' }],
       take: limit,
     });
 
     return categories.map((c) => ({
       id: c.id.toString(),
-      name: includeAllTranslations ? c.name : (c.category_translations?.[0]?.name || c.name),
+      name: includeAllTranslations
+        ? c.name
+        : c.category_translations?.[0]?.name || c.name,
       parentId: c.parent_id?.toString() || '',
       image: c.image_url || '',
       order: c.order ?? 0,
       ...(includeAllTranslations && {
-        translations: c.category_translations?.map(t => ({
-          id: t.id,
-          category_id: t.category_id,
-          locale: t.locale,
-          name: t.name,
-        })) || [],
+        translations:
+          c.category_translations?.map((t) => ({
+            id: t.id,
+            category_id: t.category_id,
+            locale: t.locale,
+            name: t.name,
+          })) || [],
       }),
     }));
   }
@@ -1092,8 +1151,11 @@ export class ProductsService {
   async createCategory(dto: CreateCategoryDto): Promise<CategoryResponseDto> {
     const { name, parentId } = dto;
     // Check for duplicate name
-    const existing = await this.prisma.categories.findFirst({ where: { name } });
-    if (existing) throw new BadRequestException('Ya existe una categoría con ese nombre');
+    const existing = await this.prisma.categories.findFirst({
+      where: { name },
+    });
+    if (existing)
+      throw new BadRequestException('Ya existe una categoría con ese nombre');
     const category = await this.prisma.categories.create({
       data: {
         name,
@@ -1108,16 +1170,29 @@ export class ProductsService {
     };
   }
 
-  async updateCategory(id: string, dto: UpdateCategoryDto): Promise<CategoryResponseDto> {
-    const category = await this.prisma.categories.findUnique({ where: { id: Number(id) } });
+  async updateCategory(
+    id: string,
+    dto: UpdateCategoryDto,
+  ): Promise<CategoryResponseDto> {
+    const category = await this.prisma.categories.findUnique({
+      where: { id: Number(id) },
+    });
     if (!category) throw new NotFoundException('Categoría no encontrada');
     // Prevent setting parentId to itself
-    if (dto.parentId && dto.parentId === id) throw new BadRequestException('Una categoría no puede ser su propio padre');
+    if (dto.parentId && dto.parentId === id)
+      throw new BadRequestException(
+        'Una categoría no puede ser su propio padre',
+      );
     const updated = await this.prisma.categories.update({
       where: { id: Number(id) },
       data: {
         name: dto.name ?? category.name,
-        parent_id: dto.parentId !== undefined ? (dto.parentId ? Number(dto.parentId) : null) : category.parent_id,
+        parent_id:
+          dto.parentId !== undefined
+            ? dto.parentId
+              ? Number(dto.parentId)
+              : null
+            : category.parent_id,
       },
     });
     return {
@@ -1136,18 +1211,28 @@ export class ProductsService {
         this.prisma.categories.update({
           where: { id: Number(id) },
           data: { order },
-        })
-      )
+        }),
+      ),
     );
   }
 
   async deleteCategory(id: string): Promise<void> {
     // Prevent delete if has children
-    const children = await this.prisma.categories.findFirst({ where: { parent_id: Number(id) } });
-    if (children) throw new BadRequestException('No se puede eliminar una categoría que tiene subcategorías');
+    const children = await this.prisma.categories.findFirst({
+      where: { parent_id: Number(id) },
+    });
+    if (children)
+      throw new BadRequestException(
+        'No se puede eliminar una categoría que tiene subcategorías',
+      );
     // Prevent delete if has products
-    const hasProducts = await this.prisma.products_categories.findFirst({ where: { category_id: Number(id) } });
-    if (hasProducts) throw new BadRequestException('No se puede eliminar una categoría que tiene productos asociados');
+    const hasProducts = await this.prisma.products_categories.findFirst({
+      where: { category_id: Number(id) },
+    });
+    if (hasProducts)
+      throw new BadRequestException(
+        'No se puede eliminar una categoría que tiene productos asociados',
+      );
     await this.prisma.categories.delete({ where: { id: Number(id) } });
   }
 
@@ -1163,21 +1248,26 @@ export class ProductsService {
       where: { id: productId },
     });
     if (!product) {
-      throw new NotFoundException(`Producto con ID "${productId}" no encontrado.`);
+      throw new NotFoundException(
+        `Producto con ID "${productId}" no encontrado.`,
+      );
     }
 
     // Check if translation already exists
-    const existingTranslation = await this.prisma.product_translations.findUnique({
-      where: {
-        product_id_locale: {
-          product_id: productId,
-          locale,
+    const existingTranslation =
+      await this.prisma.product_translations.findUnique({
+        where: {
+          product_id_locale: {
+            product_id: productId,
+            locale,
+          },
         },
-      },
-    });
+      });
 
     if (existingTranslation) {
-      throw new BadRequestException(`Ya existe una traducción para el producto ${productId} en el idioma ${locale}`);
+      throw new BadRequestException(
+        `Ya existe una traducción para el producto ${productId} en el idioma ${locale}`,
+      );
     }
 
     // Create translation
@@ -1201,17 +1291,20 @@ export class ProductsService {
     description?: string,
   ): Promise<void> {
     // Check if translation exists
-    const existingTranslation = await this.prisma.product_translations.findUnique({
-      where: {
-        product_id_locale: {
-          product_id: productId,
-          locale,
+    const existingTranslation =
+      await this.prisma.product_translations.findUnique({
+        where: {
+          product_id_locale: {
+            product_id: productId,
+            locale,
+          },
         },
-      },
-    });
+      });
 
     if (!existingTranslation) {
-      throw new NotFoundException(`Traducción no encontrada para el producto ${productId} en el idioma ${locale}`);
+      throw new NotFoundException(
+        `Traducción no encontrada para el producto ${productId} en el idioma ${locale}`,
+      );
     }
 
     // Update translation
@@ -1232,19 +1325,25 @@ export class ProductsService {
     await this.clearProductCache();
   }
 
-  async deleteProductTranslation(productId: number, locale: string): Promise<void> {
+  async deleteProductTranslation(
+    productId: number,
+    locale: string,
+  ): Promise<void> {
     // Check if translation exists
-    const existingTranslation = await this.prisma.product_translations.findUnique({
-      where: {
-        product_id_locale: {
-          product_id: productId,
-          locale,
+    const existingTranslation =
+      await this.prisma.product_translations.findUnique({
+        where: {
+          product_id_locale: {
+            product_id: productId,
+            locale,
+          },
         },
-      },
-    });
+      });
 
     if (!existingTranslation) {
-      throw new NotFoundException(`Traducción no encontrada para el producto ${productId} en el idioma ${locale}`);
+      throw new NotFoundException(
+        `Traducción no encontrada para el producto ${productId} en el idioma ${locale}`,
+      );
     }
 
     // Delete translation
@@ -1271,21 +1370,26 @@ export class ProductsService {
       where: { id: categoryId },
     });
     if (!category) {
-      throw new NotFoundException(`Categoría con ID "${categoryId}" no encontrada.`);
+      throw new NotFoundException(
+        `Categoría con ID "${categoryId}" no encontrada.`,
+      );
     }
 
     // Check if translation already exists
-    const existingTranslation = await this.prisma.category_translations.findUnique({
-      where: {
-        category_id_locale: {
-          category_id: categoryId,
-          locale,
+    const existingTranslation =
+      await this.prisma.category_translations.findUnique({
+        where: {
+          category_id_locale: {
+            category_id: categoryId,
+            locale,
+          },
         },
-      },
-    });
+      });
 
     if (existingTranslation) {
-      throw new BadRequestException(`Ya existe una traducción para la categoría ${categoryId} en el idioma ${locale}`);
+      throw new BadRequestException(
+        `Ya existe una traducción para la categoría ${categoryId} en el idioma ${locale}`,
+      );
     }
 
     // Create translation
@@ -1307,17 +1411,20 @@ export class ProductsService {
     name: string,
   ): Promise<void> {
     // Check if translation exists
-    const existingTranslation = await this.prisma.category_translations.findUnique({
-      where: {
-        category_id_locale: {
-          category_id: categoryId,
-          locale,
+    const existingTranslation =
+      await this.prisma.category_translations.findUnique({
+        where: {
+          category_id_locale: {
+            category_id: categoryId,
+            locale,
+          },
         },
-      },
-    });
+      });
 
     if (!existingTranslation) {
-      throw new NotFoundException(`Traducción no encontrada para la categoría ${categoryId} en el idioma ${locale}`);
+      throw new NotFoundException(
+        `Traducción no encontrada para la categoría ${categoryId} en el idioma ${locale}`,
+      );
     }
 
     // Update translation
@@ -1337,19 +1444,25 @@ export class ProductsService {
     await this.clearProductCache();
   }
 
-  async deleteCategoryTranslation(categoryId: number, locale: string): Promise<void> {
+  async deleteCategoryTranslation(
+    categoryId: number,
+    locale: string,
+  ): Promise<void> {
     // Check if translation exists
-    const existingTranslation = await this.prisma.category_translations.findUnique({
-      where: {
-        category_id_locale: {
-          category_id: categoryId,
-          locale,
+    const existingTranslation =
+      await this.prisma.category_translations.findUnique({
+        where: {
+          category_id_locale: {
+            category_id: categoryId,
+            locale,
+          },
         },
-      },
-    });
+      });
 
     if (!existingTranslation) {
-      throw new NotFoundException(`Traducción no encontrada para la categoría ${categoryId} en el idioma ${locale}`);
+      throw new NotFoundException(
+        `Traducción no encontrada para la categoría ${categoryId} en el idioma ${locale}`,
+      );
     }
 
     // Delete translation

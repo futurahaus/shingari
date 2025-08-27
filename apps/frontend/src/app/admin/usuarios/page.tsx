@@ -45,7 +45,7 @@ export default function AdminUsersPage() {
     const searchLower = search.toLowerCase();
     return (
       ((user.first_name || '') + ' ' + (user.last_name || '')).toLowerCase().includes(searchLower) ||
-      (user.trade_name?.toLowerCase().includes(searchLower) || '') ||
+      (user.tax_name?.toLowerCase().includes(searchLower) || '') ||
       user.email.toLowerCase().includes(searchLower)
     );
   });
@@ -279,13 +279,13 @@ export default function AdminUsersPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre Fiscal</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Business Name</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Compras</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scoring</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Puntos</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roles</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Últ. Login</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
@@ -294,22 +294,22 @@ export default function AdminUsersPage() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={11} className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan={10} className="px-6 py-8 text-center text-gray-500">
                       No hay usuarios registrados
                     </td>
                   </tr>
                 ) : (
                   filteredUsers.map(user => (
                     <tr key={user.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-gray-900 font-medium">{user.internal_id}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.tax_name || '-'}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{(user.first_name || '') + ' ' + (user.last_name || '')}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.trade_name || '-'}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-700 underline">{user.email}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.phone || '-'}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-center text-gray-900">{user.compras ?? '-'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-900">#{user.id.slice(0, 6)}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="inline-block bg-gray-100 px-4 py-1 rounded-full font-semibold text-gray-700">
-                          {user.scoring ?? '0'}
+                          {user.points ?? '0'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -368,8 +368,8 @@ export default function AdminUsersPage() {
                         <span className="text-xs text-gray-500">#{user.id.slice(0, 6)}</span>
                       </div>
                       <p className="text-sm text-blue-700 underline">{user.email}</p>
-                      {user.trade_name && (
-                        <p className="text-xs text-gray-600 mt-1">{user.trade_name}</p>
+                      {user.tax_name && (
+                        <p className="text-xs text-gray-600 mt-1">{user.tax_name}</p>
                       )}
                     </div>
                     <Link
@@ -394,9 +394,9 @@ export default function AdminUsersPage() {
                       <span className="ml-1 text-gray-900">{user.compras ?? '-'}</span>
                     </div>
                     <div>
-                      <span className="text-gray-500">Scoring:</span>
+                      <span className="text-gray-500">Puntos:</span>
                       <span className="ml-1 bg-gray-100 px-2 py-0.5 rounded-full text-gray-700">
-                        {user.scoring ?? '0'}
+                        {user.points ?? '0'}
                       </span>
                     </div>
                   </div>

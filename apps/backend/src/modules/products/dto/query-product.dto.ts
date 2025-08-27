@@ -80,6 +80,14 @@ export class QueryProductDto {
   categoryFilters?: string[];
 
   @ApiPropertyOptional({
+    description: 'ID de categoría específica para filtrar productos',
+    type: String,
+  })
+  @IsOptional()
+  @IsString()
+  categoryId?: string;
+
+  @ApiPropertyOptional({
     description: 'Ordenar por precio',
     enum: ProductSortByPrice,
   })

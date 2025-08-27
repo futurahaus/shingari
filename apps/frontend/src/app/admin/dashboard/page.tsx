@@ -19,6 +19,7 @@ interface User {
   country: string;
   phone: string;
   profile_is_complete: boolean;
+  internal_id?: string;
 }
 
 interface Product {

@@ -2,6 +2,7 @@ import {
     Controller,
     Get,
     Post,
+    Put,
     Body,
     Param,
     UseGuards,
@@ -13,6 +14,7 @@ import {
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrderResponseDto } from './dto/order-response.dto';
 import { MailService } from '../mail/mail.service';
 import {
@@ -133,6 +135,38 @@ export class OrdersController {
             return result;
         } catch (error) {
             this.logger.error('Error creating order:', error);
+            throw error;
+        }
+    }
+
+    @Put(':id')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Actualizar una orden existente' })
+    @ApiParam({ name: 'id', description: 'ID de la orden a actualizar' })
+    @ApiBody({ type: UpdateOrderDto })
+    @ApiResponse({
+        status: 200,
+        description: 'Orden actualizada exitosamente.',
+        type: OrderResponseDto,
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'Orden no encontrada.',
+    })
+    async update(
+        @Param('id', ParseUUIDPipe) id: string,
+        @Body() updateOrderDto: UpdateOrderDto,
+    ): Promise<OrderResponseDto> {
+        this.logger.log(`Received order update request for ID: ${id}`);
+        this.logger.log('Update data:', JSON.stringify(updateOrderDto, null, 2));
+
+        try {
+            const result = await this.ordersService.update(id, updateOrderDto);
+            this.logger.log(`Order ${id} updated successfully`);
+            return result;
+        } catch (error) {
+            this.logger.error(`Error updating order ${id}:`, error);
             throw error;
         }
     }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 
@@ -14,7 +14,17 @@ export interface Order {
   currency: string;
   created_at: string;
   updated_at: string;
+  used_points?: number;
+  earned_points?: number;
   // Add more fields as needed
+}
+
+export interface UpdateOrderData extends Record<string, unknown> {
+  status?: string;
+  total_amount?: number;
+  currency?: string;
+  used_points?: number;
+  earned_points?: number;
 }
 
 export interface PaginatedOrdersResponse {
@@ -85,4 +95,29 @@ export const useAdminOrders = ({ page, limit = 20, search = '', sortField = 'cre
     error: error ? (error instanceof Error ? error.message : 'Error desconocido') : null,
     refetch
   };
+};
+
+// Hook para actualizar una orden
+export const useUpdateOrder = () => {
+  const queryClient = useQueryClient();
+  const { showSuccess, showError } = useNotificationContext();
+
+  return useMutation({
+    mutationFn: async ({ orderId, updateData }: { orderId: string; updateData: UpdateOrderData }) => {
+      const response = await api.put<Order, UpdateOrderData>(`/orders/${orderId}`, updateData);
+      return response;
+    },
+    onSuccess: (updatedOrder, { orderId }) => {
+      showSuccess('Éxito', `Orden ${orderId} actualizada correctamente`);
+      
+      // Invalidar y refetch las queries relacionadas
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['order', orderId] });
+    },
+    onError: (error: any) => {
+      const errorMsg = error?.response?.data?.message || error?.message || 'Error desconocido';
+      showError('Error', `Error al actualizar la orden: ${errorMsg}`);
+      console.error('Error updating order:', error);
+    },
+  });
 }; 

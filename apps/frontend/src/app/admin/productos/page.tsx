@@ -8,7 +8,7 @@ import { AdminProductRow } from './components/AdminProductRow';
 import { ProductsListSkeleton } from './components/ProductsListSkeleton';
 import { Button } from '@/app/ui/components/Button';
 import { Product } from './interfaces/product.interfaces';
-import { useAdminProducts } from './hooks/useAdminProducts.hook';
+import { useAdminProducts, useCategories } from './hooks/useAdminProducts.hook';
 import { Text } from '@/app/ui/components/Text';
 import { FaSearch } from 'react-icons/fa';
 
@@ -16,6 +16,7 @@ export default function AdminProductsPage() {
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchQuery, setSearchQuery] = useState(''); // Estado para la búsqueda real
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -29,6 +30,9 @@ export default function AdminProductsPage() {
   const [sortField, setSortField] = useState<'created_at' | 'updated_at'>('created_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
+  // Usar el hook para obtener categorías
+  const { categories, loading: categoriesLoading } = useCategories();
+
   // Usar el hook para obtener productos con searchQuery (no searchTerm)
   const {
     products,
@@ -36,7 +40,7 @@ export default function AdminProductsPage() {
     error,
     lastPage,
     refetch
-  } = useAdminProducts({ page, limit: 10, search: searchQuery, sortField, sortDirection });
+  } = useAdminProducts({ page, limit: 10, search: searchQuery, sortField, sortDirection, categoryId: selectedCategory });
 
   const openEditModal = (product: Product) => {
     setSelectedProduct(product);
@@ -93,6 +97,12 @@ export default function AdminProductsPage() {
     }
   }, [handleSearchSubmit]);
 
+  // Función para manejar el cambio de categoría
+  const handleCategoryChange = useCallback((categoryId: string) => {
+    setSelectedCategory(categoryId);
+    setPage(1); // Resetear a la primera página cuando se cambia de categoría
+  }, []);
+
   return (
     <div className="">
       <div className="">
@@ -125,7 +135,7 @@ export default function AdminProductsPage() {
             Gestiona control de mercadería
           </Text>
 
-          {/* Buscador y Ordenador */}
+          {/* Buscador, Filtros y Ordenador */}
           <div className="flex flex-col md:flex-row md:items-center gap-4">
             <div className="relative max-w-md flex-1">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -141,6 +151,27 @@ export default function AdminProductsPage() {
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-black focus:border-black"
               />
             </div>
+            
+            {/* Filtro de Categorías */}
+            <div className="flex gap-2 items-center">
+              <label htmlFor="categoryFilter" className="text-sm text-gray-600">Categoría:</label>
+              <select
+                id="categoryFilter"
+                value={selectedCategory}
+                onChange={(e) => handleCategoryChange(e.target.value)}
+                className="border border-gray-300 rounded-lg px-2 py-1 text-sm min-w-[150px]"
+                disabled={categoriesLoading}
+              >
+                <option value="all">Todas las categorías</option>
+                <option value="none">Sin categoría</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             <div className="flex gap-2 items-center">
               <label htmlFor="sortField" className="text-sm text-gray-600">Ordenar por:</label>
               <select
