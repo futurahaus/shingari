@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Notification } from '@/hooks/useNotifications';
 
 interface NotificationContainerProps {
@@ -80,6 +80,24 @@ export const NotificationContainer: React.FC<NotificationContainerProps> = ({
 
   // Limit the number of notifications shown
   const visibleNotifications = notifications.slice(0, maxNotifications);
+
+  // Auto-remove notifications after 3 seconds
+  useEffect(() => {
+    const timeouts: NodeJS.Timeout[] = [];
+
+    visibleNotifications.forEach((notification) => {
+      const timeout = setTimeout(() => {
+        onRemove(notification.id);
+      }, 2000);
+
+      timeouts.push(timeout);
+    });
+
+    // Cleanup timeouts on unmount or when notifications change
+    return () => {
+      timeouts.forEach(timeout => clearTimeout(timeout));
+    };
+  }, [visibleNotifications, onRemove]);
 
   if (visibleNotifications.length === 0) {
     return null;

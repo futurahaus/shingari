@@ -345,6 +345,24 @@ export class OrdersService {
     }
   }
 
+  async getTotalBilledByUserId(userId: string): Promise<number> {
+    try {
+      const result = await this.prisma.orders.aggregate({
+        where: {
+          user_id: userId,
+        },
+        _sum: {
+          total_amount: true,
+        },
+      });
+
+      return Number(result._sum.total_amount) || 0;
+    } catch (error) {
+      this.logger.error(`Error getting total billed for user ${userId}:`, error);
+      return 0;
+    }
+  }
+
   private mapToOrderResponse(order: any): OrderResponseDto {
     return {
       id: order.id,

@@ -3,6 +3,7 @@ import { DatabaseService } from '../database/database.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { Prisma } from '../../../generated/prisma';
+import { OrdersService } from '../orders/orders.service';
 
 interface PublicUser {
   first_name?: string;
@@ -56,6 +57,7 @@ export interface UserDetailsResponse {
   shipping_address?: string;
   postal_code?: string;
   internal_id?: string;
+  total_billed: number;
   public_profile: Partial<PublicUser>;
 }
 
@@ -64,6 +66,7 @@ export class UserService {
   constructor(
     private readonly supabaseService: DatabaseService,
     private readonly prismaService: PrismaService,
+    private readonly ordersService: OrdersService,
   ) { }
 
   async updateUserProfile(
@@ -189,6 +192,9 @@ export class UserService {
 
       const publicProfile: Partial<PublicUser> = user.users as Partial<PublicUser>;
 
+      // Obtener el total facturado por el usuario
+      const totalBilled = await this.ordersService.getTotalBilledByUserId(userId);
+
       return {
         id: user.id,
         email: user.email,
@@ -212,6 +218,7 @@ export class UserService {
         shipping_address: publicProfile?.shipping_address ?? '',
         postal_code: publicProfile?.postal_code ?? '',
         internal_id: publicProfile?.internal_id ?? '',
+        total_billed: totalBilled,
         public_profile: publicProfile,
       };
     } catch (err: unknown) {
