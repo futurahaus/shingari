@@ -1,10 +1,11 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import {  useParams } from 'next/navigation';
 import Link from 'next/link';
 import { OrdersDetailSkeleton } from '../components/OrdersDetailSkeleton';
 import { StatusChip } from '../components/StatusChip';
 import { api } from '@/lib/api';
+import { Button } from '@/app/ui/components/Button';
 
 interface OrderLine {
   id: string;
@@ -54,6 +55,7 @@ interface Order {
   currency: string;
   created_at: string;
   updated_at: string;
+  invoice_file_url?: string;
   order_lines: OrderLine[];
   order_addresses: OrderAddress[];
   order_payments: OrderPayment[];
@@ -71,7 +73,6 @@ const formatDate = (dateString: string) => {
 
 export default function AdminOrderDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const orderId = params.id as string;
 
   const [order, setOrder] = useState<Order | null>(null);
@@ -85,7 +86,17 @@ export default function AdminOrderDetailPage() {
     if (!orderId) return;
     setLoading(true);
     api.get<Order>(`/orders/${orderId}`)
-      .then((data) => setOrder(data))
+      .then((data) => {
+        setOrder(data);
+        // Si ya hay una factura subida, agregarla a la lista de archivos
+        if (data.invoice_file_url) {
+          setUploadedFiles([{
+            url: data.invoice_file_url,
+            path: data.invoice_file_url.split('/').pop() || 'invoice.pdf',
+            name: 'Factura subida anteriormente'
+          }]);
+        }
+      })
       .catch(() => setError('No se pudo cargar la orden.'))
       .finally(() => setLoading(false));
   }, [orderId]);
@@ -143,7 +154,8 @@ export default function AdminOrderDetailPage() {
       const result: DocumentUploadResponse = await response.json();
       console.log('✅ Resultado exitoso:', result);
 
-      setUploadedFiles(prev => [...prev, {
+      // Reemplazar la factura existente o agregar una nueva
+      setUploadedFiles([{
         url: result.url,
         path: result.path,
         name: selectedFile.name
@@ -179,11 +191,11 @@ export default function AdminOrderDetailPage() {
     }
   };
 
-  const handleDeleteFile = async (filePath: string, index: number) => {
+  const handleDeleteFile = async (filePath: string) => {
     if (!confirm('¿Estás seguro de que quieres eliminar este archivo?')) return;
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('accessToken');
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/orders/${orderId}/documents/${filePath}`, {
         method: 'DELETE',
         headers: {
@@ -195,7 +207,23 @@ export default function AdminOrderDetailPage() {
         throw new Error('Error al eliminar archivo');
       }
 
-      setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+      // Limpiar la URL de la base de datos también
+      const updateResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/orders/${orderId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          invoice_file_url: null,
+        }),
+      });
+
+      if (!updateResponse.ok) {
+        console.warn('No se pudo limpiar la URL de la base de datos');
+      }
+
+      setUploadedFiles([]);
       alert('Archivo eliminado exitosamente');
     } catch (error) {
       console.error('Error al eliminar archivo:', error);
@@ -308,7 +336,7 @@ export default function AdminOrderDetailPage() {
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-4 px-8">
           <div className="flex-1">
             <label className="block font-medium mb-2">Subir factura</label>
-            <div className="flex items-center gap-2 p-3 border rounded-xl bg-gray-50">
+            <div className="flex justify-between items-center gap-2 p-3 border rounded-xl bg-gray-50">
               <label className={`px-4 py-2 rounded cursor-pointer transition-colors ${
                 uploading 
                   ? 'bg-gray-400 text-white cursor-not-allowed' 
@@ -327,12 +355,16 @@ export default function AdminOrderDetailPage() {
                 {uploading ? 'Subiendo archivo...' : selectedFile ? selectedFile.name : 'Ningún archivo seleccionado'}
               </span>
               {selectedFile && !uploading && (
-                <button
-                  onClick={handleFileUpload}
-                  className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors"
-                >
-                  Subir Manualmente
-                </button>
+                <Button
+                  onPress={handleFileUpload}
+                  type="primary-admin"
+                  text="Subir Archivo"
+                  testID="upload-button"
+                  inline
+                  textProps={{
+                    size: 'sm',
+                  }}
+                />
               )}
               {uploading && (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
@@ -357,7 +389,7 @@ export default function AdminOrderDetailPage() {
                           Ver archivo
                         </a>
                         <button
-                          onClick={() => handleDeleteFile(file.path, index)}
+                          onClick={() => handleDeleteFile(file.path)}
                           className="text-red-600 hover:text-red-800 text-sm"
                         >
                           Eliminar
@@ -369,12 +401,6 @@ export default function AdminOrderDetailPage() {
               </div>
             )}
           </div>
-          <button
-            className="mt-2 md:mt-0 px-6 py-2 border border-gray-400 rounded-xl text-gray-900 font-medium hover:bg-gray-100 transition-colors"
-            onClick={() => router.back()}
-          >
-            Cerrar
-          </button>
         </div>
       </div>
     </div>

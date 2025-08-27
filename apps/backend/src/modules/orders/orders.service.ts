@@ -307,6 +307,16 @@ export class OrdersService {
 
       this.logger.log(`Document uploaded successfully: ${filePath}`);
 
+      // Guardar la URL del archivo en la base de datos
+      await this.prisma.orders.update({
+        where: { id: orderId },
+        data: {
+          invoice_file_url: urlData.publicUrl,
+        },
+      });
+
+      this.logger.log(`Invoice URL saved to database for order ${orderId}`);
+
       return {
         url: urlData.publicUrl,
         path: filePath,
@@ -349,6 +359,7 @@ export class OrdersService {
       currency: order.currency,
       created_at: order.created_at,
       updated_at: order.updated_at,
+      invoice_file_url: order.invoice_file_url || null,
       order_lines: order.order_lines.map((line: any) => ({
         id: line.id,
         product_id: line.product_id,
