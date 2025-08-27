@@ -19,7 +19,7 @@ export interface Order {
   // Add more fields as needed
 }
 
-export interface UpdateOrderData {
+export interface UpdateOrderData extends Record<string, unknown> {
   status?: string;
   total_amount?: number;
   currency?: string;
@@ -104,7 +104,7 @@ export const useUpdateOrder = () => {
 
   return useMutation({
     mutationFn: async ({ orderId, updateData }: { orderId: string; updateData: UpdateOrderData }) => {
-      const response = await api.put<Order>(`/orders/${orderId}`, updateData);
+      const response = await api.put<Order, UpdateOrderData>(`/orders/${orderId}`, updateData);
       return response;
     },
     onSuccess: (updatedOrder, { orderId }) => {
@@ -114,7 +114,7 @@ export const useUpdateOrder = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
       queryClient.invalidateQueries({ queryKey: ['order', orderId] });
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
       const errorMsg = error?.response?.data?.message || error?.message || 'Error desconocido';
       showError('Error', `Error al actualizar la orden: ${errorMsg}`);
       console.error('Error updating order:', error);
