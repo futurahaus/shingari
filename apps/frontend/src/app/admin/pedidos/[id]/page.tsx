@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { OrdersDetailSkeleton } from '../components/OrdersDetailSkeleton';
+import { StatusChip } from '../components/StatusChip';
 import { api } from '@/lib/api';
 
 interface OrderLine {
@@ -93,7 +94,7 @@ export default function AdminOrderDetailPage() {
   const payment = order.order_payments[0];
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center py-8">
+    <div className="min-h-screen flex flex-col items-center justify-center py-8 px-16">
       <div className="bg-white rounded-xl shadow-lg w-full p-0">
         <div className="text-center pt-8 pb-4">
           <h2 className="font-bold text-lg">Detalles de la orden</h2>
@@ -118,6 +119,15 @@ export default function AdminOrderDetailPage() {
                 ) : (
                   '-'
                 )}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
+              <div className="text-gray-500">Estado</div>
+              <div className="text-gray-900 text-right flex justify-end">
+                <StatusChip 
+                  orderId={order.id} 
+                  currentStatus={order.status}
+                />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
