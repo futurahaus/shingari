@@ -74,6 +74,7 @@ export interface UpdateProductData {
   unit_id?: number;
   units_per_box?: number;
   iva?: number;
+  sku?: string;
 }
 
 // Props interfaces para componentes

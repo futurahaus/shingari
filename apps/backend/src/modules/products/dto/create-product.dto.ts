@@ -127,6 +127,15 @@ export class CreateProductDto {
   @IsOptional()
   iva?: number;
 
+  @ApiPropertyOptional({
+    description: 'SKU del producto',
+    example: '123456',
+    type: String,
+  })
+  @IsString()
+  @IsOptional()
+  sku?: string;
+
   // Si tuvieras metadatos o atributos customizables podrías usar algo como:
   // @ApiPropertyOptional({ type: [ProductMetadataDto], description: 'Metadatos adicionales del producto' })
   // @IsArray()
