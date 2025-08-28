@@ -202,6 +202,32 @@
       "welcome": "欢迎",
       "logout": "退出登录"
     },
+    "orders": {
+      "title": "订单",
+      "subtitle": "平台订单管理",
+      "search_placeholder": "按ID、用户或邮箱搜索...",
+      "table": {
+        "id": "ID",
+        "user": "用户",
+        "total": "总计",
+        "status": "状态",
+        "date": "日期",
+        "view_details": "查看详情"
+      },
+      "pagination": {
+        "previous": "上一页",
+        "next": "下一页"
+      },
+      "status": {
+        "pending": "待处理",
+        "accepted": "已接受",
+        "delivered": "已交付",
+        "cancelled": "已取消",
+        "updating": "更新中...",
+        "change_status": "更改状态",
+        "current_status": "当前状态"
+      }
+    },
     "products": {
       "title": "库存控制",
       "subtitle": "管理商品库存",

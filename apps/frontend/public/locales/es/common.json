@@ -202,6 +202,32 @@
       "welcome": "Bienvenido",
       "logout": "Cerrar Sesión"
     },
+    "orders": {
+      "title": "Pedidos",
+      "subtitle": "Gestión de pedidos realizados en la plataforma",
+      "search_placeholder": "Buscar por ID, usuario o email...",
+      "table": {
+        "id": "ID",
+        "user": "Usuario",
+        "total": "Total",
+        "status": "Estado",
+        "date": "Fecha",
+        "view_details": "Ver Detalles"
+      },
+      "pagination": {
+        "previous": "Anterior",
+        "next": "Siguiente"
+      },
+      "status": {
+        "pending": "Pendiente",
+        "accepted": "Aceptada",
+        "delivered": "Entregada",
+        "cancelled": "Cancelada",
+        "updating": "Actualizando...",
+        "change_status": "Cambiar Estado",
+        "current_status": "Estado actual"
+      }
+    },
     "products": {
       "title": "Control de Stock",
       "subtitle": "Gestiona control de mercadería",
