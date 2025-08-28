@@ -1,77 +1,14 @@
 'use client';
 import { useTranslation } from '@/contexts/I18nContext';
-import { Gift, TrendingUp, TrendingDown, Clock } from 'lucide-react';
+import { Gift, TrendingUp, TrendingDown, Clock, RefreshCw } from 'lucide-react';
 import Sidebar from '@/components/layout/Sidebar';
-
-// Mockup data for points transactions
-const mockPointsTransactions = [
-  {
-    id: 1,
-    type: 'earned',
-    points: 150,
-    date: '2025-01-17',
-    description: 'Bono por compra #12345',
-    orderId: '12345'
-  },
-  {
-    id: 2,
-    type: 'used',
-    points: -50,
-    date: '2025-01-15',
-    description: 'Puntos utilizados en compra #12340',
-    orderId: '12340'
-  },
-  {
-    id: 3,
-    type: 'earned',
-    points: 200,
-    date: '2025-01-12',
-    description: 'Bono por referido - Usuario nuevo',
-    orderId: null
-  },
-  {
-    id: 4,
-    type: 'earned',
-    points: 75,
-    date: '2025-01-10',
-    description: 'Bono por compra #12335',
-    orderId: '12335'
-  },
-  {
-    id: 5,
-    type: 'expired',
-    points: -25,
-    date: '2025-01-08',
-    description: 'Puntos expirados',
-    orderId: null
-  },
-  {
-    id: 6,
-    type: 'used',
-    points: -100,
-    date: '2025-01-05',
-    description: 'Puntos utilizados en compra #12330',
-    orderId: '12330'
-  },
-  {
-    id: 7,
-    type: 'earned',
-    points: 300,
-    date: '2025-01-03',
-    description: 'Bono por compra #12325',
-    orderId: '12325'
-  }
-];
-
-// Calculate total points
-const totalPoints = mockPointsTransactions.reduce((total, transaction) => {
-  return total + transaction.points;
-}, 0);
+import { usePoints, PointsLedgerEntry } from '@/hooks/usePoints';
 
 export default function PointsPage() {
   const { t } = useTranslation();
+  const { pointsData, loading, error, refetch } = usePoints();
 
-  const getTransactionIcon = (type: string) => {
+  const getTransactionIcon = (type: string | null) => {
     switch (type) {
       case 'earned':
         return <TrendingUp className="w-4 h-4 text-green-600" />;
@@ -84,26 +21,26 @@ export default function PointsPage() {
     }
   };
 
-  const getTransactionTypeLabel = (type: string) => {
+  const getTransactionTypeLabel = (type: string | null) => {
     switch (type) {
-      case 'earned':
+      case 'EARN':
         return t('dashboard.earned');
-      case 'used':
+      case 'USED':
         return t('dashboard.used');
-      case 'expired':
+      case 'EXPIRED':
         return t('dashboard.expired');
       default:
-        return type;
+        return type || 'Unknown';
     }
   };
 
-  const getTransactionTypeColor = (type: string) => {
+  const getTransactionTypeColor = (type: string | null) => {
     switch (type) {
-      case 'earned':
+      case 'EARN':
         return 'text-green-600 bg-green-50';
-      case 'used':
+      case 'USED':
         return 'text-red-600 bg-red-50';
-      case 'expired':
+      case 'EXPIRED':
         return 'text-gray-600 bg-gray-50';
       default:
         return 'text-blue-600 bg-blue-50';
@@ -126,12 +63,32 @@ export default function PointsPage() {
         <div className="flex-1">
           {/* Header with total points */}
           <div className="bg-gradient-to-r from-slate-500 to-slate-600 rounded-lg p-6 mb-6 text-white">
-            <div className="flex items-center gap-3 mb-2">
-              <Gift className="w-8 h-8" />
-              <h1 className="text-2xl font-bold">{t('dashboard.my_points')}</h1>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-3">
+                <Gift className="w-8 h-8" />
+                <h1 className="text-2xl font-bold">{t('dashboard.my_points')}</h1>
+              </div>
+              <button
+                onClick={refetch}
+                disabled={loading}
+                className="p-2 rounded-full hover:bg-white/20 transition-colors"
+                title="Refresh points"
+              >
+                <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+              </button>
             </div>
-            <div className="text-4xl font-bold mb-2">{totalPoints.toLocaleString()}</div>
-            <p className="text-red-100">{t('dashboard.total_points')}</p>
+            {loading ? (
+              <div className="text-4xl font-bold mb-2">...</div>
+            ) : error ? (
+              <div className="text-2xl font-bold mb-2 text-red-200">Error loading points</div>
+            ) : (
+              <>
+                <div className="text-4xl font-bold mb-2">
+                  {pointsData?.balance?.total_points?.toLocaleString('de-DE') || '0'}
+                </div>
+                <p className="text-red-100">{t('dashboard.total_points')}</p>
+              </>
+            )}
           </div>
 
           {/* Points transactions table */}
@@ -161,29 +118,59 @@ export default function PointsPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {mockPointsTransactions.map((transaction) => (
-                    <tr key={transaction.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          {getTransactionIcon(transaction.type)}
-                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getTransactionTypeColor(transaction.type)}`}>
-                            {getTransactionTypeLabel(transaction.type)}
-                          </span>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                        <div className="flex items-center justify-center gap-2">
+                          <RefreshCw className="w-5 h-5 animate-spin" />
+                          Loading transactions...
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`text-sm font-medium ${transaction.points > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {transaction.points > 0 ? '+' : ''}{transaction.points.toLocaleString()}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatDate(transaction.date)}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        {transaction.description}
+                    </tr>
+                  ) : error ? (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-8 text-center text-red-500">
+                        Error loading transactions. Please try again.
                       </td>
                     </tr>
-                  ))}
+                  ) : pointsData?.transactions && pointsData.transactions.length > 0 ? (
+                    pointsData.transactions.map((transaction: PointsLedgerEntry) => (
+                      <tr key={transaction.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            {getTransactionIcon(transaction.type)}
+                            <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getTransactionTypeColor(transaction.type)}`}>
+                              {getTransactionTypeLabel(transaction.type)}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`text-sm font-medium ${transaction.points > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {transaction.points > 0 ? '+' : ''}{transaction.points.toLocaleString('de-DE')}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {formatDate(transaction.created_at)}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900">
+                          {transaction.type === 'EARN' && transaction.order_number
+                            ? `Bono por compra ${transaction.order_number}`
+                            : transaction.type === 'USED' && transaction.order_number
+                            ? `Puntos utilizados en compra ${transaction.order_number}`
+                            : transaction.type === 'EXPIRED'
+                            ? 'Puntos expirados'
+                            : 'Transacción de puntos'
+                          }
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                        No transactions found. Start shopping to earn points!
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -196,9 +183,8 @@ export default function PointsPage() {
             </h3>
             <div className="space-y-2 text-blue-800">
               <p>• Gana 1 punto por cada euro gastado en tus compras</p>
-              <p>• Recibe 50 puntos extra por cada referido que se registre</p>
               <p>• Los puntos expiran después de 12 meses de inactividad</p>
-              <p>• Usa tus puntos para obtener descuentos en futuras compras</p>
+              <p>• Usa tus puntos por canjeables en la seccion de recompensas</p>
             </div>
           </div>
         </div>

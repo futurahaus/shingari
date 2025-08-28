@@ -80,7 +80,7 @@ export class OrdersService {
               user_id,
               order_id: order.id,
               points: points_earned,
-              type: `EARN`,
+              type: 'EARN',
             },
           });
 
