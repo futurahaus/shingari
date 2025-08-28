@@ -2,6 +2,7 @@
 import React from 'react';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
+import { useTranslation } from '@/contexts/I18nContext';
 import { Button } from '@/app/ui/components/Button';
 import { DeleteModalProps } from '../interfaces/product.interfaces';
 
@@ -12,6 +13,7 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
   onProductDeleted
 }) => {
   const { showSuccess, showError } = useNotificationContext();
+  const { t } = useTranslation();
 
   const handleDeleteProduct = async () => {
     if (!product) return;
@@ -20,12 +22,12 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
       await api.delete(`/products/${product.id}`);
       onClose();
       onProductDeleted();
-      showSuccess('Producto Eliminado', 'El producto se ha eliminado exitosamente');
+      showSuccess(t('admin.products.modals.delete.product_deleted'), t('admin.products.modals.delete.product_deleted_success'));
     } catch (err: unknown) {
       if (err instanceof Error) {
-        showError('Error al Eliminar', 'Error al eliminar producto: ' + (err.message || 'Error desconocido'));
+        showError(t('admin.products.modals.delete.error_deleting'), t('admin.products.modals.delete.error_deleting_message'));
       } else {
-        showError('Error al Eliminar', 'Error al eliminar producto: Error desconocido');
+        showError(t('admin.products.modals.delete.error_deleting'), t('admin.products.modals.delete.error_deleting_message'));
       }
     }
   };
@@ -42,24 +44,24 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
             </svg>
           </div>
           <div className="mt-3 text-center">
-            <h3 className="text-lg font-medium text-gray-900">Eliminar Producto</h3>
+            <h3 className="text-lg font-medium text-gray-900">{t('admin.products.modals.delete.title')}</h3>
             <div className="mt-2 px-7 py-3">
               <p className="text-sm text-gray-500">
-                ¿Estás seguro de que quieres eliminar el producto &quot;{product.name}&quot;? Esta acción no se puede deshacer.
+                {t('admin.products.modals.delete.message', { productName: product.name })}
               </p>
             </div>
             <div className="flex justify-center space-x-3 mt-6">
               <Button
                 onPress={onClose}
                 type="secondary"
-                text="Cancelar"
+                text={t('admin.products.modals.delete.cancel')}
                 testID="cancel-delete-button"
                 inline
               />
               <Button
                 onPress={handleDeleteProduct}
                 type="primary-admin"
-                text="Eliminar"
+                text={t('admin.products.modals.delete.delete')}
                 testID="confirm-delete-button"
                 inline
               />

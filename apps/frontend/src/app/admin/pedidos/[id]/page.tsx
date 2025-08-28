@@ -1,9 +1,12 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import {  useParams } from 'next/navigation';
 import Link from 'next/link';
 import { OrdersDetailSkeleton } from '../components/OrdersDetailSkeleton';
+import { StatusChip } from '../components/StatusChip';
 import { api } from '@/lib/api';
+import { Button } from '@/app/ui/components/Button';
+import { useNotificationContext } from '@/contexts/NotificationContext';
 
 interface OrderLine {
   id: string;
@@ -37,6 +40,11 @@ interface OrderPayment {
   metadata?: Record<string, unknown>;
 }
 
+interface DocumentUploadResponse {
+  url: string;
+  path: string;
+}
+
 interface Order {
   id: string;
   user_id?: string;
@@ -48,6 +56,7 @@ interface Order {
   currency: string;
   created_at: string;
   updated_at: string;
+  invoice_file_url?: string;
   order_lines: OrderLine[];
   order_addresses: OrderAddress[];
   order_payments: OrderPayment[];
@@ -65,22 +74,153 @@ const formatDate = (dateString: string) => {
 
 export default function AdminOrderDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const orderId = params.id as string;
+  const { showSuccess, showError } = useNotificationContext();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<Array<{ url: string; path: string; name: string }>>([]);
 
   useEffect(() => {
     if (!orderId) return;
     setLoading(true);
     api.get<Order>(`/orders/${orderId}`)
-      .then((data) => setOrder(data))
+      .then((data) => {
+        setOrder(data);
+        // Si ya hay una factura subida, agregarla a la lista de archivos
+        if (data.invoice_file_url) {
+          setUploadedFiles([{
+            url: data.invoice_file_url,
+            path: data.invoice_file_url.split('/').pop() || 'invoice.pdf',
+            name: 'Factura subida anteriormente'
+          }]);
+        }
+      })
       .catch(() => setError('No se pudo cargar la orden.'))
       .finally(() => setLoading(false));
   }, [orderId]);
+
+  // Log para verificar variables de entorno
+  useEffect(() => {
+    console.log('🔧 Variables de entorno:');
+    console.log('NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
+    console.log('orderId:', orderId);
+  }, [orderId]);
+
+  const handleFileUpload = async () => {
+    console.log('🔄 handleFileUpload iniciado');
+    console.log('selectedFile:', selectedFile);
+    console.log('orderId:', orderId);
+    
+    if (!selectedFile || !orderId) {
+      console.log('❌ No hay archivo seleccionado o orderId');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('documentType', 'invoice');
+
+      const token = localStorage.getItem('accessToken');
+      console.log('🔑 Token:', token ? 'Presente' : 'No encontrado');
+      
+      if (!token) {
+        throw new Error('No se encontró el token de autenticación. Por favor, inicia sesión nuevamente.');
+      }
+      
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/orders/${orderId}/upload-document`;
+      console.log('🌐 URL del API:', apiUrl);
+
+      // Intentar con fetch primero
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      console.log('📡 Respuesta del servidor:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Error en la respuesta:', errorText);
+        throw new Error(`Error al subir archivo: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+
+      const result: DocumentUploadResponse = await response.json();
+      console.log('✅ Resultado exitoso:', result);
+
+      // Reemplazar la factura existente o agregar una nueva
+      setUploadedFiles([{
+        url: result.url,
+        path: result.path,
+        name: selectedFile.name
+      }]);
+      
+      setSelectedFile(null);
+      showSuccess('Archivo subido', 'La factura se ha subido exitosamente');
+    } catch (error) {
+      console.error('❌ Error al subir archivo:', error);
+      showError('Error al subir archivo', error instanceof Error ? error.message : 'Error desconocido');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;    
+    setSelectedFile(file);
+  };
+
+  const handleDeleteFile = async (filePath: string) => {
+    if (!confirm('¿Estás seguro de que quieres eliminar este archivo?')) return;
+
+    setDeleting(true);
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/orders/${orderId}/documents/${filePath}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al eliminar archivo');
+      }
+
+      // Limpiar la URL de la base de datos también
+      const updateResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/orders/${orderId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          invoice_file_url: null,
+        }),
+      });
+
+      if (!updateResponse.ok) {
+        console.warn('No se pudo limpiar la URL de la base de datos');
+      }
+
+      setUploadedFiles([]);
+      showSuccess('Archivo eliminado', 'La factura se ha eliminado exitosamente');
+    } catch (error) {
+      console.error('Error al eliminar archivo:', error);
+      showError('Error al eliminar archivo', 'No se pudo eliminar el archivo. Por favor, inténtalo de nuevo.');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   if (loading) {
     return <OrdersDetailSkeleton />;
@@ -93,7 +233,7 @@ export default function AdminOrderDetailPage() {
   const payment = order.order_payments[0];
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center py-8">
+    <div className="min-h-screen flex flex-col items-center justify-center py-8 px-16">
       <div className="bg-white rounded-xl shadow-lg w-full p-0">
         <div className="text-center pt-8 pb-4">
           <h2 className="font-bold text-lg">Detalles de la orden</h2>
@@ -118,6 +258,15 @@ export default function AdminOrderDetailPage() {
                 ) : (
                   '-'
                 )}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
+              <div className="text-gray-500">Estado</div>
+              <div className="text-gray-900 text-right flex justify-end">
+                <StatusChip 
+                  orderId={order.id} 
+                  currentStatus={order.status}
+                />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
@@ -175,29 +324,94 @@ export default function AdminOrderDetailPage() {
               : 'No especificada'}
           </div>
         </div>
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-4 px-8">
-          <div className="flex-1">
-            <label className="block font-medium mb-2">Subir factura</label>
-            <div className="flex items-center gap-2 p-3 border rounded-xl bg-gray-50">
-              <label className="bg-black text-white px-4 py-2 rounded cursor-pointer hover:bg-gray-800 transition-colors">
-                Seleccionar Archivo
-                <input
-                  type="file"
-                  className="hidden"
-                  onChange={e => setSelectedFile(e.target.files?.[0] || null)}
-                />
-              </label>
-              <span className="text-gray-500 text-sm">
-                {selectedFile ? selectedFile.name : 'Ningún archivo seleccionado'}
-              </span>
+        <div className="mb-4 px-8">
+          <h3 className="font-bold text-lg mb-4">Factura</h3>
+          
+          {/* Mostrar input solo si no hay factura cargada */}
+          {uploadedFiles.length === 0 && (
+            <div className="flex-1">
+              <label className="block font-medium mb-2">Subir factura</label>
+              <div className="flex justify-between items-center gap-2 p-3 border rounded-xl bg-gray-50">
+                <label className={`px-4 py-2 rounded cursor-pointer transition-colors ${
+                  uploading 
+                    ? 'bg-gray-400 text-white cursor-not-allowed' 
+                    : 'bg-black text-white hover:bg-gray-800'
+                }`}>
+                  {uploading ? 'Subiendo...' : 'Seleccionar Archivo'}
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.gif"
+                    onChange={handleFileChange}
+                    disabled={uploading}
+                  />
+                </label>
+                <span className="text-gray-500 text-sm">
+                  {uploading ? 'Subiendo archivo...' : selectedFile ? selectedFile.name : 'Ningún archivo seleccionado'}
+                </span>
+                {selectedFile && !uploading && (
+                  <Button
+                    onPress={handleFileUpload}
+                    type="primary-admin"
+                    text="Subir Archivo"
+                    testID="upload-button"
+                    inline
+                    textProps={{
+                      size: 'sm',
+                    }}
+                  />
+                )}
+                {uploading && (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                )}
+              </div>
             </div>
-          </div>
-          <button
-            className="mt-2 md:mt-0 px-6 py-2 border border-gray-400 rounded-xl text-gray-900 font-medium hover:bg-gray-100 transition-colors"
-            onClick={() => router.back()}
-          >
-            Cerrar
-          </button>
+          )}
+          
+          {/* Mostrar factura cargada */}
+          {uploadedFiles.length > 0 && (
+            <div className="space-y-2">
+              {uploadedFiles.map((file, index) => (
+                <div key={index} className="flex items-center justify-between p-3 border rounded-xl bg-gray-50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-900">{file.name}</span>
+                      <p className="text-xs text-gray-500">Factura subida</p>
+                    </div>
+                  </div>
+                                     <div className="flex items-center gap-2">
+                     <a
+                       href={file.url}
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                     >
+                       Ver archivo
+                     </a>
+                     <button
+                       onClick={() => handleDeleteFile(file.path.split('/').pop() || '')}
+                       disabled={deleting}
+                       className={`text-sm font-medium transition-colors ${
+                         deleting 
+                           ? 'text-gray-400 cursor-not-allowed' 
+                           : 'text-red-600 hover:text-red-800'
+                       }`}
+                     >
+                       {deleting ? 'Eliminando...' : 'Eliminar'}
+                     </button>
+                     {deleting && (
+                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                     )}
+                   </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

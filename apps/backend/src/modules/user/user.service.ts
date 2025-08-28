@@ -3,6 +3,7 @@ import { DatabaseService } from '../database/database.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { Prisma } from '../../../generated/prisma';
+import { OrdersService } from '../orders/orders.service';
 
 interface PublicUser {
   first_name?: string;
@@ -56,6 +57,7 @@ export interface UserDetailsResponse {
   shipping_address?: string;
   postal_code?: string;
   internal_id?: string;
+  total_billed: number;
   public_profile: Partial<PublicUser>;
 }
 
@@ -64,6 +66,7 @@ export class UserService {
   constructor(
     private readonly supabaseService: DatabaseService,
     private readonly prismaService: PrismaService,
+    private readonly ordersService: OrdersService,
   ) { }
 
   async updateUserProfile(
@@ -148,9 +151,11 @@ export class UserService {
           first_name: publicProfile?.first_name ?? '',
           last_name: publicProfile?.last_name ?? '',
           trade_name: publicProfile?.trade_name ?? '',
+          internal_id: publicProfile?.internal_id ?? '',
           city: publicProfile?.city ?? '',
           province: publicProfile?.province ?? '',
           country: publicProfile?.country ?? '',
+          tax_name: publicProfile?.tax_name ?? '',
           phone: publicProfile?.phone ?? '',
           profile_is_complete: publicProfile?.profile_is_complete ?? false,
         };
@@ -187,6 +192,9 @@ export class UserService {
 
       const publicProfile: Partial<PublicUser> = user.users as Partial<PublicUser>;
 
+      // Obtener el total facturado por el usuario
+      const totalBilled = await this.ordersService.getTotalBilledByUserId(userId);
+
       return {
         id: user.id,
         email: user.email,
@@ -210,6 +218,7 @@ export class UserService {
         shipping_address: publicProfile?.shipping_address ?? '',
         postal_code: publicProfile?.postal_code ?? '',
         internal_id: publicProfile?.internal_id ?? '',
+        total_billed: totalBilled,
         public_profile: publicProfile,
       };
     } catch (err: unknown) {
@@ -385,16 +394,43 @@ export class UserService {
     }
   }
 
-  // Get order history for a user (mock data for now)
+  // Get order history for a user
   async getUserOrders(userId: string) {
-    // TODO: Replace with real order data if available
-    return [
-      // { id: '123456', date: '2024-07-15', total: '$250.00' },
-      // { id: '123456', date: '2024-07-01', total: '$180.00' },
-      // { id: '123456', date: '2024-06-15', total: '$320.00' },
-      // { id: '123456', date: '2024-06-01', total: '$200.00' },
-      // { id: '123456', date: '2024-05-15', total: '$150.00' },
-    ];
+    try {
+      const orders = await this.prismaService.orders.findMany({
+        where: {
+          user_id: userId,
+        },
+        include: {
+          order_lines: {
+            include: {
+              products: {
+                select: {
+                  name: true,
+                  image_url: true,
+                },
+              },
+            },
+          },
+          order_payments: true,
+          order_addresses: true,
+        },
+        orderBy: {
+          created_at: 'desc',
+        },
+      });
+
+      // Serialize BigInt values for JSON response
+      const serializedOrders = JSON.parse(
+        JSON.stringify(orders, (key, value) =>
+          typeof value === 'bigint' ? Number(value) : value,
+        ),
+      ) as typeof orders;
+
+      return serializedOrders;
+    } catch (error) {
+      throw new Error(`Failed to fetch user orders: ${error.message}`);
+    }
   }
 
   // Get special prices for a user

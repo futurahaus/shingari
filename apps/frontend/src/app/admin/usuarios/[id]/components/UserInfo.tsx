@@ -21,6 +21,7 @@ interface UserDetails {
   postal_code?: string;
   internal_id?: string;
   roles?: string[];
+  total_billed?: number;
 }
 
 interface UserInfoProps {
@@ -57,7 +58,7 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, onUserLoaded }) => {
       <div className="mb-8">
         <div className="h-6 bg-gray-300 rounded w-48 mb-4 animate-pulse"></div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 border-b border-gray-200 pb-6">
-          {Array.from({ length: 8 }, (_, index) => (
+          {Array.from({ length: 9 }, (_, index) => (
             <div key={index}>
               <div className="h-3 bg-gray-300 rounded w-16 mb-2 animate-pulse"></div>
               <div className="h-5 bg-gray-300 rounded w-24 animate-pulse"></div>
@@ -101,6 +102,10 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, onUserLoaded }) => {
           <div className="font-medium text-gray-900">{user.trade_name || '-'}</div>
         </div>
         <div>
+          <div className="text-xs text-gray-500">Nombre Fiscal</div>
+          <div className="font-medium text-gray-900">{user.tax_name || '-'}</div>
+        </div>
+        <div>
           <div className="text-xs text-gray-500">Ciudad</div>
           <div className="font-medium text-gray-900">{user.city || '-'}</div>
         </div>
@@ -138,6 +143,21 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, onUserLoaded }) => {
               </div>
             ) : (
               'Sin roles asignados'
+            )}
+          </div>
+        </div>
+        <div>
+          <div className="text-xs text-gray-500">Total Facturado</div>
+          <div className="font-medium text-gray-900">
+            {user.total_billed ? (
+              <span className="text-green-600 font-semibold">
+                ${user.total_billed.toLocaleString('es-AR', { 
+                  minimumFractionDigits: 2, 
+                  maximumFractionDigits: 2 
+                })}
+              </span>
+            ) : (
+              <span className="text-gray-500">$0.00</span>
             )}
           </div>
         </div>

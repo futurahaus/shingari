@@ -91,7 +91,7 @@ export function useProductsInfinite(filters: Omit<ProductFilters, 'page'> = {}) 
       return lastPage.page < lastPage.lastPage ? lastPage.page + 1 : undefined;
     },
     enabled: isReady, // Only fetch when i18n is ready
-    staleTime: 3 * 60 * 1000, // 3 minutes
+    staleTime: 1 * 60 * 1000, // 1 minute
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: 1,
   });
@@ -110,8 +110,8 @@ export function useProduct(id: string) {
       return api.get<Product>(`/products/${id}${separator}locale=${locale}`);
     },
     enabled: !!id,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 15 * 60 * 1000, // 15 minutes
+    staleTime: 1 * 60 * 1000, // 1 minute
+    gcTime: 10 * 60 * 1000, // 10 minutes
     retry: 1,
   });
 }
@@ -125,8 +125,8 @@ export function useProductCategories() {
     queryKey: productsKeys.categories(locale),
     queryFn: () => localizedAPI.get<Category[]>('/products/categories'),
     enabled: isReady, // Only fetch when i18n is ready
-    staleTime: 10 * 60 * 1000, // 10 minutes - categories don't change often
-    gcTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: 1 * 60 * 1000, // 1 minute - categories don't change often
+    gcTime: 10 * 60 * 1000, // 10 minutes
     retry: 2,
   });
 }

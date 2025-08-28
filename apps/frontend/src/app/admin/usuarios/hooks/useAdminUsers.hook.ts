@@ -10,17 +10,19 @@ export interface User {
   first_name?: string;
   last_name?: string;
   trade_name?: string;
+  tax_name?: string;
   city?: string;
   province?: string;
   country?: string;
   phone?: string;
   profile_is_complete?: boolean;
   compras?: number;
-  scoring?: number;
+  points?: number;
   last_sign_in_at?: string;
   email_confirmed_at?: string;
   roles: string[];
   meta_data?: unknown;
+  internal_id?: string;
 }
 
 // Función para obtener usuarios

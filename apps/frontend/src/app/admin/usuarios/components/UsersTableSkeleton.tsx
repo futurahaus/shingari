@@ -13,14 +13,14 @@ export const UsersTableSkeleton: React.FC<UsersTableSkeletonProps> = ({
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre Fiscal</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Business Name</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">City</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Compras</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scoring</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Puntos</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roles</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Últ. Login</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
             </tr>
@@ -39,24 +39,24 @@ export const UsersTableSkeleton: React.FC<UsersTableSkeletonProps> = ({
 const UserRowSkeleton: React.FC = () => {
   return (
     <tr className="animate-pulse">
+      {/* ID */}
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="h-4 bg-gray-300 rounded w-12"></div>
+      </td>
+      
+      {/* Nombre Fiscal */}
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="h-4 bg-gray-300 rounded w-20"></div>
+      </td>
+      
       {/* Name */}
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="h-4 bg-gray-300 rounded w-24"></div>
       </td>
       
-      {/* Business Name */}
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="h-4 bg-gray-300 rounded w-20"></div>
-      </td>
-      
       {/* Email */}
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="h-4 bg-gray-300 rounded w-32"></div>
-      </td>
-      
-      {/* City */}
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="h-4 bg-gray-300 rounded w-16"></div>
       </td>
       
       {/* Phone */}
@@ -69,14 +69,17 @@ const UserRowSkeleton: React.FC = () => {
         <div className="h-4 bg-gray-300 rounded w-8 mx-auto"></div>
       </td>
       
-      {/* ID */}
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="h-4 bg-gray-300 rounded w-12"></div>
-      </td>
-      
-      {/* Scoring */}
+      {/* Points */}
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="h-6 bg-gray-300 rounded-full w-12"></div>
+      </td>
+      
+      {/* Roles */}
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="flex gap-1">
+          <div className="h-5 bg-gray-300 rounded-full w-16"></div>
+          <div className="h-5 bg-gray-300 rounded-full w-12"></div>
+        </div>
       </td>
       
       {/* Últ. Login */}

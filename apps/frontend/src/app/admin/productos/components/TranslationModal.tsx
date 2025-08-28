@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
+import { useTranslation } from '@/contexts/I18nContext';
 import { Product } from '../interfaces/product.interfaces';
 import { api } from '@/lib/api';
 
@@ -27,6 +28,7 @@ interface ExistingTranslation {
 }
 
 export function TranslationModal({ isOpen, onClose, product, onTranslationUpdated }: TranslationModalProps) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [fetchingTranslation, setFetchingTranslation] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -254,7 +256,7 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <div className="flex justify-between items-center mb-4">
           <Text size="xl" weight="bold" color="gray-900">
-            Traducir Producto
+            {t('admin.products.modals.translation.title')}
           </Text>
           <button
             onClick={onClose}
@@ -268,10 +270,10 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
 
         <div className="mb-4">
           <Text size="sm" color="gray-600" className="mb-2">
-            Producto: <span className="font-medium">{product.name}</span>
+            {t('admin.products.table.product')}: <span className="font-medium">{product.name}</span>
           </Text>
           <Text size="sm" color="gray-600">
-            SKU: <span className="font-medium">{product.sku}</span>
+            {t('admin.products.table.sku')}: <span className="font-medium">{product.sku}</span>
           </Text>
 
           {/* Translation Status Indicator */}
@@ -282,7 +284,7 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
                 <Text size="sm" color="gray-900" weight="medium">
-                  Traducción existente en {translationData.locale === 'zh' ? 'Chino' : 'Español'}
+                  {t('admin.products.table.translated')} {translationData.locale === 'zh' ? t('language.chinese') : t('language.spanish')}
                 </Text>
               </div>
             </div>
@@ -292,7 +294,7 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Idioma
+              {t('admin.products.modals.translation.locale')}
             </label>
             <select
               value={translationData.locale}
@@ -305,20 +307,20 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
             </select>
             {fetchingTranslation && (
               <Text size="xs" color="gray-500" className="mt-1">
-                Cargando traducción existente...
+                {t('admin.products.modals.translation.loading')}
               </Text>
             )}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nombre Traducido *
+              {t('admin.products.modals.translation.name')} *
             </label>
             <input
               type="text"
               value={translationData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
-              placeholder="Nombre del producto en el idioma seleccionado"
+              placeholder={t('admin.products.modals.translation.name_placeholder')}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
               required
               disabled={loading || fetchingTranslation}
@@ -327,12 +329,12 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Descripción Traducida
+              {t('admin.products.modals.translation.description')}
             </label>
             <textarea
               value={translationData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder="Descripción del producto en el idioma seleccionado"
+              placeholder={t('admin.products.modals.translation.description_placeholder')}
               rows={3}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
               disabled={loading || fetchingTranslation}
@@ -354,7 +356,7 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
           <div className="flex gap-2 pt-4">
             <Button
               type="primary-admin"
-              text={loading ? 'Guardando...' : (existingTranslation ? 'Actualizar Traducción' : 'Guardar Traducción')}
+              text={loading ? t('admin.products.modals.translation.saving') : (existingTranslation ? t('admin.products.modals.translation.update') : t('admin.products.modals.translation.save'))}
               onPress={saveTranslation}
               disabled={loading || fetchingTranslation || !translationData.name.trim()}
               inline
@@ -363,7 +365,7 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
             {existingTranslation && (
               <Button
                 type="secondary"
-                text="Eliminar"
+                text={t('common.delete')}
                 onPress={handleDeleteTranslation}
                 disabled={loading || fetchingTranslation}
                 inline
@@ -372,7 +374,7 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
             )}
             <Button
               type="secondary"
-              text="Cancelar"
+                              text={t('admin.products.modals.translation.cancel')}
               onPress={onClose}
               disabled={loading || fetchingTranslation}
               inline

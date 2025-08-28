@@ -2,12 +2,15 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Text } from "@/app/ui/components/Text";
+import { useTranslation } from "@/contexts/I18nContext";
 import { OrdersListSkeleton } from "./components/OrdersListSkeleton";
+import { StatusChip } from "./components/StatusChip";
 import { useAdminOrders } from "./hooks/useAdminOrders.hook";
 import { FaSearch, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import { Button } from "@/app/ui/components/Button";
 
 export default function AdminOrdersPage() {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,11 +52,11 @@ export default function AdminOrdersPage() {
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <Text size="3xl" weight="bold" color="gray-900" as="h1">
-            Pedidos
+            {t('admin.orders.title')}
           </Text>
         </div>
         <Text size="sm" weight="normal" color="gray-500" as="p" className="mb-4">
-          Gestión de pedidos realizados en la plataforma
+          {t('admin.orders.subtitle')}
         </Text>
         {/* Search and Sort Controls */}
         <div className="flex flex-col md:flex-row md:items-center gap-4">
@@ -63,7 +66,7 @@ export default function AdminOrdersPage() {
             </div>
             <input
               type="text"
-              placeholder="Buscar por ID, usuario o email..."
+              placeholder={t('admin.orders.search_placeholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onBlur={() => setSearchQuery(searchTerm)}
@@ -87,7 +90,7 @@ export default function AdminOrdersPage() {
                     onClick={() => handleSort('created_at')} 
                     className="flex items-center gap-1 hover:text-gray-700 transition-colors"
                   >
-                    ID {getSortIcon('created_at')}
+                    {t('admin.orders.table.id')} {getSortIcon('created_at')}
                   </button>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -95,7 +98,7 @@ export default function AdminOrdersPage() {
                     onClick={() => handleSort('user_name')} 
                     className="flex items-center gap-1 hover:text-gray-700 transition-colors"
                   >
-                    Usuario {getSortIcon('user_name')}
+                    {t('admin.orders.table.user')} {getSortIcon('user_name')}
                   </button>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -103,7 +106,7 @@ export default function AdminOrdersPage() {
                     onClick={() => handleSort('total_amount')} 
                     className="flex items-center gap-1 hover:text-gray-700 transition-colors"
                   >
-                    Total {getSortIcon('total_amount')}
+                    {t('admin.orders.table.total')} {getSortIcon('total_amount')}
                   </button>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -111,7 +114,7 @@ export default function AdminOrdersPage() {
                     onClick={() => handleSort('status')} 
                     className="flex items-center gap-1 hover:text-gray-700 transition-colors"
                   >
-                    Estado {getSortIcon('status')}
+                    {t('admin.orders.table.status')} {getSortIcon('status')}
                   </button>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -119,7 +122,7 @@ export default function AdminOrdersPage() {
                     onClick={() => handleSort('updated_at')} 
                     className="flex items-center gap-1 hover:text-gray-700 transition-colors"
                   >
-                    Fecha {getSortIcon('updated_at')}
+                    {t('admin.orders.table.date')} {getSortIcon('updated_at')}
                   </button>
                 </th>
                 <th className="px-6 py-3"></th>
@@ -143,12 +146,15 @@ export default function AdminOrdersPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">€{Number(order.total_amount).toFixed(2)}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${order.status === "Completada" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"}`}>{order.status}</span>
+                    <StatusChip 
+                      orderId={order.id} 
+                      currentStatus={order.status}
+                    />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString()}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <Link href={`/admin/pedidos/${order.id}`} className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer">
-                      Ver Detalles
+                      {t('admin.orders.table.view_details')}
                     </Link>
                   </td>
                 </tr>
@@ -160,7 +166,7 @@ export default function AdminOrdersPage() {
             <Button
               onPress={() => handlePageChange(page - 1)}
               type="secondary"
-              text="Anterior"
+              text={t('admin.orders.pagination.previous')}
               testID="prev-page-button"
               inline
               textProps={{
@@ -187,7 +193,7 @@ export default function AdminOrdersPage() {
             <Button
               onPress={() => handlePageChange(page + 1)}
               type="secondary"
-              text="Siguiente"
+              text={t('admin.orders.pagination.next')}
               testID="next-page-button"
               inline
               textProps={{
