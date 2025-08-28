@@ -420,6 +420,43 @@ export class ProductsController {
     return this.productsService.deleteCategoryTranslation(Number(id), locale);
   }
 
+  @Post('upload-image')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Subir imagen de producto a Supabase Storage (Solo Admin)' })
+  @ApiResponse({ status: 201, description: 'Imagen subida exitosamente.', schema: {
+    type: 'object',
+    properties: {
+      url: { type: 'string', description: 'URL pública de la imagen' },
+      path: { type: 'string', description: 'Ruta del archivo en el bucket' }
+    }
+  }})
+  @ApiResponse({ status: 400, description: 'Archivo no válido.' })
+  @ApiResponse({ status: 401, description: 'No autorizado.' })
+  @ApiResponse({ status: 403, description: 'Prohibido - Se requiere acceso de administrador.' })
+  @HttpCode(HttpStatus.CREATED)
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No se proporcionó ningún archivo.');
+    }
+    return this.productsService.uploadImage(file);
+  }
+
+  @Delete('images/:filePath')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Eliminar imagen de producto de Supabase Storage (Solo Admin)' })
+  @ApiParam({ name: 'filePath', description: 'Ruta del archivo a eliminar', example: 'products/image_123.jpg' })
+  @ApiResponse({ status: 204, description: 'Imagen eliminada exitosamente.' })
+  @ApiResponse({ status: 401, description: 'No autorizado.' })
+  @ApiResponse({ status: 403, description: 'Prohibido - Se requiere acceso de administrador.' })
+  @ApiResponse({ status: 404, description: 'Archivo no encontrado.' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteImage(@Param('filePath') filePath: string): Promise<void> {
+    return this.productsService.deleteImage(filePath);
+  }
+
   // @Post('upload-image')
   // @UseGuards(JwtAuthGuard, AdminGuard)
   // @UseInterceptors(FileInterceptor('file'))

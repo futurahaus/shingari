@@ -284,10 +284,8 @@ export default function AdminUsersPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Compras</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Puntos</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roles</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Últ. Login</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
@@ -306,7 +304,6 @@ export default function AdminUsersPage() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{(user.first_name || '') + ' ' + (user.last_name || '')}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-700 underline">{user.email}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.phone || '-'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-gray-900">{user.compras ?? '-'}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="inline-block bg-gray-100 px-4 py-1 rounded-full font-semibold text-gray-700">
                           {user.points ?? '0'}
@@ -329,11 +326,6 @@ export default function AdminUsersPage() {
                         ) : (
                           <span className="text-xs text-gray-500">Sin roles</span>
                         )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user.last_sign_in_at
-                          ? new Date(user.last_sign_in_at).toISOString().slice(0, 10)
-                          : '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <Link
@@ -390,10 +382,6 @@ export default function AdminUsersPage() {
                       <span className="ml-1 text-gray-900">{user.phone || '-'}</span>
                     </div>
                     <div>
-                      <span className="text-gray-500">Compras:</span>
-                      <span className="ml-1 text-gray-900">{user.compras ?? '-'}</span>
-                    </div>
-                    <div>
                       <span className="text-gray-500">Puntos:</span>
                       <span className="ml-1 bg-gray-100 px-2 py-0.5 rounded-full text-gray-700">
                         {user.points ?? '0'}
@@ -421,12 +409,6 @@ export default function AdminUsersPage() {
                       <span className="text-xs text-gray-500">Sin roles asignados</span>
                     )}
                   </div>
-                  
-                  {user.last_sign_in_at && (
-                    <div className="mt-2 text-xs text-gray-500">
-                      Últ. login: {new Date(user.last_sign_in_at).toISOString().slice(0, 10)}
-                    </div>
-                  )}
                 </div>
               ))
             )}

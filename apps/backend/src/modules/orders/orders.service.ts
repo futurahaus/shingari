@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { DatabaseService } from '../database/database.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrderResponseDto } from './dto/order-response.dto';
@@ -8,7 +9,10 @@ import { OrderResponseDto } from './dto/order-response.dto';
 export class OrdersService {
   private readonly logger = new Logger(OrdersService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly databaseService: DatabaseService,
+  ) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
     this.logger.log(
@@ -236,6 +240,129 @@ export class OrdersService {
     return [orders.map((order) => this.mapToOrderResponse(order)), total];
   }
 
+  async uploadDocument(
+    file: Express.Multer.File,
+    orderId: string,
+    documentType: string = 'general',
+  ): Promise<{ url: string; path: string }> {
+    try {
+      // Validar que la orden existe
+      const order = await this.findOne(orderId);
+      if (!order) {
+        throw new NotFoundException('Orden no encontrada');
+      }
+
+      // Validar el archivo
+      if (!file) {
+        throw new Error('No se proporcionó ningún archivo');
+      }
+
+      // Validar el tipo de archivo (solo documentos)
+      const allowedMimeTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/plain',
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+      ];
+
+      if (!allowedMimeTypes.includes(file.mimetype)) {
+        throw new Error('Tipo de archivo no permitido');
+      }
+
+      // Validar el tamaño del archivo (máximo 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        throw new Error('El archivo es demasiado grande. Máximo 10MB');
+      }
+
+      // Generar nombre único para el archivo
+      const timestamp = Date.now();
+      const fileExtension = file.originalname.split('.').pop();
+      const fileName = `${orderId}_${documentType}_${timestamp}.${fileExtension}`;
+      const filePath = `orders/${orderId}/${fileName}`;
+
+      // Subir archivo a Supabase Storage
+      const { data, error } = await this.databaseService.getAdminClient().storage
+        .from('shingari')
+        .upload(filePath, file.buffer, {
+          contentType: file.mimetype,
+          cacheControl: '3600',
+          upsert: false,
+        });
+
+      if (error) {
+        this.logger.error('Error uploading file to Supabase:', error);
+        throw new Error('Error al subir el archivo');
+      }
+
+      // Obtener la URL pública del archivo
+      const { data: urlData } = this.databaseService.getAdminClient().storage
+        .from('shingari')
+        .getPublicUrl(filePath);
+
+      this.logger.log(`Document uploaded successfully: ${filePath}`);
+
+      // Guardar la URL del archivo en la base de datos
+      await this.prisma.orders.update({
+        where: { id: orderId },
+        data: {
+          invoice_file_url: urlData.publicUrl,
+        },
+      });
+
+      this.logger.log(`Invoice URL saved to database for order ${orderId}`);
+
+      return {
+        url: urlData.publicUrl,
+        path: filePath,
+      };
+    } catch (error) {
+      this.logger.error('Error in uploadDocument:', error);
+      throw error;
+    }
+  }
+
+  async deleteDocument(filePath: string): Promise<void> {
+    try {
+      const { error } = await this.databaseService.getAdminClient().storage
+        .from('shingari')
+        .remove([filePath]);
+
+      if (error) {
+        this.logger.error('Error deleting file from Supabase:', error);
+        throw new Error('Error al eliminar el archivo');
+      }
+
+      this.logger.log(`Document deleted successfully: ${filePath}`);
+    } catch (error) {
+      this.logger.error('Error in deleteDocument:', error);
+      throw error;
+    }
+  }
+
+  async getTotalBilledByUserId(userId: string): Promise<number> {
+    try {
+      const result = await this.prisma.orders.aggregate({
+        where: {
+          user_id: userId,
+        },
+        _sum: {
+          total_amount: true,
+        },
+      });
+
+      return Number(result._sum.total_amount) || 0;
+    } catch (error) {
+      this.logger.error(`Error getting total billed for user ${userId}:`, error);
+      return 0;
+    }
+  }
+
   private mapToOrderResponse(order: any): OrderResponseDto {
     return {
       id: order.id,
@@ -250,6 +377,7 @@ export class OrdersService {
       currency: order.currency,
       created_at: order.created_at,
       updated_at: order.updated_at,
+      invoice_file_url: order.invoice_file_url || null,
       order_lines: order.order_lines.map((line: any) => ({
         id: line.id,
         product_id: line.product_id,

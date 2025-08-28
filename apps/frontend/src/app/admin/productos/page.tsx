@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useRef, useCallback } from 'react';
+import { useTranslation } from '@/contexts/I18nContext';
 import { EditionModal } from './components/EditionModal';
 import { CreationModal } from './components/CreationModal';
 import { DeleteModal } from './components/DeleteModal';
@@ -13,6 +14,7 @@ import { Text } from '@/app/ui/components/Text';
 import { FaSearch } from 'react-icons/fa';
 
 export default function AdminProductsPage() {
+  const { t } = useTranslation();
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchQuery, setSearchQuery] = useState(''); // Estado para la búsqueda real
@@ -114,12 +116,12 @@ export default function AdminProductsPage() {
               color="gray-900"
               as="h1"
             >
-              Control de Stock
+              {t('admin.products.title')}
             </Text>
             <Button
               onPress={() => setShowCreateModal(true)}
               type="primary-admin"
-              text="Nuevo Producto"
+              text={t('admin.products.new_product')}
               testID="create-product-button"
               icon="FaPlus"
               inline
@@ -132,7 +134,7 @@ export default function AdminProductsPage() {
             as="p"
             className="mb-4"
           >
-            Gestiona control de mercadería
+            {t('admin.products.subtitle')}
           </Text>
 
           {/* Buscador, Filtros y Ordenador */}
@@ -143,7 +145,7 @@ export default function AdminProductsPage() {
               </div>
               <input
                 type="text"
-                placeholder="Buscar por SKU, nombre o ID..."
+                placeholder={t('admin.products.search_placeholder')}
                 value={searchTerm}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 onBlur={handleSearchSubmit}
@@ -154,7 +156,7 @@ export default function AdminProductsPage() {
             
             {/* Filtro de Categorías */}
             <div className="flex gap-2 items-center">
-              <label htmlFor="categoryFilter" className="text-sm text-gray-600">Categoría:</label>
+              <label htmlFor="categoryFilter" className="text-sm text-gray-600">{t('admin.products.category')}:</label>
               <select
                 id="categoryFilter"
                 value={selectedCategory}
@@ -162,8 +164,8 @@ export default function AdminProductsPage() {
                 className="border border-gray-300 rounded-lg px-2 py-1 text-sm min-w-[150px]"
                 disabled={categoriesLoading}
               >
-                <option value="all">Todas las categorías</option>
-                <option value="none">Sin categoría</option>
+                <option value="all">{t('admin.products.all_categories')}</option>
+                <option value="none">{t('admin.products.no_category')}</option>
                 {categories.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.name}
@@ -173,15 +175,15 @@ export default function AdminProductsPage() {
             </div>
 
             <div className="flex gap-2 items-center">
-              <label htmlFor="sortField" className="text-sm text-gray-600">Ordenar por:</label>
+              <label htmlFor="sortField" className="text-sm text-gray-600">{t('admin.products.sort_by')}:</label>
               <select
                 id="sortField"
                 value={sortField}
                 onChange={e => setSortField(e.target.value as 'created_at' | 'updated_at')}
                 className="border border-gray-300 rounded-lg px-2 py-1 text-sm"
               >
-                <option value="created_at">Más recientes</option>
-                <option value="updated_at">Última actualización</option>
+                <option value="created_at">{t('admin.products.most_recent')}</option>
+                <option value="updated_at">{t('admin.products.last_update')}</option>
               </select>
               <select
                 id="sortDirection"
@@ -189,8 +191,8 @@ export default function AdminProductsPage() {
                 onChange={e => setSortDirection(e.target.value as 'asc' | 'desc')}
                 className="border border-gray-300 rounded-lg px-2 py-1 text-sm"
               >
-                <option value="desc">Descendente</option>
-                <option value="asc">Ascendente</option>
+                <option value="desc">{t('admin.products.descending')}</option>
+                <option value="asc">{t('admin.products.ascending')}</option>
               </select>
             </div>
           </div>
@@ -211,28 +213,28 @@ export default function AdminProductsPage() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Producto
+                      {t('admin.products.table.product')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Stock
+                      {t('admin.products.table.stock')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Unidades por Caja
+                      {t('admin.products.table.units_per_box')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Precio Minorista
+                      {t('admin.products.table.retail_price')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Precio Mayorista
+                      {t('admin.products.table.wholesale_price')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Precio con IVA Minorista
+                      {t('admin.products.table.retail_price_with_iva')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      IVA (%)
+                      {t('admin.products.table.iva')}
                     </th>
                     <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Acciones
+                      {t('admin.products.table.actions')}
                     </th>
                   </tr>
                 </thead>
@@ -256,7 +258,7 @@ export default function AdminProductsPage() {
               <Button
                 onPress={() => handlePageChange(page - 1)}
                 type="secondary"
-                text="Anterior"
+                text={t('admin.products.pagination.previous')}
                 testID="prev-page-button"
                 inline
                 textProps={{
@@ -308,7 +310,7 @@ export default function AdminProductsPage() {
               <Button
                 onPress={() => handlePageChange(page + 1)}
                 type="secondary"
-                text="Siguiente"
+                text={t('admin.products.pagination.next')}
                 testID="next-page-button"
                 inline
                 textProps={{
@@ -325,16 +327,16 @@ export default function AdminProductsPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
             </svg>
             <h3 className="mt-2 text-sm font-medium text-gray-900">
-              {searchQuery ? 'No se encontraron productos' : 'No hay productos'}
+              {searchQuery ? t('admin.products.empty.search_not_found') : t('admin.products.empty.no_products')}
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              {searchQuery ? 'Intenta con otros términos de búsqueda.' : 'Comienza creando tu primer producto.'}
+              {searchQuery ? t('admin.products.empty.try_other_terms') : t('admin.products.empty.start_creating')}
             </p>
             <div className="mt-6">
               <Button
                 onPress={() => setShowCreateModal(true)}
                 type="primary-admin"
-                text="Nuevo Producto"
+                text={t('admin.products.new_product')}
                 testID="create-product-empty-button"
                 icon="FaPlus"
                 inline

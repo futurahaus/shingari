@@ -44,4 +44,13 @@ export class UpdateOrderDto {
   @IsOptional()
   @IsNumber()
   earned_points?: number;
+
+  @ApiProperty({
+    description: 'URL del archivo de factura',
+    required: false,
+    example: 'https://spozhuqlvmaieeqtaxvq.supabase.co/storage/v1/object/public/shingari/orders/123e4567-e89b-12d3-a456-426614174000/invoice_1703123456789.pdf'
+  })
+  @IsOptional()
+  @IsString()
+  invoice_file_url?: string;
 }
