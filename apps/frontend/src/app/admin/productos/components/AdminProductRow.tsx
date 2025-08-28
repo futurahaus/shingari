@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { FaEdit, FaTrash, FaGlobe, FaCheck } from 'react-icons/fa';
+import { useTranslation } from '@/contexts/I18nContext';
 import { AdminProductRowProps } from '../interfaces/product.interfaces';
 
 export const AdminProductRow: React.FC<AdminProductRowProps> = ({
@@ -11,6 +12,8 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
     isLast = false,
     lastProductRef
 }) => {
+    const { t } = useTranslation();
+    
     // Check if product has translations
     const hasTranslations = product.translations && product.translations.length > 0;
     const translationLocales = hasTranslations 
@@ -45,13 +48,13 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
                     </div>
                     <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                        <div className="text-sm text-gray-500">SKU: {product.sku}</div>
+                        <div className="text-sm text-gray-500">{t('admin.products.table.sku')}: {product.sku}</div>
                         {/* Translation status indicator */}
                         {hasTranslations && (
                             <div className="flex items-center mt-1">
                                 <FaCheck className="w-3 h-3 text-green-500 mr-1" />
                                 <span className="text-xs text-green-600 font-medium">
-                                    Traducido ({translationLocales})
+                                    {t('admin.products.table.translated')} ({translationLocales})
                                 </span>
                             </div>
                         )}
@@ -102,8 +105,8 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
                                 : 'text-blue-600 hover:bg-blue-50'
                         }`}
                         title={hasTranslations 
-                            ? `Traducir producto (Ya traducido en: ${translationLocales})` 
-                            : 'Traducir producto'
+                            ? t('admin.products.table.translate_product_with_locales', { locales: translationLocales }) 
+                            : t('admin.products.table.translate_product')
                         }
                     >
                         <FaGlobe size={16} />
@@ -111,14 +114,14 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
                     <button
                         onClick={() => onEdit(product)}
                         className="p-2 text-black rounded-lg transition duration-200 hover:bg-gray-100 cursor-pointer"
-                        title="Editar producto"
+                        title={t('admin.products.table.edit_product')}
                     >
                         <FaEdit size={16} />
                     </button>
                     <button
                         onClick={() => onDelete(product)}
                         className="p-2 text-black rounded-lg transition duration-200 hover:bg-gray-100 cursor-pointer"
-                        title="Eliminar producto"
+                        title={t('admin.products.table.delete_product')}
                     >
                         <FaTrash size={16} />
                     </button>

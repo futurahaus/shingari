@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from '@/contexts/I18nContext';
 import { ProductRowSkeleton } from './ProductRowSkeleton';
 
 interface ProductsListSkeletonProps {
@@ -8,6 +9,7 @@ interface ProductsListSkeletonProps {
 export const ProductsListSkeleton: React.FC<ProductsListSkeletonProps> = ({ 
   rowsCount = 10 
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="bg-white shadow overflow-hidden sm:rounded-lg">
       <div className="overflow-x-auto">
@@ -15,28 +17,28 @@ export const ProductsListSkeleton: React.FC<ProductsListSkeletonProps> = ({
           <thead className="bg-gray-50">
             <tr>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Producto
+                {t('admin.products.table.product')}
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Stock
+                {t('admin.products.table.stock')}
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Unidades por Caja
+                {t('admin.products.table.units_per_box')}
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Precio Minorista
+                {t('admin.products.table.retail_price')}
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Precio Mayorista
+                {t('admin.products.table.wholesale_price')}
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Precio con Descuento
+                {t('admin.products.table.retail_price_with_iva')}
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Unidades Vendidas
+                {t('admin.products.table.iva')}
               </th>
               <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Acciones
+                {t('admin.products.table.actions')}
               </th>
             </tr>
           </thead>

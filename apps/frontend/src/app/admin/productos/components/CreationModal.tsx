@@ -2,6 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
+import { useTranslation } from '@/contexts/I18nContext';
 import { useCategories } from '../hooks/useCategories.hook';
 import { Button } from '@/app/ui/components/Button';
 import { CreateProductData, CreationModalProps } from '../interfaces/product.interfaces';
@@ -14,6 +15,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
   onProductCreated
 }) => {
   const { showSuccess, showError } = useNotificationContext();
+  const { t } = useTranslation();
   const { categories, loading: loadingCategories } = useCategories();
 
   const [createForm, setCreateForm] = useState<CreateProductData>({
@@ -133,7 +135,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
           imageUrls = await uploadImagesToSupabase(selectedFiles);
           setUploadedImageUrls(imageUrls);
         } catch {
-          showError('Error al subir imágenes', 'No se pudieron subir las imágenes. Por favor, inténtalo de nuevo.');
+          showError(t('admin.products.modals.create.error_uploading_images'), t('admin.products.modals.create.error_uploading_images_message'));
           setUploadingImages(false);
           return;
         }
@@ -168,12 +170,12 @@ export const CreationModal: React.FC<CreationModalProps> = ({
       setUploadedImageUrls([]);
       
       onProductCreated();
-      showSuccess('Producto Creado', 'El producto se ha creado exitosamente con sus imágenes');
+      showSuccess(t('admin.products.modals.create.product_created'), t('admin.products.modals.create.product_created_with_images'));
     } catch (err: unknown) {
       if (err instanceof Error) {
-        showError('Error al Crear', 'Error al crear producto: ' + (err.message || 'Error desconocido'));
+        showError(t('admin.products.modals.create.error_creating'), t('admin.products.modals.create.error_creating_message'));
       } else {
-        showError('Error al Crear', 'Error al crear producto: Error desconocido');
+        showError(t('admin.products.modals.create.error_creating'), t('admin.products.modals.create.error_creating_message'));
       }
     } finally {
       setUploadingImages(false);
@@ -199,25 +201,25 @@ export const CreationModal: React.FC<CreationModalProps> = ({
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
       <div className="relative top-20 mx-auto p-5 border w-auto shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
         <div className="mt-3">
-          <h3 className="text-lg font-medium text-center text-gray-900 mb-4">Agregar nuevo producto</h3>
+          <h3 className="text-lg font-medium text-center text-gray-900 mb-4">{t('admin.products.modals.create.title')}</h3>
           <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Left Column */}
             <div className="flex flex-col gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Nombre de Producto</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">{t('admin.products.modals.create.product_name')}</label>
                 <input
                   type="text"
-                  placeholder="Nombre de Producto"
+                  placeholder={t('admin.products.modals.create.product_name_placeholder')}
                   value={createForm.name}
                   onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Descripción</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">{t('admin.products.modals.create.description')}</label>
                 <input
                   type="text"
-                  placeholder="Descripción de Producto"
+                  placeholder={t('admin.products.modals.create.description_placeholder')}
                   value={createForm.description}
                   onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
@@ -226,10 +228,10 @@ export const CreationModal: React.FC<CreationModalProps> = ({
               {/* Sección de subida de imágenes */}
               <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-2">
                 <label className="block text-lg font-semibold text-gray-900 mb-4">
-                  Subir fotos
+                  {t('admin.products.modals.create.upload_photos')}
                   {uploadingImages && (
                     <span className="ml-2 text-sm text-blue-600 font-normal">
-                      (Subiendo imágenes...)
+                      {t('admin.products.modals.create.uploading_images')}
                     </span>
                   )}
                 </label>
@@ -237,7 +239,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                   <Button
                     onPress={handleFileButtonClick}
                     type="primary-admin"
-                    text="Seleccionar Archivos"
+                    text={t('admin.products.modals.create.select_files')}
                     testID="select-files-button"
                     inline
                     htmlType="button"
@@ -253,10 +255,10 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                   />
                   <span className="text-gray-400 text-base">
                     {selectedFiles.length === 0
-                      ? 'Ningún archivo seleccionado'
+                      ? t('admin.products.modals.create.no_files_selected')
                       : selectedFiles.length === 1
                         ? selectedFiles[0].name
-                        : `${selectedFiles.length} archivos seleccionados`}
+                        : `${selectedFiles.length} ${t('admin.products.modals.create.files_selected')}`}
                   </span>
                 </div>
                 <div className="flex gap-4">
@@ -280,7 +282,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                         </>
                       )}
                     </div>
-                    <span className="mt-2 text-sm text-black font-medium text-center leading-tight">Imagen<br />Principal</span>
+                    <span className="mt-2 text-sm text-black font-medium text-center leading-tight">{t('admin.products.modals.create.main_image')}</span>
                   </div>
                   {/* Otras imágenes */}
                   {Array.from({ length: 4 }).map((_, idx) => (
@@ -311,7 +313,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
             <div className="flex flex-col gap-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Stock</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">{t('admin.products.modals.create.stock')}</label>
                   <input
                     type="number"
                     min="0"
@@ -322,7 +324,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Unidades por Caja</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">{t('admin.products.modals.create.units_per_box')}</label>
                   <input
                     type="number"
                     min="0"
@@ -335,20 +337,20 @@ export const CreationModal: React.FC<CreationModalProps> = ({
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Precio de Lista</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">{t('admin.products.modals.create.list_price')}</label>
                   <input
                     type="number"
-                    placeholder="$1234"
+                    placeholder={t('admin.products.modals.create.list_price_placeholder')}
                     value={createForm.listPrice || ''}
                     onChange={(e) => setCreateForm({ ...createForm, listPrice: parseFloat(e.target.value) || 0 })}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Precio Mayorista</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">{t('admin.products.modals.create.wholesale_price')}</label>
                   <input
                     type="number"
-                    placeholder="$123"
+                    placeholder={t('admin.products.modals.create.wholesale_price_placeholder')}
                     value={createForm.wholesalePrice || ''}
                     onChange={e => setCreateForm({ ...createForm, wholesalePrice: parseFloat(e.target.value) || 0 })}
                     className="w-full border border-gray-300 text-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black"
@@ -357,10 +359,10 @@ export const CreationModal: React.FC<CreationModalProps> = ({
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">IVA (%)</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">{t('admin.products.modals.create.iva')}</label>
                   <input
                     type="number"
-                    placeholder="21"
+                    placeholder={t('admin.products.modals.create.iva_placeholder')}
                     min="0"
                     max="100"
                     step="0.01"
@@ -371,7 +373,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Categoría</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">{t('admin.products.modals.create.category')}</label>
                 <select
                   value={createForm.categoryIds[0] || ''}
                   onChange={e => setCreateForm({ ...createForm, categoryIds: [e.target.value] })}
@@ -379,7 +381,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                   disabled={loadingCategories}
                 >
                   <option value="">
-                    {loadingCategories ? 'Cargando categorías...' : 'Seleccionar categoría'}
+                    {loadingCategories ? t('admin.products.modals.create.loading_categories') : t('admin.products.modals.create.select_category')}
                   </option>
                   {/* Agrupar y mostrar categorías igual que el frontend principal */}
                   {(() => {
@@ -407,14 +409,14 @@ export const CreationModal: React.FC<CreationModalProps> = ({
               <Button
                 onPress={handleClose}
                 type="secondary"
-                text="Cancelar"
+                text={t('admin.products.modals.create.cancel')}
                 testID="cancel-create-button"
                 inline
               />
               <Button
                 onPress={handleCreateProduct}
                 type="primary-admin"
-                text={uploadingImages ? "Subiendo..." : "Subir Producto"}
+                text={uploadingImages ? t('admin.products.modals.create.uploading') : t('admin.products.modals.create.upload_product')}
                 testID="create-product-button"
                 inline
                 disabled={uploadingImages}

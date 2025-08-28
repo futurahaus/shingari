@@ -3,20 +3,22 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from '@/contexts/I18nContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Home, Users, Boxes, Settings, LogOut, FolderTree, Inbox, Menu, X } from 'lucide-react';
 
 const sidebarOptions = [
-  { name: 'Dashboard', path: '/admin/dashboard', icon: <Home className="w-5 h-5 text-gray-400" /> },
-  { name: 'Usuarios', path: '/admin/usuarios', icon: <Users className="w-5 h-5 text-gray-400" /> },
-  { name: 'Productos', path: '/admin/productos', icon: <Boxes className="w-5 h-5 text-gray-400" /> },
-  { name: 'Pedidos', path: '/admin/pedidos', icon: <Inbox className="w-5 h-5 text-gray-400" /> },
-  { name: 'Categorias', path: '/admin/categorias', icon: <FolderTree className="w-5 h-5 text-gray-400" /> },
-  { name: 'Configuración', path: '/admin/setup', icon: <Settings className="w-5 h-5 text-gray-400" /> },
+  { name: 'admin.sidebar.dashboard', path: '/admin/dashboard', icon: <Home className="w-5 h-5 text-gray-400" /> },
+  { name: 'admin.sidebar.users', path: '/admin/usuarios', icon: <Users className="w-5 h-5 text-gray-400" /> },
+  { name: 'admin.sidebar.products', path: '/admin/productos', icon: <Boxes className="w-5 h-5 text-gray-400" /> },
+  { name: 'admin.sidebar.orders', path: '/admin/pedidos', icon: <Inbox className="w-5 h-5 text-gray-400" /> },
+  { name: 'admin.sidebar.categories', path: '/admin/categorias', icon: <FolderTree className="w-5 h-5 text-gray-400" /> },
+  { name: 'admin.sidebar.settings', path: '/admin/setup', icon: <Settings className="w-5 h-5 text-gray-400" /> },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const { user, logout, isLoading } = useAuth();
   const router = useRouter();
@@ -113,7 +115,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         <span className="mr-3">
                           {option.icon}
                         </span>
-                        {option.name}
+                        {t(option.name)}
                       </a>
                     </Link>
                   </li>
@@ -122,7 +124,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
             <div className="px-4 mb-6">
               <div className="mb-4">
-                <span className="block text-xs text-gray-400 mb-1">Bienvenido,</span>
+                <span className="block text-xs text-gray-400 mb-1">{t('admin.sidebar.welcome')},</span>
                 <span className="block text-sm font-semibold text-gray-700">{user.email}</span>
               </div>
               <button
@@ -132,7 +134,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <span className="mr-3">
                   <LogOut className="w-5 h-5 text-gray-400 cursor-pointer" />
                 </span>
-                Cerrar Sesión
+                {t('admin.sidebar.logout')}
               </button>
             </div>
           </nav>
