@@ -2,11 +2,11 @@
 import { useTranslation } from '@/contexts/I18nContext';
 import { Gift, TrendingUp, TrendingDown, Clock, RefreshCw } from 'lucide-react';
 import Sidebar from '@/components/layout/Sidebar';
-import { usePoints, PointsLedgerEntry } from '@/hooks/usePoints';
+import { usePointsQuery, PointsLedgerEntry } from '@/hooks/usePointsQuery';
 
 export default function PointsPage() {
   const { t } = useTranslation();
-  const { pointsData, loading, error, refetch } = usePoints();
+  const { balance, transactions, isLoading, error, refetch, isFetching } = usePointsQuery();
 
   const getTransactionIcon = (type: string | null) => {
     switch (type) {
@@ -69,22 +69,27 @@ export default function PointsPage() {
                 <h1 className="text-2xl font-bold">{t('dashboard.my_points')}</h1>
               </div>
               <button
-                onClick={refetch}
-                disabled={loading}
+                onClick={() => refetch()}
+                disabled={isLoading}
                 className="p-2 rounded-full hover:bg-white/20 transition-colors"
                 title="Refresh points"
               >
-                <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
               </button>
+              {isFetching && !isLoading && (
+                <div className="text-xs text-red-100 opacity-75">
+                  Updating...
+                </div>
+              )}
             </div>
-            {loading ? (
+            {isLoading ? (
               <div className="text-4xl font-bold mb-2">...</div>
             ) : error ? (
               <div className="text-2xl font-bold mb-2 text-red-200">Error loading points</div>
             ) : (
               <>
                 <div className="text-4xl font-bold mb-2">
-                  {pointsData?.balance?.total_points?.toLocaleString('de-DE') || '0'}
+                  {balance?.total_points?.toLocaleString('de-DE') || '0'}
                 </div>
                 <p className="text-red-100">{t('dashboard.total_points')}</p>
               </>
@@ -118,7 +123,7 @@ export default function PointsPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {loading ? (
+                  {isLoading ? (
                     <tr>
                       <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
                         <div className="flex items-center justify-center gap-2">
@@ -133,8 +138,8 @@ export default function PointsPage() {
                         Error loading transactions. Please try again.
                       </td>
                     </tr>
-                  ) : pointsData?.transactions && pointsData.transactions.length > 0 ? (
-                    pointsData.transactions.map((transaction: PointsLedgerEntry) => (
+                  ) : transactions && transactions.length > 0 ? (
+                    transactions.map((transaction: PointsLedgerEntry) => (
                       <tr key={transaction.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">

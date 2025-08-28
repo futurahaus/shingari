@@ -1,57 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Sidebar from '@/components/layout/Sidebar';
-import { api } from '@/lib/api';
 import { useTranslation, useI18n } from '@/contexts/I18nContext';
-
-interface OrderLine {
-  id: string;
-  product_id: number;
-  product_name: string;
-  quantity: number;
-  unit_price: string;
-  total_price: string;
-  product_image?: string;
-}
-
-interface OrderAddress {
-  id: string;
-  type: string;
-  full_name: string;
-  address_line1: string;
-  address_line2?: string;
-  city: string;
-  state?: string;
-  postal_code: string;
-  country: string;
-  phone?: string;
-}
-
-interface OrderPayment {
-  id: string;
-  payment_method: string;
-  status: string;
-  paid_at?: string;
-  amount: string;
-  transaction_id?: string;
-  metadata?: Record<string, unknown>;
-}
-
-interface Order {
-  id: string;
-  user_id?: string;
-  status: string;
-  total_amount: string;
-  currency: string;
-  created_at: string;
-  updated_at: string;
-  order_lines: OrderLine[];
-  order_addresses: OrderAddress[];
-  order_payments: OrderPayment[];
-}
+import { useOrderDetail } from '@/hooks/useOrdersQuery';
 
 const getStatusConfig = (status: string, t: (key: string) => string) => {
   switch (status.toLowerCase()) {
@@ -246,29 +200,9 @@ export default function OrderDetailPage() {
   const { t } = useTranslation();
   const { locale } = useI18n();
 
-  const [order, setOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: order, isLoading, error, refetch } = useOrderDetail(orderId);
 
-  useEffect(() => {
-    const fetchOrder = async () => {
-      if (!orderId) return;
-
-      try {
-        const orderData = await api.get<Order>(`/orders/${orderId}`);
-        setOrder(orderData);
-      } catch (error) {
-        console.error('Error fetching order:', error);
-        setError(t('dashboard.loading_order_details'));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrder();
-  }, [orderId, t]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="mx-auto px-4 sm:px-6 lg:px-16 py-8 lg:py-12">
         <div className="flex flex-col lg:flex-row gap-8">
@@ -286,7 +220,7 @@ export default function OrderDetailPage() {
           <Sidebar />
           <div className="flex-1">
             <div className="text-center text-red-600">
-              <p>{error || t('dashboard.order_not_found')}</p>
+              <p>{error?.message || t('dashboard.order_not_found')}</p>
             </div>
           </div>
         </div>
@@ -319,13 +253,20 @@ export default function OrderDetailPage() {
                   {t('dashboard.purchase_date')}: {formatDate(order.created_at, locale === 'zh' ? 'zh-CN' : 'es-ES')}
                 </p>
               </div>
-              <div className="sm:ml-4">
+              <div className="sm:ml-4 flex gap-2">
+                <button
+                  onClick={() => refetch()}
+                  disabled={isLoading}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors disabled:opacity-50"
+                >
+                  {isLoading ? 'Refreshing...' : 'Refresh'}
+                </button>
                 <button
                   onClick={() => {
                     // Lógica para repetir compra
                     console.log('Repetir compra:', order.id);
                   }}
-                  className="w-full sm:w-auto px-4 py-2 bg-[#EA3D15] text-white rounded text-sm font-medium hover:bg-[#d43e0e] transition-colors cursor-pointer"
+                  className="px-4 py-2 bg-[#EA3D15] text-white rounded text-sm font-medium hover:bg-[#d43e0e] transition-colors cursor-pointer"
                 >
                   {t('dashboard.repeat_order')}
                 </button>
