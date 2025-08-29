@@ -154,6 +154,14 @@ Aplicación construida con Next.js.
         -   **Integración con API**: Utiliza los endpoints del backend para todas las operaciones.
         -   **Estados de Carga**: Indicadores de carga y manejo de errores con opción de reintento.
         -   **Confirmaciones**: Modales de confirmación para acciones destructivas como eliminar usuarios.
+    -   `admin/canjeables/page.tsx`: Página de administración de recompensas (canjeables) con funcionalidad CRUD completa.
+        -   **Gestión de Recompensas**: Interfaz completa para administrar recompensas que los usuarios pueden canjear con puntos.
+        -   **Tabla de Recompensas**: Muestra todas las recompensas con información detallada (nombre, descripción, imagen, costo en puntos, stock).
+        -   **CRUD Completo**: Modales para crear, editar y eliminar recompensas con validación de formularios.
+        -   **Gestión de Stock**: Control de inventario para cada recompensa.
+        -   **Integración con API**: Utiliza los endpoints del backend para todas las operaciones.
+        -   **Estados de Carga**: Indicadores de carga y manejo de errores con opción de reintento.
+        -   **Confirmaciones**: Modales de confirmación para acciones destructivas como eliminar recompensas.
     -   `products/page.tsx`: Página pública de productos con filtros y paginación.
     -   `products/[id]/page.tsx`: Página de detalle de producto específico.
     -   `ui/page.tsx`: Página de demostración de componentes UI con ejemplos de uso.
@@ -237,6 +245,12 @@ Aplicación construida con Next.js.
     -   **Navegación**: Integración en el sidebar del dashboard con acceso directo a la sección de puntos.
     -   **Historial de Transacciones**: Tabla detallada con tipos de transacciones (ganados, usados, expirados).
     -   **Datos Mockup**: Implementación inicial con datos de ejemplo para demostración.
+-   **Sistema de Recompensas**: Implementación de sistema de recompensas (canjeables) para usuarios.
+    -   **Gestión de Recompensas**: Interfaz completa para administradores para crear, editar y eliminar recompensas.
+    -   **Tabla de Recompensas**: Muestra todas las recompensas con información detallada (nombre, descripción, imagen, costo en puntos, stock).
+    -   **CRUD Completo**: Modales para crear, editar y eliminar recompensas con validación de formularios.
+    -   **Gestión de Stock**: Control de inventario para cada recompensa.
+    -   **Integración con Puntos**: Las recompensas están vinculadas al sistema de puntos a través de la tabla `points_ledger`.
     -   **Traducciones**: Soporte completo en español para toda la funcionalidad de puntos.
 -   **Testing**: Ambos proyectos tienen configuraciones de Jest. El backend tiene tests unitarios para servicios y tests e2e. El frontend tiene tests para componentes.
 - **Endpoints**: Se pueden encontrar los endpoints disponibles para dev en http://localhost:3001/api-docs
@@ -250,6 +264,6 @@ Aplicación construida con Next.js.
 ---
 
 *Este archivo fue generado y actualizado el 2025-01-03 22:30:00.*
-*Última actualización: 2025-01-17 - Implementado sistema de puntos para usuarios con historial de transacciones y navegación integrada.*
+*Última actualización: 2025-01-17 - Implementado sistema de puntos para usuarios con historial de transacciones y navegación integrada, y sistema de recompensas (canjeables) para administradores.*
 
 *Por favor, actualiza la fecha y cualquier información relevante cuando hagas cambios significativos.*

@@ -198,6 +198,7 @@
       "products": "产品",
       "orders": "订单",
       "categories": "分类",
+      "rewards": "可兑换商品",
       "settings": "设置",
       "welcome": "欢迎",
       "logout": "退出登录"
@@ -226,6 +227,69 @@
         "updating": "更新中...",
         "change_status": "更改状态",
         "current_status": "当前状态"
+      }
+    },
+    "rewards": {
+      "title": "可兑换商品",
+      "subtitle": "管理用户可以用积分兑换的奖励",
+      "new_reward": "新可兑换商品",
+      "search_placeholder": "按名称或描述搜索...",
+      "sort_by": "排序方式",
+      "most_recent": "最新",
+      "last_update": "最后更新",
+      "sort_by_name": "按名称",
+      "sort_by_points": "按积分",
+      "descending": "降序",
+      "ascending": "升序",
+      "table": {
+        "reward": "可兑换商品",
+        "points_cost": "积分成本",
+        "stock": "库存",
+        "created_at": "创建日期",
+        "actions": "操作",
+        "edit_reward": "编辑可兑换商品",
+        "delete_reward": "删除可兑换商品"
+      },
+      "pagination": {
+        "previous": "上一页",
+        "next": "下一页"
+      },
+      "empty": {
+        "search_not_found": "未找到可兑换商品",
+        "no_rewards": "没有可兑换商品",
+        "try_other_terms": "尝试其他搜索词。",
+        "start_creating": "开始创建您的第一个可兑换商品。"
+      },
+      "modals": {
+        "create": {
+          "title": "添加新的可兑换商品",
+          "reward_name": "可兑换商品名称",
+          "reward_name_placeholder": "可兑换商品名称",
+          "description": "描述",
+          "description_placeholder": "可兑换商品描述",
+          "image_url": "图片URL",
+          "image_url_placeholder": "https://example.com/image.jpg",
+          "points_cost": "积分成本",
+          "points_cost_placeholder": "100",
+          "stock": "可用库存",
+          "stock_placeholder": "50",
+          "create_reward": "创建可兑换商品",
+          "creating": "创建中...",
+          "reward_created": "可兑换商品创建成功"
+        },
+        "edit": {
+          "title": "编辑可兑换商品",
+          "update_reward": "更新可兑换商品",
+          "updating": "更新中...",
+          "reward_updated": "可兑换商品更新成功"
+        },
+        "delete": {
+          "title": "删除可兑换商品",
+          "message": "您确定要删除这个可兑换商品吗？此操作无法撤销。",
+          "delete_reward": "删除可兑换商品",
+          "deleting": "删除中...",
+          "reward_deleted": "可兑换商品删除成功"
+        }
       }
     },
     "products": {

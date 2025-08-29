@@ -8,6 +8,7 @@ import { UserModule } from './modules/user/user.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { ProductsModule } from './modules/products/products.module';
 import { OrdersModule } from './modules/orders/orders.module';
+import { RewardsModule } from './modules/rewards/rewards.module';
 import { FavoritesModule } from './modules/favorites/favorites.module';
 import { PointsModule } from './modules/points/points.module';
 import { CacheModule } from '@nestjs/cache-manager';
@@ -33,6 +34,7 @@ import * as redisStore from 'cache-manager-ioredis';
     ProductsModule,
     OrdersModule,
     MailModule,
+    RewardsModule,
     FavoritesModule,
     PointsModule,
   ],

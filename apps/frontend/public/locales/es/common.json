@@ -199,6 +199,7 @@
       "products": "Productos",
       "orders": "Pedidos",
       "categories": "Categorías",
+      "rewards": "Canjeables",
       "settings": "Configuración",
       "welcome": "Bienvenido",
       "logout": "Cerrar Sesión"
@@ -227,6 +228,69 @@
         "updating": "Actualizando...",
         "change_status": "Cambiar Estado",
         "current_status": "Estado actual"
+      }
+    },
+    "rewards": {
+      "title": "Canjeables",
+      "subtitle": "Gestiona las recompensas que los usuarios pueden canjear con sus puntos",
+      "new_reward": "Nuevo Canjeable",
+      "search_placeholder": "Buscar por nombre o descripción...",
+      "sort_by": "Ordenar por",
+      "most_recent": "Más recientes",
+      "last_update": "Última actualización",
+      "sort_by_name": "Por Nombre",
+      "sort_by_points": "Por Puntos",
+      "descending": "Descendente",
+      "ascending": "Ascendente",
+      "table": {
+        "reward": "Canjeable",
+        "points_cost": "Costo en Puntos",
+        "stock": "Stock",
+        "created_at": "Fecha de Creación",
+        "actions": "Acciones",
+        "edit_reward": "Editar canjeable",
+        "delete_reward": "Eliminar canjeable"
+      },
+      "pagination": {
+        "previous": "Anterior",
+        "next": "Siguiente"
+      },
+      "empty": {
+        "search_not_found": "No se encontraron canjeables",
+        "no_rewards": "No hay canjeables",
+        "try_other_terms": "Intenta con otros términos de búsqueda.",
+        "start_creating": "Comienza creando tu primer canjeable."
+      },
+      "modals": {
+        "create": {
+          "title": "Agregar nuevo canjeable",
+          "reward_name": "Nombre del Canjeable",
+          "reward_name_placeholder": "Nombre del Canjeable",
+          "description": "Descripción",
+          "description_placeholder": "Descripción del canjeable",
+          "image_url": "URL de la Imagen",
+          "image_url_placeholder": "https://ejemplo.com/imagen.jpg",
+          "points_cost": "Costo en Puntos",
+          "points_cost_placeholder": "100",
+          "stock": "Stock Disponible",
+          "stock_placeholder": "50",
+          "create_reward": "Crear Canjeable",
+          "creating": "Creando...",
+          "reward_created": "Canjeable creado exitosamente"
+        },
+        "edit": {
+          "title": "Editar canjeable",
+          "update_reward": "Actualizar Canjeable",
+          "updating": "Actualizando...",
+          "reward_updated": "Canjeable actualizado exitosamente"
+        },
+        "delete": {
+          "title": "Eliminar canjeable",
+          "message": "¿Estás seguro de que quieres eliminar este canjeable? Esta acción no se puede deshacer.",
+          "delete_reward": "Eliminar Canjeable",
+          "deleting": "Eliminando...",
+          "reward_deleted": "Canjeable eliminado exitosamente"
+        }
       }
     },
     "products": {
