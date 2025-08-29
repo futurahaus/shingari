@@ -2,6 +2,7 @@ import React, { forwardRef } from 'react';
 import { useTranslation } from '@/contexts/I18nContext';
 import { Reward } from '../interfaces/reward.interfaces';
 import { FaEdit, FaTrash } from 'react-icons/fa';
+import Image from 'next/image';
 
 interface AdminRewardRowProps {
   reward: Reward;
@@ -33,15 +34,59 @@ export const AdminRewardRow = forwardRef<HTMLTableRowElement, AdminRewardRowProp
         <td className="px-6 py-4 whitespace-nowrap">
           <div className="flex items-center">
             {reward.image_url ? (
-              <img
-                src={reward.image_url}
-                alt={reward.name}
-                className="h-12 w-12 rounded-lg object-cover mr-3"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                }}
-              />
+              <div className="h-12 w-12 rounded-lg mr-3 relative">
+                {/* Try to use Next.js Image for configured domains, fallback to regular img for external */}
+                {(() => {
+                  try {
+                    const url = new URL(reward.image_url);
+                    // Check if it's a Supabase URL (configured domain)
+                    if (url.hostname === 'spozhuqlvmaieeqtaxvq.supabase.co') {
+                      return (
+                        <Image
+                          src={reward.image_url}
+                          alt={reward.name}
+                          fill
+                          className="rounded-lg object-cover"
+                          onError={() => {
+                            // Hide the image container on error
+                            const container = document.querySelector(`[data-reward-image="${reward.id}"]`);
+                            if (container) {
+                              (container as HTMLElement).style.display = 'none';
+                            }
+                          }}
+                          data-reward-image={reward.id}
+                        />
+                      );
+                    } else {
+                      // For external images, use regular img tag
+                      return (
+                        <img
+                          src={reward.image_url}
+                          alt={reward.name}
+                          className="rounded-lg object-cover w-full h-full"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                          }}
+                        />
+                      );
+                    }
+                  } catch {
+                    // If URL parsing fails, use regular img tag
+                    return (
+                      <img
+                        src={reward.image_url}
+                        alt={reward.name}
+                        className="rounded-lg object-cover w-full h-full"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                        }}
+                      />
+                    );
+                  }
+                })()}
+              </div>
             ) : (
               <div className="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center mr-3">
                 <svg className="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,10 +119,10 @@ export const AdminRewardRow = forwardRef<HTMLTableRowElement, AdminRewardRowProp
           <div className="flex items-center">
             {reward.stock !== null ? (
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                reward.stock > 10 
-                  ? 'bg-green-100 text-green-800' 
-                  : reward.stock > 0 
-                    ? 'bg-yellow-100 text-yellow-800' 
+                reward.stock > 10
+                  ? 'bg-green-100 text-green-800'
+                  : reward.stock > 0
+                    ? 'bg-yellow-100 text-yellow-800'
                     : 'bg-red-100 text-red-800'
               }`}>
                 {reward.stock}

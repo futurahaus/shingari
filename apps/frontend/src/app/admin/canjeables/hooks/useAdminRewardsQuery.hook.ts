@@ -92,7 +92,7 @@ export const useCreateReward = () => {
 
   return useMutation({
     mutationFn: async (rewardData: CreateRewardDto) => {
-      const response = await api.post<Reward>('/rewards', rewardData);
+      const response = await api.post<Reward, Record<string, unknown>>('/rewards', rewardData as unknown as Record<string, unknown>);
       return response;
     },
     onSuccess: () => {
@@ -115,7 +115,7 @@ export const useUpdateReward = () => {
 
   return useMutation({
     mutationFn: async ({ id, rewardData }: { id: number; rewardData: UpdateRewardDto }) => {
-      const response = await api.put<Reward>(`/rewards/${id}`, rewardData);
+      const response = await api.put<Reward, Record<string, unknown>>(`/rewards/${id}`, rewardData as unknown as Record<string, unknown>);
       return response;
     },
     onSuccess: () => {

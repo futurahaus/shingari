@@ -62,12 +62,12 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
         </div>
 
         <div className="mb-6">
-          <Text size="base" color="gray-600">
+          <Text size="md" color="gray-600">
             {t('admin.rewards.modals.delete.message')}
           </Text>
 
           <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-            <Text size="base" weight="semibold" color="gray-900">
+            <Text size="md" weight="semibold" color="gray-900">
               {reward.name}
             </Text>
             {reward.description && (
@@ -105,7 +105,7 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
             inline
             disabled={isDeleting}
             textProps={{
-              color: 'red-600'
+              color: 'error'
             }}
           />
         </div>

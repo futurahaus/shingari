@@ -56,9 +56,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+    const handleSubmit = async () => {
     if (!validateForm()) {
       return;
     }
@@ -121,7 +119,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
           {/* Name */}
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
