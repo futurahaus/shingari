@@ -3,7 +3,7 @@ import { useTranslation } from '@/contexts/I18nContext';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
 import { Reward } from '../interfaces/reward.interfaces';
-import { useAdminRewards } from '../hooks/useAdminRewards.hook';
+import { useDeleteReward } from '../hooks/useAdminRewardsQuery.hook';
 
 interface DeleteModalProps {
   isOpen: boolean;
@@ -22,7 +22,7 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { deleteReward } = useAdminRewards({ page: 1, limit: 10 });
+  const deleteRewardMutation = useDeleteReward();
 
   const handleDelete = async () => {
     if (!reward) return;
@@ -30,7 +30,7 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
     try {
       setIsDeleting(true);
       setError(null);
-      await deleteReward(reward.id);
+      await deleteRewardMutation.mutateAsync(reward.id);
       onRewardDeleted();
       onClose();
     } catch (err) {
@@ -44,7 +44,7 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
   if (!isOpen || !reward) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <div className="flex justify-between items-center mb-4">
           <Text size="xl" weight="bold" color="gray-900">
@@ -52,7 +52,7 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
           </Text>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-600 cursor-pointer"
             disabled={isDeleting}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -65,7 +65,7 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
           <Text size="base" color="gray-600">
             {t('admin.rewards.modals.delete.message')}
           </Text>
-          
+
           <div className="mt-4 p-4 bg-gray-50 rounded-lg">
             <Text size="base" weight="semibold" color="gray-900">
               {reward.name}

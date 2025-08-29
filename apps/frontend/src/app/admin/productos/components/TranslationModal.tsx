@@ -61,7 +61,7 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
 
     setFetchingTranslation(true);
     console.log('Fetching translation for product:', product.id, 'locale:', translationData.locale);
-    
+
     try {
       // First, check if the product object already has translations (from admin list)
       if (product.translations && Array.isArray(product.translations) && product.translations.length > 0) {
@@ -82,7 +82,7 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
       } else {
         console.log('Product has no translations array or empty translations');
       }
-      
+
       // If no translation in product data, clear the fields
       console.log('Clearing form for new translation');
       setExistingTranslation(null);
@@ -91,7 +91,7 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
         name: '',
         description: ''
       }));
-      
+
     } catch (err) {
       console.error('Error processing existing translation:', err);
       setExistingTranslation(null);
@@ -260,7 +260,7 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
           </Text>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-600 cursor-pointer"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

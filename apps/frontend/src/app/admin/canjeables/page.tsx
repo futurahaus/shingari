@@ -8,7 +8,7 @@ import { AdminRewardRow } from './components/AdminRewardRow';
 import { RewardsListSkeleton } from './components/RewardsListSkeleton';
 import { Button } from '@/app/ui/components/Button';
 import { Reward } from './interfaces/reward.interfaces';
-import { useAdminRewards } from './hooks/useAdminRewards.hook';
+import { useAdminRewards } from './hooks/useAdminRewardsQuery.hook';
 import { Text } from '@/app/ui/components/Text';
 import { FaSearch } from 'react-icons/fa';
 

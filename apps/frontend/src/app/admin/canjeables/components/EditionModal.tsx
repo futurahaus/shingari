@@ -3,7 +3,7 @@ import { useTranslation } from '@/contexts/I18nContext';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
 import { Reward, UpdateRewardDto } from '../interfaces/reward.interfaces';
-import { useAdminRewards } from '../hooks/useAdminRewards.hook';
+import { useUpdateReward } from '../hooks/useAdminRewardsQuery.hook';
 
 interface EditionModalProps {
   isOpen: boolean;
@@ -23,7 +23,7 @@ export const EditionModal: React.FC<EditionModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { updateReward } = useAdminRewards({ page: 1, limit: 10 });
+  const updateRewardMutation = useUpdateReward();
 
   // Update form data when reward changes
   useEffect(() => {
@@ -68,14 +68,14 @@ export const EditionModal: React.FC<EditionModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!reward || !validateForm()) {
       return;
     }
 
     try {
       setIsSubmitting(true);
-      await updateReward(reward.id, formData);
+      await updateRewardMutation.mutateAsync({ id: reward.id, rewardData: formData });
       onRewardUpdated();
       onClose();
     } catch (error) {
@@ -89,7 +89,7 @@ export const EditionModal: React.FC<EditionModalProps> = ({
   if (!isOpen || !reward) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <div className="flex justify-between items-center mb-4">
           <Text size="xl" weight="bold" color="gray-900">
@@ -97,7 +97,7 @@ export const EditionModal: React.FC<EditionModalProps> = ({
           </Text>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-600 cursor-pointer"
             disabled={isSubmitting}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

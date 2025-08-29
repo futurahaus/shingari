@@ -3,7 +3,7 @@ import { useTranslation } from '@/contexts/I18nContext';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
 import { CreateRewardDto } from '../interfaces/reward.interfaces';
-import { useAdminRewards } from '../hooks/useAdminRewards.hook';
+import { useCreateReward } from '../hooks/useAdminRewardsQuery.hook';
 
 interface CreationModalProps {
   isOpen: boolean;
@@ -27,7 +27,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { createReward } = useAdminRewards({ page: 1, limit: 10 });
+  const createRewardMutation = useCreateReward();
 
   const handleInputChange = (field: keyof CreateRewardDto, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -58,14 +58,14 @@ export const CreationModal: React.FC<CreationModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     try {
       setIsSubmitting(true);
-      await createReward(formData);
+      await createRewardMutation.mutateAsync(formData);
       onRewardCreated();
       onClose();
       // Reset form
@@ -79,22 +79,22 @@ export const CreationModal: React.FC<CreationModalProps> = ({
       setErrors({});
     } catch (error: any) {
       console.error('Error creating reward:', error);
-      
+
       // Try to extract more specific error message
       let errorMessage = 'Error al crear el canjeable';
-      
+
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.message) {
         errorMessage = error.message;
       } else if (error.response?.status === 401) {
         errorMessage = 'No autorizado. Por favor, inicia sesión nuevamente.';
-      } else if (error.response?.status === 403) {
-        errorMessage = 'Acceso denegado. Se requieren permisos de administrador.';
+      } else if (error.response?.status === 400) {
+        errorMessage = 'Datos inválidos. Por favor, verifica la información.';
       } else if (error.response?.status === 500) {
         errorMessage = 'Error del servidor. Por favor, inténtalo más tarde.';
       }
-      
+
       setErrors({ submit: errorMessage });
     } finally {
       setIsSubmitting(false);
@@ -104,7 +104,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <div className="flex justify-between items-center mb-4">
           <Text size="xl" weight="bold" color="gray-900">
@@ -112,7 +112,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
           </Text>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-600 cursor-pointer"
             disabled={isSubmitting}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -237,10 +237,10 @@ export const CreationModal: React.FC<CreationModalProps> = ({
             <Button
               onPress={handleSubmit}
               type="primary-admin"
-              text={isSubmitting ? t('admin.rewards.modals.create.creating') : t('admin.rewards.modals.create.create_reward')}
+              text={isSubmitting || createRewardMutation.isPending ? t('admin.rewards.modals.create.creating') : t('admin.rewards.modals.create.create_reward')}
               testID="submit-create-reward"
               inline
-              disabled={isSubmitting}
+              disabled={isSubmitting || createRewardMutation.isPending}
             />
           </div>
         </form>
