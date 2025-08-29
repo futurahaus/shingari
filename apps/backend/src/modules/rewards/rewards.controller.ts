@@ -12,6 +12,9 @@ import {
   HttpStatus,
   ParseIntPipe,
   Request as NestRequest,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
 import { RewardsService } from './rewards.service';
 import { CreateRewardDto } from './dto/create-reward.dto';
@@ -26,10 +29,12 @@ import {
   ApiQuery,
   ApiBearerAuth,
   ApiParam,
+  ApiConsumes,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Rewards')
 @Controller('rewards')
@@ -360,5 +365,47 @@ export class RewardsController {
       currentStock: reward.stock,
       requestedQuantity: quantity,
     };
+  }
+
+  @Post('upload-image')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Subir imagen de recompensa a Supabase Storage (Solo Admin)' })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Imagen subida exitosamente.', 
+    schema: {
+      type: 'object',
+      properties: {
+        url: { type: 'string', description: 'URL pública de la imagen' },
+        path: { type: 'string', description: 'Ruta del archivo en el bucket' }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Archivo no válido.' })
+  @ApiResponse({ status: 401, description: 'No autorizado.' })
+  @ApiResponse({ status: 403, description: 'Prohibido - Se requiere acceso de administrador.' })
+  @HttpCode(HttpStatus.CREATED)
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No se proporcionó ningún archivo.');
+    }
+    return this.rewardsService.uploadImage(file);
+  }
+
+  @Delete('images/:filePath')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Eliminar imagen de recompensa de Supabase Storage (Solo Admin)' })
+  @ApiParam({ name: 'filePath', description: 'Ruta del archivo a eliminar', example: 'rewards/image_123.jpg' })
+  @ApiResponse({ status: 204, description: 'Imagen eliminada exitosamente.' })
+  @ApiResponse({ status: 401, description: 'No autorizado.' })
+  @ApiResponse({ status: 403, description: 'Prohibido - Se requiere acceso de administrador.' })
+  @ApiResponse({ status: 404, description: 'Archivo no encontrado.' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteImage(@Param('filePath') filePath: string): Promise<void> {
+    return this.rewardsService.deleteImage(filePath);
   }
 }

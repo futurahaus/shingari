@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useTranslation } from '@/contexts/I18nContext';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
 import { CreateRewardDto } from '../interfaces/reward.interfaces';
 import { useCreateReward } from '../hooks/useAdminRewardsQuery.hook';
+import { FaTimes } from 'react-icons/fa';
+import { useNotificationContext } from '@/contexts/NotificationContext';
 
 interface CreationModalProps {
   isOpen: boolean;
@@ -17,6 +19,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
   onRewardCreated,
 }) => {
   const { t } = useTranslation();
+  const { showError } = useNotificationContext();
   const [formData, setFormData] = useState<CreateRewardDto>({
     name: '',
     description: '',
@@ -26,6 +29,12 @@ export const CreationModal: React.FC<CreationModalProps> = ({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Image upload states
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const createRewardMutation = useCreateReward();
 
@@ -56,17 +65,82 @@ export const CreationModal: React.FC<CreationModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-    const handleSubmit = async () => {
+  const handleFileButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedFile(null);
+    setPreviewUrl('');
+    setFormData(prev => ({ ...prev, image_url: '' }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // Upload image to Supabase
+  const uploadImageToSupabase = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const token = localStorage.getItem('accessToken');
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/rewards/upload-image`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error al subir imagen: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    const result = await response.json();
+    return result.url;
+  };
+
+  const handleSubmit = async () => {
     if (!validateForm()) {
       return;
     }
 
     try {
       setIsSubmitting(true);
-      await createRewardMutation.mutateAsync(formData);
+
+      // Upload image if file is selected
+      let imageUrl = '';
+      if (selectedFile) {
+        try {
+          setUploadingImage(true);
+          imageUrl = await uploadImageToSupabase(selectedFile);
+          setFormData(prev => ({ ...prev, image_url: imageUrl }));
+        } catch {
+          showError('Error', 'Error al subir la imagen');
+          setUploadingImage(false);
+          return;
+        }
+      }
+
+      // Create reward with image URL
+      await createRewardMutation.mutateAsync({
+        ...formData,
+        image_url: imageUrl || formData.image_url,
+      });
+
       onRewardCreated();
       onClose();
-      // Reset form
+      
+      // Reset form and states
       setFormData({
         name: '',
         description: '',
@@ -74,13 +148,19 @@ export const CreationModal: React.FC<CreationModalProps> = ({
         points_cost: 0,
         stock: 0,
       });
+      setSelectedFile(null);
+      setPreviewUrl('');
       setErrors({});
+      
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     } catch (error: any) {
       console.error('Error creating reward:', error);
-
+      
       // Try to extract more specific error message
       let errorMessage = 'Error al crear el canjeable';
-
+      
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.message) {
@@ -92,12 +172,22 @@ export const CreationModal: React.FC<CreationModalProps> = ({
       } else if (error.response?.status === 500) {
         errorMessage = 'Error del servidor. Por favor, inténtalo más tarde.';
       }
-
+      
       setErrors({ submit: errorMessage });
     } finally {
       setIsSubmitting(false);
+      setUploadingImage(false);
     }
   };
+
+  // Cleanup preview URL on unmount
+  React.useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   if (!isOpen) return null;
 
@@ -157,20 +247,67 @@ export const CreationModal: React.FC<CreationModalProps> = ({
             />
           </div>
 
-          {/* Image URL */}
-          <div>
-            <label htmlFor="image_url" className="block text-sm font-medium text-gray-700 mb-1">
-              {t('admin.rewards.modals.create.image_url')}
+          {/* Image Upload Section */}
+          <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-2">
+            <label className="block text-lg font-semibold text-gray-900 mb-4">
+              {t('admin.rewards.modals.create.upload_photo')}
+              {uploadingImage && (
+                <span className="ml-2 text-sm text-blue-600 font-normal">
+                  {t('admin.rewards.modals.create.uploading_image')}
+                </span>
+              )}
             </label>
-            <input
-              type="url"
-              id="image_url"
-              value={formData.image_url}
-              onChange={(e) => handleInputChange('image_url', e.target.value)}
-              placeholder={t('admin.rewards.modals.create.image_url_placeholder')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-              disabled={isSubmitting}
-            />
+            <div className="flex items-center gap-4 mb-6">
+              <Button
+                onPress={handleFileButtonClick}
+                type="primary-admin"
+                text={t('admin.rewards.modals.create.select_file')}
+                testID="select-file-button"
+                inline
+                htmlType="button"
+                disabled={uploadingImage}
+              />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              <span className="text-gray-400 text-base">
+                {selectedFile
+                  ? selectedFile.name
+                  : t('admin.rewards.modals.create.no_file_selected')}
+              </span>
+            </div>
+            
+            {/* Image Preview */}
+            {previewUrl && (
+              <div className="flex flex-col items-center">
+                <div className="w-32 h-32 border-2 border-black rounded-lg bg-white flex items-center justify-center overflow-hidden relative">
+                  <img 
+                    src={previewUrl} 
+                    alt="Preview" 
+                    className="object-cover w-full h-full"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-500 hover:text-white text-gray-700 text-xs z-10 cursor-pointer"
+                    onClick={handleRemoveImage}
+                    title="Eliminar imagen"
+                  >
+                    <FaTimes size={12} />
+                  </button>
+                </div>
+                <span className="mt-2 text-sm text-black font-medium text-center leading-tight">
+                  {t('admin.rewards.modals.create.main_image')}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Points Cost */}

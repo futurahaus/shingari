@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from '@/contexts/I18nContext';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
 import { Reward, UpdateRewardDto } from '../interfaces/reward.interfaces';
 import { useUpdateReward } from '../hooks/useAdminRewardsQuery.hook';
+import { FaTimes } from 'react-icons/fa';
+import Image from 'next/image';
+import { useNotificationContext } from '@/contexts/NotificationContext';
 
 interface EditionModalProps {
   isOpen: boolean;
@@ -19,9 +22,17 @@ export const EditionModal: React.FC<EditionModalProps> = ({
   onRewardUpdated,
 }) => {
   const { t } = useTranslation();
+  const { showError } = useNotificationContext();
   const [formData, setFormData] = useState<UpdateRewardDto>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Image upload states
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [currentImageUrl, setCurrentImageUrl] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const updateRewardMutation = useUpdateReward();
 
@@ -35,7 +46,14 @@ export const EditionModal: React.FC<EditionModalProps> = ({
         points_cost: reward.points_cost,
         stock: reward.stock || 0,
       });
+      setCurrentImageUrl(reward.image_url || '');
       setErrors({});
+      // Reset image states when new reward is loaded
+      setSelectedFile(null);
+      setPreviewUrl('');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   }, [reward]);
 
@@ -66,14 +84,87 @@ export const EditionModal: React.FC<EditionModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-    const handleSubmit = async () => {
+  const handleFileButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedFile(null);
+    setPreviewUrl('');
+    setCurrentImageUrl('');
+    setFormData(prev => ({ ...prev, image_url: '' }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveCurrentImage = () => {
+    setCurrentImageUrl('');
+    setFormData(prev => ({ ...prev, image_url: '' }));
+  };
+
+  // Upload image to Supabase
+  const uploadImageToSupabase = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const token = localStorage.getItem('accessToken');
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/rewards/upload-image`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error al subir imagen: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    const result = await response.json();
+    return result.url;
+  };
+
+  const handleSubmit = async () => {
     if (!reward || !validateForm()) {
       return;
     }
 
     try {
       setIsSubmitting(true);
-      await updateRewardMutation.mutateAsync({ id: reward.id, rewardData: formData });
+
+      // Upload new image if file is selected
+      let imageUrl = formData.image_url || '';
+      if (selectedFile) {
+        try {
+          setUploadingImage(true);
+          imageUrl = await uploadImageToSupabase(selectedFile);
+          setFormData(prev => ({ ...prev, image_url: imageUrl }));
+        } catch {
+          showError('Error', 'Error al subir la imagen');
+          setUploadingImage(false);
+          return;
+        }
+      }
+
+      // Update reward with new data
+      await updateRewardMutation.mutateAsync({ 
+        id: reward.id, 
+        rewardData: {
+          ...formData,
+          image_url: imageUrl,
+        }
+      });
+      
       onRewardUpdated();
       onClose();
     } catch (error) {
@@ -81,8 +172,18 @@ export const EditionModal: React.FC<EditionModalProps> = ({
       setErrors({ submit: 'Error al actualizar el canjeable' });
     } finally {
       setIsSubmitting(false);
+      setUploadingImage(false);
     }
   };
+
+  // Cleanup preview URL on unmount
+  React.useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
 
   if (!isOpen || !reward) return null;
 
@@ -142,20 +243,133 @@ export const EditionModal: React.FC<EditionModalProps> = ({
             />
           </div>
 
-          {/* Image URL */}
-          <div>
-            <label htmlFor="image_url" className="block text-sm font-medium text-gray-700 mb-1">
-              {t('admin.rewards.modals.create.image_url')}
+          {/* Image Upload Section */}
+          <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-2">
+            <label className="block text-lg font-semibold text-gray-900 mb-4">
+              {t('admin.rewards.modals.create.upload_photo')}
+              {uploadingImage && (
+                <span className="ml-2 text-sm text-blue-600 font-normal">
+                  {t('admin.rewards.modals.create.uploading_image')}
+                </span>
+              )}
             </label>
-            <input
-              type="url"
-              id="image_url"
-              value={formData.image_url || ''}
-              onChange={(e) => handleInputChange('image_url', e.target.value)}
-              placeholder={t('admin.rewards.modals.create.image_url_placeholder')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-              disabled={isSubmitting}
-            />
+            
+            {/* Current Image Display */}
+            {currentImageUrl && !previewUrl && (
+              <div className="flex flex-col items-center mb-4">
+                <div className="w-32 h-32 border-2 border-black rounded-lg bg-white flex items-center justify-center overflow-hidden relative">
+                  {(() => {
+                    try {
+                      const url = new URL(currentImageUrl);
+                      if (url.hostname === 'spozhuqlvmaieeqtaxvq.supabase.co') {
+                        return (
+                          <Image 
+                            src={currentImageUrl} 
+                            alt="Current" 
+                            className="object-cover w-full h-full" 
+                            fill 
+                            onError={() => {
+                              const container = document.querySelector(`[data-current-image="edition-modal"]`);
+                              if (container) {
+                                (container as HTMLElement).style.display = 'none';
+                              }
+                            }}
+                            data-current-image="edition-modal"
+                          />
+                        );
+                      } else {
+                        return (
+                          <img
+                            src={currentImageUrl}
+                            alt="Current"
+                            className="object-cover w-full h-full"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                            }}
+                          />
+                        );
+                      }
+                    } catch {
+                      return (
+                        <img
+                          src={currentImageUrl}
+                          alt="Current"
+                          className="object-cover w-full h-full"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                          }}
+                        />
+                      );
+                    }
+                  })()}
+                  <button
+                    type="button"
+                    className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-500 hover:text-white text-gray-700 text-xs z-10 cursor-pointer"
+                    onClick={handleRemoveCurrentImage}
+                    title="Eliminar imagen actual"
+                  >
+                    <FaTimes size={12} />
+                  </button>
+                </div>
+                <span className="mt-2 text-sm text-black font-medium text-center leading-tight">
+                  Imagen actual
+                </span>
+              </div>
+            )}
+            
+            <div className="flex items-center gap-4 mb-6">
+              <Button
+                onPress={handleFileButtonClick}
+                type="primary-admin"
+                text={currentImageUrl && !previewUrl ? "Cambiar imagen" : t('admin.rewards.modals.create.select_file')}
+                testID="select-file-button"
+                inline
+                htmlType="button"
+                disabled={uploadingImage}
+              />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              <span className="text-gray-400 text-base">
+                {selectedFile
+                  ? selectedFile.name
+                  : t('admin.rewards.modals.create.no_file_selected')}
+              </span>
+            </div>
+            
+            {/* New Image Preview */}
+            {previewUrl && (
+              <div className="flex flex-col items-center">
+                <div className="w-32 h-32 border-2 border-black rounded-lg bg-white flex items-center justify-center overflow-hidden relative">
+                  <img 
+                    src={previewUrl} 
+                    alt="Preview" 
+                    className="object-cover w-full h-full"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-500 hover:text-white text-gray-700 text-xs z-10 cursor-pointer"
+                    onClick={handleRemoveImage}
+                    title="Eliminar imagen nueva"
+                  >
+                    <FaTimes size={12} />
+                  </button>
+                </div>
+                <span className="mt-2 text-sm text-black font-medium text-center leading-tight">
+                  Nueva imagen
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Points Cost */}
