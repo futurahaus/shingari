@@ -65,7 +65,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
       <div className="relative bg-white rounded-lg w-full max-w-md">
         <button
           onClick={onClose}
-          className="button absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+          className="button absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
           aria-label="Close modal"
         >
           <FaTimes className="w-5 h-5" />
@@ -89,7 +89,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
                 </Text>
               </div>
             )}
-            
+
             <Input
               label="Correo electrónico"
               value={email}
@@ -99,7 +99,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
               disabled={isLoading}
               testID="forgot-password-email-input"
             />
-            
+
             <Button
               onPress={handleSubmit}
               type="primary"

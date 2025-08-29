@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/contexts/I18nContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Home, Users, Boxes, Settings, LogOut, FolderTree, Inbox, Menu, X } from 'lucide-react';
+import { Home, Users, Boxes, Settings, LogOut, FolderTree, Inbox, Menu, X, Gift } from 'lucide-react';
 
 const sidebarOptions = [
   { name: 'admin.sidebar.dashboard', path: '/admin/dashboard', icon: <Home className="w-5 h-5 text-gray-400" /> },
@@ -14,6 +14,7 @@ const sidebarOptions = [
   { name: 'admin.sidebar.products', path: '/admin/productos', icon: <Boxes className="w-5 h-5 text-gray-400" /> },
   { name: 'admin.sidebar.orders', path: '/admin/pedidos', icon: <Inbox className="w-5 h-5 text-gray-400" /> },
   { name: 'admin.sidebar.categories', path: '/admin/categorias', icon: <FolderTree className="w-5 h-5 text-gray-400" /> },
+  { name: 'admin.sidebar.rewards', path: '/admin/canjeables', icon: <Gift className="w-5 h-5 text-gray-400" /> },
   { name: 'admin.sidebar.settings', path: '/admin/setup', icon: <Settings className="w-5 h-5 text-gray-400" /> },
 ];
 
@@ -76,7 +77,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Mobile overlay */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
           onClick={() => setIsSidebarOpen(false)}
         />
@@ -104,7 +105,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 {sidebarOptions.map(option => (
                   <li key={option.path}>
                     <Link href={option.path} legacyBehavior>
-                      <a 
+                      <a
                         className={`flex items-center px-4 py-3 text-sm font-medium rounded-md transition-colors ${
                           pathname === option.path
                             ? 'bg-red-50 text-red-700 border-r-2 border-red-500'
