@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from '@/contexts/I18nContext';
 import { useParams, useRouter } from "next/navigation";
 import { api } from '@/lib/api';
 import { EditUserModal } from './components/EditUserModal';
@@ -31,6 +32,7 @@ export interface UserDetails {
 }
 
 export default function UserDetailsPage() {
+  const { t } = useTranslation();
   const params = useParams();
   const userId = params?.id as string;
   const router = useRouter();
@@ -74,7 +76,7 @@ export default function UserDetailsPage() {
       setUser(userRes as UserDetails);
     } catch (err: unknown) {
       const error = err instanceof Error ? err.message : 'Unknown error';
-      setSaveError('Error al actualizar usuario: ' + error);
+      setSaveError(t('admin.users.detail.error_updating_user') + ': ' + error);
     } finally {
       setSaving(false);
     }
@@ -82,7 +84,7 @@ export default function UserDetailsPage() {
 
   const handleDeleteUser = async () => {
     if (!userId) return;
-    if (!window.confirm('¿Estás seguro de que deseas cancelar esta cuenta? Esta acción no se puede deshacer.')) return;
+    if (!window.confirm(t('admin.users.detail.confirm_delete_account'))) return;
     setDeleting(true);
     setDeleteError(null);
     try {
@@ -90,7 +92,7 @@ export default function UserDetailsPage() {
       router.push('/admin/usuarios');
     } catch (err: unknown) {
       const error = err instanceof Error ? err.message : 'Unknown error';
-      setDeleteError('Error al cancelar la cuenta: ' + error);
+      setDeleteError(t('admin.users.detail.error_deleting_account') + ': ' + error);
     } finally {
       setDeleting(false);
     }
@@ -101,15 +103,15 @@ export default function UserDetailsPage() {
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-2xl font-bold mb-1">Detalles</h1>
-          <p className="text-gray-500 text-sm">Gestiona Descuentos y Promociones por cliente</p>
+          <h1 className="text-2xl font-bold mb-1">{t('admin.users.detail.title')}</h1>
+          <p className="text-gray-500 text-sm">{t('admin.users.detail.subtitle')}</p>
         </div>
         <div>
           <button className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer" onClick={() => setShowEditModal(true)}>
-            + Editar Detalles del Cliente
+            + {t('admin.users.detail.edit_client_details')}
           </button>
           <button className="ml-2 px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer" onClick={handleDeleteUser} disabled={deleting}>
-            {deleting ? 'Cancelando...' : 'Cancelar cuenta'}
+            {deleting ? t('admin.users.detail.cancelling') : t('admin.users.detail.cancel_account')}
           </button>
         </div>
       </div>

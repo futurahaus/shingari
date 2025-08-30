@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from '@/contexts/I18nContext';
 import {  useParams } from 'next/navigation';
 import Link from 'next/link';
 import { OrdersDetailSkeleton } from '../components/OrdersDetailSkeleton';
@@ -73,6 +74,7 @@ const formatDate = (dateString: string) => {
 };
 
 export default function AdminOrderDetailPage() {
+  const { t } = useTranslation();
   const params = useParams();
   const orderId = params.id as string;
   const { showSuccess, showError } = useNotificationContext();
@@ -100,9 +102,9 @@ export default function AdminOrderDetailPage() {
           }]);
         }
       })
-      .catch(() => setError('No se pudo cargar la orden.'))
+      .catch(() => setError(t('admin.orders.detail.error_loading_order')))
       .finally(() => setLoading(false));
-  }, [orderId]);
+  }, [orderId, t]);
 
   // Log para verificar variables de entorno
   useEffect(() => {
@@ -131,7 +133,7 @@ export default function AdminOrderDetailPage() {
       console.log('🔑 Token:', token ? 'Presente' : 'No encontrado');
       
       if (!token) {
-        throw new Error('No se encontró el token de autenticación. Por favor, inicia sesión nuevamente.');
+        throw new Error(t('admin.orders.detail.auth_token_missing'));
       }
       
       const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/orders/${orderId}/upload-document`;
@@ -151,7 +153,7 @@ export default function AdminOrderDetailPage() {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ Error en la respuesta:', errorText);
-        throw new Error(`Error al subir archivo: ${response.status} ${response.statusText} - ${errorText}`);
+        throw new Error(t('admin.orders.detail.upload_error', { status: response.status, statusText: response.statusText, error: errorText }));
       }
 
       const result: DocumentUploadResponse = await response.json();
@@ -165,10 +167,10 @@ export default function AdminOrderDetailPage() {
       }]);
       
       setSelectedFile(null);
-      showSuccess('Archivo subido', 'La factura se ha subido exitosamente');
+      showSuccess(t('admin.orders.detail.file_uploaded'), t('admin.orders.detail.invoice_uploaded_success'));
     } catch (error) {
       console.error('❌ Error al subir archivo:', error);
-      showError('Error al subir archivo', error instanceof Error ? error.message : 'Error desconocido');
+      showError(t('admin.orders.detail.upload_error_title'), error instanceof Error ? error.message : t('admin.orders.detail.unknown_error'));
     } finally {
       setUploading(false);
     }
@@ -180,7 +182,7 @@ export default function AdminOrderDetailPage() {
   };
 
   const handleDeleteFile = async (filePath: string) => {
-    if (!confirm('¿Estás seguro de que quieres eliminar este archivo?')) return;
+    if (!confirm(t('admin.orders.detail.confirm_delete_file'))) return;
 
     setDeleting(true);
     try {
@@ -193,7 +195,7 @@ export default function AdminOrderDetailPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Error al eliminar archivo');
+        throw new Error(t('admin.orders.detail.delete_file_error'));
       }
 
       // Limpiar la URL de la base de datos también
@@ -209,14 +211,14 @@ export default function AdminOrderDetailPage() {
       });
 
       if (!updateResponse.ok) {
-        console.warn('No se pudo limpiar la URL de la base de datos');
+        console.warn(t('admin.orders.detail.could_not_clear_db_url'));
       }
 
       setUploadedFiles([]);
-      showSuccess('Archivo eliminado', 'La factura se ha eliminado exitosamente');
+      showSuccess(t('admin.orders.detail.file_deleted'), t('admin.orders.detail.invoice_deleted_success'));
     } catch (error) {
       console.error('Error al eliminar archivo:', error);
-      showError('Error al eliminar archivo', 'No se pudo eliminar el archivo. Por favor, inténtalo de nuevo.');
+      showError(t('admin.orders.detail.delete_error_title'), t('admin.orders.detail.delete_error_message'));
     } finally {
       setDeleting(false);
     }
@@ -226,7 +228,7 @@ export default function AdminOrderDetailPage() {
     return <OrdersDetailSkeleton />;
   }
   if (error || !order) {
-    return <div className="text-red-600 text-center py-8">{error || 'No se pudo cargar la orden.'}</div>;
+    return <div className="text-red-600 text-center py-8">{error || t('admin.orders.detail.could_not_load_order')}</div>;
   }
 
   const shippingAddress = order.order_addresses.find(addr => addr.type === 'shipping');
@@ -236,20 +238,20 @@ export default function AdminOrderDetailPage() {
     <div className="min-h-screen flex flex-col items-center justify-center py-8 px-16">
       <div className="bg-white rounded-xl shadow-lg w-full p-0">
         <div className="text-center pt-8 pb-4">
-          <h2 className="font-bold text-lg">Detalles de la orden</h2>
+          <h2 className="font-bold text-lg">{t('admin.orders.detail.title')}</h2>
         </div>
         <div className="px-8">
           <div className="border-t border-gray-200">
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
-              <div className="text-gray-500">ID de compra</div>
+              <div className="text-gray-500">{t('admin.orders.detail.purchase_id')}</div>
               <div className="text-gray-900 font-medium text-right">#{order.id.slice(0, 8).toUpperCase()}</div>
             </div>
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
-              <div className="text-gray-500">Fecha</div>
+              <div className="text-gray-500">{t('admin.orders.detail.date')}</div>
               <div className="text-gray-900 text-right">{formatDate(order.created_at)}</div>
             </div>
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
-              <div className="text-gray-500">ID de Cliente</div>
+              <div className="text-gray-500">{t('admin.orders.detail.customer_id')}</div>
               <div className="text-gray-900 font-medium text-right">
                 {order.user_id ? (
                   <Link href={`/admin/usuarios/${order.user_id}`} className="text-blue-600 hover:text-blue-800 hover:underline">
@@ -261,7 +263,7 @@ export default function AdminOrderDetailPage() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
-              <div className="text-gray-500">Estado</div>
+              <div className="text-gray-500">{t('admin.orders.detail.status')}</div>
               <div className="text-gray-900 text-right flex justify-end">
                 <StatusChip 
                   orderId={order.id} 
@@ -270,29 +272,29 @@ export default function AdminOrderDetailPage() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
-              <div className="text-gray-500">Puntos</div>
+              <div className="text-gray-500">{t('admin.orders.detail.points')}</div>
               <div className="text-gray-900 text-right">-</div>
             </div>
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
-              <div className="text-gray-500">Total</div>
+              <div className="text-gray-500">{t('admin.orders.detail.total')}</div>
               <div className="text-gray-900 font-medium text-right">{formatCurrency(order.total_amount)}</div>
             </div>
             <div className="grid grid-cols-2 gap-x-4 py-6">
-              <div className="text-gray-500">Método de pago</div>
+              <div className="text-gray-500">{t('admin.orders.detail.payment_method')}</div>
               <div className="text-gray-900 text-right">{payment?.payment_method || '-'}</div>
             </div>
           </div>
         </div>
         <div className="mb-8 px-8">
-          <h3 className="font-bold text-lg mb-4">Productos Comprados</h3>
+          <h3 className="font-bold text-lg mb-4">{t('admin.orders.detail.purchased_products')}</h3>
           <div className="rounded-xl border border-gray-200 overflow-hidden">
             <table className="min-w-full text-sm">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left font-medium text-gray-500">Nombre de Producto</th>
-                  <th className="px-6 py-3 text-left font-medium text-gray-500">Cantidad</th>
-                  <th className="px-6 py-3 text-left font-medium text-gray-500">Precio</th>
-                  <th className="px-6 py-3 text-left font-medium text-gray-500">Subtotal</th>
+                  <th className="px-6 py-3 text-left font-medium text-gray-500">{t('admin.orders.detail.table.product_name')}</th>
+                  <th className="px-6 py-3 text-left font-medium text-gray-500">{t('admin.orders.detail.table.quantity')}</th>
+                  <th className="px-6 py-3 text-left font-medium text-gray-500">{t('admin.orders.detail.table.price')}</th>
+                  <th className="px-6 py-3 text-left font-medium text-gray-500">{t('admin.orders.detail.table.subtotal')}</th>
                 </tr>
               </thead>
               <tbody className="bg-white">
@@ -307,7 +309,7 @@ export default function AdminOrderDetailPage() {
               </tbody>
               <tfoot>
                 <tr className="bg-gray-50 border-t border-gray-200">
-                  <td className="px-6 py-4 text-right font-bold" colSpan={3}>Total</td>
+                  <td className="px-6 py-4 text-right font-bold" colSpan={3}>{t('admin.orders.detail.table.total')}</td>
                   <td className="px-6 py-4 text-gray-900 font-bold">
                     {formatCurrency(order.order_lines.reduce((acc, line) => acc + Number(line.unit_price) * line.quantity, 0).toString())}
                   </td>
@@ -317,27 +319,27 @@ export default function AdminOrderDetailPage() {
           </div>
         </div>
         <div className="mb-8 px-8">
-          <h3 className="font-bold text-lg mb-2">Dirección de Envío</h3>
+          <h3 className="font-bold text-lg mb-2">{t('admin.orders.detail.shipping_address')}</h3>
           <div className="text-gray-700">
             {shippingAddress
               ? `${shippingAddress.city}, ${shippingAddress.country} (${shippingAddress.address_line1}${shippingAddress.address_line2 ? ', ' + shippingAddress.address_line2 : ''})`
-              : 'No especificada'}
+              : t('admin.orders.detail.not_specified')}
           </div>
         </div>
         <div className="mb-4 px-8">
-          <h3 className="font-bold text-lg mb-4">Factura</h3>
+          <h3 className="font-bold text-lg mb-4">{t('admin.orders.detail.invoice')}</h3>
           
           {/* Mostrar input solo si no hay factura cargada */}
           {uploadedFiles.length === 0 && (
             <div className="flex-1">
-              <label className="block font-medium mb-2">Subir factura</label>
+              <label className="block font-medium mb-2">{t('admin.orders.detail.upload_invoice')}</label>
               <div className="flex justify-between items-center gap-2 p-3 border rounded-xl bg-gray-50">
                 <label className={`px-4 py-2 rounded cursor-pointer transition-colors ${
                   uploading 
                     ? 'bg-gray-400 text-white cursor-not-allowed' 
                     : 'bg-black text-white hover:bg-gray-800'
                 }`}>
-                  {uploading ? 'Subiendo...' : 'Seleccionar Archivo'}
+                  {uploading ? t('admin.orders.detail.uploading') : t('admin.orders.detail.select_file')}
                   <input
                     type="file"
                     className="hidden"
@@ -347,13 +349,13 @@ export default function AdminOrderDetailPage() {
                   />
                 </label>
                 <span className="text-gray-500 text-sm">
-                  {uploading ? 'Subiendo archivo...' : selectedFile ? selectedFile.name : 'Ningún archivo seleccionado'}
+                  {uploading ? t('admin.orders.detail.uploading_file') : selectedFile ? selectedFile.name : t('admin.orders.detail.no_file_selected')}
                 </span>
                 {selectedFile && !uploading && (
                   <Button
                     onPress={handleFileUpload}
                     type="primary-admin"
-                    text="Subir Archivo"
+                    text={t('admin.orders.detail.upload_file')}
                     testID="upload-button"
                     inline
                     textProps={{
@@ -381,7 +383,7 @@ export default function AdminOrderDetailPage() {
                     </div>
                     <div>
                       <span className="text-sm font-medium text-gray-900">{file.name}</span>
-                      <p className="text-xs text-gray-500">Factura subida</p>
+                      <p className="text-xs text-gray-500">{t('admin.orders.detail.invoice_uploaded')}</p>
                     </div>
                   </div>
                                      <div className="flex items-center gap-2">
@@ -391,7 +393,7 @@ export default function AdminOrderDetailPage() {
                        rel="noopener noreferrer"
                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                      >
-                       Ver archivo
+                       {t('admin.orders.detail.view_file')}
                      </a>
                      <button
                        onClick={() => handleDeleteFile(file.path.split('/').pop() || '')}
@@ -402,7 +404,7 @@ export default function AdminOrderDetailPage() {
                            : 'text-red-600 hover:text-red-800'
                        }`}
                      >
-                       {deleting ? 'Eliminando...' : 'Eliminar'}
+                       {deleting ? t('admin.orders.detail.deleting') : t('admin.orders.detail.delete')}
                      </button>
                      {deleting && (
                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>

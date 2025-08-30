@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from '@/contexts/I18nContext';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
 import { Category } from '../../productos/hooks/useCategories.hook';
@@ -25,6 +26,7 @@ interface ExistingTranslation {
 }
 
 export function CategoryTranslationModal({ isOpen, onClose, category, onTranslationUpdated }: CategoryTranslationModalProps) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [fetchingTranslation, setFetchingTranslation] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -148,7 +150,7 @@ export function CategoryTranslationModal({ isOpen, onClose, category, onTranslat
 
       console.log('Translation response:', response);
 
-      setSuccess(existingTranslation ? 'Traducción actualizada exitosamente' : 'Traducción guardada exitosamente');
+      setSuccess(existingTranslation ? t('admin.categories.translation_updated_success') : t('admin.categories.translation_saved_success'));
       onTranslationUpdated();
 
       // Close modal after a short delay
@@ -166,16 +168,16 @@ export function CategoryTranslationModal({ isOpen, onClose, category, onTranslat
         if (apiError.response?.data?.message) {
           setError(apiError.response.data.message);
         } else if (apiError.response?.status === 401) {
-          setError('No autorizado. Por favor, inicia sesión nuevamente.');
+          setError(t('admin.categories.unauthorized_error'));
         } else if (apiError.response?.status === 403) {
-          setError('No tienes permisos para realizar esta acción.');
+          setError(t('admin.categories.forbidden_error'));
         } else if (apiError.response?.status === 404) {
-          setError('Categoría no encontrada.');
+          setError(t('admin.categories.category_not_found_error'));
         } else {
-          setError(`Error del servidor: ${apiError.response?.status || 'Desconocido'}`);
+          setError(t('admin.categories.server_error', { status: apiError.response?.status || 'Desconocido' }));
         }
       } else {
-        setError('Error al guardar la traducción');
+        setError(t('admin.categories.error_saving_translation'));
       }
     } finally {
       setLoading(false);
@@ -198,7 +200,7 @@ export function CategoryTranslationModal({ isOpen, onClose, category, onTranslat
 
       console.log('Delete translation response:', response);
 
-      setSuccess('Traducción eliminada exitosamente');
+      setSuccess(t('admin.categories.translation_deleted_success'));
       setExistingTranslation(null);
       setTranslationData(prev => ({
         ...prev,
@@ -220,16 +222,16 @@ export function CategoryTranslationModal({ isOpen, onClose, category, onTranslat
         if (apiError.response?.data?.message) {
           setError(apiError.response.data.message);
         } else if (apiError.response?.status === 401) {
-          setError('No autorizado. Por favor, inicia sesión nuevamente.');
+          setError(t('admin.categories.unauthorized_error'));
         } else if (apiError.response?.status === 403) {
-          setError('No tienes permisos para realizar esta acción.');
+          setError(t('admin.categories.forbidden_error'));
         } else if (apiError.response?.status === 404) {
-          setError('Traducción no encontrada.');
+          setError(t('admin.categories.translation_not_found_error'));
         } else {
-          setError(`Error del servidor: ${apiError.response?.status || 'Desconocido'}`);
+          setError(t('admin.categories.server_error', { status: apiError.response?.status || 'Desconocido' }));
         }
       } else {
-        setError('Error al eliminar la traducción');
+        setError(t('admin.categories.error_deleting_translation'));
       }
     } finally {
       setLoading(false);
@@ -243,7 +245,7 @@ export function CategoryTranslationModal({ isOpen, onClose, category, onTranslat
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <div className="flex justify-between items-center mb-4">
           <Text size="xl" weight="bold" color="gray-900">
-            Traducir Categoría
+            {t('admin.categories.translate_category')}
           </Text>
           <button
             onClick={onClose}
@@ -257,7 +259,7 @@ export function CategoryTranslationModal({ isOpen, onClose, category, onTranslat
 
         <div className="mb-4">
           <Text size="sm" color="gray-600" className="mb-2">
-            Categoría: <span className="font-medium">{category.name}</span>
+            {t('admin.categories.category')}: <span className="font-medium">{category.name}</span>
           </Text>
 
           {/* Translation Status Indicator */}
@@ -268,7 +270,7 @@ export function CategoryTranslationModal({ isOpen, onClose, category, onTranslat
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
                 <Text size="sm" color="gray-900" weight="medium">
-                  Traducción existente en {translationData.locale === 'zh' ? 'Chino' : 'Español'}
+                  {t('admin.categories.existing_translation_in', { language: translationData.locale === 'zh' ? t('admin.categories.chinese') : t('admin.categories.spanish') })}
                 </Text>
               </div>
             </div>
@@ -278,7 +280,7 @@ export function CategoryTranslationModal({ isOpen, onClose, category, onTranslat
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Idioma
+              {t('admin.categories.language')}
             </label>
             <select
               value={translationData.locale}
@@ -286,25 +288,25 @@ export function CategoryTranslationModal({ isOpen, onClose, category, onTranslat
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
               disabled={loading || fetchingTranslation}
             >
-              <option value="zh">Chino (zh)</option>
-              <option value="es">Español (es)</option>
+              <option value="zh">{t('admin.categories.chinese')} (zh)</option>
+              <option value="es">{t('admin.categories.spanish')} (es)</option>
             </select>
             {fetchingTranslation && (
               <Text size="xs" color="gray-500" className="mt-1">
-                Cargando traducción existente...
+                {t('admin.categories.loading_existing_translation')}
               </Text>
             )}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nombre Traducido *
+              {t('admin.categories.translated_name')} *
             </label>
             <input
               type="text"
               value={translationData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
-              placeholder="Nombre de la categoría en el idioma seleccionado"
+              placeholder={t('admin.categories.translated_name_placeholder')}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
               required
               disabled={loading || fetchingTranslation}
@@ -326,7 +328,7 @@ export function CategoryTranslationModal({ isOpen, onClose, category, onTranslat
           <div className="flex gap-2 pt-4">
             <Button
               type="primary-admin"
-              text={loading ? 'Guardando...' : (existingTranslation ? 'Actualizar Traducción' : 'Guardar Traducción')}
+              text={loading ? t('admin.categories.saving') : (existingTranslation ? t('admin.categories.update_translation') : t('admin.categories.save_translation'))}
               onPress={saveTranslation}
               disabled={loading || fetchingTranslation || !translationData.name.trim()}
               inline
@@ -335,7 +337,7 @@ export function CategoryTranslationModal({ isOpen, onClose, category, onTranslat
             {existingTranslation && (
               <Button
                 type="secondary"
-                text="Eliminar"
+                text={t('admin.categories.delete')}
                 onPress={handleDeleteTranslation}
                 disabled={loading || fetchingTranslation}
                 inline
@@ -344,7 +346,7 @@ export function CategoryTranslationModal({ isOpen, onClose, category, onTranslat
             )}
             <Button
               type="secondary"
-              text="Cancelar"
+                              text={t('admin.categories.cancel')}
               onPress={onClose}
               disabled={loading || fetchingTranslation}
               inline

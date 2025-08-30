@@ -1,11 +1,13 @@
 "use client";
 import React, { useState } from 'react';
+import { useTranslation } from '@/contexts/I18nContext';
 import { api } from '@/lib/api';
 import Link from 'next/link';
 import { useAdminUsers } from './hooks/useAdminUsers.hook';
 import { UsersTableSkeleton } from './components/UsersTableSkeleton';
 
 export default function AdminUsersPage() {
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [showNewClientModal, setShowNewClientModal] = useState(false);
   const [newClientForm, setNewClientForm] = useState({
@@ -112,7 +114,7 @@ export default function AdminUsersPage() {
       if (isErrorWithMessage(err)) {
         message = err.message;
       }
-      setSaveNewClientError('Error al crear usuario: ' + message);
+      setSaveNewClientError(t('admin.users.error_creating_user') + ': ' + message);
     } finally {
       setSavingNewClient(false);
     }
@@ -126,7 +128,7 @@ export default function AdminUsersPage() {
           onClick={() => refetch()}
           className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
         >
-          Reintentar
+          {t('admin.users.retry')}
         </button>
       </div>
     );
@@ -137,85 +139,85 @@ export default function AdminUsersPage() {
       {/* Header */}
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-xl lg:text-2xl font-bold mb-1">Clientes</h1>
-          <p className="text-gray-500 text-sm">Gestiona tu cartera de clientes</p>
+          <h1 className="text-xl lg:text-2xl font-bold mb-1">{t('admin.users.title')}</h1>
+          <p className="text-gray-500 text-sm">{t('admin.users.subtitle')}</p>
         </div>
         <button
           className="w-full sm:w-auto px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer text-sm lg:text-base"
           onClick={() => setShowNewClientModal(true)}
         >
-          + Nuevo cliente
+          + {t('admin.users.new_client')}
         </button>
       </div>
       {/* New Client Modal */}
       {showNewClientModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white rounded-lg p-4 lg:p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <h3 className="text-base lg:text-lg font-medium mb-4">Nuevo Cliente</h3>
+            <h3 className="text-base lg:text-lg font-medium mb-4">{t('admin.users.modal.new_client')}</h3>
             <form
               onSubmit={handleCreateNewUser}
               className="space-y-4"
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-gray-500">Email</label>
+                  <label className="block text-xs text-gray-500">{t('admin.users.form.email')}</label>
                   <input name="email" value={newClientForm.email} onChange={e => setNewClientForm(f => ({ ...f, email: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500">Contraseña</label>
+                  <label className="block text-xs text-gray-500">{t('admin.users.form.password')}</label>
                   <input name="password" type="password" value={newClientForm.password} onChange={e => setNewClientForm(f => ({ ...f, password: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500">Nombre</label>
+                  <label className="block text-xs text-gray-500">{t('admin.users.form.first_name')}</label>
                   <input name="first_name" value={newClientForm.first_name} onChange={e => setNewClientForm(f => ({ ...f, first_name: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500">Apellido</label>
+                  <label className="block text-xs text-gray-500">{t('admin.users.form.last_name')}</label>
                   <input name="last_name" value={newClientForm.last_name} onChange={e => setNewClientForm(f => ({ ...f, last_name: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500">Business Name</label>
+                  <label className="block text-xs text-gray-500">{t('admin.users.form.trade_name')}</label>
                   <input name="trade_name" value={newClientForm.trade_name} onChange={e => setNewClientForm(f => ({ ...f, trade_name: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500">Ciudad</label>
+                  <label className="block text-xs text-gray-500">{t('admin.users.form.city')}</label>
                   <input name="city" value={newClientForm.city} onChange={e => setNewClientForm(f => ({ ...f, city: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500">Provincia</label>
+                  <label className="block text-xs text-gray-500">{t('admin.users.form.province')}</label>
                   <input name="province" value={newClientForm.province} onChange={e => setNewClientForm(f => ({ ...f, province: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500">País</label>
+                  <label className="block text-xs text-gray-500">{t('admin.users.form.country')}</label>
                   <input name="country" value={newClientForm.country} onChange={e => setNewClientForm(f => ({ ...f, country: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500">Teléfono</label>
+                  <label className="block text-xs text-gray-500">{t('admin.users.form.phone')}</label>
                   <input name="phone" value={newClientForm.phone} onChange={e => setNewClientForm(f => ({ ...f, phone: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-500">Nombre Fiscal</label>
+                  <label className="block text-xs text-gray-500">{t('admin.users.form.tax_name')}</label>
                   <input name="tax_name" value={newClientForm.tax_name} onChange={e => setNewClientForm(f => ({ ...f, tax_name: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500">NIF</label>
+                  <label className="block text-xs text-gray-500">{t('admin.users.form.tax_id')}</label>
                   <input name="tax_id" value={newClientForm.tax_id} onChange={e => setNewClientForm(f => ({ ...f, tax_id: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500">Dirección Fiscal</label>
+                  <label className="block text-xs text-gray-500">{t('admin.users.form.billing_address')}</label>
                   <input name="billing_address" value={newClientForm.billing_address} onChange={e => setNewClientForm(f => ({ ...f, billing_address: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500">Dirección de Entrega</label>
+                  <label className="block text-xs text-gray-500">{t('admin.users.form.shipping_address')}</label>
                   <input name="shipping_address" value={newClientForm.shipping_address} onChange={e => setNewClientForm(f => ({ ...f, shipping_address: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500">C.P.</label>
+                  <label className="block text-xs text-gray-500">{t('admin.users.form.postal_code')}</label>
                   <input name="postal_code" value={newClientForm.postal_code} onChange={e => setNewClientForm(f => ({ ...f, postal_code: e.target.value }))} className="w-full border rounded px-2 py-1 text-gray-900" />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-500">ID Interno</label>
+                  <label className="block text-xs text-gray-500">{t('admin.users.form.internal_id')}</label>
                   <input
                     name="internal_id"
                     value={newClientForm.internal_id}
@@ -227,7 +229,7 @@ export default function AdminUsersPage() {
 
               {/* Role Management Section */}
               <div className="border-t pt-4 mt-4">
-                <h4 className="text-sm font-medium text-gray-700 mb-3">Gestión de Roles</h4>
+                <h4 className="text-sm font-medium text-gray-700 mb-3">{t('admin.users.form.role_management')}</h4>
                 <div className="space-y-2">
                   {['consumer', 'business', 'admin'].map((role) => (
                     <label key={role} className="flex items-center space-x-2 cursor-pointer">
@@ -238,9 +240,9 @@ export default function AdminUsersPage() {
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
                       <span className="text-sm text-gray-700 capitalize">
-                        {role === 'consumer' ? 'Consumidor' : 
-                         role === 'business' ? 'Empresa' : 
-                         role === 'admin' ? 'Administrador' : role}
+                        {role === 'consumer' ? t('admin.users.roles.consumer') : 
+                         role === 'business' ? t('admin.users.roles.business') : 
+                         role === 'admin' ? t('admin.users.roles.admin') : role}
                       </span>
                     </label>
                   ))}
@@ -248,8 +250,8 @@ export default function AdminUsersPage() {
               </div>
               {saveNewClientError && <div className="text-red-600 text-sm">{saveNewClientError}</div>}
               <div className="flex flex-col sm:flex-row justify-end gap-2 mt-6">
-                <button type="button" onClick={() => setShowNewClientModal(false)} className="px-4 py-2 text-gray-600 hover:text-gray-800 cursor-pointer text-sm">Cancelar</button>
-                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer text-sm" disabled={savingNewClient}>{savingNewClient ? 'Guardando...' : 'Guardar'}</button>
+                <button type="button" onClick={() => setShowNewClientModal(false)} className="px-4 py-2 text-gray-600 hover:text-gray-800 cursor-pointer text-sm">{t('admin.users.modal.cancel')}</button>
+                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer text-sm" disabled={savingNewClient}>{savingNewClient ? t('admin.users.modal.saving') : t('admin.users.modal.save')}</button>
               </div>
             </form>
           </div>
@@ -259,7 +261,7 @@ export default function AdminUsersPage() {
       <div className="mb-4 flex items-center relative">
         <input
           type="text"
-          placeholder="Buscar cliente"
+          placeholder={t('admin.users.search_placeholder')}
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="w-full px-3 lg:px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200 text-sm lg:text-base"
@@ -279,21 +281,21 @@ export default function AdminUsersPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre Fiscal</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Puntos</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roles</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.id')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.tax_name')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.name')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.email')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.phone')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.points')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.roles')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.table.actions')}</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredUsers.length === 0 ? (
                   <tr>
                     <td colSpan={10} className="px-6 py-8 text-center text-gray-500">
-                      No hay usuarios registrados
+                      {t('admin.users.no_users')}
                     </td>
                   </tr>
                 ) : (
@@ -317,14 +319,14 @@ export default function AdminUsersPage() {
                                 key={role}
                                 className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full capitalize"
                               >
-                                {role === 'consumer' ? 'Consumidor' : 
-                                 role === 'business' ? 'Empresa' : 
-                                 role === 'admin' ? 'Administrador' : role}
+                                                            {role === 'consumer' ? t('admin.users.roles.consumer') : 
+                             role === 'business' ? t('admin.users.roles.business') : 
+                             role === 'admin' ? t('admin.users.roles.admin') : role}
                               </span>
                             ))}
                           </div>
                         ) : (
-                          <span className="text-xs text-gray-500">Sin roles</span>
+                          <span className="text-xs text-gray-500">{t('admin.users.no_roles')}</span>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -332,7 +334,7 @@ export default function AdminUsersPage() {
                           href={`/admin/usuarios/${user.id}`}
                           className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer text-sm"
                         >
-                          Ver Detalles
+                          {t('admin.users.view_details')}
                         </Link>
                       </td>
                     </tr>
@@ -346,7 +348,7 @@ export default function AdminUsersPage() {
           <div className="lg:hidden">
             {filteredUsers.length === 0 ? (
               <div className="px-4 py-8 text-center text-gray-500">
-                No hay usuarios registrados
+                {t('admin.users.no_users')}
               </div>
             ) : (
               filteredUsers.map(user => (
@@ -368,21 +370,21 @@ export default function AdminUsersPage() {
                       href={`/admin/usuarios/${user.id}`}
                       className="px-3 py-1 bg-black text-white rounded text-xs hover:bg-gray-800 cursor-pointer"
                     >
-                      Ver
+                      {t('admin.users.view')}
                     </Link>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4 text-xs">
                     <div>
-                      <span className="text-gray-500">Ciudad:</span>
+                      <span className="text-gray-500">{t('admin.users.mobile.city')}:</span>
                       <span className="ml-1 text-gray-900">{user.city || '-'}</span>
                     </div>
                     <div>
-                      <span className="text-gray-500">Teléfono:</span>
+                      <span className="text-gray-500">{t('admin.users.mobile.phone')}:</span>
                       <span className="ml-1 text-gray-900">{user.phone || '-'}</span>
                     </div>
                     <div>
-                      <span className="text-gray-500">Puntos:</span>
+                      <span className="text-gray-500">{t('admin.users.mobile.points')}:</span>
                       <span className="ml-1 bg-gray-100 px-2 py-0.5 rounded-full text-gray-700">
                         {user.points ?? '0'}
                       </span>
@@ -391,7 +393,7 @@ export default function AdminUsersPage() {
 
                   {/* Roles in mobile view */}
                   <div className="mt-3">
-                    <div className="text-xs text-gray-500 mb-1">Roles:</div>
+                    <div className="text-xs text-gray-500 mb-1">{t('admin.users.mobile.roles')}:</div>
                     {user.roles && user.roles.length > 0 ? (
                       <div className="flex flex-wrap gap-1">
                         {user.roles.map((role) => (
@@ -399,14 +401,14 @@ export default function AdminUsersPage() {
                             key={role}
                             className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full capitalize"
                           >
-                            {role === 'consumer' ? 'Consumidor' : 
-                             role === 'business' ? 'Empresa' : 
-                             role === 'admin' ? 'Administrador' : role}
+                            {role === 'consumer' ? t('admin.users.roles.consumer') : 
+                             role === 'business' ? t('admin.users.roles.business') : 
+                             role === 'admin' ? t('admin.users.roles.admin') : role}
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-xs text-gray-500">Sin roles asignados</span>
+                      <span className="text-xs text-gray-500">{t('admin.users.no_roles_assigned')}</span>
                     )}
                   </div>
                 </div>

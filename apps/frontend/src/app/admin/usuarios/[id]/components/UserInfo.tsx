@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from '@/contexts/I18nContext';
 import { api } from '@/lib/api';
 
 interface UserDetails {
@@ -30,6 +31,7 @@ interface UserInfoProps {
 }
 
 export const UserInfo: React.FC<UserInfoProps> = ({ userId, onUserLoaded }) => {
+  const { t } = useTranslation();
   const [user, setUser] = useState<UserDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,10 +50,10 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, onUserLoaded }) => {
       })
       .catch((err) => {
         const error = err instanceof Error ? err.message : 'Unknown error';
-        setError('Error al cargar los datos del usuario: ' + error);
+        setError(t('admin.users.detail.error_loading_user_data') + ': ' + error);
       })
       .finally(() => setLoading(false));
-  }, [userId, onUserLoaded]);
+  }, [userId, onUserLoaded, t]);
 
   if (loading) {
     return (
@@ -80,53 +82,53 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, onUserLoaded }) => {
   if (!user) {
     return (
       <div className="mb-8">
-        <div className="text-gray-500">Usuario no encontrado.</div>
+        <div className="text-gray-500">{t('admin.users.detail.user_not_found')}</div>
       </div>
     );
   }
 
   return (
     <div className="mb-8">
-      <h2 className="text-lg font-semibold mb-4">Información del Cliente</h2>
+      <h2 className="text-lg font-semibold mb-4">{t('admin.users.detail.client_information')}</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 border-b border-gray-200 pb-6">
         <div>
-          <div className="text-xs text-gray-500">ID Interno</div>
+          <div className="text-xs text-gray-500">{t('admin.users.form.internal_id')}</div>
           <div className="font-medium text-gray-900">#{user.internal_id}</div>
         </div>
         <div>
-          <div className="text-xs text-gray-500">Nombre</div>
+          <div className="text-xs text-gray-500">{t('admin.users.detail.name')}</div>
           <div className="font-medium text-gray-900">{(user.first_name || '') + ' ' + (user.last_name || '')}</div>
         </div>
         <div>
-          <div className="text-xs text-gray-500">Business Name</div>
+          <div className="text-xs text-gray-500">{t('admin.users.form.trade_name')}</div>
           <div className="font-medium text-gray-900">{user.trade_name || '-'}</div>
         </div>
         <div>
-          <div className="text-xs text-gray-500">Nombre Fiscal</div>
+          <div className="text-xs text-gray-500">{t('admin.users.form.tax_name')}</div>
           <div className="font-medium text-gray-900">{user.tax_name || '-'}</div>
         </div>
         <div>
-          <div className="text-xs text-gray-500">Ciudad</div>
+          <div className="text-xs text-gray-500">{t('admin.users.form.city')}</div>
           <div className="font-medium text-gray-900">{user.city || '-'}</div>
         </div>
         <div>
-          <div className="text-xs text-gray-500">Provincia</div>
+          <div className="text-xs text-gray-500">{t('admin.users.form.province')}</div>
           <div className="font-medium text-gray-900">{user.province || '-'}</div>
         </div>
         <div>
-          <div className="text-xs text-gray-500">País</div>
+          <div className="text-xs text-gray-500">{t('admin.users.form.country')}</div>
           <div className="font-medium text-gray-900">{user.country || '-'}</div>
         </div>
         <div>
-          <div className="text-xs text-gray-500">Teléfono</div>
+          <div className="text-xs text-gray-500">{t('admin.users.form.phone')}</div>
           <div className="font-medium text-gray-900">{user.phone || '-'}</div>
         </div>
         <div>
-          <div className="text-xs text-gray-500">Perfil Completo</div>
-          <div className="font-medium text-gray-900">{user.profile_is_complete ? 'Sí' : 'No'}</div>
+          <div className="text-xs text-gray-500">{t('admin.users.detail.profile_complete')}</div>
+          <div className="font-medium text-gray-900">{user.profile_is_complete ? t('admin.users.detail.yes') : t('admin.users.detail.no')}</div>
         </div>
         <div>
-          <div className="text-xs text-gray-500">Roles</div>
+          <div className="text-xs text-gray-500">{t('admin.users.detail.roles')}</div>
           <div className="font-medium text-gray-900">
             {user.roles && user.roles.length > 0 ? (
               <div className="flex flex-wrap gap-1">
@@ -135,19 +137,17 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, onUserLoaded }) => {
                     key={role}
                     className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full capitalize"
                   >
-                    {role === 'consumer' ? 'Consumidor' : 
-                     role === 'business' ? 'Empresa' : 
-                     role === 'admin' ? 'Administrador' : role}
+                    {t(`admin.users.roles.${role}`)}
                   </span>
                 ))}
               </div>
             ) : (
-              'Sin roles asignados'
+              t('admin.users.detail.no_roles_assigned')
             )}
           </div>
         </div>
         <div>
-          <div className="text-xs text-gray-500">Total Facturado</div>
+          <div className="text-xs text-gray-500">{t('admin.users.detail.total_billed')}</div>
           <div className="font-medium text-gray-900">
             {user.total_billed ? (
               <span className="text-green-600 font-semibold">
