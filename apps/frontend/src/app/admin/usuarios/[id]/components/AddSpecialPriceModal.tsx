@@ -113,7 +113,7 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
         setError(t('admin.users.detail.error_loading_products'));
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
 
   // Filter products based on search term
   useEffect(() => {

@@ -85,7 +85,7 @@ export const UserOrders: React.FC<UserOrdersProps> = ({ userId, onOrdersLoaded }
         setError(t('admin.users.detail.error_loading_purchase_history') + ': ' + error);
       })
       .finally(() => setLoading(false));
-  }, [userId, onOrdersLoaded]);
+  }, [userId, onOrdersLoaded, t]);
 
   if (loading) {
     return (

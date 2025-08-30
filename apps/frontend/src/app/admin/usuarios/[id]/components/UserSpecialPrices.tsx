@@ -45,7 +45,7 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
         setError(t('admin.users.detail.error_loading_special_prices') + ': ' + error);
       })
       .finally(() => setLoading(false));
-  }, [userId, onSpecialPricesLoaded]);
+  }, [userId, onSpecialPricesLoaded, t]);
 
   useEffect(() => {
     loadSpecialPrices();

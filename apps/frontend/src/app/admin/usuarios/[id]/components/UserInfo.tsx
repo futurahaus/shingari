@@ -53,7 +53,7 @@ export const UserInfo: React.FC<UserInfoProps> = ({ userId, onUserLoaded }) => {
         setError(t('admin.users.detail.error_loading_user_data') + ': ' + error);
       })
       .finally(() => setLoading(false));
-  }, [userId, onUserLoaded]);
+  }, [userId, onUserLoaded, t]);
 
   if (loading) {
     return (
