@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { useTranslation } from '@/contexts/I18nContext';
 import { api } from '@/lib/api';
 import { AddSpecialPriceModal } from './AddSpecialPriceModal';
 
@@ -20,6 +21,7 @@ interface UserSpecialPricesProps {
 }
 
 export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, onSpecialPricesLoaded }) => {
+  const { t } = useTranslation();
   const [specialPrices, setSpecialPrices] = useState<SpecialPrice[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +42,7 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
       })
       .catch((err) => {
         const error = err instanceof Error ? err.message : 'Unknown error';
-        setError('Error al cargar los precios especiales: ' + error);
+        setError(t('admin.users.detail.error_loading_special_prices') + ': ' + error);
       })
       .finally(() => setLoading(false));
   }, [userId, onSpecialPricesLoaded]);
@@ -61,7 +63,7 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
   };
 
   const handleDeleteSpecialPrice = async (specialPriceId: string) => {
-    if (!confirm('¿Estás seguro de que quieres eliminar este precio especial?')) {
+    if (!confirm(t('admin.users.detail.confirm_delete_special_price'))) {
       return;
     }
 
@@ -70,7 +72,7 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
       loadSpecialPrices(); // Refresh the list
     } catch (err) {
       const error = err instanceof Error ? err.message : 'Unknown error';
-      setError('Error al eliminar el precio especial: ' + error);
+      setError(t('admin.users.detail.error_deleting_special_price') + ': ' + error);
     }
   };
 
@@ -104,12 +106,12 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
     return (
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">Lista de Precios especial</h2>
+          <h2 className="text-lg font-semibold">{t('admin.users.detail.special_price_list')}</h2>
           <button
             onClick={() => setShowAddModal(true)}
             className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer"
           >
-            + Agregar precio especial
+            + {t('admin.users.detail.add_special_price')}
           </button>
         </div>
         <div className="text-red-600 text-sm">{error}</div>
@@ -120,28 +122,28 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
   return (
     <div className="mb-8">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">Lista de Precios especial</h2>
+        <h2 className="text-lg font-semibold">{t('admin.users.detail.special_price_list')}</h2>
         <button
           onClick={() => setShowAddModal(true)}
           className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer"
         >
-          + Agregar precio especial
+          + {t('admin.users.detail.add_special_price')}
         </button>
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 rounded-lg">
           <thead>
             <tr className="bg-gray-50">
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio Minorista</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio Mayorista</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio por cliente</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.detail.product')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.detail.retail_price')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.detail.wholesale_price')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.detail.client_price')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.detail.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {specialPrices.length === 0 ? (
-              <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">Sin precios especiales</td></tr>
+              <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">{t('admin.users.detail.no_special_prices')}</td></tr>
             ) : (
               specialPrices.map((row, idx) => (
                 <tr key={idx} className="border-t border-gray-100">
@@ -153,7 +155,7 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
                     <div className="flex space-x-2">
                       <button
                         className="p-2 text-black rounded-lg transition duration-200 hover:bg-gray-100 cursor-pointer"
-                        title="Editar precio especial"
+                        title={t('admin.users.detail.edit_special_price')}
                         onClick={() => handleEditSpecialPrice(row)}
                       >
                         <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 576 512" height="16" width="16" xmlns="http://www.w3.org/2000/svg">
@@ -162,7 +164,7 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
                       </button>
                       <button
                         className="p-2 text-black rounded-lg transition duration-200 hover:bg-gray-100 cursor-pointer"
-                        title="Eliminar precio especial"
+                        title={t('admin.users.detail.delete_special_price')}
                         onClick={() => handleDeleteSpecialPrice(row.id)}
                       >
                         <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 448 512" height="16" width="16" xmlns="http://www.w3.org/2000/svg">

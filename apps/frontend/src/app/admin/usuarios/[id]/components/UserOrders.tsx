@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from '@/contexts/I18nContext';
 import Link from "next/link";
 import { api } from '@/lib/api';
 
@@ -62,6 +63,7 @@ interface UserOrdersProps {
 }
 
 export const UserOrders: React.FC<UserOrdersProps> = ({ userId, onOrdersLoaded }) => {
+  const { t } = useTranslation();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -80,7 +82,7 @@ export const UserOrders: React.FC<UserOrdersProps> = ({ userId, onOrdersLoaded }
       })
       .catch((err) => {
         const error = err instanceof Error ? err.message : 'Unknown error';
-        setError('Error al cargar el historial de compras: ' + error);
+        setError(t('admin.users.detail.error_loading_purchase_history') + ': ' + error);
       })
       .finally(() => setLoading(false));
   }, [userId, onOrdersLoaded]);
@@ -114,7 +116,7 @@ export const UserOrders: React.FC<UserOrdersProps> = ({ userId, onOrdersLoaded }
   if (error) {
     return (
       <div className="mb-8">
-        <h2 className="text-lg font-semibold mb-4">Historial de compras</h2>
+        <h2 className="text-lg font-semibold mb-4">{t('admin.users.detail.purchase_history')}</h2>
         <div className="text-red-600 text-sm">{error}</div>
       </div>
     );
@@ -122,21 +124,21 @@ export const UserOrders: React.FC<UserOrdersProps> = ({ userId, onOrdersLoaded }
 
   return (
     <div className="mb-8">
-      <h2 className="text-lg font-semibold mb-4">Historial de compras</h2>
+      <h2 className="text-lg font-semibold mb-4">{t('admin.users.detail.purchase_history')}</h2>
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 rounded-lg">
           <thead>
             <tr className="bg-gray-50">
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID de orden</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.detail.order_id')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.detail.date')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.detail.total')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.detail.status')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.detail.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {orders.length === 0 ? (
-              <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">Sin compras registradas</td></tr>
+              <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">{t('admin.users.detail.no_purchases_registered')}</td></tr>
             ) : (
               orders.map((order) => (
                 <tr key={order.id} className="border-t border-gray-100">
@@ -154,10 +156,7 @@ export const UserOrders: React.FC<UserOrdersProps> = ({ userId, onOrdersLoaded }
                       order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
                       'bg-yellow-100 text-yellow-800'
                     }`}>
-                      {order.status === 'accepted' ? 'Aceptada' :
-                       order.status === 'delivered' ? 'Entregada' :
-                       order.status === 'cancelled' ? 'Cancelada' :
-                       order.status === 'pending' ? 'Pendiente' : order.status}
+                      {t(`admin.orders.status.${order.status}`)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -165,7 +164,7 @@ export const UserOrders: React.FC<UserOrdersProps> = ({ userId, onOrdersLoaded }
                       href={`/admin/pedidos/${order.id}`}
                       className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer text-sm inline-block"
                     >
-                      Ver Detalles
+                      {t('admin.users.detail.view_details')}
                     </Link>
                   </td>
                 </tr>
