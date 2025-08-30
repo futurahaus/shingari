@@ -36,7 +36,7 @@ function buildCategoryTree(categories: Category[]): CategoryWithChildren[] {
 }
 
 export default function AdminCategoriasPage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { categories, loading, refetch } = useCategories(true); // Include all translations for admin
   const { showSuccess, showError } = useNotificationContext();
   const [showModal, setShowModal] = useState(false);
@@ -49,6 +49,22 @@ export default function AdminCategoriasPage() {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
   const tree = buildCategoryTree(categories);
+
+  // Función para obtener el nombre traducido de una categoría
+  const getTranslatedName = (category: Category): string => {
+    if (!category.translations || category.translations.length === 0) {
+      return category.name; // Fallback al nombre original
+    }
+    
+    // Buscar traducción para el idioma actual
+    const translation = category.translations.find(t => t.locale === locale);
+    if (translation) {
+      return translation.name;
+    }
+    
+    // Si no hay traducción para el idioma actual, usar el nombre original
+    return category.name;
+  };
 
   const openAddModal = (parentId?: string) => {
     setModalMode('add');
@@ -130,6 +146,11 @@ export default function AdminCategoriasPage() {
     setLocalTree([...buildCategoryTree(categories)].sort(sortByOrder));
   }, [categories]);
 
+  // Refetch categories when locale changes to ensure translations are up to date
+  React.useEffect(() => {
+    refetch();
+  }, [locale, refetch]);
+
   // Generalized drag end handler for any level
   const handleDragEnd = async (result: DropResult, nodes: CategoryWithChildren[], parentId?: string) => {
     if (!result.destination) return;
@@ -196,7 +217,10 @@ export default function AdminCategoriasPage() {
                         )}
                       </span>
                       <div className="flex-1">
-                        <span className="font-medium text-gray-900 truncate text-base" title={cat.name}>{cat.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-gray-900 truncate text-base" title={getTranslatedName(cat)}>{getTranslatedName(cat)}</span>
+                        
+                        </div>
                         {/* Translation indicator */}
                         {cat.translations && cat.translations.length > 0 && (
                           <div className="flex items-center mt-1">
@@ -291,7 +315,7 @@ export default function AdminCategoriasPage() {
               <select className="w-full border rounded px-3 py-2 mt-1 focus:ring-2 focus:ring-primary-main" value={formState.parentId || ''} onChange={e => setFormState(f => ({ ...f, parentId: e.target.value || undefined }))} disabled={saving}>
                                   <option value="">{t('admin.categories.none')}</option>
                 {categories.filter(c => !formState.id || c.id !== formState.id).map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+                  <option key={c.id} value={c.id}>{getTranslatedName(c)}</option>
                 ))}
               </select>
             </label>
@@ -310,7 +334,7 @@ export default function AdminCategoriasPage() {
               <FaExclamationTriangle className="text-red-500" />
               {t('admin.categories.delete_category')}
             </Text>
-            <Text size="md" color="gray-700" as="p" className="mb-4">{t('admin.categories.confirm_delete_category', { name: categories.find(c => c.id === deleteId)?.name || '' })}</Text>
+            <Text size="md" color="gray-700" as="p" className="mb-4">{t('admin.categories.confirm_delete_category', { name: (() => { const cat = categories.find(c => c.id === deleteId); return cat ? getTranslatedName(cat) : ''; })() })}</Text>
             <div className="flex justify-end gap-2 mt-6">
               <Button text={t('admin.categories.cancel')} type="secondary" onPress={closeDelete} testID="cancel-delete" disabled={deleting} />
               <Button text={deleting ? t('admin.categories.deleting') : t('admin.categories.delete')} type="secondary" onPress={handleDelete} testID="confirm-delete" disabled={deleting} icon="FaTrash" />

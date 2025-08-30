@@ -409,7 +409,14 @@
       "edit_category_description": "Edita el nombre o el padre de la categoría.",
       "confirm_delete_category": "¿Estás seguro de que deseas eliminar la categoría {{name}}?",
       "deleting": "Eliminando...",
-      "delete": "Eliminar"
+      "delete": "Eliminar",
+      "sample_categories": {
+        "electronics": "Electrónicos",
+        "clothing": "Ropa",
+        "books": "Libros",
+        "food": "Alimentos",
+        "sports": "Deportes"
+      }
     },
     "setup": {
       "title": "Configuración de Administrador",
