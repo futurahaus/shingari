@@ -104,7 +104,7 @@ export default function AdminOrderDetailPage() {
       })
       .catch(() => setError(t('admin.orders.detail.error_loading_order')))
       .finally(() => setLoading(false));
-  }, [orderId]);
+  }, [orderId, t]);
 
   // Log para verificar variables de entorno
   useEffect(() => {

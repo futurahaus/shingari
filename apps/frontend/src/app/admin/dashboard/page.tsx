@@ -194,7 +194,7 @@ export default function AdminDashboardPage() {
     };
 
     fetchDashboardData();
-  }, []);
+  }, [t]);
 
   const getKPIs = (): KPIData[] => {
     if (!dashboardData) return [];
