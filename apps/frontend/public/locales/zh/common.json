@@ -153,13 +153,25 @@
     "already_have_account": "已有账户？",
     "dont_have_account": "没有账户？",
     "not_registered": "还没有注册？",
-    "reset_password": "重置密码",
     "profile": "档案",
     "account_settings": "账户设置",
     "logout_confirm": "确定要登出吗？",
     "close_modal": "关闭模态框",
     "login_error": "登录错误",
-    "register_error": "注册用户错误"
+    "register_error": "注册用户错误",
+    "reset_password": {
+      "title": "重置密码",
+      "new_password": "新密码",
+      "confirm_password": "确认密码",
+      "reset_button": "重置密码",
+      "processing": "处理中...",
+      "loading": "加载表单...",
+      "invalid_token": "密码重置令牌无效或已过期。",
+      "passwords_dont_match": "密码不匹配",
+      "password_too_short": "密码必须至少包含6个字符",
+      "reset_error": "重置密码时出错",
+      "success_message": "密码重置成功。正在重定向到登录页面..."
+    }
   },
   "banner": {
     "title": "日本食品批发零售",

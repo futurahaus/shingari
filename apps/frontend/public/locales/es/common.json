@@ -153,13 +153,25 @@
     "already_have_account": "¿Ya tienes una cuenta?",
     "dont_have_account": "¿No tienes una cuenta?",
     "not_registered": "¿Aún no estás registrado?",
-    "reset_password": "Restablecer Contraseña",
     "profile": "Perfil",
     "account_settings": "Configuración de Cuenta",
     "logout_confirm": "¿Estás seguro de que quieres cerrar sesión?",
     "close_modal": "Cerrar modal",
     "login_error": "Error al iniciar sesión",
-    "register_error": "Error al registrar usuario"
+    "register_error": "Error al registrar usuario",
+    "reset_password": {
+      "title": "Restablecer Contraseña",
+      "new_password": "Nueva Contraseña",
+      "confirm_password": "Confirmar Contraseña",
+      "reset_button": "Restablecer Contraseña",
+      "processing": "Procesando...",
+      "loading": "Cargando formulario...",
+      "invalid_token": "Token de restablecimiento de contraseña no válido o expirado.",
+      "passwords_dont_match": "Las contraseñas no coinciden",
+      "password_too_short": "La contraseña debe tener al menos 6 caracteres",
+      "reset_error": "Error al restablecer la contraseña",
+      "success_message": "Contraseña restablecida exitosamente. Redirigiendo al inicio de sesión..."
+    }
   },
   "banner": {
     "title": "Venta al por mayor y menor de Alimentos Japoneses.",

@@ -3,10 +3,12 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
+import { useTranslation } from '@/contexts/I18nContext';
 import { Input } from '@/app/ui/components/Input';
 import { Button } from '@/app/ui/components/Button';
 
 function ResetPasswordPageContent() {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [password, setPassword] = useState('');
@@ -37,7 +39,7 @@ function ResetPasswordPageContent() {
       return;
     }
 
-    setError('Token de restablecimiento de contraseña no válido o expirado.');
+    setError(t('auth.reset_password.invalid_token'));
   }, [searchParams]);
 
   const handleSubmit = async () => {
@@ -45,17 +47,17 @@ function ResetPasswordPageContent() {
     setSuccessMessage('');
 
     if (!token) {
-      setError('Token de restablecimiento de contraseña no válido o expirado.');
+      setError(t('auth.reset_password.invalid_token'));
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden');
+      setError(t('auth.reset_password.passwords_dont_match'));
       return;
     }
 
     if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+      setError(t('auth.reset_password.password_too_short'));
       return;
     }
 
@@ -76,16 +78,16 @@ function ResetPasswordPageContent() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Error al restablecer la contraseña');
+        throw new Error(data.message || t('auth.reset_password.reset_error'));
       }
 
-      setSuccessMessage('Contraseña restablecida exitosamente. Redirigiendo al inicio de sesión...');
+      setSuccessMessage(t('auth.reset_password.success_message'));
       setTimeout(() => {
         router.push('/#login');
       }, 2000);
     } catch (err) {
       console.error('Password reset confirmation error:', err);
-      setError(err instanceof Error ? err.message : 'Error al restablecer la contraseña');
+      setError(err instanceof Error ? err.message : t('auth.reset_password.reset_error'));
     } finally {
       setIsLoading(false);
     }
@@ -97,7 +99,7 @@ function ResetPasswordPageContent() {
         <div className="flex flex-col items-center justify-center py-8 gap-4">
           <Image src="/shingari.webp" alt="Shingari Foods" width={200} height={200} />
           <h2 className="text-center text-3xl font-extrabold text-gray-900">
-            Restablecer Contraseña
+            {t('auth.reset_password.title')}
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -115,7 +117,7 @@ function ResetPasswordPageContent() {
             <div className="relative mb-4">
               <Input
                 testID="password"
-                label="Nueva Contraseña"
+                label={t('auth.reset_password.new_password')}
                 onChangeValue={setPassword}
                 type={showPassword ? 'text' : 'password'}
                 value={password}
@@ -127,7 +129,7 @@ function ResetPasswordPageContent() {
             <div className="relative">
               <Input
                 testID="confirm-password"
-                label="Confirmar Contraseña"
+                label={t('auth.reset_password.confirm_password')}
                 onChangeValue={setConfirmPassword}
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmPassword}
@@ -143,7 +145,7 @@ function ResetPasswordPageContent() {
               testID="reset-password"
               type="primary"
               disabled={isLoading || !token}
-              text={isLoading ? 'Procesando...' : 'Restablecer Contraseña'}
+              text={isLoading ? t('auth.reset_password.processing') : t('auth.reset_password.reset_button')}
               onPress={handleSubmit}
             />
           </div>
@@ -154,8 +156,9 @@ function ResetPasswordPageContent() {
 }
 
 export default function ResetPasswordPage() {
+  const { t } = useTranslation();
   return (
-    <Suspense fallback={<div>Cargando formulario...</div>}>
+    <Suspense fallback={<div>{t('auth.reset_password.loading')}</div>}>
       <ResetPasswordPageContent />
     </Suspense>
   );
