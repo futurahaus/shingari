@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from '@/contexts/I18nContext';
 import { api } from '../../../lib/api';
 
 interface User {
@@ -132,6 +133,7 @@ interface KPIData {
 }
 
 export default function AdminDashboardPage() {
+  const { t } = useTranslation();
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -185,7 +187,7 @@ export default function AdminDashboardPage() {
         });
       } catch (err: unknown) {
         console.error('Error fetching dashboard data:', err);
-        setError('Error al cargar los datos del dashboard');
+        setError(t('admin.dashboard.error_loading_data'));
       } finally {
         setLoading(false);
       }
@@ -199,25 +201,25 @@ export default function AdminDashboardPage() {
 
     return [
       {
-        label: 'Usuarios activos',
+        label: t('admin.dashboard.kpis.active_users'),
         value: dashboardData.users.total,
         change: '+12%', // Mock change - se podría calcular comparando con período anterior
         changeType: 'positive'
       },
       {
-        label: 'Productos',
+        label: t('admin.dashboard.kpis.products'),
         value: dashboardData.products.total,
         change: '+5%', // Mock change
         changeType: 'positive'
       },
       {
-        label: 'Ventas hoy',
+        label: t('admin.dashboard.kpis.sales_today'),
         value: dashboardData.orders.today,
         change: '-3%', // Mock change
         changeType: 'negative'
       },
       {
-        label: 'Ingresos mensuales',
+        label: t('admin.dashboard.kpis.monthly_revenue'),
         value: `€${+dashboardData.orders.monthlyRevenue}`,
         change: '+8%', // Mock change
         changeType: 'positive'
@@ -226,29 +228,29 @@ export default function AdminDashboardPage() {
   };
 
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'Nunca';
+    if (!dateString) return t('admin.dashboard.never');
     return new Date(dateString).toLocaleDateString('es-ES');
   };
 
   const getRoleDisplay = (roles: string[]) => {
-    if (roles.includes('admin')) return 'admin';
-    if (roles.includes('business')) return 'business';
-    if (roles.includes('consumer')) return 'consumer';
-    return 'usuario';
+    if (roles.includes('admin')) return t('admin.dashboard.roles.admin');
+    if (roles.includes('business')) return t('admin.dashboard.roles.business');
+    if (roles.includes('consumer')) return t('admin.dashboard.roles.consumer');
+    return t('admin.dashboard.roles.user');
   };
 
   const getStatusDisplay = (emailConfirmed: string | null, lastSignIn: string | null) => {
-    if (!emailConfirmed) return 'Pendiente';
-    if (!lastSignIn) return 'Inactivo';
-    return 'Activo';
+    if (!emailConfirmed) return t('admin.dashboard.status.pending');
+    if (!lastSignIn) return t('admin.dashboard.status.inactive');
+    return t('admin.dashboard.status.active');
   };
 
   if (loading) {
     return (
       <div className="space-y-6">
         <div className="mb-6 lg:mb-8">
-          <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Dashboard de Administrador</h1>
-          <p className="mt-2 text-sm lg:text-base text-gray-600">Resumen general de la plataforma</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{t('admin.dashboard.title')}</h1>
+          <p className="mt-2 text-sm lg:text-base text-gray-600">{t('admin.dashboard.subtitle')}</p>
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
@@ -280,8 +282,8 @@ export default function AdminDashboardPage() {
     return (
       <div className="space-y-6">
         <div className="mb-6 lg:mb-8">
-          <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Dashboard de Administrador</h1>
-          <p className="mt-2 text-sm lg:text-base text-gray-600">Resumen general de la plataforma</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{t('admin.dashboard.title')}</h1>
+          <p className="mt-2 text-sm lg:text-base text-gray-600">{t('admin.dashboard.subtitle')}</p>
         </div>
         
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -296,8 +298,8 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-6">
       <div className="mb-6 lg:mb-8">
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Dashboard de Administrador</h1>
-        <p className="mt-2 text-sm lg:text-base text-gray-600">Resumen general de la plataforma</p>
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{t('admin.dashboard.title')}</h1>
+        <p className="mt-2 text-sm lg:text-base text-gray-600">{t('admin.dashboard.subtitle')}</p>
       </div>
 
       {/* KPIs Grid */}
@@ -322,7 +324,7 @@ export default function AdminDashboardPage() {
       {/* Recent Users Table */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="px-4 lg:px-6 py-4 border-b border-gray-200">
-          <h2 className="text-base lg:text-lg font-medium text-gray-900">Usuarios Recientes</h2>
+          <h2 className="text-base lg:text-lg font-medium text-gray-900">{t('admin.dashboard.recent_users')}</h2>
         </div>
         
         {/* Desktop Table */}
@@ -331,19 +333,19 @@ export default function AdminDashboardPage() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ID
+                  {t('admin.dashboard.table.id')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
+                  {t('admin.dashboard.table.email')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rol
+                  {t('admin.dashboard.table.role')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Estado
+                  {t('admin.dashboard.table.status')}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Último acceso
+                  {t('admin.dashboard.table.last_access')}
                 </th>
               </tr>
             </thead>
@@ -425,7 +427,7 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-gray-900">{user.email}</p>
-                  <p className="text-xs text-gray-500">Último acceso: {formatDate(user.last_sign_in_at)}</p>
+                  <p className="text-xs text-gray-500">{t('admin.dashboard.table.last_access')}: {formatDate(user.last_sign_in_at)}</p>
                 </div>
               </div>
             );

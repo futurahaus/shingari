@@ -236,6 +236,143 @@
         "updating": "更新中...",
         "change_status": "更改状态",
         "current_status": "当前状态"
+      },
+      "detail": {
+        "title": "订单详情",
+        "error_loading_order": "无法加载订单。",
+        "auth_token_missing": "未找到身份验证令牌。请重新登录。",
+        "upload_error": "上传文件时出错：{{status}} {{statusText}} - {{error}}",
+        "file_uploaded": "文件已上传",
+        "invoice_uploaded_success": "发票已成功上传",
+        "upload_error_title": "上传文件时出错",
+        "unknown_error": "未知错误",
+        "confirm_delete_file": "您确定要删除此文件吗？",
+        "delete_file_error": "删除文件时出错",
+        "could_not_clear_db_url": "无法清除数据库URL",
+        "file_deleted": "文件已删除",
+        "invoice_deleted_success": "发票已成功删除",
+        "delete_error_title": "删除文件时出错",
+        "delete_error_message": "无法删除文件。请重试。",
+        "could_not_load_order": "无法加载订单。",
+        "purchase_id": "购买ID",
+        "date": "日期",
+        "customer_id": "客户ID",
+        "status": "状态",
+        "points": "积分",
+        "total": "总计",
+        "payment_method": "支付方式",
+        "purchased_products": "已购买产品",
+        "shipping_address": "送货地址",
+        "not_specified": "未指定",
+        "invoice": "发票",
+        "upload_invoice": "上传发票",
+        "uploading": "上传中...",
+        "select_file": "选择文件",
+        "uploading_file": "正在上传文件...",
+        "no_file_selected": "未选择文件",
+        "upload_file": "上传文件",
+        "invoice_uploaded": "发票已上传",
+        "view_file": "查看文件",
+        "deleting": "删除中...",
+        "delete": "删除",
+        "table": {
+          "product_name": "产品名称",
+          "quantity": "数量",
+          "price": "价格",
+          "subtotal": "小计",
+          "total": "总计"
+        }
+      }
+    },
+    "dashboard": {
+      "title": "管理员仪表板",
+      "subtitle": "平台总体概览",
+      "error_loading_data": "加载仪表板数据时出错",
+      "never": "从未",
+      "recent_users": "最近用户",
+      "kpis": {
+        "active_users": "活跃用户",
+        "products": "产品",
+        "sales_today": "今日销售",
+        "monthly_revenue": "月收入"
+      },
+      "roles": {
+        "admin": "管理员",
+        "business": "企业",
+        "consumer": "消费者",
+        "user": "用户"
+      },
+      "status": {
+        "pending": "待处理",
+        "inactive": "非活跃",
+        "active": "活跃"
+      },
+      "table": {
+        "id": "ID",
+        "email": "邮箱",
+        "role": "角色",
+        "status": "状态",
+        "last_access": "最后访问"
+      }
+    },
+    "users": {
+      "title": "客户",
+      "subtitle": "管理您的客户组合",
+      "new_client": "新客户",
+      "search_placeholder": "搜索客户",
+      "error_creating_user": "创建用户时出错",
+      "retry": "重试",
+      "no_users": "没有注册用户",
+      "no_roles": "无角色",
+      "no_roles_assigned": "未分配角色",
+      "view_details": "查看详情",
+      "view": "查看",
+      "modal": {
+        "new_client": "新客户",
+        "cancel": "取消",
+        "save": "保存",
+        "saving": "保存中..."
+      },
+      "form": {
+        "email": "邮箱",
+        "password": "密码",
+        "first_name": "名字",
+        "last_name": "姓氏",
+        "trade_name": "企业名称",
+        "city": "城市",
+        "province": "省份",
+        "country": "国家",
+        "phone": "电话",
+        "tax_name": "税务名称",
+        "tax_id": "税号",
+        "billing_address": "账单地址",
+        "shipping_address": "送货地址",
+        "postal_code": "邮编",
+        "internal_id": "内部ID",
+        "role_management": "角色管理"
+      },
+      "roles": {
+        "consumer": "消费者",
+        "business": "企业",
+        "admin": "管理员"
+      },
+      "table": {
+        "id": "ID",
+        "tax_name": "税务名称",
+        "name": "姓名",
+        "email": "邮箱",
+        "phone": "电话",
+        "purchases": "购买",
+        "points": "积分",
+        "roles": "角色",
+        "last_login": "最后登录",
+        "actions": "操作"
+      },
+      "mobile": {
+        "city": "城市",
+        "phone": "电话",
+        "points": "积分",
+        "roles": "角色"
       }
     },
     "products": {

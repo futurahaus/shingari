@@ -236,6 +236,143 @@
         "updating": "Actualizando...",
         "change_status": "Cambiar Estado",
         "current_status": "Estado actual"
+      },
+      "detail": {
+        "title": "Detalles de la orden",
+        "error_loading_order": "No se pudo cargar la orden.",
+        "auth_token_missing": "No se encontró el token de autenticación. Por favor, inicia sesión nuevamente.",
+        "upload_error": "Error al subir archivo: {{status}} {{statusText}} - {{error}}",
+        "file_uploaded": "Archivo subido",
+        "invoice_uploaded_success": "La factura se ha subido exitosamente",
+        "upload_error_title": "Error al subir archivo",
+        "unknown_error": "Error desconocido",
+        "confirm_delete_file": "¿Estás seguro de que quieres eliminar este archivo?",
+        "delete_file_error": "Error al eliminar archivo",
+        "could_not_clear_db_url": "No se pudo limpiar la URL de la base de datos",
+        "file_deleted": "Archivo eliminado",
+        "invoice_deleted_success": "La factura se ha eliminado exitosamente",
+        "delete_error_title": "Error al eliminar archivo",
+        "delete_error_message": "No se pudo eliminar el archivo. Por favor, inténtalo de nuevo.",
+        "could_not_load_order": "No se pudo cargar la orden.",
+        "purchase_id": "ID de compra",
+        "date": "Fecha",
+        "customer_id": "ID de Cliente",
+        "status": "Estado",
+        "points": "Puntos",
+        "total": "Total",
+        "payment_method": "Método de pago",
+        "purchased_products": "Productos Comprados",
+        "shipping_address": "Dirección de Envío",
+        "not_specified": "No especificada",
+        "invoice": "Factura",
+        "upload_invoice": "Subir factura",
+        "uploading": "Subiendo...",
+        "select_file": "Seleccionar Archivo",
+        "uploading_file": "Subiendo archivo...",
+        "no_file_selected": "Ningún archivo seleccionado",
+        "upload_file": "Subir Archivo",
+        "invoice_uploaded": "Factura subida",
+        "view_file": "Ver archivo",
+        "deleting": "Eliminando...",
+        "delete": "Eliminar",
+        "table": {
+          "product_name": "Nombre de Producto",
+          "quantity": "Cantidad",
+          "price": "Precio",
+          "subtotal": "Subtotal",
+          "total": "Total"
+        }
+      }
+    },
+    "dashboard": {
+      "title": "Dashboard de Administrador",
+      "subtitle": "Resumen general de la plataforma",
+      "error_loading_data": "Error al cargar los datos del dashboard",
+      "never": "Nunca",
+      "recent_users": "Usuarios Recientes",
+      "kpis": {
+        "active_users": "Usuarios activos",
+        "products": "Productos",
+        "sales_today": "Ventas hoy",
+        "monthly_revenue": "Ingresos mensuales"
+      },
+      "roles": {
+        "admin": "admin",
+        "business": "business",
+        "consumer": "consumer",
+        "user": "usuario"
+      },
+      "status": {
+        "pending": "Pendiente",
+        "inactive": "Inactivo",
+        "active": "Activo"
+      },
+      "table": {
+        "id": "ID",
+        "email": "Email",
+        "role": "Rol",
+        "status": "Estado",
+        "last_access": "Último acceso"
+      }
+    },
+    "users": {
+      "title": "Clientes",
+      "subtitle": "Gestiona tu cartera de clientes",
+      "new_client": "Nuevo cliente",
+      "search_placeholder": "Buscar cliente",
+      "error_creating_user": "Error al crear usuario",
+      "retry": "Reintentar",
+      "no_users": "No hay usuarios registrados",
+      "no_roles": "Sin roles",
+      "no_roles_assigned": "Sin roles asignados",
+      "view_details": "Ver Detalles",
+      "view": "Ver",
+      "modal": {
+        "new_client": "Nuevo Cliente",
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "saving": "Guardando..."
+      },
+      "form": {
+        "email": "Email",
+        "password": "Contraseña",
+        "first_name": "Nombre",
+        "last_name": "Apellido",
+        "trade_name": "Business Name",
+        "city": "Ciudad",
+        "province": "Provincia",
+        "country": "País",
+        "phone": "Teléfono",
+        "tax_name": "Nombre Fiscal",
+        "tax_id": "NIF",
+        "billing_address": "Dirección Fiscal",
+        "shipping_address": "Dirección de Entrega",
+        "postal_code": "C.P.",
+        "internal_id": "ID Interno",
+        "role_management": "Gestión de Roles"
+      },
+      "roles": {
+        "consumer": "Consumidor",
+        "business": "Empresa",
+        "admin": "Administrador"
+      },
+      "table": {
+        "id": "ID",
+        "tax_name": "Nombre Fiscal",
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "purchases": "Compras",
+        "points": "Puntos",
+        "roles": "Roles",
+        "last_login": "Últ. Login",
+        "actions": "Acciones"
+      },
+      "mobile": {
+        "city": "Ciudad",
+        "phone": "Teléfono",
+        "points": "Puntos",
+        "roles": "Roles"
       }
     },
     "products": {
@@ -510,9 +647,6 @@
   },
   "complete_profile": {
     "subtitle": "Completa tu información personal para continuar"
-  },
-  "cookie_policy": {
-    "title": "Política de cookies"
   },
   "payment": {
     "title": "Selecciona método de pago",
