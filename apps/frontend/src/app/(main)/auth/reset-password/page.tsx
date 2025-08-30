@@ -40,7 +40,7 @@ function ResetPasswordPageContent() {
     }
 
     setError(t('auth.reset_password.invalid_token'));
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   const handleSubmit = async () => {
     setError('');
