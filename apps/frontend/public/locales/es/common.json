@@ -188,8 +188,6 @@
   },
   "admin": {
     "title": "Administración",
-    "products": "Productos",
-    "orders": "Pedidos",
     "users": "Usuarios",
     "categories": "Categorías",
     "dashboard": "Panel de Control",
