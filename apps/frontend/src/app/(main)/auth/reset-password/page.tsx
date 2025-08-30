@@ -2,7 +2,9 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import Image from 'next/image';
+import { Input } from '@/app/ui/components/Input';
+import { Button } from '@/app/ui/components/Button';
 
 function ResetPasswordPageContent() {
   const router = useRouter();
@@ -38,8 +40,7 @@ function ResetPasswordPageContent() {
     setError('Token de restablecimiento de contraseña no válido o expirado.');
   }, [searchParams]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setError('');
     setSuccessMessage('');
 
@@ -91,9 +92,10 @@ function ResetPasswordPageContent() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
+    <div className="max-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full">
+        <div className="flex flex-col items-center justify-center py-8 gap-4">
+          <Image src="/shingari.webp" alt="Shingari Foods" width={200} height={200} />
           <h2 className="text-center text-3xl font-extrabold text-gray-900">
             Restablecer Contraseña
           </h2>
@@ -111,61 +113,39 @@ function ResetPasswordPageContent() {
           )}
           <div className="rounded-md gap-4">
             <div className="relative mb-4">
-              <label htmlFor="password" className="sr-only">
-                Nueva Contraseña
-              </label>
-              <input
-                id="password"
-                name="password"
+              <Input
+                testID="password"
+                label="Nueva Contraseña"
+                onChangeValue={setPassword}
                 type={showPassword ? 'text' : 'password'}
-                required
-                className="text-gray-900 appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 rounded-t-md rounded-b-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm"
-                placeholder="Nueva Contraseña"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
+                iconRight={showPassword ? 'FaEyeSlash' : 'FaEye'}
+                iconRightOnPress={() => setShowPassword(!showPassword)}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? <FaEyeSlash className="h-5 w-5" /> : <FaEye className="h-5 w-5" />}
-              </button>
             </div>
             <div className="relative">
-              <label htmlFor="confirm-password" className="sr-only">
-                Confirmar Contraseña
-              </label>
-              <input
-                id="confirm-password"
-                name="confirm-password"
+              <Input
+                testID="confirm-password"
+                label="Confirmar Contraseña"
+                onChangeValue={setConfirmPassword}
                 type={showConfirmPassword ? 'text' : 'password'}
-                required
-                className="text-gray-900 appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 rounded-b-md rounded-t-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm"
-                placeholder="Confirmar Contraseña"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={isLoading}
+                iconRight={showConfirmPassword ? 'FaEyeSlash' : 'FaEye'}
+                iconRightOnPress={() => setShowConfirmPassword(!showConfirmPassword)}
               />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-              >
-                {showConfirmPassword ? <FaEyeSlash className="h-5 w-5" /> : <FaEye className="h-5 w-5" />}
-              </button>
             </div>
           </div>
 
           <div>
-            <button
-              type="submit"
+            <Button
+              testID="reset-password"
+              type="primary"
               disabled={isLoading || !token}
-              className="button group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Procesando...' : 'Restablecer Contraseña'}
-            </button>
+              text={isLoading ? 'Procesando...' : 'Restablecer Contraseña'}
+              onPress={handleSubmit}
+            />
           </div>
         </form>
       </div>
