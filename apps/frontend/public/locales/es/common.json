@@ -16,11 +16,9 @@
     "my_orders": "Mis Compras"
   },
   "language": {
-    "spanish": "ESP",
-    "chinese": "CHN",
-    "select": "Idioma",
     "spanish": "Español",
-    "chinese": "Chino"
+    "chinese": "Chino",
+    "select": "Idioma"
   },
   "common": {
     "search": "Buscar",
@@ -188,9 +186,6 @@
   },
   "admin": {
     "title": "Administración",
-    "users": "Usuarios",
-    "categories": "Categorías",
-    "dashboard": "Panel de Control",
     "translations": "Traducciones",
     "translate": "Traducir",
     "translation_status": "Estado de Traducción",
@@ -376,7 +371,7 @@
         "roles": "Roles"
       },
       "detail": {
-        "title": "Detalles",
+        "title": "Detalles del Cliente",
         "subtitle": "Gestiona Descuentos y Promociones por cliente",
         "edit_client_details": "Editar Detalles del Cliente",
         "cancelling": "Cancelando...",
@@ -431,10 +426,7 @@
       "cancel": "Cancelar",
       "saving": "Guardando...",
       "save": "Guardar",
-      "update": "Actualizar",
-      "detail": {
-        "edit_user": "Editar Usuario"
-      }
+      "update": "Actualizar"
     },
     "categories": {
       "title": "Categorías",
@@ -484,8 +476,6 @@
       "category": "Categoría",
       "existing_translation_in": "Traducción existente en {{language}}",
       "language": "Idioma",
-      "chinese": "Chino",
-      "spanish": "Español",
       "loading_existing_translation": "Cargando traducción existente...",
       "translated_name": "Nombre Traducido",
       "translated_name_placeholder": "Nombre de la categoría en el idioma seleccionado",

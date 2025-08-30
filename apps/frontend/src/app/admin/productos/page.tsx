@@ -14,7 +14,7 @@ import { Text } from '@/app/ui/components/Text';
 import { FaSearch } from 'react-icons/fa';
 
 export default function AdminProductsPage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchQuery, setSearchQuery] = useState(''); // Estado para la búsqueda real
@@ -33,7 +33,7 @@ export default function AdminProductsPage() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   // Usar el hook para obtener categorías
-  const { categories, loading: categoriesLoading } = useCategories();
+  const { categories, loading: categoriesLoading } = useCategories(locale);
 
   // Usar el hook para obtener productos con searchQuery (no searchTerm)
   const {
@@ -42,7 +42,7 @@ export default function AdminProductsPage() {
     error,
     lastPage,
     refetch
-  } = useAdminProducts({ page, limit: 10, search: searchQuery, sortField, sortDirection, categoryId: selectedCategory });
+  } = useAdminProducts({ page, limit: 10, search: searchQuery, sortField, sortDirection, categoryId: selectedCategory, locale });
 
   const openEditModal = (product: Product) => {
     setSelectedProduct(product);

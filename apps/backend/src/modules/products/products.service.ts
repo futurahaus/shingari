@@ -276,6 +276,7 @@ export class ProductsService {
     products: ProductWithCategoriesForResponse[],
     userId?: string,
     locale: string = 'es',
+    includeAllTranslations: boolean = false,
   ): Promise<ProductResponseDto[]> {
     let discountMap: Map<number, number> | null = null;
     let userRole: string | null = null;
@@ -375,16 +376,20 @@ export class ProductsService {
         finalIvaValue = normalizedIvaValue;
 
         // Get translated name and description
-        const translatedName = this.getTranslatedName(
-          product.product_translations,
-          locale,
-          product.name,
-        );
-        const translatedDescription = this.getTranslatedDescription(
-          product.product_translations,
-          locale,
-          product.description,
-        );
+        const translatedName = includeAllTranslations
+          ? product.name
+          : this.getTranslatedName(
+              product.product_translations,
+              locale,
+              product.name,
+            );
+        const translatedDescription = includeAllTranslations
+          ? product.description || ''
+          : this.getTranslatedDescription(
+              product.product_translations,
+              locale,
+              product.description,
+            );
 
         return {
           updatedAt: new Date(),
@@ -412,14 +417,15 @@ export class ProductsService {
               ? Number(product.units_per_box)
               : undefined,
           iva: finalIvaValue,
-          product_translations:
-            product.product_translations?.map((t) => ({
-              id: t.id,
-              product_id: t.product_id,
-              locale: t.locale,
-              name: t.name,
-              description: t.description,
-            })) || [], // Include translations for admin view
+          product_translations: includeAllTranslations
+            ? product.product_translations?.map((t) => ({
+                id: t.id,
+                product_id: t.product_id,
+                locale: t.locale,
+                name: t.name,
+                description: t.description,
+              })) || []
+            : [], // Include translations for admin view
         };
       }),
     );
@@ -975,6 +981,8 @@ export class ProductsService {
 
   async findAllForAdmin(
     queryProductDto: QueryProductDto,
+    locale: string = 'es',
+    includeAllTranslations: boolean = false,
   ): Promise<PaginatedProductResponseDto> {
     const {
       page = 1,
@@ -1008,6 +1016,17 @@ export class ProductsService {
           sku: {
             contains: searchTerm,
             mode: 'insensitive',
+          },
+        },
+        // Buscar en traducciones
+        {
+          product_translations: {
+            some: {
+              name: {
+                contains: searchTerm,
+                mode: 'insensitive',
+              },
+            },
           },
         },
         // Buscar por ID (si el término de búsqueda es numérico)
@@ -1062,7 +1081,11 @@ export class ProductsService {
             units: true,
           },
         },
-        product_translations: true,
+        product_translations: includeAllTranslations
+          ? true
+          : {
+              where: { locale },
+            },
       },
     });
 
@@ -1070,6 +1093,9 @@ export class ProductsService {
 
     const mappedProducts = await this.mapToProductsResponseDto(
       productsData as ProductWithCategoriesForResponse[],
+      undefined,
+      locale,
+      includeAllTranslations,
     );
 
     return {

@@ -16,11 +16,9 @@
     "my_orders": "我的订单"
   },
   "language": {
-    "spanish": "ESP",
-    "chinese": "CHN",
-    "select": "语言",
     "spanish": "西班牙语",
-    "chinese": "中文"
+    "chinese": "中文",
+    "select": "语言"
   },
   "common": {
     "search": "搜索",
@@ -188,9 +186,6 @@
   },
   "admin": {
     "title": "管理",
-    "users": "用户",
-    "categories": "分类",
-    "dashboard": "控制台",
     "translations": "翻译",
     "translate": "翻译",
     "translation_status": "翻译状态",
@@ -376,7 +371,7 @@
         "roles": "角色"
       },
       "detail": {
-        "title": "详情",
+        "title": "客户详情",
         "subtitle": "管理客户折扣和促销",
         "edit_client_details": "编辑客户详情",
         "cancelling": "取消中...",
@@ -431,10 +426,7 @@
       "cancel": "取消",
       "saving": "保存中...",
       "save": "保存",
-      "update": "更新",
-      "detail": {
-        "edit_user": "编辑用户"
-      }
+      "update": "更新"
     },
     "categories": {
       "title": "分类",
@@ -484,8 +476,6 @@
       "category": "分类",
       "existing_translation_in": "{{language}}的现有翻译",
       "language": "语言",
-      "chinese": "中文",
-      "spanish": "西班牙语",
       "loading_existing_translation": "正在加载现有翻译...",
       "translated_name": "翻译名称",
       "translated_name_placeholder": "所选语言中的分类名称",
