@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { useTranslation } from '@/contexts/I18nContext';
 import { api } from '@/lib/api';
 
 interface Product {
@@ -41,6 +42,7 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
   onClose,
   onSpecialPriceAdded,
 }) => {
+  const { t } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -103,15 +105,15 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
           setFilteredProducts(typedResponse.data);
         } else {
           console.error('Unexpected products response format:', response);
-          setError('Formato de respuesta inesperado');
+          setError(t('admin.users.detail.unexpected_response_format'));
         }
       })
       .catch((err) => {
         console.error('Error loading products:', err);
-        setError('Error al cargar los productos');
+        setError(t('admin.users.detail.error_loading_products'));
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
 
   // Filter products based on search term
   useEffect(() => {
@@ -155,7 +157,7 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
     e.preventDefault();
 
     if (!formData.productId || !formData.price) {
-      setError('Producto y precio son requeridos');
+      setError(t('admin.users.detail.product_and_price_required'));
       return;
     }
 
@@ -183,7 +185,7 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
       onSpecialPriceAdded();
     } catch (err) {
       console.error('Error creating special price:', err);
-      setError('Error al crear el precio especial.');
+      setError(t('admin.users.detail.error_creating_special_price'));
     } finally {
       setSubmitting(false);
     }
@@ -201,7 +203,7 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
       <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold">
-            {editingSpecialPrice ? 'Editar Precio Especial' : 'Agregar Precio Especial'}
+            {editingSpecialPrice ? t('admin.users.detail.edit_special_price') : t('admin.users.detail.add_special_price')}
           </h3>
           <button
             onClick={onClose}
@@ -220,7 +222,7 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative" ref={searchRef}>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Producto *
+              {t('admin.users.detail.product')} *
             </label>
             {loading ? (
               <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
@@ -232,7 +234,7 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
                   onChange={(e) => handleSearchChange(e.target.value)}
                   onFocus={() => setShowDropdown(true)}
                   className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Buscar producto..."
+                  placeholder={t('admin.users.detail.search_product')}
                   required
                 />
                 {showDropdown && filteredProducts.length > 0 && (
@@ -245,7 +247,7 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
                       >
                         <div className="font-medium">{product.name}</div>
                         <div className="text-sm text-gray-500">
-                          Precio actual: €{product.price}
+                          {t('admin.users.detail.current_price')}: €{product.price}
                         </div>
                       </div>
                     ))}
@@ -254,7 +256,7 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
                 {showDropdown && filteredProducts.length === 0 && searchTerm.trim() !== '' && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
                     <div className="px-3 py-2 text-gray-500">
-                      No se encontraron productos
+                      {t('admin.users.detail.no_products_found')}
                     </div>
                   </div>
                 )}
@@ -264,7 +266,7 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Precio Especial *
+              {t('admin.users.detail.special_price')} *
             </label>
             <input
               type="number"
@@ -280,7 +282,7 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Válido desde
+              {t('admin.users.detail.valid_from')}
             </label>
             <input
               type="datetime-local"
@@ -292,7 +294,7 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Válido hasta
+              {t('admin.users.detail.valid_to')}
             </label>
             <input
               type="datetime-local"
@@ -311,7 +313,7 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <label htmlFor="isActive" className="ml-2 block text-sm text-gray-700">
-              Activo
+              {t('admin.users.detail.active')}
             </label>
           </div>
 
@@ -322,14 +324,14 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
               className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer"
               disabled={submitting}
             >
-              Cancelar
+              {t('admin.users.cancel')}
             </button>
             <button
               type="submit"
               disabled={submitting || loading}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
             >
-              {submitting ? 'Guardando...' : editingSpecialPrice ? 'Actualizar' : 'Guardar'}
+              {submitting ? t('admin.users.saving') : editingSpecialPrice ? t('admin.users.update') : t('admin.users.save')}
             </button>
           </div>
         </form>

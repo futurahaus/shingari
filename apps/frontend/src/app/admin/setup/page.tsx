@@ -1,9 +1,11 @@
 "use client";
 import React, { useState } from 'react';
+import { useTranslation } from '@/contexts/I18nContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 
 export default function AdminSetupPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [isAssigning, setIsAssigning] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -11,7 +13,7 @@ export default function AdminSetupPage() {
 
   const assignAdminRoleToSelf = async () => {
     if (!user) {
-      setError('No hay usuario autenticado');
+      setError(t('admin.setup.no_authenticated_user'));
       return;
     }
 
@@ -25,7 +27,7 @@ export default function AdminSetupPage() {
         role: 'admin'
       });
 
-      setMessage('¡Rol de administrador asignado exitosamente! Ahora puedes acceder al panel de administración.');
+      setMessage(t('admin.setup.admin_role_assigned_success'));
       
       // Refresh the page after a short delay to update the user context
       setTimeout(() => {
@@ -33,7 +35,7 @@ export default function AdminSetupPage() {
       }, 2000);
     } catch (err) {
       console.error('Error assigning admin role:', err);
-      setError(err instanceof Error ? err.message : 'Error al asignar rol de administrador');
+      setError(err instanceof Error ? err.message : t('admin.setup.error_assigning_admin_role'));
     } finally {
       setIsAssigning(false);
     }
@@ -44,19 +46,19 @@ export default function AdminSetupPage() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Configuración de Administrador</h1>
-        <p className="mt-2 text-gray-600">Configura el acceso al panel de administración</p>
+        <h1 className="text-3xl font-bold text-gray-900">{t('admin.setup.title')}</h1>
+        <p className="mt-2 text-gray-600">{t('admin.setup.subtitle')}</p>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="mb-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-2">Usuario Actual</h2>
+          <h2 className="text-lg font-medium text-gray-900 mb-2">{t('admin.setup.current_user')}</h2>
           <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-sm text-gray-600">Email: <span className="font-medium text-gray-900">{user?.email}</span></p>
-            <p className="text-sm text-gray-600">ID: <span className="font-medium text-gray-900">{user?.id}</span></p>
-            <p className="text-sm text-gray-600">Roles: 
+            <p className="text-sm text-gray-600">{t('admin.setup.email')}: <span className="font-medium text-gray-900">{user?.email}</span></p>
+            <p className="text-sm text-gray-600">{t('admin.setup.id')}: <span className="font-medium text-gray-900">{user?.id}</span></p>
+            <p className="text-sm text-gray-600">{t('admin.setup.roles')}: 
               <span className="font-medium text-gray-900 ml-1">
-                {user?.roles?.join(', ') || 'Ninguno'}
+                {user?.roles?.join(', ') || t('admin.setup.none')}
               </span>
             </p>
           </div>
@@ -72,10 +74,10 @@ export default function AdminSetupPage() {
               </div>
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-green-800">
-                  ¡Ya tienes permisos de administrador!
+                  {t('admin.setup.already_admin_permissions')}
                 </h3>
                 <p className="text-sm text-green-700 mt-1">
-                  Puedes acceder al panel de administración en <a href="/admin/dashboard" className="underline">/admin/dashboard</a>
+                  {t('admin.setup.can_access_admin_panel')} <a href="/admin/dashboard" className="underline">/admin/dashboard</a>
                 </p>
               </div>
             </div>
@@ -91,10 +93,10 @@ export default function AdminSetupPage() {
                 </div>
                 <div className="ml-3">
                   <h3 className="text-sm font-medium text-yellow-800">
-                    No tienes permisos de administrador
+                    {t('admin.setup.no_admin_permissions')}
                   </h3>
                   <p className="text-sm text-yellow-700 mt-1">
-                    Haz clic en el botón de abajo para asignarte el rol de administrador.
+                    {t('admin.setup.click_button_to_assign_admin')}
                   </p>
                 </div>
               </div>
@@ -105,7 +107,7 @@ export default function AdminSetupPage() {
               disabled={isAssigning}
               className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white font-medium py-3 px-4 rounded-md transition-colors"
             >
-              {isAssigning ? 'Asignando rol...' : 'Asignarme Rol de Administrador'}
+              {isAssigning ? t('admin.setup.assigning_role') : t('admin.setup.assign_admin_role_to_self')}
             </button>
           </div>
         )}
@@ -124,13 +126,13 @@ export default function AdminSetupPage() {
       </div>
 
       <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 className="text-sm font-medium text-blue-900 mb-2">Información:</h3>
-        <ul className="text-sm text-blue-700 space-y-1 list-disc list-inside">
-          <li>Esta página te permite asignarte el rol de administrador</li>
-          <li>Una vez asignado, tendrás acceso completo al panel de administración</li>
-          <li>El rol de administrador te permite gestionar usuarios, productos y configuraciones</li>
-          <li>Después de asignar el rol, serás redirigido automáticamente</li>
-        </ul>
+        <h3 className="text-sm font-medium text-blue-900 mb-2">{t('admin.setup.information')}:</h3>
+                  <ul className="text-sm text-blue-700 space-y-1 list-disc list-inside">
+            <li>{t('admin.setup.info_1')}</li>
+            <li>{t('admin.setup.info_2')}</li>
+            <li>{t('admin.setup.info_3')}</li>
+            <li>{t('admin.setup.info_4')}</li>
+          </ul>
       </div>
     </div>
   );

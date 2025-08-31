@@ -117,6 +117,7 @@ export class ProductsController {
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Cantidad de productos por página', example: 20 })
   @ApiQuery({ name: 'search', required: false, type: String, description: 'Término de búsqueda (SKU, nombre, ID)', example: 'laptop' })
   @ApiQuery({ name: 'categoryId', required: false, type: String, description: 'ID de categoría para filtrar productos. Use "none" para productos sin categoría', example: '1' })
+  @ApiQuery({ name: 'locale', required: false, type: String, description: 'Locale for translations (es, zh)', example: 'es', default: 'es' })
   @ApiResponse({
     status: 200,
     description: 'Lista de productos paginada obtenida exitosamente.',
@@ -129,8 +130,10 @@ export class ProductsController {
   })
   async findAllForAdmin(
     @Query() queryProductDto: QueryProductDto,
+    @Query('locale') locale: string = 'es',
+    @Query('includeAllTranslations') includeAllTranslations: boolean = false,
   ): Promise<PaginatedProductResponseDto> {
-    return this.productsService.findAllForAdmin(queryProductDto);
+    return this.productsService.findAllForAdmin(queryProductDto, locale, includeAllTranslations);
   }
 
   @Post()

@@ -2,9 +2,13 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import Image from 'next/image';
+import { useTranslation } from '@/contexts/I18nContext';
+import { Input } from '@/app/ui/components/Input';
+import { Button } from '@/app/ui/components/Button';
 
 function ResetPasswordPageContent() {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [password, setPassword] = useState('');
@@ -35,26 +39,25 @@ function ResetPasswordPageContent() {
       return;
     }
 
-    setError('Token de restablecimiento de contraseña no válido o expirado.');
-  }, [searchParams]);
+    setError(t('auth.reset_password.invalid_token'));
+  }, [searchParams, t]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setError('');
     setSuccessMessage('');
 
     if (!token) {
-      setError('Token de restablecimiento de contraseña no válido o expirado.');
+      setError(t('auth.reset_password.invalid_token'));
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden');
+      setError(t('auth.reset_password.passwords_dont_match'));
       return;
     }
 
     if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+      setError(t('auth.reset_password.password_too_short'));
       return;
     }
 
@@ -75,27 +78,28 @@ function ResetPasswordPageContent() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Error al restablecer la contraseña');
+        throw new Error(data.message || t('auth.reset_password.reset_error'));
       }
 
-      setSuccessMessage('Contraseña restablecida exitosamente. Redirigiendo al inicio de sesión...');
+      setSuccessMessage(t('auth.reset_password.success_message'));
       setTimeout(() => {
         router.push('/#login');
       }, 2000);
     } catch (err) {
       console.error('Password reset confirmation error:', err);
-      setError(err instanceof Error ? err.message : 'Error al restablecer la contraseña');
+      setError(err instanceof Error ? err.message : t('auth.reset_password.reset_error'));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
+    <div className="max-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full">
+        <div className="flex flex-col items-center justify-center py-8 gap-4">
+          <Image src="/shingari.webp" alt="Shingari Foods" width={200} height={200} />
           <h2 className="text-center text-3xl font-extrabold text-gray-900">
-            Restablecer Contraseña
+            {t('auth.reset_password.title')}
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -111,61 +115,39 @@ function ResetPasswordPageContent() {
           )}
           <div className="rounded-md gap-4">
             <div className="relative mb-4">
-              <label htmlFor="password" className="sr-only">
-                Nueva Contraseña
-              </label>
-              <input
-                id="password"
-                name="password"
+              <Input
+                testID="password"
+                label={t('auth.reset_password.new_password')}
+                onChangeValue={setPassword}
                 type={showPassword ? 'text' : 'password'}
-                required
-                className="text-gray-900 appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 rounded-t-md rounded-b-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm"
-                placeholder="Nueva Contraseña"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
+                iconRight={showPassword ? 'FaEyeSlash' : 'FaEye'}
+                iconRightOnPress={() => setShowPassword(!showPassword)}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer"
-              >
-                {showPassword ? <FaEyeSlash className="h-5 w-5" /> : <FaEye className="h-5 w-5" />}
-              </button>
             </div>
             <div className="relative">
-              <label htmlFor="confirm-password" className="sr-only">
-                Confirmar Contraseña
-              </label>
-              <input
-                id="confirm-password"
-                name="confirm-password"
+              <Input
+                testID="confirm-password"
+                label={t('auth.reset_password.confirm_password')}
+                onChangeValue={setConfirmPassword}
                 type={showConfirmPassword ? 'text' : 'password'}
-                required
-                className="text-gray-900 appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 rounded-b-md rounded-t-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm"
-                placeholder="Confirmar Contraseña"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={isLoading}
+                iconRight={showConfirmPassword ? 'FaEyeSlash' : 'FaEye'}
+                iconRightOnPress={() => setShowConfirmPassword(!showConfirmPassword)}
               />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer"
-              >
-                {showConfirmPassword ? <FaEyeSlash className="h-5 w-5" /> : <FaEye className="h-5 w-5" />}
-              </button>
             </div>
           </div>
 
           <div>
-            <button
-              type="submit"
+            <Button
+              testID="reset-password"
+              type="primary"
               disabled={isLoading || !token}
-              className="button group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Procesando...' : 'Restablecer Contraseña'}
-            </button>
+              text={isLoading ? t('auth.reset_password.processing') : t('auth.reset_password.reset_button')}
+              onPress={handleSubmit}
+            />
           </div>
         </form>
       </div>
@@ -174,8 +156,9 @@ function ResetPasswordPageContent() {
 }
 
 export default function ResetPasswordPage() {
+  const { t } = useTranslation();
   return (
-    <Suspense fallback={<div>Cargando formulario...</div>}>
+    <Suspense fallback={<div>{t('auth.reset_password.loading')}</div>}>
       <ResetPasswordPageContent />
     </Suspense>
   );

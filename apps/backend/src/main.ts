@@ -36,7 +36,10 @@ async function bootstrap() {
 
   // Configure CORS for frontend
   app.enableCors({
-    origin: [process.env.FRONTEND_URL || 'http://localhost:3000'],
+    origin: [
+      process.env.FRONTEND_URL || 'http://localhost:3000',
+      'https://shingarifoods.es',
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -59,6 +62,8 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   await app.listen(port);
   logger.log(`Application is running on: ${await app.getUrl()}`);
-  logger.log(`Swagger documentation is available at: ${await app.getUrl()}/api-docs`);
+  logger.log(
+    `Swagger documentation is available at: ${await app.getUrl()}/api-docs`,
+  );
 }
 bootstrap();
