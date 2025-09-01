@@ -861,7 +861,16 @@
     "redemption_pending_info": "Tu canje está siendo procesado. Recibirás más información sobre la entrega en tu correo electrónico.",
     "redemption_completed_info": "Tu canje ha sido completado exitosamente. Revisa tu correo electrónico para información sobre la entrega.",
     "redemption_processing_info": "Tu canje está en proceso. Te notificaremos cuando esté listo.",
-    "redemption_cancelled_info": "Este canje ha sido cancelado. Los puntos han sido devueltos a tu cuenta."
+    "redemption_cancelled_info": "Este canje ha sido cancelado. Los puntos han sido devueltos a tu cuenta.",
+    "no_transactions": "No se encontraron transacciones. ¡Comienza a comprar para ganar puntos!",
+    "loading_transactions": "Cargando transacciones...",
+    "error_loading_transactions": "Error al cargar las transacciones. Por favor, inténtalo de nuevo.",
+    "how_to_earn_points": "¿Cómo ganar puntos?",
+    "earn_points_rule_1": "• Gana 1 punto por cada euro gastado en tus compras",
+    "earn_points_rule_2": "• Los puntos expiran después de 12 meses de inactividad",
+    "earn_points_rule_3": "• Usa tus puntos por canjeables en la seccion de recompensas",
+    "updating": "Actualizando...",
+    "refresh_points": "Actualizar puntos"
   },
   "order_status": {
     "pending": "Pendiente",

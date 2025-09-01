@@ -227,7 +227,7 @@ const RewardCard = ({ reward }: { reward: Reward }) => {
                                 <button
                                     onClick={handleAddToCart}
                                     disabled={!canAfford || (reward.stock !== null && inCart && inCart.quantity >= reward.stock)}
-                                    className={`w-full px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                                    className={`w-full px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
                                         canAfford && !(reward.stock !== null && inCart && inCart.quantity >= reward.stock)
                                             ? 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
                                             : 'bg-gray-300 text-gray-500 cursor-not-allowed'

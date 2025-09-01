@@ -154,7 +154,7 @@ const RewardsCartPage = () => {
           </Text>
           <button
             onClick={() => router.push('/products?rewards=true')}
-            className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg"
+            className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer"
           >
             {t('products.explore_more_rewards')}
           </button>
@@ -170,7 +170,7 @@ const RewardsCartPage = () => {
         <div className="flex items-center mb-8">
           <button
             onClick={() => router.back()}
-            className="flex items-center text-gray-600 hover:text-gray-800 transition-colors mr-4"
+            className="flex items-center text-gray-600 hover:text-gray-800 transition-colors mr-4 cursor-pointer"
           >
             <ChevronLeft className="w-5 h-5 mr-1" />
             {t('products.go_back')}
@@ -258,7 +258,7 @@ const RewardsCartPage = () => {
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => updateRewardQuantity(reward.id, reward.quantity - 1)}
-                          className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                          className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors cursor-pointer"
                         >
                           <Text as="span" size="sm" weight="bold" color="primary">-</Text>
                         </button>
@@ -268,7 +268,7 @@ const RewardsCartPage = () => {
                         <button
                           onClick={() => updateRewardQuantity(reward.id, reward.quantity + 1)}
                           disabled={reward.stock !== null && reward.quantity >= reward.stock}
-                          className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 disabled:bg-gray-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                          className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 disabled:bg-gray-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors cursor-pointer"
                         >
                           <Text as="span" size="sm" weight="bold" color="primary">+</Text>
                         </button>
@@ -288,7 +288,7 @@ const RewardsCartPage = () => {
 
                       <button
                         onClick={() => removeFromRewardsCart(reward.id)}
-                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -380,7 +380,7 @@ const RewardsCartPage = () => {
               <button
                 onClick={handleRedemption}
                 disabled={!canAfford || isProcessing || rewardsCart.length === 0}
-                className={`w-full px-6 py-4 rounded-lg text-white font-semibold transition-all duration-200 ${
+                className={`w-full px-6 py-4 rounded-lg text-white font-semibold transition-all duration-200 cursor-pointer ${
                   canAfford && !isProcessing
                     ? 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
                     : 'bg-gray-300 cursor-not-allowed'

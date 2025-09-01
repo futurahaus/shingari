@@ -78,20 +78,20 @@ export default function PointsPage() {
                 onClick={() => refetch()}
                 disabled={isLoading}
                 className="p-2 rounded-full hover:bg-white/20 transition-colors"
-                title="Refresh points"
+                title={t('dashboard.refresh_points')}
               >
                 <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
               </button>
               {isFetching && !isLoading && (
                 <div className="text-xs text-red-100 opacity-75">
-                  Updating...
+                  {t('dashboard.updating')}
                 </div>
               )}
             </div>
             {isLoading ? (
               <div className="text-4xl font-bold mb-2">...</div>
             ) : error ? (
-              <div className="text-2xl font-bold mb-2 text-red-200">Error loading points</div>
+              <div className="text-2xl font-bold mb-2 text-red-200">Error al cargar los puntos</div>
             ) : (
               <>
                 <div className="text-4xl font-bold mb-2">
@@ -134,14 +134,14 @@ export default function PointsPage() {
                       <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
                         <div className="flex items-center justify-center gap-2">
                           <RefreshCw className="w-5 h-5 animate-spin" />
-                          Loading transactions...
+                          {t('dashboard.loading_transactions')}
                         </div>
                       </td>
                     </tr>
                   ) : error ? (
                     <tr>
                       <td colSpan={4} className="px-6 py-8 text-center text-red-500">
-                        Error loading transactions. Please try again.
+                        {t('dashboard.error_loading_transactions')}
                       </td>
                     </tr>
                   ) : transactions && transactions.length > 0 ? (
@@ -178,7 +178,7 @@ export default function PointsPage() {
                   ) : (
                     <tr>
                       <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                        No transactions found. Start shopping to earn points!
+                        {t('dashboard.no_transactions')}
                       </td>
                     </tr>
                   )}
@@ -190,12 +190,12 @@ export default function PointsPage() {
           {/* Points info section */}
           <div className="mt-6 bg-blue-50 rounded-lg p-6">
             <h3 className="text-lg font-semibold text-blue-900 mb-3">
-              ¿Cómo ganar puntos?
+              {t('dashboard.how_to_earn_points')}
             </h3>
             <div className="space-y-2 text-blue-800">
-              <p>• Gana 1 punto por cada euro gastado en tus compras</p>
-              <p>• Los puntos expiran después de 12 meses de inactividad</p>
-              <p>• Usa tus puntos por canjeables en la seccion de recompensas</p>
+              <p>{t('dashboard.earn_points_rule_1')}</p>
+              <p>{t('dashboard.earn_points_rule_2')}</p>
+              <p>{t('dashboard.earn_points_rule_3')}</p>
             </div>
           </div>
         </div>
