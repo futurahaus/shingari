@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ReactNode } from 'react';
-import { User, MapPin, ShoppingBag, LogOut, UserCheck, Gift } from 'lucide-react';
+import { User, MapPin, ShoppingBag, LogOut, UserCheck, Gift, Trophy } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/contexts/I18nContext';
 
@@ -22,6 +22,7 @@ export default function Sidebar({ className = '', children }: SidebarProps) {
     { label: t('navigation.addresses'), href: '/dashboard/direcciones', icon: MapPin },
     { label: t('navigation.my_orders'), href: '/dashboard/compras', icon: ShoppingBag },
     { label: t('navigation.my_points'), href: '/dashboard/puntos', icon: Gift },
+    { label: t('navigation.my_redemptions'), href: '/dashboard/canjes', icon: Trophy },
   ];
 
   return (

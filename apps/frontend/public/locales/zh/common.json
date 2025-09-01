@@ -13,7 +13,9 @@
     "dashboard": "控制台",
     "personal_data": "个人信息",
     "addresses": "地址",
-    "my_orders": "我的订单"
+    "my_orders": "我的订单",
+    "my_points": "我的积分",
+    "my_redemptions": "我的兑换"
   },
   "language": {
     "spanish": "西班牙语",

@@ -14,6 +14,8 @@ export default function PointsPage() {
         return <TrendingUp className="w-4 h-4 text-green-600" />;
       case 'used':
         return <TrendingDown className="w-4 h-4 text-red-600" />;
+      case 'spend':
+        return <TrendingDown className="w-4 h-4 text-red-600" />;
       case 'expired':
         return <Clock className="w-4 h-4 text-gray-500" />;
       default:
@@ -25,6 +27,8 @@ export default function PointsPage() {
     switch (type) {
       case 'EARN':
         return t('dashboard.earned');
+      case 'SPEND':
+          return t('dashboard.spend');
       case 'USED':
         return t('dashboard.used');
       case 'EXPIRED':
@@ -40,6 +44,8 @@ export default function PointsPage() {
         return 'text-green-600 bg-green-50';
       case 'USED':
         return 'text-red-600 bg-red-50';
+      case 'SPEND':
+          return 'text-red-600 bg-red-50';
       case 'EXPIRED':
         return 'text-gray-600 bg-gray-50';
       default:
@@ -161,7 +167,7 @@ export default function PointsPage() {
                           {transaction.type === 'EARN' && transaction.order_number
                             ? `Bono por compra ${transaction.order_number}`
                             : transaction.type === 'USED' && transaction.order_number
-                            ? `Puntos utilizados en compra ${transaction.order_number}`
+                            ? `Puntos gastados en compra ${transaction.order_number}`
                             : transaction.type === 'EXPIRED'
                             ? 'Puntos expirados'
                             : 'Transacción de puntos'

@@ -14,7 +14,8 @@
     "personal_data": "Datos Personales",
     "addresses": "Direcciones",
     "my_orders": "Mis Compras",
-    "my_points": "Mis Puntos"
+    "my_points": "Mis Puntos",
+    "my_redemptions": "Mis Canjes"
   },
   "language": {
     "spanish": "Español",
@@ -384,6 +385,7 @@
       "error_loading_data": "Error al cargar los datos del dashboard",
       "never": "Nunca",
       "recent_users": "Usuarios Recientes",
+      "redemption": "Canje",
       "kpis": {
         "active_users": "Usuarios activos",
         "products": "Productos",
@@ -831,6 +833,7 @@
     "view_invoice": "Ver factura",
     "spain": "España",
     "my_points": "Mis Puntos",
+    "my_redemptions": "Mis Canjes",
     "total_points": "Puntos Totales",
     "points_transactions": "Transacciones de Puntos",
     "transaction_type": "Tipo",
@@ -838,12 +841,27 @@
     "date": "Fecha",
     "description": "Descripción",
     "earned": "Ganados",
-    "used": "Usados",
+    "spend": "Canjeados",
     "expired": "Expirados",
     "purchase_bonus": "Bono por compra",
     "referral_bonus": "Bono por referido",
     "points_used": "Puntos utilizados",
-    "points_expired": "Puntos expirados"
+    "points_expired": "Puntos expirados",
+    "redemption": "Canje",
+    "redemption_date": "Fecha de canje",
+    "no_redemptions": "No tienes canjes registrados.",
+    "loading_redemptions": "Error al cargar los canjes",
+    "redemption_summary": "Resumen del Canje",
+    "total_rewards": "Total de recompensas",
+    "redeemed_rewards": "Recompensas Canjeadas",
+    "reward": "Recompensa",
+    "points_per_unit": "Puntos por unidad",
+    "total_points": "Total puntos",
+    "redemption_info": "Información sobre el canje",
+    "redemption_pending_info": "Tu canje está siendo procesado. Recibirás más información sobre la entrega en tu correo electrónico.",
+    "redemption_completed_info": "Tu canje ha sido completado exitosamente. Revisa tu correo electrónico para información sobre la entrega.",
+    "redemption_processing_info": "Tu canje está en proceso. Te notificaremos cuando esté listo.",
+    "redemption_cancelled_info": "Este canje ha sido cancelado. Los puntos han sido devueltos a tu cuenta."
   },
   "order_status": {
     "pending": "Pendiente",

@@ -200,6 +200,27 @@ export class RewardsController {
     return this.rewardsService.findAll(query);
   }
 
+  @Get('my-redemptions')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Obtener historial de canjes del usuario',
+    description: 'Devuelve todos los canjes realizados por el usuario autenticado.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Historial de canjes obtenido exitosamente.',
+    type: [RedemptionResponseDto],
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autorizado.',
+  })
+  async getUserRedemptions(@NestRequest() req: any): Promise<RedemptionResponseDto[]> {
+    const userId = req.user.sub;
+    return this.rewardsService.getUserRedemptions(userId);
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
@@ -455,26 +476,5 @@ export class RewardsController {
     console.log('🔍 Controller Debug - Extracted userId:', userId);
     
     return this.rewardsService.redeemRewards(userId, redeemData);
-  }
-
-  @Get('my-redemptions')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({
-    summary: 'Obtener historial de canjes del usuario',
-    description: 'Devuelve todos los canjes realizados por el usuario autenticado.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Historial de canjes obtenido exitosamente.',
-    type: [RedemptionResponseDto],
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'No autorizado.',
-  })
-  async getUserRedemptions(@NestRequest() req: any): Promise<RedemptionResponseDto[]> {
-    const userId = req.user.sub;
-    return this.rewardsService.getUserRedemptions(userId);
   }
 }

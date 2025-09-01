@@ -146,6 +146,17 @@ Aplicación construida con Next.js.
     -   `dashboard/page.tsx`: Panel de control del usuario autenticado.
     -   `dashboard/perfil/page.tsx`: Página de perfil del usuario autenticado.
     -   `dashboard/puntos/page.tsx`: Página de puntos del usuario con historial de transacciones y total acumulado.
+    -   `dashboard/canjes/page.tsx`: Página de canjes del usuario con historial de recompensas canjeadas.
+        -   **Gestión de Canjes**: Interfaz completa para visualizar todos los canjes de recompensas realizados por el usuario.
+        -   **Lista de Canjes**: Muestra todos los canjes con información detallada (ID, fecha, puntos utilizados, estado, preview de items).
+        -   **Estados de Canje**: Indicadores visuales para diferentes estados (pendiente, completado, cancelado, procesando).
+        -   **Integración con API**: Utiliza el endpoint `/rewards/my-redemptions` para obtener los datos.
+        -   **Navegación**: Accesible desde el sidebar del dashboard con ícono de trofeo.
+    -   `dashboard/canjes/[id]/page.tsx`: Página de detalle individual de canje con información completa.
+        -   **Detalle Completo**: Muestra información completa del canje incluyendo todas las recompensas canjeadas.
+        -   **Resumen de Puntos**: Desglose detallado de puntos utilizados por cada item.
+        -   **Estado y Fecha**: Información clara sobre el estado del canje y fecha de procesamiento.
+        -   **Items Canjeados**: Lista detallada de todas las recompensas incluidas en el canje.
     -   `admin/usuarios/page.tsx`: Página de administración de usuarios con funcionalidad CRUD completa.
         -   **Gestión de Usuarios**: Interfaz completa para administrar usuarios del sistema.
         -   **Tabla de Usuarios**: Muestra todos los usuarios con información detallada (email, roles, estado de verificación, último acceso).
@@ -180,7 +191,7 @@ Aplicación construida con Next.js.
     -   `layout/SearchHeader.tsx`: Header con barra de búsqueda y botón de login.
     -   `layout/Navbar.tsx`: Barra de navegación.
     -   `layout/Footer.tsx`: Pie de página.
-    -   `layout/Sidebar.tsx`: Barra lateral para páginas del dashboard con navegación a puntos del usuario.
+    -   `layout/Sidebar.tsx`: Barra lateral para páginas del dashboard con navegación a puntos del usuario y canjes de recompensas.
     -   `ProductCard.tsx`: Componente para mostrar información de productos.
 -   **`lib/`**: Librerías auxiliares y utilidades.
     -   `api.ts`: Cliente para interactuar con el backend (maneja tokens, refresh, etc.).
@@ -264,6 +275,6 @@ Aplicación construida con Next.js.
 ---
 
 *Este archivo fue generado y actualizado el 2025-01-03 22:30:00.*
-*Última actualización: 2025-01-17 - Implementado sistema de puntos para usuarios con historial de transacciones y navegación integrada, y sistema de recompensas (canjeables) para administradores.*
+*Última actualización: 2025-01-17 - Implementado sistema de canjes (redemptions) para usuarios con navegación, listado y páginas de detalle integradas en el dashboard.*
 
 *Por favor, actualiza la fecha y cualquier información relevante cuando hagas cambios significativos.*
