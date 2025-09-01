@@ -9,6 +9,8 @@ import { CreateRewardDto } from './dto/create-reward.dto';
 import { UpdateRewardDto } from './dto/update-reward.dto';
 import { QueryRewardDto } from './dto/query-reward.dto';
 import { RewardResponseDto, PaginatedRewardsResponseDto } from './dto/reward-response.dto';
+import { RedeemRewardsDto } from './dto/redeem-rewards.dto';
+import { RedemptionResponseDto } from './dto/redemption-response.dto';
 import { rewards as RewardPrismaType } from '../../../generated/prisma';
 import { DatabaseService } from 'src/modules/database/database.service';
 
@@ -386,6 +388,188 @@ export class RewardsService {
     } catch (error) {
       this.logger.error('Error in deleteImage:', error);
       throw error;
+    }
+  }
+
+  async redeemRewards(userId: string, redeemData: RedeemRewardsDto): Promise<RedemptionResponseDto> {
+    try {
+      this.logger.log(`Processing redemption for user: ${userId}`);
+
+      // Start a transaction
+      return await this.prisma.$transaction(async (prisma) => {
+        // 1. Get user's current points
+        const userPointsBalance = await prisma.$queryRaw<Array<{ total_points: number }>>`
+          SELECT COALESCE(SUM(points), 0) as total_points 
+          FROM points_ledger 
+          WHERE user_id = ${userId}::uuid
+        `;
+
+        const currentPoints = userPointsBalance[0]?.total_points || 0;
+
+        this.logger.log(`🔍 Backend Debug - Points Validation:`, {
+          userId,
+          currentPoints,
+          requestedPoints: redeemData.total_points,
+          sufficient: currentPoints >= redeemData.total_points,
+          rewardDetails: redeemData.rewards.map(r => ({
+            reward_id: r.reward_id,
+            quantity: r.quantity,
+            points_cost: r.points_cost,
+            total: r.quantity * r.points_cost
+          })),
+          calculatedTotal: redeemData.rewards.reduce((sum, r) => sum + (r.quantity * r.points_cost), 0)
+        });
+
+        if (currentPoints < redeemData.total_points) {
+          throw new BadRequestException('Puntos insuficientes para completar el canje');
+        }
+
+        // 2. Validate each reward and check stock
+        const rewardChecks = await Promise.all(
+          redeemData.rewards.map(async (item) => {
+            const reward = await prisma.rewards.findUnique({
+              where: { id: item.reward_id },
+            });
+
+            if (!reward) {
+              throw new NotFoundException(`Recompensa con ID ${item.reward_id} no encontrada`);
+            }
+
+            if (reward.stock !== null && reward.stock < item.quantity) {
+              throw new BadRequestException(`Stock insuficiente para la recompensa: ${reward.name}`);
+            }
+
+            if (reward.points_cost !== item.points_cost) {
+              throw new BadRequestException(`El costo de puntos no coincide para la recompensa: ${reward.name}`);
+            }
+
+            return { reward, requestedQuantity: item.quantity };
+          })
+        );
+
+        // 3. Create the main redemption record
+        const redemption = await prisma.reward_redemptions.create({
+          data: {
+            user_id: userId,
+            status: 'PENDING',
+            total_points: redeemData.total_points,
+          },
+        });
+
+        // 4. Create redemption lines and update stock
+        const lines = await Promise.all(
+          redeemData.rewards.map(async (item, index) => {
+            const { reward } = rewardChecks[index];
+
+            // Create redemption line
+            const line = await prisma.reward_redemption_lines.create({
+              data: {
+                redemption_id: redemption.id,
+                reward_id: item.reward_id,
+                quantity: item.quantity,
+                points_cost: item.points_cost,
+              },
+            });
+
+            // Update stock if it's tracked
+            if (reward.stock !== null) {
+              await prisma.rewards.update({
+                where: { id: item.reward_id },
+                data: {
+                  stock: {
+                    decrement: item.quantity,
+                  },
+                },
+              });
+            }
+
+            return {
+              id: line.id,
+              reward_id: reward.id,
+              reward_name: reward.name,
+              quantity: item.quantity,
+              points_cost: item.points_cost,
+              total_points: item.points_cost * item.quantity,
+            };
+          })
+        );
+
+        // 5. Create points ledger entry (negative points for redemption)
+        await prisma.points_ledger.create({
+          data: {
+            user_id: userId,
+            points: -redeemData.total_points,
+            type: 'SPEND',
+            reward_id: null, // We could link to the first reward or keep it null for bulk redemptions
+          },
+        });
+
+        this.logger.log(`Redemption completed successfully for user: ${userId}, redemption ID: ${redemption.id}`);
+
+        const response = {
+          id: redemption.id,
+          user_id: redemption.user_id,
+          status: redemption.status || 'PENDING',
+          total_points: redemption.total_points,
+          created_at: redemption.created_at || new Date(),
+          lines,
+        };
+
+        // Serialize BigInt values for JSON response
+        return JSON.parse(
+          JSON.stringify(response, (key, value) =>
+            typeof value === 'bigint' ? Number(value) : value,
+          ),
+        ) as RedemptionResponseDto;
+      });
+    } catch (error) {
+      this.logger.error(`Error processing redemption for user ${userId}:`, error);
+      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException('Error al procesar el canje');
+    }
+  }
+
+  async getUserRedemptions(userId: string): Promise<RedemptionResponseDto[]> {
+    try {
+      const redemptions = await this.prisma.reward_redemptions.findMany({
+        where: { user_id: userId },
+        include: {
+          reward_redemption_lines: {
+            include: {
+              rewards: true,
+            },
+          },
+        },
+        orderBy: { created_at: 'desc' },
+      });
+
+      const transformedRedemptions = redemptions.map(redemption => ({
+        id: redemption.id,
+        user_id: redemption.user_id,
+        status: redemption.status || 'PENDING',
+        total_points: redemption.total_points,
+        created_at: redemption.created_at || new Date(),
+        lines: redemption.reward_redemption_lines.map(line => ({
+          id: line.id,
+          reward_id: line.reward_id,
+          reward_name: line.rewards.name,
+          quantity: line.quantity,
+          points_cost: line.points_cost,
+          total_points: line.points_cost * line.quantity,
+        })),
+      }));
+
+      // Serialize BigInt values for JSON response
+      return JSON.parse(
+        JSON.stringify(transformedRedemptions, (key, value) =>
+          typeof value === 'bigint' ? Number(value) : value,
+        ),
+      ) as RedemptionResponseDto[];
+    } catch (error) {
+      this.logger.error(`Error getting redemptions for user ${userId}:`, error);
+      throw new BadRequestException('Error al obtener los canjes del usuario');
     }
   }
 }

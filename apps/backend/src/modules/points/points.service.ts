@@ -30,7 +30,7 @@ export class PointsService {
         const result = await this.prisma.$queryRaw<Array<{ user_id: string; total_points: number }>>`
           SELECT user_id, total_points 
           FROM user_points_balance 
-          WHERE user_id = ${userId}
+          WHERE user_id = ${userId}::uuid
         `;
 
         if (result.length > 0) {
@@ -52,10 +52,17 @@ export class PointsService {
 
       const totalPoints = result._sum.points || 0;
       
-      return {
+      const response = {
         user_id: userId,
         total_points: totalPoints,
       };
+
+      // Serialize BigInt values for JSON response
+      return JSON.parse(
+        JSON.stringify(response, (key, value) =>
+          typeof value === 'bigint' ? Number(value) : value,
+        ),
+      );
     } catch (error) {
       this.logger.error(`Error fetching points balance for user ${userId}:`, error);
       return null;
@@ -82,7 +89,7 @@ export class PointsService {
       });
 
       // Transform the data to include order numbers and format for frontend
-      return entries.map(entry => ({
+      const transformedEntries = entries.map(entry => ({
         id: entry.id,
         user_id: entry.user_id!,
         order_id: entry.order_id,
@@ -90,8 +97,15 @@ export class PointsService {
         points: entry.points,
         type: entry.type,
         created_at: entry.created_at!,
-        order_number: entry.orders?.id ? `#${entry.orders.id.slice(-8)}` : undefined,
+        order_number: entry.orders?.id ? `#${String(entry.orders.id).slice(-8)}` : undefined,
       }));
+
+      // Serialize BigInt values for JSON response
+      return JSON.parse(
+        JSON.stringify(transformedEntries, (key, value) =>
+          typeof value === 'bigint' ? Number(value) : value,
+        ),
+      ) as PointsLedgerEntry[];
     } catch (error) {
       this.logger.error(`Error fetching points ledger for user ${userId}:`, error);
       return [];
@@ -108,10 +122,17 @@ export class PointsService {
         this.getUserPointsLedger(userId),
       ]);
 
-      return {
+      const result = {
         balance,
         transactions,
       };
+
+      // Serialize BigInt values for JSON response
+      return JSON.parse(
+        JSON.stringify(result, (key, value) =>
+          typeof value === 'bigint' ? Number(value) : value,
+        ),
+      );
     } catch (error) {
       this.logger.error(`Error fetching points summary for user ${userId}:`, error);
       return {

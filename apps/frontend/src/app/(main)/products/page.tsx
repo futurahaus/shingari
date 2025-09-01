@@ -12,6 +12,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/contexts/I18nContext';
 import { useProductsInfinite, useProductCategories } from '@/hooks/useProductsQuery';
 import { ProductsWithQuery } from '@/components/ProductsWithQuery';
+import { useRewardsCart } from '@/contexts/RewardsCartContext';
+import { usePoints } from '@/hooks/usePoints';
+import RewardsCart from '@/components/cart/RewardsCart';
 import Image from 'next/image';
 
 interface Category {
@@ -74,10 +77,23 @@ const useRewards = () => {
 
 const RewardCard = ({ reward }: { reward: Reward }) => {
     const { user } = useAuth();
+    const { addToRewardsCart, rewardsCart } = useRewardsCart();
+    const { pointsData } = usePoints();
+    const { t } = useTranslation();
 
-    const handleExchange = () => {
-        // TODO: Implement reward exchange logic
-        console.log('Exchange reward:', reward.id);
+    // Check if reward is already in cart
+    const inCart = rewardsCart.find(r => r.id === reward.id);
+    const canAfford = user && pointsData?.balance?.total_points ? pointsData.balance.total_points >= reward.points_cost : false;
+
+    const handleAddToCart = () => {
+        addToRewardsCart({
+            id: reward.id,
+            name: reward.name,
+            description: reward.description,
+            image_url: reward.image_url,
+            points_cost: reward.points_cost,
+            stock: reward.stock,
+        });
     };
 
     return (
@@ -200,12 +216,32 @@ const RewardCard = ({ reward }: { reward: Reward }) => {
                         </div>
                     ) : (
                         user ? (
-                            <button
-                                onClick={handleExchange}
-                                className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-                            >
-                                🎁 Canjear ahora
-                            </button>
+                            <div className="space-y-2">
+                                {inCart && (
+                                    <div className="w-full px-3 py-2 bg-green-50 border border-green-200 rounded-lg text-center">
+                                        <Text as="span" size="xs" color="success" className="text-green-700">
+                                            ✅ {t('products.in_cart')} ({inCart.quantity})
+                                        </Text>
+                                    </div>
+                                )}
+                                <button
+                                    onClick={handleAddToCart}
+                                    disabled={!canAfford || (reward.stock !== null && inCart && inCart.quantity >= reward.stock)}
+                                    className={`w-full px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                                        canAfford && !(reward.stock !== null && inCart && inCart.quantity >= reward.stock)
+                                            ? 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
+                                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    }`}
+                                >
+                                    {!canAfford ? (
+                                        '💸 Puntos insuficientes'
+                                    ) : reward.stock !== null && inCart && inCart.quantity >= reward.stock ? (
+                                        '📦 Stock máximo alcanzado'
+                                    ) : (
+                                        `🛒 ${t('products.add_to_cart')}`
+                                    )}
+                                </button>
+                            </div>
                         ) : (
                             <div className="w-full px-4 py-3 bg-gray-100 rounded-lg text-center">
                                 <Text as="span" size="sm" color="secondary" className="text-gray-600">
@@ -222,6 +258,8 @@ const RewardCard = ({ reward }: { reward: Reward }) => {
 
 const RewardsSection = () => {
     const { rewards, loading, error } = useRewards();
+    const { openRewardsCart, getTotalItems } = useRewardsCart();
+    const cartItemsCount = getTotalItems();
 
     if (loading) {
         return (
@@ -269,10 +307,34 @@ const RewardsSection = () => {
     }
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {rewards.map((reward) => (
-                <RewardCard key={reward.id} reward={reward} />
-            ))}
+        <div className="relative">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                {rewards.map((reward) => (
+                    <RewardCard key={reward.id} reward={reward} />
+                ))}
+            </div>
+
+            {/* Floating Cart Button */}
+            {cartItemsCount > 0 && (
+                <button
+                    onClick={openRewardsCart}
+                    className="fixed bottom-24 right-8 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1 z-40"
+                >
+                    <div className="relative">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                        </svg>
+                        {cartItemsCount > 0 && (
+                            <div className="absolute -top-2 -right-2 bg-yellow-400 text-black text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                {cartItemsCount > 9 ? '9+' : cartItemsCount}
+                            </div>
+                        )}
+                    </div>
+                </button>
+            )}
+
+            {/* Rewards Cart Modal */}
+            <RewardsCart />
         </div>
     );
 };

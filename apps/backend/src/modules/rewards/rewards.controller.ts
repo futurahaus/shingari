@@ -21,6 +21,8 @@ import { CreateRewardDto } from './dto/create-reward.dto';
 import { UpdateRewardDto } from './dto/update-reward.dto';
 import { QueryRewardDto } from './dto/query-reward.dto';
 import { RewardResponseDto, PaginatedRewardsResponseDto } from './dto/reward-response.dto';
+import { RedeemRewardsDto } from './dto/redeem-rewards.dto';
+import { RedemptionResponseDto } from './dto/redemption-response.dto';
 import {
   ApiTags,
   ApiOperation,
@@ -407,5 +409,72 @@ export class RewardsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteImage(@Param('filePath') filePath: string): Promise<void> {
     return this.rewardsService.deleteImage(filePath);
+  }
+
+  // --- User Redemption Endpoints ---
+  @Post('redeem')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Canjear recompensas por puntos',
+    description: 'Permite a un usuario autenticado canjear una o más recompensas usando sus puntos acumulados.',
+  })
+  @ApiBody({
+    type: RedeemRewardsDto,
+    description: 'Datos del canje de recompensas',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Canje procesado exitosamente.',
+    type: RedemptionResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos inválidos, puntos insuficientes o stock insuficiente.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autorizado.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Una o más recompensas no encontradas.',
+  })
+  async redeemRewards(
+    @Body() redeemData: RedeemRewardsDto,
+    @NestRequest() req: any,
+  ): Promise<RedemptionResponseDto> {
+    console.log('🔍 Controller Debug - Request:', {
+      hasUser: !!req.user,
+      user: req.user,
+      headers: req.headers,
+      authorization: req.headers.authorization?.substring(0, 20) + '...'
+    });
+    
+    const userId = req.user?.sub || req.user?.id;
+    console.log('🔍 Controller Debug - Extracted userId:', userId);
+    
+    return this.rewardsService.redeemRewards(userId, redeemData);
+  }
+
+  @Get('my-redemptions')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Obtener historial de canjes del usuario',
+    description: 'Devuelve todos los canjes realizados por el usuario autenticado.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Historial de canjes obtenido exitosamente.',
+    type: [RedemptionResponseDto],
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autorizado.',
+  })
+  async getUserRedemptions(@NestRequest() req: any): Promise<RedemptionResponseDto[]> {
+    const userId = req.user.sub;
+    return this.rewardsService.getUserRedemptions(userId);
   }
 }

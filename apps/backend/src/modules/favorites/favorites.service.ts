@@ -56,6 +56,30 @@ export class FavoritesService {
         status: favorite.products.status || 'active',
       },
     };
+
+    // Transform the response to match the DTO structure
+    const result = {
+      user_id: favorite.user_id,
+      product_id: favorite.product_id,
+      created_at: favorite.created_at,
+      product: {
+        id: favorite.products.id,
+        name: favorite.products.name,
+        description: favorite.products.description || '',
+        image_url: favorite.products.image_url || '',
+        list_price: favorite.products.list_price.toString(),
+        wholesale_price: favorite.products.wholesale_price.toString(),
+        sku: favorite.products.sku,
+        status: favorite.products.status || 'active',
+      },
+    };
+
+    // Serialize BigInt values for JSON response
+    return JSON.parse(
+      JSON.stringify(result, (key, value) =>
+        typeof value === 'bigint' ? Number(value) : value,
+      ),
+    );
   }
 
   async removeFavorite(userId: string, productId: number) {
@@ -105,6 +129,18 @@ export class FavoritesService {
       favorites: transformedFavorites,
       total: favorites.length,
     };
+
+    // Serialize BigInt values for JSON response
+    const result = {
+      favorites: transformedFavorites,
+      total: favorites.length,
+    };
+
+    return JSON.parse(
+      JSON.stringify(result, (key, value) =>
+        typeof value === 'bigint' ? Number(value) : value,
+      ),
+    );
   }
 
   async isFavorite(userId: string, productId: number): Promise<boolean> {

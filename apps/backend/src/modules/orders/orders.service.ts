@@ -400,7 +400,7 @@ export class OrdersService {
   }
 
   private mapToOrderResponse(order: any): OrderResponseDto {
-    return {
+    const response = {
       id: order.id,
       user_id: order.user_id,
       user_email: order.users?.email || null,
@@ -445,5 +445,12 @@ export class OrdersService {
         metadata: payment.metadata,
       })),
     };
+
+    // Serialize BigInt values for JSON response
+    return JSON.parse(
+      JSON.stringify(response, (key, value) =>
+        typeof value === 'bigint' ? Number(value) : value,
+      ),
+    ) as OrderResponseDto;
   }
 }
