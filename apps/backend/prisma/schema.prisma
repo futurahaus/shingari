@@ -325,6 +325,7 @@ model auth_users {
   orders                      orders[]
   points_ledger               points_ledger[]
   products_discounts          products_discounts[]
+  reward_redemptions          reward_redemptions[]
   user_roles                  user_roles[]
   users                       public_users?
 
@@ -597,20 +598,13 @@ model product_translations {
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model reward_redemptions {
-  id                       BigInt                     @id @default(autoincrement())
-  created_at               DateTime                   @default(now()) @db.Timestamptz(6)
-  reward_redemptions_lines reward_redemptions_lines[]
-
-  @@schema("public")
-}
-
-/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model reward_redemptions_lines {
-  id                   BigInt             @id @default(autoincrement())
-  created_at           DateTime           @default(now()) @db.Timestamptz(6)
-  reward_redemption_id BigInt
-  reward_redemptions   reward_redemptions @relation(fields: [reward_redemption_id], references: [id], onDelete: Cascade)
+  id                      Int                       @id @default(autoincrement())
+  user_id                 String                    @db.Uuid
+  status                  String?                   @default("PENDING")
+  total_points            Int                       @default(0)
+  created_at              DateTime?                 @default(now()) @db.Timestamp(6)
+  reward_redemption_lines reward_redemption_lines[]
+  users                   auth_users                @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@schema("public")
 }
@@ -632,14 +626,31 @@ model points_ledger {
 }
 
 model rewards {
-  id            Int             @id @default(autoincrement())
-  name          String
-  description   String?
-  image_url     String?
-  points_cost   Int
-  stock         Int?            @default(0)
-  created_at    DateTime?       @default(now()) @db.Timestamp(6)
-  points_ledger points_ledger[]
+  id                      Int                       @id @default(autoincrement())
+  name                    String
+  description             String?
+  image_url               String?
+  points_cost             Int
+  stock                   Int?                      @default(0)
+  created_at              DateTime?                 @default(now()) @db.Timestamp(6)
+  updated_at              DateTime                  @default(now()) @db.Timestamp(6)
+  status                  reward_states?
+  points_ledger           points_ledger[]
+  reward_redemption_lines reward_redemption_lines[]
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model reward_redemption_lines {
+  id                 Int                @id @default(autoincrement())
+  redemption_id      Int
+  reward_id          Int
+  quantity           Int
+  points_cost        Int
+  created_at         DateTime?          @default(now()) @db.Timestamp(6)
+  reward_redemptions reward_redemptions @relation(fields: [redemption_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  rewards            rewards            @relation(fields: [reward_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@schema("public")
 }
@@ -707,6 +718,14 @@ enum order_states {
   accepted
   delivered
   cancelled
+
+  @@schema("public")
+}
+
+enum reward_states {
+  active
+  draft
+  deleted
 
   @@schema("public")
 }

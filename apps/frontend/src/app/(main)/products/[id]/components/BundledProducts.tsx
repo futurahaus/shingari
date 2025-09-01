@@ -1,6 +1,7 @@
 import { RefreshCw } from 'lucide-react';
 import Image from 'next/image';
 import { Product } from '@/components/ProductCard';
+import { formatCurrency } from '@/lib/currency';
 
 interface BundledProductsProps {
   bundledProducts: Product[];
@@ -31,9 +32,9 @@ export function BundledProducts({ bundledProducts }: BundledProductsProps) {
                       -{product.discount}%
                     </span>
                   )}
-                  <p className="font-semibold">${new Intl.NumberFormat('es-CO').format(product.price)}</p>
+                  <p className="font-semibold">{formatCurrency(product.price)}</p>
                   {hasDiscount && product.originalPrice && (
-                    <p className="text-sm text-gray-400 line-through">${new Intl.NumberFormat('es-CO').format(product.originalPrice)}</p>
+                    <p className="text-sm text-gray-400 line-through">{formatCurrency(product.originalPrice)}</p>
                   )}
                 </div>
               </div>
@@ -52,11 +53,11 @@ export function BundledProducts({ bundledProducts }: BundledProductsProps) {
           {totalDiscountPercentage > 0 && (
             <div className="flex items-center gap-2">
               <span className="px-2 py-1 text-sm font-bold text-white bg-orange-500 rounded-md">-{totalDiscountPercentage}%</span>
-              <p className="text-gray-400 line-through">${totalOriginalPrice.toFixed(2)}</p>
+              <p className="text-gray-400 line-through">{formatCurrency(totalOriginalPrice)}</p>
             </div>
           )}
         </div>
-        <p className="text-2xl font-bold">${totalCurrentPrice.toFixed(2)}</p>
+        <p className="text-2xl font-bold">{formatCurrency(totalCurrentPrice)}</p>
       </div>
       <button className="button w-full px-4 py-3 mt-4 font-bold text-orange-600 bg-white border border-orange-600 rounded-md hover:bg-orange-50">
         Agregar al carrito
