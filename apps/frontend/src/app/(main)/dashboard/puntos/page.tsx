@@ -5,7 +5,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import { usePointsQuery, PointsLedgerEntry } from '@/hooks/usePointsQuery';
 
 export default function PointsPage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { balance, transactions, isLoading, error, refetch, isFetching } = usePointsQuery();
 
   const getTransactionIcon = (type: string | null) => {
@@ -55,7 +55,12 @@ export default function PointsPage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('es-ES', {
+    const localeMap = {
+      'es': 'es-ES',
+      'zh': 'zh-CN'
+    };
+    const dateLocale = localeMap[locale as keyof typeof localeMap] || 'es-ES';
+    return date.toLocaleDateString(dateLocale, {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -91,11 +96,11 @@ export default function PointsPage() {
             {isLoading ? (
               <div className="text-4xl font-bold mb-2">...</div>
             ) : error ? (
-              <div className="text-2xl font-bold mb-2 text-red-200">Error al cargar los puntos</div>
+              <div className="text-2xl font-bold mb-2 text-red-200">{t('dashboard.error_loading_points')}</div>
             ) : (
               <>
                 <div className="text-4xl font-bold mb-2">
-                  {balance?.total_points?.toLocaleString('de-DE') || '0'}
+                  {balance?.total_points?.toLocaleString(locale === 'zh' ? 'zh-CN' : 'es-ES') || '0'}
                 </div>
                 <p className="text-red-100">{t('dashboard.total_points')}</p>
               </>
@@ -157,7 +162,7 @@ export default function PointsPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`text-sm font-medium ${transaction.points > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {transaction.points > 0 ? '+' : ''}{transaction.points.toLocaleString('de-DE')}
+                            {transaction.points > 0 ? '+' : ''}{transaction.points.toLocaleString(locale === 'zh' ? 'zh-CN' : 'es-ES')}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -165,12 +170,12 @@ export default function PointsPage() {
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-900">
                           {transaction.type === 'EARN' && transaction.order_number
-                            ? `Bono por compra ${transaction.order_number}`
+                            ? t('dashboard.bonus_for_purchase', { orderNumber: transaction.order_number })
                             : transaction.type === 'USED' && transaction.order_number
-                            ? `Puntos gastados en compra ${transaction.order_number}`
+                            ? t('dashboard.points_spent_on_purchase', { orderNumber: transaction.order_number })
                             : transaction.type === 'EXPIRED'
-                            ? 'Puntos expirados'
-                            : 'Transacción de puntos'
+                            ? t('dashboard.points_expired')
+                            : t('dashboard.points_transaction')
                           }
                         </td>
                       </tr>

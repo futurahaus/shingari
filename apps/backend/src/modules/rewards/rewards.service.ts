@@ -398,8 +398,8 @@ export class RewardsService {
       return await this.prisma.$transaction(async (prisma) => {
         // 1. Get user's current points
         const userPointsBalance = await prisma.$queryRaw<Array<{ total_points: number }>>`
-          SELECT COALESCE(SUM(points), 0) as total_points 
-          FROM points_ledger 
+          SELECT COALESCE(SUM(points), 0) as total_points
+          FROM points_ledger
           WHERE user_id = ${userId}::uuid
         `;
 

@@ -842,6 +842,7 @@
     "description": "Descripción",
     "earned": "Ganados",
     "spend": "Canjeados",
+    "used": "Usados",
     "expired": "Expirados",
     "purchase_bonus": "Bono por compra",
     "referral_bonus": "Bono por referido",
@@ -870,7 +871,12 @@
     "earn_points_rule_2": "• Los puntos expiran después de 12 meses de inactividad",
     "earn_points_rule_3": "• Usa tus puntos por canjeables en la seccion de recompensas",
     "updating": "Actualizando...",
-    "refresh_points": "Actualizar puntos"
+    "refresh_points": "Actualizar puntos",
+    "bonus_for_purchase": "Bono por compra {orderNumber}",
+    "points_spent_on_purchase": "Puntos gastados en compra {orderNumber}",
+    "points_expired": "Puntos expirados",
+    "points_transaction": "Transacción de puntos",
+    "error_loading_points": "Error al cargar los puntos"
   },
   "order_status": {
     "pending": "Pendiente",
