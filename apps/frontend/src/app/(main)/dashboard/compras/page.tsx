@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
 import { api } from '@/lib/api';
 import { useTranslation, useI18n } from '@/contexts/I18nContext';
+import { formatCurrency } from '@/lib/currency';
 
 interface OrderLine {
   id: string;
@@ -230,7 +231,7 @@ export default function ComprasPage() {
                             {t('dashboard.purchase_date')}: {formatDate(order.created_at, locale === 'zh' ? 'zh-CN' : 'es-ES')}
                           </p>
                           <p className="text-xs sm:text-sm text-gray-600">
-                            {t('dashboard.total')}: €{Number(order.total_amount).toFixed(2)}
+                            {t('dashboard.total')}: {formatCurrency(Number(order.total_amount))}
                           </p>
                         </div>
                       </div>

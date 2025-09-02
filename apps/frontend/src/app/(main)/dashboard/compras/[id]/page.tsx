@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Sidebar from '@/components/layout/Sidebar';
 import { api } from '@/lib/api';
 import { useTranslation, useI18n } from '@/contexts/I18nContext';
+import { formatCurrency as formatCurrencyUtil } from '@/lib/currency';
 
 interface OrderLine {
   id: string;
@@ -109,7 +110,7 @@ const formatOrderId = (id: string) => {
 };
 
 const formatCurrency = (amount: string) => {
-  return `€${Number(amount).toFixed(2).replace('.', ',')}`;
+  return formatCurrencyUtil(Number(amount));
 };
 
 const OrderDetailSkeleton = () => (

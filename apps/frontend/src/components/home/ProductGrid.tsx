@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Text } from '@/app/ui/components/Text';
 import { useTranslation } from '@/contexts/I18nContext';
 import { useHomeProducts } from '@/hooks/useProductsQuery';
+import { formatCurrency } from '@/lib/currency';
 
 export default function ProductGrid() {
     const router = useRouter();
@@ -90,7 +91,7 @@ export default function ProductGrid() {
                             </Text>
                             <div className="flex flex-col">
                                 <Text as="div" size="md" color="secondary">
-                                    €{product.price.toFixed(2)}
+                                    {formatCurrency(product.price)}
                                 </Text>
                             </div>
                         </div>
