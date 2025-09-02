@@ -164,7 +164,6 @@ export class RewardsService {
         where: { id },
         data: {
           ...updateRewardDto,
-          updated_at: new Date(),
         },
       });
 
@@ -314,7 +313,7 @@ export class RewardsService {
       points_cost: reward.points_cost,
       stock: reward.stock,
       created_at: reward.created_at,
-      updated_at: reward.updated_at,
+      updated_at: reward.updated_at || reward.created_at,
     };
   }
 
@@ -507,7 +506,7 @@ export class RewardsService {
         this.logger.log(`Redemption completed successfully for user: ${userId}, redemption ID: ${redemption.id}`);
 
         const response = {
-          id: redemption.id,
+          id: Number(redemption.id),
           user_id: redemption.user_id,
           status: redemption.status || 'PENDING',
           total_points: redemption.total_points,
@@ -546,13 +545,13 @@ export class RewardsService {
       });
 
       const transformedRedemptions = redemptions.map(redemption => ({
-        id: redemption.id,
+        id: Number(redemption.id),
         user_id: redemption.user_id,
         status: redemption.status || 'PENDING',
         total_points: redemption.total_points,
         created_at: redemption.created_at || new Date(),
         lines: redemption.reward_redemption_lines.map(line => ({
-          id: line.id,
+          id: Number(line.id),
           reward_id: line.reward_id,
           reward_name: line.rewards.name,
           quantity: line.quantity,
