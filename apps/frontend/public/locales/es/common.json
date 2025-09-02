@@ -962,7 +962,15 @@
     "shipping_address": "Dirección de envío",
     "city": "Ciudad",
     "client": "Cliente",
-    "spain": "España"
+    "spain": "España",
+    "current_points": "Puntos actuales:",
+    "points_you_will_earn": "Puntos que ganarás",
+    "products_with_iva": "Productos IVA {iva}% (sin IVA)",
+    "products_without_iva": "Productos sin IVA",
+    "iva": "IVA",
+    "subtotal_without_iva": "Subtotal (sin IVA)",
+    "total_iva": "IVA Total",
+    "points": "puntos"
   },
   "congrats": {
     "title": "Confirmación de compra",
