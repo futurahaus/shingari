@@ -153,7 +153,7 @@ export default function AdminProductsPage() {
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-black focus:border-black"
               />
             </div>
-            
+
             {/* Filtro de Categorías */}
             <div className="flex gap-2 items-center">
               <label htmlFor="categoryFilter" className="text-sm text-gray-600">{t('admin.products.category')}:</label>
@@ -212,6 +212,9 @@ export default function AdminProductsPage() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('admin.products.table.sku')}
+                    </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {t('admin.products.table.product')}
                     </th>

@@ -26,7 +26,12 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
             className={`hover:bg-gray-50 ${isLast ? '' : 'border-b border-gray-200'}`}
             ref={isLast ? lastProductRef : null}
         >
-            {/* Nombre del producto (imagen, nombre y SKU) */}
+            {/* SKU */}
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                {product.sku}
+            </td>
+
+            {/* Nombre del producto (imagen y nombre) */}
             <td className="px-6 py-4">
                 <div className="flex items-center">
                     <div className="flex-shrink-0 h-12 w-12">
@@ -49,7 +54,6 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
                     </div>
                     <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                        <div className="text-sm text-gray-500">{t('admin.products.table.sku')}: {product.sku}</div>
                         {/* Translation status indicator */}
                         {hasTranslations && (
                             <div className="flex items-center mt-1">
