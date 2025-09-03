@@ -442,13 +442,14 @@ export class UserService {
       },
       include: {
         products: {
-          select: { name: true, list_price: true, wholesale_price: true },
+          select: { name: true, list_price: true, wholesale_price: true, sku: true },
         },
       },
     });
     return discounts.map((d) => ({
       id: d.id.toString(),
       product: d.products?.name || '',
+      sku: d.products?.sku || '',
       priceRetail: d.products?.list_price?.toString() || '',
       priceWholesale: d.products?.wholesale_price?.toString() || '',
       priceClient: d.price?.toString() || '',

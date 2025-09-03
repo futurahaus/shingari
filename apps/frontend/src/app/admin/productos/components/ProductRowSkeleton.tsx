@@ -3,7 +3,12 @@ import React from 'react';
 export const ProductRowSkeleton: React.FC = () => {
   return (
     <tr className="animate-pulse">
-      {/* Producto (imagen, nombre y SKU) */}
+      {/* SKU */}
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="h-4 bg-gray-300 rounded w-16"></div>
+      </td>
+
+      {/* Producto (imagen y nombre) */}
       <td className="px-6 py-4">
         <div className="flex items-center">
           <div className="flex-shrink-0 h-12 w-12">
@@ -11,7 +16,6 @@ export const ProductRowSkeleton: React.FC = () => {
           </div>
           <div className="ml-4">
             <div className="h-4 bg-gray-300 rounded w-32 mb-2"></div>
-            <div className="h-3 bg-gray-300 rounded w-24"></div>
           </div>
         </div>
       </td>

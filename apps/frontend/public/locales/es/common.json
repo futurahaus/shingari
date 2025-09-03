@@ -404,6 +404,7 @@
         "confirm_delete_special_price": "¿Estás seguro de que quieres eliminar este precio especial?",
         "error_deleting_special_price": "Error al eliminar el precio especial",
         "product": "Producto",
+        "sku": "SKU",
         "retail_price": "Precio Minorista",
         "wholesale_price": "Precio Mayorista",
         "client_price": "Precio por cliente",
