@@ -88,6 +88,16 @@ export class QueryProductDto {
   categoryId?: string;
 
   @ApiPropertyOptional({
+    description: 'Estado del producto para filtrar',
+    enum: ['active', 'draft', 'paused', 'deleted'],
+    example: 'active',
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(['active', 'draft', 'paused', 'deleted'])
+  status?: string;
+
+  @ApiPropertyOptional({
     description: 'Ordenar por precio',
     enum: ProductSortByPrice,
   })

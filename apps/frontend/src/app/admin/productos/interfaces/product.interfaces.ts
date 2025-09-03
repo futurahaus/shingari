@@ -83,6 +83,7 @@ export interface AdminProductRowProps {
   onEdit: (product: Product) => void;
   onDelete: (product: Product) => void;
   onTranslate: (product: Product) => void;
+  onStatusChange: (productId: string, newStatus: string) => void;
   isLast?: boolean;
   lastProductRef?: React.RefObject<HTMLTableRowElement>;
 }

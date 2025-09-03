@@ -19,6 +19,7 @@ export default function AdminProductsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchQuery, setSearchQuery] = useState(''); // Estado para la búsqueda real
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -42,7 +43,7 @@ export default function AdminProductsPage() {
     error,
     lastPage,
     refetch
-  } = useAdminProducts({ page, limit: 10, search: searchQuery, sortField, sortDirection, categoryId: selectedCategory, locale });
+  } = useAdminProducts({ page, limit: 10, search: searchQuery, sortField, sortDirection, categoryId: selectedCategory, status: selectedStatus, locale });
 
   const openEditModal = (product: Product) => {
     setSelectedProduct(product);
@@ -75,6 +76,13 @@ export default function AdminProductsPage() {
     refetch();
   };
 
+  const handleProductStatusChange = (productId: string, newStatus: string) => {
+    // Refetch the data to get the updated product
+    // We could also implement optimistic updates here if needed
+    console.log(`Product ${productId} status changed to ${newStatus}`);
+    refetch();
+  };
+
   const handlePageChange = (newPage: number) => {
     if (newPage !== page && newPage > 0 && newPage <= lastPage) {
       setPage(newPage);
@@ -103,6 +111,12 @@ export default function AdminProductsPage() {
   const handleCategoryChange = useCallback((categoryId: string) => {
     setSelectedCategory(categoryId);
     setPage(1); // Resetear a la primera página cuando se cambia de categoría
+  }, []);
+
+  // Función para manejar el cambio de estado
+  const handleStatusChange = useCallback((status: string) => {
+    setSelectedStatus(status);
+    setPage(1); // Resetear a la primera página cuando se cambia de estado
   }, []);
 
   return (
@@ -174,6 +188,23 @@ export default function AdminProductsPage() {
               </select>
             </div>
 
+            {/* Filtro de Estado */}
+            <div className="flex gap-2 items-center">
+              <label htmlFor="statusFilter" className="text-sm text-gray-600">{t('admin.products.table.status')}:</label>
+              <select
+                id="statusFilter"
+                value={selectedStatus}
+                onChange={(e) => handleStatusChange(e.target.value)}
+                className="border border-gray-300 rounded-lg px-2 py-1 text-sm min-w-[150px]"
+              >
+                <option value="all">{t('admin.products.status.all_statuses')}</option>
+                <option value="active">{t('admin.products.status.active')}</option>
+                <option value="draft">{t('admin.products.status.draft')}</option>
+                <option value="paused">{t('admin.products.status.paused')}</option>
+                <option value="deleted">{t('admin.products.status.deleted')}</option>
+              </select>
+            </div>
+
             <div className="flex gap-2 items-center">
               <label htmlFor="sortField" className="text-sm text-gray-600">{t('admin.products.sort_by')}:</label>
               <select
@@ -236,6 +267,9 @@ export default function AdminProductsPage() {
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {t('admin.products.table.iva')}
                     </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('admin.products.table.status')}
+                    </th>
                     <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {t('admin.products.table.actions')}
                     </th>
@@ -249,6 +283,7 @@ export default function AdminProductsPage() {
                       onEdit={openEditModal}
                       onDelete={openDeleteModal}
                       onTranslate={openTranslationModal}
+                      onStatusChange={handleProductStatusChange}
                       isLast={index === products.length - 1}
                       lastProductRef={lastProductRef}
                     />

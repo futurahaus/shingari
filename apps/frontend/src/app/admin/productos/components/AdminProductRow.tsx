@@ -1,25 +1,114 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { FaEdit, FaTrash, FaGlobe, FaCheck } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaGlobe, FaCheck, FaEye, FaEyeSlash, FaPause, FaTrashAlt, FaChevronDown } from 'react-icons/fa';
 import { useTranslation } from '@/contexts/I18nContext';
 import { AdminProductRowProps } from '../interfaces/product.interfaces';
 import { formatCurrency, formatPercentage } from '@/lib/currency';
+import { api } from '@/lib/api';
+import { useNotifications } from '@/hooks/useNotifications';
 
 export const AdminProductRow: React.FC<AdminProductRowProps> = ({
     product,
     onEdit,
     onDelete,
     onTranslate,
+    onStatusChange,
     isLast = false,
     lastProductRef
 }) => {
     const { t } = useTranslation();
+    const { showSuccess, showError } = useNotifications();
+    const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
+    const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Check if product has translations
     const hasTranslations = product.translations && product.translations.length > 0;
     const translationLocales = hasTranslations
         ? product.translations!.map(t => t.locale).join(', ')
         : '';
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsStatusDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    // Status configuration
+    const getStatusConfig = (status: string | undefined) => {
+        switch (status) {
+            case 'active':
+                return {
+                    label: t('admin.products.status.active'),
+                    icon: FaEye,
+                    className: 'text-green-600 bg-green-50 border-green-200',
+                    iconClassName: 'text-green-600'
+                };
+            case 'draft':
+                return {
+                    label: t('admin.products.status.draft'),
+                    icon: FaEyeSlash,
+                    className: 'text-gray-600 bg-gray-50 border-gray-200',
+                    iconClassName: 'text-gray-600'
+                };
+            case 'paused':
+                return {
+                    label: t('admin.products.status.paused'),
+                    icon: FaPause,
+                    className: 'text-yellow-600 bg-yellow-50 border-yellow-200',
+                    iconClassName: 'text-yellow-600'
+                };
+            case 'deleted':
+                return {
+                    label: t('admin.products.status.deleted'),
+                    icon: FaTrashAlt,
+                    className: 'text-red-600 bg-red-50 border-red-200',
+                    iconClassName: 'text-red-600'
+                };
+            default:
+                return {
+                    label: t('admin.products.status.draft'),
+                    icon: FaEyeSlash,
+                    className: 'text-gray-600 bg-gray-50 border-gray-200',
+                    iconClassName: 'text-gray-600'
+                };
+        }
+    };
+
+    const statusConfig = getStatusConfig(product.status);
+    const StatusIcon = statusConfig.icon;
+
+            const handleStatusChange = async (newStatus: string) => {
+        if (newStatus === product.status || isUpdatingStatus) return;
+
+        try {
+            setIsUpdatingStatus(true);
+            await api.put(`/products/${product.id}`, { status: newStatus });
+            showSuccess(t('admin.products.status.change_status'), t('admin.products.status.status_updated'));
+            // Call the callback to update the parent component
+            onStatusChange(product.id, newStatus);
+        } catch {
+            showError(t('admin.products.status.change_status'), t('admin.products.status.error_updating_status'));
+        } finally {
+            setIsUpdatingStatus(false);
+            setIsStatusDropdownOpen(false);
+        }
+    };
+
+    const statusOptions = [
+        { value: 'active', label: t('admin.products.status.active'), icon: FaEye, className: 'text-green-600' },
+        { value: 'draft', label: t('admin.products.status.draft'), icon: FaEyeSlash, className: 'text-gray-600' },
+        { value: 'paused', label: t('admin.products.status.paused'), icon: FaPause, className: 'text-yellow-600' },
+        { value: 'deleted', label: t('admin.products.status.deleted'), icon: FaTrashAlt, className: 'text-red-600' }
+    ];
 
     return (
         <tr
@@ -96,6 +185,44 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
             <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">
                     {formatPercentage(product.iva)}
+                </div>
+            </td>
+
+            {/* Status */}
+            <td className="px-6 py-4 whitespace-nowrap">
+                <div className="relative" ref={dropdownRef}>
+                    <button
+                        onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
+                        disabled={isUpdatingStatus}
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusConfig.className} hover:opacity-80 transition-opacity ${isUpdatingStatus ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                    >
+                        <StatusIcon className={`w-3 h-3 mr-1.5 ${statusConfig.iconClassName}`} />
+                        {statusConfig.label}
+                        <FaChevronDown className={`w-2 h-2 ml-1 transition-transform ${isStatusDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {isStatusDropdownOpen && (
+                        <div className="absolute z-10 mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg">
+                            <div className="py-1">
+                                {statusOptions.map((option) => {
+                                    const OptionIcon = option.icon;
+                                    return (
+                                        <button
+                                            key={option.value}
+                                            onClick={() => handleStatusChange(option.value)}
+                                            disabled={option.value === product.status || isUpdatingStatus}
+                                            className={`w-full text-left px-3 py-2 text-xs flex items-center hover:bg-gray-50 ${
+                                                option.value === product.status ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'text-gray-700'
+                                            }`}
+                                        >
+                                            <OptionIcon className={`w-3 h-3 mr-2 ${option.className}`} />
+                                            {option.label}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </td>
 
