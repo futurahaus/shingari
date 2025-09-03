@@ -12,6 +12,7 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
     onEdit,
     onDelete,
     onTranslate,
+    onStatusChange,
     isLast = false,
     lastProductRef
 }) => {
@@ -85,15 +86,15 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
     const statusConfig = getStatusConfig(product.status);
     const StatusIcon = statusConfig.icon;
 
-        const handleStatusChange = async (newStatus: string) => {
+            const handleStatusChange = async (newStatus: string) => {
         if (newStatus === product.status || isUpdatingStatus) return;
-        
+
         try {
             setIsUpdatingStatus(true);
             await api.put(`/products/${product.id}`, { status: newStatus });
             showSuccess(t('admin.products.status.change_status'), t('admin.products.status.status_updated'));
-            // Trigger a refetch of the products list
-            window.location.reload();
+            // Call the callback to update the parent component
+            onStatusChange(product.id, newStatus);
         } catch {
             showError(t('admin.products.status.change_status'), t('admin.products.status.error_updating_status'));
         } finally {

@@ -76,6 +76,13 @@ export default function AdminProductsPage() {
     refetch();
   };
 
+  const handleProductStatusChange = (productId: string, newStatus: string) => {
+    // Refetch the data to get the updated product
+    // We could also implement optimistic updates here if needed
+    console.log(`Product ${productId} status changed to ${newStatus}`);
+    refetch();
+  };
+
   const handlePageChange = (newPage: number) => {
     if (newPage !== page && newPage > 0 && newPage <= lastPage) {
       setPage(newPage);
@@ -273,6 +280,7 @@ export default function AdminProductsPage() {
                       onEdit={openEditModal}
                       onDelete={openDeleteModal}
                       onTranslate={openTranslationModal}
+                      onStatusChange={handleProductStatusChange}
                       isLast={index === products.length - 1}
                       lastProductRef={lastProductRef}
                     />
