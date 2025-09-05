@@ -1,56 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
-import { api } from '@/lib/api';
 import { useTranslation, useI18n } from '@/contexts/I18nContext';
+import { useOrdersQuery } from '@/hooks/useOrdersQuery';
 import { formatCurrency } from '@/lib/currency';
-
-interface OrderLine {
-  id: string;
-  product_id: number;
-  product_name: string;
-  quantity: number;
-  unit_price: string;
-  total_price: string;
-}
-
-interface OrderAddress {
-  id: string;
-  type: string;
-  full_name: string;
-  address_line1: string;
-  address_line2?: string;
-  city: string;
-  state?: string;
-  postal_code: string;
-  country: string;
-  phone?: string;
-}
-
-interface OrderPayment {
-  id: string;
-  payment_method: string;
-  status: string;
-  paid_at?: string;
-  amount: string;
-  transaction_id?: string;
-  metadata?: Record<string, unknown>;
-}
-
-interface Order {
-  id: string;
-  user_id?: string;
-  status: string;
-  total_amount: string;
-  currency: string;
-  created_at: string;
-  updated_at: string;
-  order_lines: OrderLine[];
-  order_addresses: OrderAddress[];
-  order_payments: OrderPayment[];
-}
 
 const getStatusConfig = (status: string, t: (key: string) => string) => {
   switch (status.toLowerCase()) {
@@ -139,33 +94,24 @@ export default function ComprasPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const { locale } = useI18n();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { orders, isLoading, error, refetch } = useOrdersQuery();
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const ordersData = await api.get<Order[]>('/orders/user/me');
-        setOrders(ordersData);
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-        setError(t('dashboard.loading_orders'));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrders();
-  }, [t]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="mx-auto px-4 sm:px-6 lg:px-16 py-8 lg:py-12">
         <div className="flex flex-col lg:flex-row gap-8">
           <Sidebar />
           <div className="flex-1">
-            <h2 className="text-xl sm:text-2xl font-bold mb-6">{t('dashboard.my_orders')}</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold">{t('dashboard.my_orders')}</h2>
+              <button
+                onClick={() => refetch()}
+                disabled={isLoading}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+              >
+                {isLoading ? 'Refreshing...' : 'Refresh'}
+              </button>
+            </div>
             <div className="space-y-4">
               {[...Array(4)].map((_, i) => (
                 <OrderCardSkeleton key={i} />
@@ -184,7 +130,7 @@ export default function ComprasPage() {
           <Sidebar />
           <div className="flex-1 bg-white shadow-sm rounded-lg p-4 sm:p-6">
             <div className="text-center text-red-600">
-              <p>{error}</p>
+              <p>{error?.message || t('dashboard.loading_orders')}</p>
             </div>
           </div>
         </div>

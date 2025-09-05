@@ -160,6 +160,37 @@ export class UserService {
           profile_is_complete: publicProfile?.profile_is_complete ?? false,
         };
       });
+
+      const result = users.map((user) => {
+        const publicProfile = user.users as Partial<PublicUser>;
+        return {
+          id: user.id,
+          email: user.email,
+          created_at: user.created_at,
+          updated_at: user.updated_at,
+          email_confirmed_at: user.email_confirmed_at,
+          last_sign_in_at: user.last_sign_in_at,
+          roles: user.user_roles.map((ur) => ur.roles.name),
+          meta_data: user.raw_user_meta_data,
+          first_name: publicProfile?.first_name ?? '',
+          last_name: publicProfile?.last_name ?? '',
+          trade_name: publicProfile?.trade_name ?? '',
+          internal_id: publicProfile?.internal_id ?? '',
+          city: publicProfile?.city ?? '',
+          province: publicProfile?.province ?? '',
+          country: publicProfile?.country ?? '',
+          tax_name: publicProfile?.tax_name ?? '',
+          phone: publicProfile?.phone ?? '',
+          profile_is_complete: publicProfile?.profile_is_complete ?? false,
+        };
+      });
+
+      // Serialize BigInt values for JSON response
+      return JSON.parse(
+        JSON.stringify(result, (key, value) =>
+          typeof value === 'bigint' ? Number(value) : value,
+        ),
+      );
     } catch (error) {
       throw new Error(`Failed to fetch users: ${error.message}`);
     }
@@ -458,6 +489,25 @@ export class UserService {
       validFrom: d.valid_from?.toISOString() || '',
       validTo: d.valid_to?.toISOString() || '',
     }));
+
+    const result = discounts.map((d) => ({
+      id: d.id.toString(),
+      product: d.products?.name || '',
+      priceRetail: d.products?.list_price?.toString() || '',
+      priceWholesale: d.products?.wholesale_price?.toString() || '',
+      priceClient: d.price?.toString() || '',
+      productId: d.product_id?.toString() || '',
+      isActive: d.is_active,
+      validFrom: d.valid_from?.toISOString() || '',
+      validTo: d.valid_to?.toISOString() || '',
+    }));
+
+    // Serialize BigInt values for JSON response
+    return JSON.parse(
+      JSON.stringify(result, (key, value) =>
+        typeof value === 'bigint' ? Number(value) : value,
+      ),
+    );
   }
 
   // Create a special price for a user

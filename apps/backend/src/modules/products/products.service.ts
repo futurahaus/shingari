@@ -957,6 +957,17 @@ export class ProductsService {
     return discounts.map((d) =>
       this.mapToProductDiscountResponseDto(d as DiscountWithProductDetails),
     );
+
+    // Serialize BigInt values for JSON response
+    const result = discounts.map((d) =>
+      this.mapToProductDiscountResponseDto(d as DiscountWithProductDetails),
+    );
+
+    return JSON.parse(
+      JSON.stringify(result, (key, value) =>
+        typeof value === 'bigint' ? Number(value) : value,
+      ),
+    );
   }
 
   private mapToProductDiscountResponseDto(
@@ -1147,6 +1158,32 @@ export class ProductsService {
           })) || [],
       }),
     }));
+
+    // Serialize BigInt values for JSON response
+    const result = categories.map((c) => ({
+      id: c.id.toString(),
+      name: includeAllTranslations
+        ? c.name
+        : c.category_translations?.[0]?.name || c.name,
+      parentId: c.parent_id?.toString() || '',
+      image: c.image_url || '',
+      order: c.order ?? 0,
+      ...(includeAllTranslations && {
+        translations:
+          c.category_translations?.map((t) => ({
+            id: t.id,
+            category_id: t.category_id,
+            locale: t.locale,
+            name: t.name,
+          })) || [],
+      }),
+    }));
+
+    return JSON.parse(
+      JSON.stringify(result, (key, value) =>
+        typeof value === 'bigint' ? Number(value) : value,
+      ),
+    );
   }
 
   async findAllParentCategories(
@@ -1177,6 +1214,20 @@ export class ProductsService {
       parentId: c.parent_id?.toString() || '',
       image: c.image_url || '',
     }));
+
+    // Serialize BigInt values for JSON response
+    const result = categories.map((c) => ({
+      id: c.id.toString(),
+      name: c.category_translations?.[0]?.name || c.name,
+      parentId: c.parent_id?.toString() || '',
+      image: c.image_url || '',
+    }));
+
+    return JSON.parse(
+      JSON.stringify(result, (key, value) =>
+        typeof value === 'bigint' ? Number(value) : value,
+      ),
+    );
   }
 
   async createCategory(dto: CreateCategoryDto): Promise<CategoryResponseDto> {

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '@/contexts/CartContext';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
@@ -11,13 +11,30 @@ import { useAuth } from '@/contexts/AuthContext';
 export default function PagosPage() {
   const { cart, clearCart } = useCart();
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { user } = useAuth();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
-  
+    const [userPoints, setUserPoints] = useState<number>(0);
+
+  // Fetch user's current points
+  useEffect(() => {
+    const fetchUserPoints = async () => {
+      if (user) {
+        try {
+          const userData = await api.get<{ points?: number }>('/auth/me');
+          setUserPoints(userData.points || 0);
+        } catch (error) {
+          console.error('Error fetching user points:', error);
+        }
+      }
+    };
+
+    fetchUserPoints();
+  }, [user]);
+
   // Helper function to check if user is business
   const isBusinessUser = user?.roles?.includes('business') || false;
-  
+
   // Helper function to format IVA display
   const formatIvaDisplay = (iva: number | undefined): string => {
     if (iva === undefined) return '0';
@@ -36,14 +53,14 @@ export default function PagosPage() {
 
     const grouped = cartItems.reduce((groups, item) => {
       const ivaKey = item.iva !== undefined ? formatIvaDisplay(item.iva) : 'sin-iva';
-      
+
       if (!groups[ivaKey]) {
         groups[ivaKey] = {
           ivaValue: item.iva,
           items: []
         };
       }
-      
+
       groups[ivaKey].items.push(item);
       return groups;
     }, {} as Record<string, { ivaValue: number | undefined; items: typeof cart }>);
@@ -65,7 +82,7 @@ export default function PagosPage() {
   // Helper function to calculate IVA amounts for a group
   const calculateGroupIvaBreakdown = (items: typeof cart, ivaValue?: number) => {
     const subtotal = items.reduce((total, item) => total + (item.price * item.quantity), 0);
-    
+
     if (!ivaValue || !isBusinessUser) {
       return {
         subtotal,
@@ -121,9 +138,9 @@ export default function PagosPage() {
   const total = cart.reduce((sum, p) => sum + p.price * p.quantity, 0);
   const shipping = 0; // Gastos de envío
   const discount = 0; // Descuento por puntos
-  
+
   // Use IVA calculations for business users, regular calculations for others
-  const finalTotal = isBusinessUser 
+  const finalTotal = isBusinessUser
     ? grandTotals.grandTotal + shipping - discount
     : total + shipping - discount;
 
@@ -169,6 +186,9 @@ export default function PagosPage() {
 
     setIsLoading(true);
     try {
+      // Calculate points earned from the order (1 point per euro, rounded down)
+      const pointsEarned = Math.floor(finalTotal);
+
       // Crear la orden en el backend
       const orderData = {
         total_amount: finalTotal,
@@ -210,6 +230,8 @@ export default function PagosPage() {
             },
           },
         ],
+        // Add points information
+        points_earned: pointsEarned,
       };
 
       console.log('Sending order data:', JSON.stringify(orderData, null, 2));
@@ -242,7 +264,15 @@ export default function PagosPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 md:px-16 py-8">
         <div className="">
-          <h1 className="text-xl font-bold text-black mb-8">{t('payment.title')}</h1>
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-xl font-bold text-black">{t('payment.title')}</h1>
+            {user && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <span>{t('payment.current_points')}</span>
+                <span className="font-semibold text-green-600">{userPoints}</span>
+              </div>
+            )}
+          </div>
 
           {/* Payment Methods */}
           <div className="space-y-4">
@@ -422,16 +452,16 @@ export default function PagosPage() {
                         <div key={group.ivaKey} className="space-y-2">
                           <div className="flex justify-between">
                             <span className="text-sm font-bold text-black">
-                              {group.ivaValue !== undefined 
-                                ? `Productos IVA ${formatIvaDisplay(group.ivaValue)}% (sin IVA)`
-                                : 'Productos sin IVA'
+                              {group.ivaValue !== undefined
+                                ? t('payment.products_with_iva', { iva: formatIvaDisplay(group.ivaValue) })
+                                : t('payment.products_without_iva')
                               }
                             </span>
                             <span className="text-sm font-bold text-black">
-                              €{breakdown.subtotal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              €{breakdown.subtotal.toLocaleString(locale === 'zh' ? 'zh-CN' : 'es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </span>
                           </div>
-                          
+
                           {/* Individual products in group */}
                           {group.items.map((item) => (
                             <div key={item.id} className="flex justify-between ml-4">
@@ -440,19 +470,19 @@ export default function PagosPage() {
                                 <span className="text-xs font-medium text-gray-600">x{item.quantity}</span>
                               </div>
                               <span className="text-xs font-medium text-gray-600">
-                                €{(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                €{(item.price * item.quantity).toLocaleString(locale === 'zh' ? 'zh-CN' : 'es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </span>
                             </div>
                           ))}
-                          
+
                           {/* IVA amount for this group */}
                           {group.ivaValue && breakdown.ivaAmount > 0 && (
                             <div className="flex justify-between">
                               <span className="text-sm font-medium text-black">
-                                IVA {formatIvaDisplay(group.ivaValue)}%
+                                {t('payment.iva')} {formatIvaDisplay(group.ivaValue)}%
                               </span>
                               <span className="text-sm font-medium text-black">
-                                €{breakdown.ivaAmount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                €{breakdown.ivaAmount.toLocaleString(locale === 'zh' ? 'zh-CN' : 'es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                               </span>
                             </div>
                           )}
@@ -463,21 +493,21 @@ export default function PagosPage() {
                     {/* Total breakdown */}
                     <div className="border-t border-gray-200 pt-4 space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-sm font-bold text-black">Subtotal (sin IVA)</span>
+                        <span className="text-sm font-bold text-black">{t('payment.subtotal_without_iva')}</span>
                         <span className="text-sm font-bold text-black">
-                          €{grandTotals.grandSubtotal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          €{grandTotals.grandSubtotal.toLocaleString(locale === 'zh' ? 'zh-CN' : 'es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm font-bold text-black">IVA Total</span>
+                        <span className="text-sm font-bold text-black">{t('payment.total_iva')}</span>
                         <span className="text-sm font-bold text-black">
-                          €{grandTotals.grandIvaAmount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          €{grandTotals.grandIvaAmount.toLocaleString(locale === 'zh' ? 'zh-CN' : 'es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm font-bold text-black">{t('payment.shipping_costs')}</span>
                         <span className="text-sm font-bold text-black">
-                          €{shipping.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          €{shipping.toLocaleString(locale === 'zh' ? 'zh-CN' : 'es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </div>
                     </div>
@@ -489,7 +519,7 @@ export default function PagosPage() {
                     <div className="flex justify-between">
                       <span className="text-sm font-bold text-black">{t('payment.product_prices')}</span>
                       <span className="text-sm font-bold text-black">
-                        €{total.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        €{total.toLocaleString(locale === 'zh' ? 'zh-CN' : 'es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </div>
 
@@ -501,7 +531,7 @@ export default function PagosPage() {
                           <span className="text-xs font-medium text-black">x{item.quantity}</span>
                         </div>
                         <span className="text-sm font-medium text-black">
-                          €{(item.price * item.quantity).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          €{(item.price * item.quantity).toLocaleString(locale === 'zh' ? 'zh-CN' : 'es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </div>
                     ))}
@@ -510,7 +540,7 @@ export default function PagosPage() {
                     <div className="flex justify-between">
                       <span className="text-sm font-bold text-black">{t('payment.shipping_costs')}</span>
                       <span className="text-sm font-bold text-black">
-                        €{shipping.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        €{shipping.toLocaleString(locale === 'zh' ? 'zh-CN' : 'es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </div>
 
@@ -518,7 +548,7 @@ export default function PagosPage() {
                     <div className="flex justify-between">
                       <span className="text-sm font-bold text-black">{t('payment.points_discount')}</span>
                       <span className="text-sm font-bold text-black">
-                        €{discount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        €{discount.toLocaleString(locale === 'zh' ? 'zh-CN' : 'es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </div>
                   </>
@@ -528,7 +558,15 @@ export default function PagosPage() {
                 <div className="flex justify-between border-t border-gray-200 pt-4">
                   <span className="text-lg font-bold text-black">{t('payment.total_products')}</span>
                   <span className="text-lg font-bold text-black">
-                    €{finalTotal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    €{finalTotal.toLocaleString(locale === 'zh' ? 'zh-CN' : 'es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                </div>
+
+                {/* Points Earned */}
+                <div className="flex justify-between border-t border-gray-200 pt-4">
+                  <span className="text-sm font-medium text-green-600">{t('payment.points_you_will_earn')}</span>
+                  <span className="text-sm font-medium text-green-600">
+                    +{Math.floor(finalTotal)} {t('payment.points')}
                   </span>
                 </div>
               </div>

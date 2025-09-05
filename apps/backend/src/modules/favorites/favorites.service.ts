@@ -1,7 +1,7 @@
 import {
   Injectable,
   NotFoundException,
-  ConflictException
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -85,7 +85,7 @@ export class FavoritesService {
     });
 
     // Transform the response to match the DTO structure
-    const transformedFavorites = favorites.map(favorite => ({
+    const transformedFavorites = favorites.map((favorite) => ({
       user_id: favorite.user_id,
       product_id: favorite.product_id,
       created_at: favorite.created_at,

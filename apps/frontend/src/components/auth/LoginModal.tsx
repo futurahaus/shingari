@@ -126,7 +126,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
         <div className="relative bg-white rounded-lg w-full max-w-md">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
             aria-label={t('auth.close_modal')}
           >
             <FaTimes className="w-5 h-5" />
@@ -150,7 +150,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
                   </Text>
                 </div>
               )}
-              
+
               <Input
                 label={t('auth.email_label')}
                 value={formData.email}
@@ -160,7 +160,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
                 disabled={isLoadingLogin || isLoadingRegister}
                 testID="login-email-input"
               />
-              
+
               <Input
                 label={t('auth.password_label')}
                 value={formData.password}
@@ -172,7 +172,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
                 disabled={isLoadingLogin || isLoadingRegister}
                 testID="login-password-input"
               />
-              
+
               <div className="text-right">
                 <button
                   type="button"
@@ -186,7 +186,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
                   </Text>
                 </button>
               </div>
-              
+
               <Button
                 onPress={handleSubmitClick}
                 type="primary"

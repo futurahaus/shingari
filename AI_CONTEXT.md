@@ -145,6 +145,18 @@ Aplicación construida con Next.js.
     -   `complete-profile/page.tsx`: Página para completar perfil empresarial con formulario de datos.
     -   `dashboard/page.tsx`: Panel de control del usuario autenticado.
     -   `dashboard/perfil/page.tsx`: Página de perfil del usuario autenticado.
+    -   `dashboard/puntos/page.tsx`: Página de puntos del usuario con historial de transacciones y total acumulado.
+    -   `dashboard/canjes/page.tsx`: Página de canjes del usuario con historial de recompensas canjeadas.
+        -   **Gestión de Canjes**: Interfaz completa para visualizar todos los canjes de recompensas realizados por el usuario.
+        -   **Lista de Canjes**: Muestra todos los canjes con información detallada (ID, fecha, puntos utilizados, estado, preview de items).
+        -   **Estados de Canje**: Indicadores visuales para diferentes estados (pendiente, completado, cancelado, procesando).
+        -   **Integración con API**: Utiliza el endpoint `/rewards/my-redemptions` para obtener los datos.
+        -   **Navegación**: Accesible desde el sidebar del dashboard con ícono de trofeo.
+    -   `dashboard/canjes/[id]/page.tsx`: Página de detalle individual de canje con información completa.
+        -   **Detalle Completo**: Muestra información completa del canje incluyendo todas las recompensas canjeadas.
+        -   **Resumen de Puntos**: Desglose detallado de puntos utilizados por cada item.
+        -   **Estado y Fecha**: Información clara sobre el estado del canje y fecha de procesamiento.
+        -   **Items Canjeados**: Lista detallada de todas las recompensas incluidas en el canje.
     -   `admin/usuarios/page.tsx`: Página de administración de usuarios con funcionalidad CRUD completa.
         -   **Gestión de Usuarios**: Interfaz completa para administrar usuarios del sistema.
         -   **Tabla de Usuarios**: Muestra todos los usuarios con información detallada (email, roles, estado de verificación, último acceso).
@@ -153,6 +165,14 @@ Aplicación construida con Next.js.
         -   **Integración con API**: Utiliza los endpoints del backend para todas las operaciones.
         -   **Estados de Carga**: Indicadores de carga y manejo de errores con opción de reintento.
         -   **Confirmaciones**: Modales de confirmación para acciones destructivas como eliminar usuarios.
+    -   `admin/canjeables/page.tsx`: Página de administración de recompensas (canjeables) con funcionalidad CRUD completa.
+        -   **Gestión de Recompensas**: Interfaz completa para administrar recompensas que los usuarios pueden canjear con puntos.
+        -   **Tabla de Recompensas**: Muestra todas las recompensas con información detallada (nombre, descripción, imagen, costo en puntos, stock).
+        -   **CRUD Completo**: Modales para crear, editar y eliminar recompensas con validación de formularios.
+        -   **Gestión de Stock**: Control de inventario para cada recompensa.
+        -   **Integración con API**: Utiliza los endpoints del backend para todas las operaciones.
+        -   **Estados de Carga**: Indicadores de carga y manejo de errores con opción de reintento.
+        -   **Confirmaciones**: Modales de confirmación para acciones destructivas como eliminar recompensas.
     -   `products/page.tsx`: Página pública de productos con filtros y paginación.
     -   `products/[id]/page.tsx`: Página de detalle de producto específico.
     -   `ui/page.tsx`: Página de demostración de componentes UI con ejemplos de uso.
@@ -171,7 +191,7 @@ Aplicación construida con Next.js.
     -   `layout/SearchHeader.tsx`: Header con barra de búsqueda y botón de login.
     -   `layout/Navbar.tsx`: Barra de navegación.
     -   `layout/Footer.tsx`: Pie de página.
-    -   `layout/Sidebar.tsx`: Barra lateral para páginas del dashboard.
+    -   `layout/Sidebar.tsx`: Barra lateral para páginas del dashboard con navegación a puntos del usuario y canjes de recompensas.
     -   `ProductCard.tsx`: Componente para mostrar información de productos.
 -   **`lib/`**: Librerías auxiliares y utilidades.
     -   `api.ts`: Cliente para interactuar con el backend (maneja tokens, refresh, etc.).
@@ -232,6 +252,18 @@ Aplicación construida con Next.js.
         -   **Búsqueda Multilenguaje**: Búsqueda en contenido original y traducido simultáneamente.
         -   **Gestión de Traducciones**: CRUD completo para traducciones (solo administradores).
         -   **Cache Inteligente**: Cache separado por locale para optimizar rendimiento.
+-   **Sistema de Puntos**: Implementación de sistema de puntos para usuarios con historial de transacciones.
+    -   **Página de Puntos**: Interfaz completa para visualizar puntos acumulados y transacciones del usuario.
+    -   **Navegación**: Integración en el sidebar del dashboard con acceso directo a la sección de puntos.
+    -   **Historial de Transacciones**: Tabla detallada con tipos de transacciones (ganados, usados, expirados).
+    -   **Datos Mockup**: Implementación inicial con datos de ejemplo para demostración.
+-   **Sistema de Recompensas**: Implementación de sistema de recompensas (canjeables) para usuarios.
+    -   **Gestión de Recompensas**: Interfaz completa para administradores para crear, editar y eliminar recompensas.
+    -   **Tabla de Recompensas**: Muestra todas las recompensas con información detallada (nombre, descripción, imagen, costo en puntos, stock).
+    -   **CRUD Completo**: Modales para crear, editar y eliminar recompensas con validación de formularios.
+    -   **Gestión de Stock**: Control de inventario para cada recompensa.
+    -   **Integración con Puntos**: Las recompensas están vinculadas al sistema de puntos a través de la tabla `points_ledger`.
+    -   **Traducciones**: Soporte completo en español para toda la funcionalidad de puntos.
 -   **Testing**: Ambos proyectos tienen configuraciones de Jest. El backend tiene tests unitarios para servicios y tests e2e. El frontend tiene tests para componentes.
 - **Endpoints**: Se pueden encontrar los endpoints disponibles para dev en http://localhost:3001/api-docs
 

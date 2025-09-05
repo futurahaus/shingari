@@ -20,17 +20,20 @@ export class OrdersService {
       JSON.stringify(createOrderDto, null, 2),
     );
 
-    const { order_lines, order_addresses, order_payments, ...orderData } = createOrderDto;
+    const { order_lines, order_addresses, order_payments, points_earned, ...orderData } = createOrderDto;
 
     try {
       const { user_id, ...orderDataWithoutUserId } = orderData;
       if (!user_id) {
         throw new Error('user_id is required to create an order');
       }
+
+      // Create the order first
       const order = await this.prisma.orders.create({
         data: {
           user_id,
           ...orderDataWithoutUserId,
+          earned_points: points_earned || 0,
           order_lines: {
             create: order_lines.map((line) => ({
               product_id: line.product_id,
@@ -67,6 +70,39 @@ export class OrdersService {
           order_payments: true,
         },
       });
+
+      // If points were earned, create a points_ledger record and update user points
+      if (points_earned && points_earned > 0) {
+        try {
+          // Create points_ledger record
+          await this.prisma.points_ledger.create({
+            data: {
+              user_id,
+              order_id: order.id,
+              points: points_earned,
+              type: 'EARN',
+            },
+          });
+
+          // Update or create the user's total points in public_users table
+          await this.prisma.public_users.upsert({
+            where: { uuid: user_id },
+            update: {
+              points: {
+                increment: points_earned,
+              },
+            },
+            create: {
+              uuid: user_id,
+              points: points_earned,
+            },
+          });
+        } catch (pointsError) {
+          // Log the error but don't fail the order creation
+          this.logger.error('Error updating points:', pointsError);
+          // The order was created successfully, so we continue
+        }
+      }
 
       this.logger.log('Order created successfully:', (order as { id: string }).id);
       return this.mapToOrderResponse(order);
@@ -364,7 +400,7 @@ export class OrdersService {
   }
 
   private mapToOrderResponse(order: any): OrderResponseDto {
-    return {
+    const response = {
       id: order.id,
       user_id: order.user_id,
       user_email: order.users?.email || null,
@@ -409,5 +445,12 @@ export class OrdersService {
         metadata: payment.metadata,
       })),
     };
+
+    // Serialize BigInt values for JSON response
+    return JSON.parse(
+      JSON.stringify(response, (key, value) =>
+        typeof value === 'bigint' ? Number(value) : value,
+      ),
+    ) as OrderResponseDto;
   }
 }
