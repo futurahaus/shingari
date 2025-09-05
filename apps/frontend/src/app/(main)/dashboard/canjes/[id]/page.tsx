@@ -152,7 +152,7 @@ export default function RedemptionDetailPage() {
           <Sidebar />
           <div className="flex-1">
             <div className="text-center text-red-600">
-              <p>{error?.message || 'No se pudo cargar el canje'}</p>
+              <p>{error?.message || t('dashboard.error_loading_redemption')}</p>
             </div>
           </div>
         </div>
@@ -194,16 +194,16 @@ export default function RedemptionDetailPage() {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-sm font-medium text-gray-900">{t('dashboard.total_rewards')}</span>
-                <span className="text-sm text-gray-900">{redemption.lines.length} {redemption.lines.length === 1 ? 'item' : 'items'}</span>
+                <span className="text-sm text-gray-900">{redemption.lines.length} {redemption.lines.length === 1 ? t('dashboard.item') : t('dashboard.items')}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm font-medium text-gray-900">Estado</span>
+                <span className="text-sm font-medium text-gray-900">{t('dashboard.status')}</span>
                 <span className="text-sm text-gray-900">{statusConfig.label}</span>
               </div>
               <div className="border-t pt-2 mt-2">
                 <div className="flex justify-between">
                   <span className="text-sm font-bold text-gray-900">{t('dashboard.points_used')}</span>
-                  <span className="text-sm font-bold text-gray-900">{redemption.total_points.toLocaleString()} puntos</span>
+                  <span className="text-sm font-bold text-gray-900">{redemption.total_points.toLocaleString()} {t('dashboard.points')}</span>
                 </div>
               </div>
             </div>
@@ -217,7 +217,7 @@ export default function RedemptionDetailPage() {
               <div className="hidden sm:flex justify-between items-center text-xs font-medium text-gray-500 border-b border-gray-100 pb-2">
                 <span className="flex-1">{t('dashboard.reward')}</span>
                 <div className="flex gap-4">
-                  <span className="w-20 text-center">Cantidad</span>
+                  <span className="w-20 text-center">{t('dashboard.quantity')}</span>
                   <span className="w-24 text-center">{t('dashboard.points_per_unit')}</span>
                   <span className="w-20 text-center">{t('dashboard.total_points')}</span>
                 </div>
@@ -231,7 +231,7 @@ export default function RedemptionDetailPage() {
                   <div className="sm:hidden">
                     <div className="mb-3">
                       <p className="text-sm font-medium text-gray-900 mb-1">{line.reward_name}</p>
-                      <p className="text-xs text-gray-500">Cantidad: {line.quantity}</p>
+                      <p className="text-xs text-gray-500">{t('dashboard.quantity')}: {line.quantity}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div className="text-center">

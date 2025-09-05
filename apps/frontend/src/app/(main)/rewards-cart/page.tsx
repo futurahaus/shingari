@@ -132,7 +132,7 @@ const RewardsCartPage = () => {
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <Text as="p" size="md" color="secondary">
-            Cargando...
+            {t('products.loading')}
           </Text>
         </div>
       </div>
@@ -185,7 +185,7 @@ const RewardsCartPage = () => {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-xl shadow-sm p-6">
               <Text as="h2" size="xl" weight="semibold" color="primary" className="mb-6">
-                {t('products.selected_rewards')} ({getTotalItems()} {getTotalItems() === 1 ? 'artículo' : 'artículos'})
+                {t('products.selected_rewards')} ({getTotalItems()} {getTotalItems() === 1 ? t('products.item') : t('products.items')})
               </Text>
 
               <div className="space-y-4">
@@ -248,7 +248,7 @@ const RewardsCartPage = () => {
                       <div className="flex items-center space-x-1">
                         <span className="text-sm">🏆</span>
                         <Text as="span" size="sm" weight="medium" className="text-red-600">
-                          {reward.points_cost.toLocaleString()} pts c/u
+                          {reward.points_cost.toLocaleString()} {t('products.points_each')}
                         </Text>
                       </div>
                     </div>
@@ -276,7 +276,7 @@ const RewardsCartPage = () => {
 
                       <div className="text-right">
                         <Text as="div" size="sm" color="secondary">
-                          Subtotal:
+                          {t('products.subtotal')}
                         </Text>
                         <div className="flex items-center space-x-1">
                           <span className="text-sm">🏆</span>
@@ -348,7 +348,7 @@ const RewardsCartPage = () => {
               <div className={`p-4 rounded-lg border mb-6 ${canAfford ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200'}`}>
                 <div className="flex justify-between items-center">
                   <Text as="span" size="sm" color="secondary">
-                    Puntos restantes:
+                    {t('products.remaining_points')}
                   </Text>
                   <div className="flex items-center space-x-1">
                     <span className="text-sm">{canAfford ? '✅' : '⚠️'}</span>
@@ -359,7 +359,7 @@ const RewardsCartPage = () => {
                 </div>
                 {!canAfford && (
                   <Text as="p" size="xs" className="text-amber-700 mt-2">
-                    No tienes suficientes puntos para completar este canje
+                    {t('products.insufficient_points_message')}
                   </Text>
                 )}
               </div>
@@ -389,17 +389,17 @@ const RewardsCartPage = () => {
                 {isProcessing ? (
                   <div className="flex items-center justify-center space-x-2">
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Procesando...</span>
+                    <span>{t('products.processing')}</span>
                   </div>
                 ) : !canAfford ? (
-                  '💸 Puntos Insuficientes'
+                  `💸 ${t('products.insufficient_points_short')}`
                 ) : (
-                  `🎁 Canjear ${totalPointsCost.toLocaleString()} puntos`
+                  `🎁 ${t('products.redeem_x_points', { points: totalPointsCost.toLocaleString() })}`
                 )}
               </button>
 
               <Text as="p" size="xs" color="secondary" className="text-center mt-4">
-                Al completar el canje, los puntos serán deducidos de tu cuenta inmediatamente.
+                {t('products.points_deduction_warning')}
               </Text>
             </div>
           </div>
