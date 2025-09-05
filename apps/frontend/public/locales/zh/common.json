@@ -527,6 +527,7 @@
         "confirm_delete_special_price": "您确定要删除此特殊价格吗？",
         "error_deleting_special_price": "删除特殊价格时出错",
         "product": "产品",
+        "sku": "SKU",
         "retail_price": "零售价",
         "wholesale_price": "批发价",
         "client_price": "客户价格",

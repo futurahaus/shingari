@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Sidebar from '@/components/layout/Sidebar';
 import { useTranslation, useI18n } from '@/contexts/I18nContext';
 import { useOrderDetail } from '@/hooks/useOrdersQuery';
+import { formatCurrency as formatCurrencyUtil } from '@/lib/currency';
 
 const getStatusConfig = (status: string, t: (key: string) => string) => {
   switch (status.toLowerCase()) {
@@ -63,7 +64,7 @@ const formatOrderId = (id: string) => {
 };
 
 const formatCurrency = (amount: string) => {
-  return `€${Number(amount).toFixed(2).replace('.', ',')}`;
+  return formatCurrencyUtil(Number(amount));
 };
 
 const OrderDetailSkeleton = () => (

@@ -195,6 +195,7 @@ Aplicación construida con Next.js.
     -   `ProductCard.tsx`: Componente para mostrar información de productos.
 -   **`lib/`**: Librerías auxiliares y utilidades.
     -   `api.ts`: Cliente para interactuar con el backend (maneja tokens, refresh, etc.).
+    -   `currency.ts`: Utilidades para formateo de moneda usando Euro (€) y formato español.
 -   **`contexts/`**: React Contexts para gestión de estado global (ej. `AuthContext`).
 -   **`middleware.ts`**: Middleware de Next.js para manejar lógica en el servidor antes de renderizar (ej. protección de rutas).
 -   **`public/`**: Archivos estáticos.
@@ -275,6 +276,6 @@ Aplicación construida con Next.js.
 ---
 
 *Este archivo fue generado y actualizado el 2025-01-03 22:30:00.*
-*Última actualización: 2025-01-17 - Implementado sistema de canjes (redemptions) para usuarios con navegación, listado y páginas de detalle integradas en el dashboard.*
+*Última actualización: 2025-01-17 - Implementado sistema completo de soporte multilenguaje para productos y categorías, y estandarizado formateo de moneda con Euro (€).*
 
 *Por favor, actualiza la fecha y cualquier información relevante cuando hagas cambios significativos.*

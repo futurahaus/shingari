@@ -4,6 +4,7 @@ import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import { useTranslation } from '@/contexts/I18nContext';
+import { formatCurrency } from '@/lib/currency';
 
 interface UserProfile {
   nombre: string;
@@ -207,7 +208,7 @@ const CongratsContent = () => {
               {/* Order Details */}
               <div className="text-sm text-gray-600 space-y-2">
                 <p>{t('congrats.order')} #{order.id.slice(0, 8).toUpperCase()}</p>
-                <p>{t('congrats.total')}: €{Number(order.total_amount).toFixed(2)}</p>
+                <p>{t('congrats.total')}: {formatCurrency(Number(order.total_amount))}</p>
                 <p>{t('congrats.status')}: {order.status}</p>
               </div>
 

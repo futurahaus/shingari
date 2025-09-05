@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from '@/contexts/I18nContext';
 import Link from "next/link";
 import { api } from '@/lib/api';
+import { formatCurrency } from '@/lib/currency';
 
 interface OrderLine {
   id: string;
@@ -147,7 +148,7 @@ export const UserOrders: React.FC<UserOrdersProps> = ({ userId, onOrdersLoaded }
                     {new Date(order.created_at).toLocaleDateString('es-ES')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-gray-900">
-                    €{Number(order.total_amount).toFixed(2)}
+                    {formatCurrency(Number(order.total_amount))}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${

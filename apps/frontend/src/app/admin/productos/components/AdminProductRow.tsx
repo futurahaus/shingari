@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { FaEdit, FaTrash, FaGlobe, FaCheck } from 'react-icons/fa';
 import { useTranslation } from '@/contexts/I18nContext';
 import { AdminProductRowProps } from '../interfaces/product.interfaces';
+import { formatCurrency, formatPercentage } from '@/lib/currency';
 
 export const AdminProductRow: React.FC<AdminProductRowProps> = ({
     product,
@@ -13,10 +14,10 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
     lastProductRef
 }) => {
     const { t } = useTranslation();
-    
+
     // Check if product has translations
     const hasTranslations = product.translations && product.translations.length > 0;
-    const translationLocales = hasTranslations 
+    const translationLocales = hasTranslations
         ? product.translations!.map(t => t.locale).join(', ')
         : '';
 
@@ -25,7 +26,12 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
             className={`hover:bg-gray-50 ${isLast ? '' : 'border-b border-gray-200'}`}
             ref={isLast ? lastProductRef : null}
         >
-            {/* Nombre del producto (imagen, nombre y SKU) */}
+            {/* SKU */}
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                {product.sku}
+            </td>
+
+            {/* Nombre del producto (imagen y nombre) */}
             <td className="px-6 py-4">
                 <div className="flex items-center">
                     <div className="flex-shrink-0 h-12 w-12">
@@ -48,7 +54,6 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
                     </div>
                     <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                        <div className="text-sm text-gray-500">{t('admin.products.table.sku')}: {product.sku}</div>
                         {/* Translation status indicator */}
                         {hasTranslations && (
                             <div className="flex items-center mt-1">
@@ -69,28 +74,28 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
             {/* Precio minorista */}
             <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">
-                    ${product.listPrice?.toFixed(2) || '0.00'}
+                    {formatCurrency(product.listPrice)}
                 </div>
             </td>
 
             {/* Precio mayorista */}
             <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">
-                    ${product.wholesalePrice?.toFixed(2) || '0.00'}
+                    {formatCurrency(product.wholesalePrice)}
                 </div>
             </td>
 
             {/* Precio con IVA Minorista */}
             <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">
-                    ${product.price?.toFixed(2) || '0.00'}
+                    {formatCurrency(product.price)}
                 </div>
             </td>
 
             {/* IVA*/}
             <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">
-                    {product.iva ? `${product.iva.toFixed(2)}%` : '-'}
+                    {formatPercentage(product.iva)}
                 </div>
             </td>
 
@@ -100,12 +105,12 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
                     <button
                         onClick={() => onTranslate(product)}
                         className={`p-2 rounded-lg transition duration-200 cursor-pointer ${
-                            hasTranslations 
-                                ? 'text-green-600 hover:bg-green-50' 
+                            hasTranslations
+                                ? 'text-green-600 hover:bg-green-50'
                                 : 'text-blue-600 hover:bg-blue-50'
                         }`}
-                        title={hasTranslations 
-                            ? t('admin.products.table.translate_product_with_locales', { locales: translationLocales }) 
+                        title={hasTranslations
+                            ? t('admin.products.table.translate_product_with_locales', { locales: translationLocales })
                             : t('admin.products.table.translate_product')
                         }
                     >

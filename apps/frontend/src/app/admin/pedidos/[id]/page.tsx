@@ -8,6 +8,7 @@ import { StatusChip } from '../components/StatusChip';
 import { api } from '@/lib/api';
 import { Button } from '@/app/ui/components/Button';
 import { useNotificationContext } from '@/contexts/NotificationContext';
+import { formatCurrency as formatCurrencyUtil } from '@/lib/currency';
 
 interface OrderLine {
   id: string;
@@ -64,7 +65,7 @@ interface Order {
 }
 
 const formatCurrency = (amount: string) => {
-  return `$${Number(amount).toFixed(2)}`;
+  return formatCurrencyUtil(Number(amount));
 };
 
 const formatDate = (dateString: string) => {

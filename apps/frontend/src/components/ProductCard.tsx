@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
 import { useRouter } from 'next/navigation';
+import { formatCurrency } from '@/lib/currency';
 import { QuantityControls } from './QuantityControls';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFavorites } from '@/hooks/useFavorites';
@@ -100,7 +101,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
                 <div className="flex items-center mt-2 mb-2">
                     <div className="flex flex-col">
                         <Text as="h4" size="md" weight="semibold" color="gray-900" testID={`product-price-${product.id}`}>
-                            {`€${new Intl.NumberFormat('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(product.price)}`}
+                            {formatCurrency(product.price)}
                         </Text>
                     </div>
                     {(typeof product.discount === 'number' && product.discount > 0) && (
@@ -124,7 +125,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
                         className="line-through mb-2"
                         testID={`product-original-price-${product.id}`}
                     >
-                        €{new Intl.NumberFormat('es-CO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(product.originalPrice)}
+                        {formatCurrency(product.originalPrice)}
                     </Text>
                 )}
                 <Text

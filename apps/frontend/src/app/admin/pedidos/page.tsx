@@ -8,6 +8,7 @@ import { StatusChip } from "./components/StatusChip";
 import { useAdminOrders } from "./hooks/useAdminOrders.hook";
 import { FaSearch, FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import { Button } from "@/app/ui/components/Button";
+import { formatCurrency } from "@/lib/currency";
 
 export default function AdminOrdersPage() {
   const { t } = useTranslation();
@@ -144,7 +145,7 @@ export default function AdminOrdersPage() {
                       order.user_name || order.user_trade_name || order.user_email || order.user_id || '-'
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">€{Number(order.total_amount).toFixed(2)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{formatCurrency(Number(order.total_amount))}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <StatusChip 
                       orderId={order.id} 

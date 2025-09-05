@@ -6,6 +6,7 @@ import { AddSpecialPriceModal } from './AddSpecialPriceModal';
 interface SpecialPrice {
   id: string;
   product: string;
+  sku: string;
   priceRetail: string;
   priceWholesale: string;
   priceClient: string;
@@ -83,7 +84,8 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
         <div className="overflow-x-auto">
           <div className="min-w-full border border-gray-200 rounded-lg">
             <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
-              <div className="grid grid-cols-5 gap-4">
+              <div className="grid grid-cols-6 gap-4">
+                <div className="h-4 bg-gray-300 rounded w-16 animate-pulse"></div>
                 <div className="h-4 bg-gray-300 rounded w-20 animate-pulse"></div>
                 <div className="h-4 bg-gray-300 rounded w-24 animate-pulse"></div>
                 <div className="h-4 bg-gray-300 rounded w-28 animate-pulse"></div>
@@ -134,6 +136,7 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
         <table className="min-w-full border border-gray-200 rounded-lg">
           <thead>
             <tr className="bg-gray-50">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.detail.sku')}</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.detail.product')}</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.detail.retail_price')}</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.detail.wholesale_price')}</th>
@@ -143,10 +146,11 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
           </thead>
           <tbody>
             {specialPrices.length === 0 ? (
-              <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">{t('admin.users.detail.no_special_prices')}</td></tr>
+              <tr><td colSpan={6} className="px-6 py-8 text-center text-gray-500">{t('admin.users.detail.no_special_prices')}</td></tr>
             ) : (
               specialPrices.map((row, idx) => (
                 <tr key={idx} className="border-t border-gray-100">
+                  <td className="px-6 py-4 text-gray-900 whitespace-nowrap font-medium">{row.sku || '-'}</td>
                   <td className="px-6 py-4 text-gray-900 whitespace-nowrap">{row.product || <span className="inline-block w-6 h-6 bg-black rounded-full mr-2 align-middle"></span>}</td>
                   <td className="px-6 py-4 text-gray-900 whitespace-nowrap">{row.priceRetail}</td>
                   <td className="px-6 py-4 text-gray-900 whitespace-nowrap">{row.priceWholesale}</td>
