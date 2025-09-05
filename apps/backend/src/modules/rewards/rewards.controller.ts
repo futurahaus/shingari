@@ -43,11 +43,18 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { MailService } from '../mail/mail.service';
+import { Logger } from '@nestjs/common';
 
 @ApiTags('Rewards')
 @Controller('rewards')
 export class RewardsController {
-  constructor(private readonly rewardsService: RewardsService) {}
+  private readonly logger = new Logger(RewardsController.name);
+
+  constructor(
+    private readonly rewardsService: RewardsService,
+    private readonly mailService: MailService,
+  ) {}
 
   // --- Public Endpoints ---
   @Get('public')
@@ -645,6 +652,9 @@ export class RewardsController {
     @Body() redeemData: RedeemRewardsDto,
     @NestRequest() req: any,
   ): Promise<RedemptionResponseDto> {
+    this.logger.log('Received redemption request');
+    this.logger.log('Request body:', JSON.stringify(redeemData, null, 2));
+
     console.log('🔍 Controller Debug - Request:', {
       hasUser: !!req.user,
       user: req.user,
@@ -655,6 +665,23 @@ export class RewardsController {
     const userId = req.user?.sub || req.user?.id;
     console.log('🔍 Controller Debug - Extracted userId:', userId);
 
-    return this.rewardsService.redeemRewards(userId, redeemData);
+    try {
+      const result = await this.rewardsService.redeemRewards(userId, redeemData);
+      this.logger.log('Redemption created successfully:', result.id);
+      
+      // Enviar notificación al admin (email + WhatsApp)
+      try {
+        await this.mailService.sendRedemptionNotification(result, userId);
+        this.logger.log('Admin notification sent successfully');
+      } catch (notificationError) {
+        this.logger.error('Error sending admin notification:', notificationError);
+        // No lanzamos el error para no afectar la creación del canje
+      }
+      
+      return result;
+    } catch (error) {
+      this.logger.error('Error creating redemption:', error);
+      throw error;
+    }
   }
 }
