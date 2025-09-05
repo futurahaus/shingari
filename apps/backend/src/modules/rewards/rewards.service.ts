@@ -677,7 +677,6 @@ export class RewardsService {
       const {
         page = 1,
         limit = 10,
-        search,
         sortField = 'created_at',
         sortDirection = 'desc',
         status,
@@ -689,15 +688,6 @@ export class RewardsService {
 
       // Build where clause
       const where: any = {};
-
-      // Search by user ID
-      if (search) {
-        where.user_id = {
-          contains: search,
-          mode: 'insensitive',
-        };
-      }
-
       // Filter by status
       if (status) {
         where.status = status;

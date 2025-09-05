@@ -925,6 +925,7 @@
     "status": {
       "pending": "Pendiente",
       "processing": "Procesando",
+      "accepted": "Aceptado",
       "completed": "Completado",
       "cancelled": "Cancelado"
     },

@@ -924,6 +924,7 @@
     "status": {
       "pending": "待处理",
       "processing": "处理中",
+      "accepted": "已接受",
       "completed": "已完成",
       "cancelled": "已取消"
     },

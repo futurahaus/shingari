@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from '@/contexts/I18nContext';
-import { Search, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import {  Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { RedemptionStatusChip } from './components/RedemptionStatusChip';
@@ -51,7 +51,6 @@ export default function RedemptionsPage() {
   });
 
   // Filters
-  const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -70,7 +69,6 @@ export default function RedemptionsPage() {
         sortDirection,
       });
 
-      if (search) params.append('search', search);
       if (status) params.append('status', status);
       if (dateFrom) params.append('dateFrom', dateFrom);
       if (dateTo) params.append('dateTo', dateTo);
@@ -84,7 +82,7 @@ export default function RedemptionsPage() {
     } finally {
       setLoading(false);
     }
-  }, [search, status, dateFrom, dateTo, sortField, sortDirection, pagination.limit, t]);
+  }, [ status, dateFrom, dateTo, sortField, sortDirection, pagination.limit, t]);
 
   useEffect(() => {
     fetchRedemptions(1);
@@ -142,23 +140,6 @@ export default function RedemptionsPage() {
       {/* Filters */}
       <div className="bg-white shadow rounded-lg p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Search */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              {t('redemptions.search_placeholder')}
-            </label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                placeholder={t('redemptions.search_placeholder')}
-              />
-            </div>
-          </div>
-
           {/* Status Filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -171,7 +152,7 @@ export default function RedemptionsPage() {
             >
               <option value="">{t('redemptions.filters.all_statuses')}</option>
               <option value="PENDING">{t('redemptions.status.pending')}</option>
-              <option value="PROCESSING">{t('redemptions.status.processing')}</option>
+              <option value="ACCEPTED">{t('redemptions.status.accepted')}</option>
               <option value="COMPLETED">{t('redemptions.status.completed')}</option>
               <option value="CANCELLED">{t('redemptions.status.cancelled')}</option>
             </select>
