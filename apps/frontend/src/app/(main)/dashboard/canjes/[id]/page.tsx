@@ -132,7 +132,7 @@ export default function RedemptionDetailPage() {
   const { t } = useTranslation();
   const { locale } = useI18n();
 
-  const { data: redemption, isLoading, error, refetch } = useRedemptionDetail(redemptionId);
+  const { data: redemption, isLoading, error } = useRedemptionDetail(redemptionId);
 
   if (isLoading) {
     return (
@@ -182,15 +182,6 @@ export default function RedemptionDetailPage() {
                 <p className="text-xs sm:text-sm text-gray-600">
                   {t('dashboard.redemption_date')}: {formatDate(redemption.created_at, locale === 'zh' ? 'zh-CN' : 'es-ES')}
                 </p>
-              </div>
-              <div className="sm:ml-4">
-                <button
-                  onClick={() => refetch()}
-                  disabled={isLoading}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors disabled:opacity-50"
-                >
-                  {isLoading ? 'Refreshing...' : 'Refresh'}
-                </button>
               </div>
             </div>
           </div>

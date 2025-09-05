@@ -16,6 +16,7 @@ import { useRewardsCart } from '@/contexts/RewardsCartContext';
 import { usePoints } from '@/hooks/usePoints';
 import RewardsCart from '@/components/cart/RewardsCart';
 import Image from 'next/image';
+import { Button } from '@/app/ui/components/Button';
 
 interface Category {
     id: string;
@@ -155,7 +156,7 @@ const RewardCard = ({ reward }: { reward: Reward }) => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <Text as="span" size="sm" color="tertiary">
-                                Sin imagen
+                                {t('products.no_image')}
                             </Text>
                         </div>
                     </div>
@@ -163,7 +164,7 @@ const RewardCard = ({ reward }: { reward: Reward }) => {
 
                 {/* Reward Badge */}
                 <div className="absolute top-3 left-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium shadow-lg">
-                    🎁 Canjeable
+                    🎁 {t('products.redeemable')}
                 </div>
             </div>
 
@@ -190,7 +191,7 @@ const RewardCard = ({ reward }: { reward: Reward }) => {
                                     {reward.points_cost.toLocaleString()}
                                 </Text>
                                 <Text as="div" size="xs" color="secondary" className="text-red-500">
-                                    puntos requeridos
+                                    {t('products.points_required')}
                                 </Text>
                             </div>
                         </div>
@@ -201,7 +202,7 @@ const RewardCard = ({ reward }: { reward: Reward }) => {
                 {reward.stock !== null && reward.stock > 0 && reward.stock <= 10 && (
                     <div className="mb-3 px-3 py-2 bg-amber-50 border border-amber-200 rounded-lg">
                         <Text as="p" size="xs" color="warning" className="text-amber-700 text-center">
-                            ⚠️ Solo quedan {reward.stock} disponibles
+                            ⚠️ {t('products.only_x_available', { count: reward.stock })}
                         </Text>
                     </div>
                 )}
@@ -211,7 +212,7 @@ const RewardCard = ({ reward }: { reward: Reward }) => {
                     {reward.stock !== null && reward.stock <= 0 ? (
                         <div className="w-full px-4 py-3 bg-gray-100 rounded-lg text-center">
                             <Text as="span" size="sm" color="error" weight="medium" className="text-gray-500">
-                                😞 Sin stock
+                                😞 {t('products.out_of_stock')}
                             </Text>
                         </div>
                     ) : (
@@ -224,28 +225,25 @@ const RewardCard = ({ reward }: { reward: Reward }) => {
                                         </Text>
                                     </div>
                                 )}
-                                <button
-                                    onClick={handleAddToCart}
+                                <Button
+                                    type="primary"
+                                    onPress={handleAddToCart}
+                                    icon={!canAfford ? "FaMoneyBillAlt" : reward.stock !== null && inCart && inCart.quantity >= reward.stock ? "FaBox" : "FaShoppingCart"}
                                     disabled={!canAfford || (reward.stock !== null && inCart && inCart.quantity >= reward.stock)}
-                                    className={`w-full px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 cursor-pointer ${
-                                        canAfford && !(reward.stock !== null && inCart && inCart.quantity >= reward.stock)
-                                            ? 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
-                                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                    }`}
-                                >
-                                    {!canAfford ? (
-                                        '💸 Puntos insuficientes'
+                                    testID="add-to-cart"
+                                    text={!canAfford ? (
+                                        t('products.insufficient_points')
                                     ) : reward.stock !== null && inCart && inCart.quantity >= reward.stock ? (
-                                        '📦 Stock máximo alcanzado'
+                                        t('products.max_stock_reached')
                                     ) : (
-                                        `🛒 ${t('products.add_to_cart')}`
+                                        `${t('products.add_to_cart')}`
                                     )}
-                                </button>
+                                />
                             </div>
                         ) : (
                             <div className="w-full px-4 py-3 bg-gray-100 rounded-lg text-center">
                                 <Text as="span" size="sm" color="secondary" className="text-gray-600">
-                                    Inicia sesión para canjear
+                                    {t('products.login_to_exchange')}
                                 </Text>
                             </div>
                         )
@@ -259,6 +257,7 @@ const RewardCard = ({ reward }: { reward: Reward }) => {
 const RewardsSection = () => {
     const { rewards, loading, error } = useRewards();
     const { openRewardsCart, getTotalItems } = useRewardsCart();
+    const { t } = useTranslation();
     const cartItemsCount = getTotalItems();
 
     if (loading) {
@@ -284,7 +283,7 @@ const RewardsSection = () => {
         return (
             <div className="text-center py-16">
                 <Text as="p" size="lg" color="error">
-                    Error al cargar los canjeables: {error}
+                    {t('products.error_loading_rewards')}: {error}
                 </Text>
             </div>
         );
@@ -297,10 +296,10 @@ const RewardsSection = () => {
                     <span className="text-6xl">🎁</span>
                 </div>
                 <Text as="h3" size="xl" weight="semibold" color="primary" className="mb-2">
-                    No hay canjeables disponibles
+                    {t('products.no_rewards_available')}
                 </Text>
                 <Text as="p" size="md" color="secondary">
-                    Vuelve más tarde para ver nuevos canjeables.
+                    {t('products.check_back_later')}
                 </Text>
             </div>
         );

@@ -37,12 +37,23 @@ export const Button: React.FC<ButtonProps> = ({
     }
   };
 
-  const baseClasses = `${getPaddingClasses()} rounded-[10px] font-medium text-base text-center min-h-[44px] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 flex items-center justify-center gap-2 cursor-pointer ${inline ? '' : 'w-full'}`;
+  const baseClasses = `${getPaddingClasses()} rounded-[10px] font-medium text-base text-center min-h-[44px] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 flex items-center justify-center gap-2 ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'} ${inline ? '' : 'w-full'}`;
   
-  const primaryClasses = `bg-[${colors.primary.main}] hover:bg-[${colors.primary.dark}] focus:ring-[${colors.primary.main}] shadow-md`;
-  const primaryAdminClasses = `bg-[${colors.admin.main}] hover:bg-[${colors.admin.light}] focus:ring-[${colors.admin.main}] shadow-md`;
-  const secondaryClasses = `bg-transparent border border-[${colors.secondary.main}] hover:bg-[${colors.neutral.gray[100]}] focus:ring-[${colors.secondary.main}]`;
-  const tertiaryClasses = `bg-transparent hover:bg-[${colors.neutral.gray[100]}] focus:ring-[${colors.primary.main}]`;
+  const primaryClasses = disabled 
+    ? `bg-[${colors.neutral.gray[400]}] shadow-none`
+    : `bg-[${colors.primary.main}] hover:bg-[${colors.primary.dark}] focus:ring-[${colors.primary.main}] shadow-md`;
+  
+  const primaryAdminClasses = disabled 
+    ? `bg-[${colors.neutral.gray[400]}] shadow-none`
+    : `bg-[${colors.admin.main}] hover:bg-[${colors.admin.light}] focus:ring-[${colors.admin.main}] shadow-md`;
+  
+  const secondaryClasses = disabled 
+    ? `bg-transparent border border-[${colors.neutral.gray[300]}] shadow-none`
+    : `bg-transparent border border-[${colors.secondary.main}] hover:bg-[${colors.neutral.gray[100]}] focus:ring-[${colors.secondary.main}]`;
+  
+  const tertiaryClasses = disabled 
+    ? `bg-transparent shadow-none`
+    : `bg-transparent hover:bg-[${colors.neutral.gray[100]}] focus:ring-[${colors.primary.main}]`;
   
   const buttonClasses = type === 'primary' 
     ? `${baseClasses} ${primaryClasses}`
@@ -58,7 +69,13 @@ export const Button: React.FC<ButtonProps> = ({
   const defaultTextProps: Omit<TextProps, 'children'> = {
     size: 'md',
     weight: 'medium',
-    color: type === 'primary' || type === 'primary-admin' ? 'primary-contrast' : type === 'tertiary' ? 'primary-main' : 'secondary-main',
+    color: disabled 
+      ? 'tertiary' 
+      : type === 'primary' || type === 'primary-admin' 
+        ? 'primary-contrast' 
+        : type === 'tertiary' 
+          ? 'primary-main' 
+          : 'secondary-main',
     as: 'span',
   };
 
@@ -79,7 +96,13 @@ export const Button: React.FC<ButtonProps> = ({
       {IconComponent && (
         <IconComponent 
           size={16} 
-          color={type === 'primary' || type === 'primary-admin' ? colors.primary.contrast : type === 'tertiary' ? colors.primary.main : colors.secondary.main}
+          color={disabled 
+            ? colors.neutral.gray[500] 
+            : type === 'primary' || type === 'primary-admin' 
+              ? colors.primary.contrast 
+              : type === 'tertiary' 
+                ? colors.primary.main 
+                : colors.secondary.main}
         />
       )}
       {text && (
