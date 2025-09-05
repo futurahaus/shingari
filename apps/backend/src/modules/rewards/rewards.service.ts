@@ -8,9 +8,15 @@ import {
 import { CreateRewardDto } from './dto/create-reward.dto';
 import { UpdateRewardDto } from './dto/update-reward.dto';
 import { QueryRewardDto } from './dto/query-reward.dto';
-import { RewardResponseDto, PaginatedRewardsResponseDto } from './dto/reward-response.dto';
+import {
+  RewardResponseDto,
+  PaginatedRewardsResponseDto,
+} from './dto/reward-response.dto';
 import { RedeemRewardsDto } from './dto/redeem-rewards.dto';
 import { RedemptionResponseDto } from './dto/redemption-response.dto';
+import { QueryRedemptionDto } from './dto/query-redemption.dto';
+import { PaginatedRedemptionsResponseDto } from './dto/paginated-redemptions-response.dto';
+import { UpdateRedemptionStatusDto } from './dto/update-redemption-status.dto';
 import { rewards as RewardPrismaType } from '../../../generated/prisma';
 import { DatabaseService } from 'src/modules/database/database.service';
 
@@ -18,7 +24,10 @@ import { DatabaseService } from 'src/modules/database/database.service';
 export class RewardsService {
   private readonly logger = new Logger(RewardsService.name);
 
-  constructor(private readonly prisma: PrismaService, private readonly databaseService: DatabaseService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly databaseService: DatabaseService,
+  ) {}
 
   async create(createRewardDto: CreateRewardDto): Promise<RewardResponseDto> {
     try {
@@ -44,7 +53,16 @@ export class RewardsService {
 
   async findAll(query: QueryRewardDto): Promise<PaginatedRewardsResponseDto> {
     try {
-      const { page = 1, limit = 10, search, sortField = 'created_at', sortDirection = 'desc', minPoints, maxPoints, inStock } = query;
+      const {
+        page = 1,
+        limit = 10,
+        search,
+        sortField = 'created_at',
+        sortDirection = 'desc',
+        minPoints,
+        maxPoints,
+        inStock,
+      } = query;
 
       // Build where clause
       const where: any = {};
@@ -103,7 +121,7 @@ export class RewardsService {
       this.logger.log(`Found ${rewards.length} rewards out of ${total} total`);
 
       return {
-        rewards: rewards.map(reward => this.mapToResponseDto(reward)),
+        rewards: rewards.map((reward) => this.mapToResponseDto(reward)),
         total,
         page,
         limit,
@@ -132,12 +150,18 @@ export class RewardsService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      this.logger.error(`Error finding reward ${id}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error finding reward ${id}: ${error.message}`,
+        error.stack,
+      );
       throw new BadRequestException('Error al obtener la recompensa');
     }
   }
 
-  async update(id: number, updateRewardDto: UpdateRewardDto): Promise<RewardResponseDto> {
+  async update(
+    id: number,
+    updateRewardDto: UpdateRewardDto,
+  ): Promise<RewardResponseDto> {
     try {
       this.logger.log(`Updating reward with ID: ${id}`);
 
@@ -151,7 +175,10 @@ export class RewardsService {
       }
 
       // Validate points_cost if it's being updated
-      if (updateRewardDto.points_cost !== undefined && updateRewardDto.points_cost <= 0) {
+      if (
+        updateRewardDto.points_cost !== undefined &&
+        updateRewardDto.points_cost <= 0
+      ) {
         throw new BadRequestException('El costo en puntos debe ser mayor a 0');
       }
 
@@ -170,10 +197,16 @@ export class RewardsService {
       this.logger.log(`Reward ${id} updated successfully`);
       return this.mapToResponseDto(updatedReward);
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
-      this.logger.error(`Error updating reward ${id}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error updating reward ${id}: ${error.message}`,
+        error.stack,
+      );
       throw new BadRequestException('Error al actualizar la recompensa');
     }
   }
@@ -198,7 +231,7 @@ export class RewardsService {
 
       if (pointsLedgerEntries.length > 0) {
         throw new BadRequestException(
-          'No se puede eliminar la recompensa porque está siendo utilizada en transacciones de puntos'
+          'No se puede eliminar la recompensa porque está siendo utilizada en transacciones de puntos',
         );
       }
 
@@ -208,17 +241,25 @@ export class RewardsService {
 
       this.logger.log(`Reward ${id} removed successfully`);
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
-      this.logger.error(`Error removing reward ${id}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error removing reward ${id}: ${error.message}`,
+        error.stack,
+      );
       throw new BadRequestException('Error al eliminar la recompensa');
     }
   }
 
   async findPublicRewards(limit?: number): Promise<RewardResponseDto[]> {
     try {
-      this.logger.log(`Finding public rewards with limit: ${limit || 'unlimited'}`);
+      this.logger.log(
+        `Finding public rewards with limit: ${limit || 'unlimited'}`,
+      );
 
       const where = {
         OR: [
@@ -234,10 +275,15 @@ export class RewardsService {
       });
 
       this.logger.log(`Found ${rewards.length} public rewards`);
-      return rewards.map(reward => this.mapToResponseDto(reward));
+      return rewards.map((reward) => this.mapToResponseDto(reward));
     } catch (error) {
-      this.logger.error(`Error finding public rewards: ${error.message}`, error.stack);
-      throw new BadRequestException('Error al obtener las recompensas públicas');
+      this.logger.error(
+        `Error finding public rewards: ${error.message}`,
+        error.stack,
+      );
+      throw new BadRequestException(
+        'Error al obtener las recompensas públicas',
+      );
     }
   }
 
@@ -259,14 +305,23 @@ export class RewardsService {
 
       return reward.stock >= quantity;
     } catch (error) {
-      this.logger.error(`Error checking stock for reward ${id}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error checking stock for reward ${id}: ${error.message}`,
+        error.stack,
+      );
       return false;
     }
   }
 
-  async updateStock(id: number, quantity: number, operation: 'add' | 'subtract'): Promise<void> {
+  async updateStock(
+    id: number,
+    quantity: number,
+    operation: 'add' | 'subtract',
+  ): Promise<void> {
     try {
-      this.logger.log(`Updating stock for reward ${id}: ${operation} ${quantity}`);
+      this.logger.log(
+        `Updating stock for reward ${id}: ${operation} ${quantity}`,
+      );
 
       const reward = await this.prisma.rewards.findUnique({
         where: { id },
@@ -299,8 +354,13 @@ export class RewardsService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      this.logger.error(`Error updating stock for reward ${id}: ${error.message}`, error.stack);
-      throw new BadRequestException('Error al actualizar el stock de la recompensa');
+      this.logger.error(
+        `Error updating stock for reward ${id}: ${error.message}`,
+        error.stack,
+      );
+      throw new BadRequestException(
+        'Error al actualizar el stock de la recompensa',
+      );
     }
   }
 
@@ -317,7 +377,9 @@ export class RewardsService {
     };
   }
 
-  async uploadImage(file: Express.Multer.File): Promise<{ url: string; path: string }> {
+  async uploadImage(
+    file: Express.Multer.File,
+  ): Promise<{ url: string; path: string }> {
     try {
       // Validar el archivo
       if (!file) {
@@ -325,15 +387,24 @@ export class RewardsService {
       }
 
       // Validar tipo de archivo
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      const allowedTypes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/webp',
+      ];
       if (!allowedTypes.includes(file.mimetype)) {
-        throw new BadRequestException('Tipo de archivo no válido. Solo se permiten imágenes JPEG, PNG y WebP.');
+        throw new BadRequestException(
+          'Tipo de archivo no válido. Solo se permiten imágenes JPEG, PNG y WebP.',
+        );
       }
 
       // Validar tamaño (máximo 5MB)
       const maxSize = 5 * 1024 * 1024; // 5MB
       if (file.size > maxSize) {
-        throw new BadRequestException('El archivo es demasiado grande. El tamaño máximo es 5MB.');
+        throw new BadRequestException(
+          'El archivo es demasiado grande. El tamaño máximo es 5MB.',
+        );
       }
 
       // Generar nombre único para el archivo
@@ -343,8 +414,9 @@ export class RewardsService {
       const filePath = `rewards/${fileName}`;
 
       // Subir archivo a Supabase Storage
-      const { error } = await this.databaseService.getAdminClient().storage
-        .from('shingari')
+      const { error } = await this.databaseService
+        .getAdminClient()
+        .storage.from('shingari')
         .upload(filePath, file.buffer, {
           contentType: file.mimetype,
           cacheControl: '3600',
@@ -356,8 +428,9 @@ export class RewardsService {
       }
 
       // Obtener la URL pública del archivo
-      const { data: urlData } = this.databaseService.getAdminClient().storage
-        .from('shingari')
+      const { data: urlData } = this.databaseService
+        .getAdminClient()
+        .storage.from('shingari')
         .getPublicUrl(filePath);
 
       this.logger.log(`Image uploaded successfully: ${filePath}`);
@@ -374,8 +447,9 @@ export class RewardsService {
 
   async deleteImage(filePath: string): Promise<void> {
     try {
-      const { error } = await this.databaseService.getAdminClient().storage
-        .from('shingari')
+      const { error } = await this.databaseService
+        .getAdminClient()
+        .storage.from('shingari')
         .remove([filePath]);
 
       if (error) {
@@ -390,14 +464,19 @@ export class RewardsService {
     }
   }
 
-  async redeemRewards(userId: string, redeemData: RedeemRewardsDto): Promise<RedemptionResponseDto> {
+  async redeemRewards(
+    userId: string,
+    redeemData: RedeemRewardsDto,
+  ): Promise<RedemptionResponseDto> {
     try {
       this.logger.log(`Processing redemption for user: ${userId}`);
 
       // Start a transaction
       return await this.prisma.$transaction(async (prisma) => {
         // 1. Get user's current points
-        const userPointsBalance = await prisma.$queryRaw<Array<{ total_points: number }>>`
+        const userPointsBalance = await prisma.$queryRaw<
+          Array<{ total_points: number }>
+        >`
           SELECT COALESCE(SUM(points), 0) as total_points
           FROM points_ledger
           WHERE user_id = ${userId}::uuid
@@ -410,17 +489,22 @@ export class RewardsService {
           currentPoints,
           requestedPoints: redeemData.total_points,
           sufficient: currentPoints >= redeemData.total_points,
-          rewardDetails: redeemData.rewards.map(r => ({
+          rewardDetails: redeemData.rewards.map((r) => ({
             reward_id: r.reward_id,
             quantity: r.quantity,
             points_cost: r.points_cost,
-            total: r.quantity * r.points_cost
+            total: r.quantity * r.points_cost,
           })),
-          calculatedTotal: redeemData.rewards.reduce((sum, r) => sum + (r.quantity * r.points_cost), 0)
+          calculatedTotal: redeemData.rewards.reduce(
+            (sum, r) => sum + r.quantity * r.points_cost,
+            0,
+          ),
         });
 
         if (currentPoints < redeemData.total_points) {
-          throw new BadRequestException('Puntos insuficientes para completar el canje');
+          throw new BadRequestException(
+            'Puntos insuficientes para completar el canje',
+          );
         }
 
         // 2. Validate each reward and check stock
@@ -431,19 +515,25 @@ export class RewardsService {
             });
 
             if (!reward) {
-              throw new NotFoundException(`Recompensa con ID ${item.reward_id} no encontrada`);
+              throw new NotFoundException(
+                `Recompensa con ID ${item.reward_id} no encontrada`,
+              );
             }
 
             if (reward.stock !== null && reward.stock < item.quantity) {
-              throw new BadRequestException(`Stock insuficiente para la recompensa: ${reward.name}`);
+              throw new BadRequestException(
+                `Stock insuficiente para la recompensa: ${reward.name}`,
+              );
             }
 
             if (reward.points_cost !== item.points_cost) {
-              throw new BadRequestException(`El costo de puntos no coincide para la recompensa: ${reward.name}`);
+              throw new BadRequestException(
+                `El costo de puntos no coincide para la recompensa: ${reward.name}`,
+              );
             }
 
             return { reward, requestedQuantity: item.quantity };
-          })
+          }),
         );
 
         // 3. Create the main redemption record
@@ -490,7 +580,7 @@ export class RewardsService {
               points_cost: item.points_cost,
               total_points: item.points_cost * item.quantity,
             };
-          })
+          }),
         );
 
         // 5. Create points ledger entry (negative points for redemption)
@@ -503,7 +593,9 @@ export class RewardsService {
           },
         });
 
-        this.logger.log(`Redemption completed successfully for user: ${userId}, redemption ID: ${redemption.id}`);
+        this.logger.log(
+          `Redemption completed successfully for user: ${userId}, redemption ID: ${redemption.id}`,
+        );
 
         const response = {
           id: Number(redemption.id),
@@ -522,8 +614,14 @@ export class RewardsService {
         ) as RedemptionResponseDto;
       });
     } catch (error) {
-      this.logger.error(`Error processing redemption for user ${userId}:`, error);
-      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+      this.logger.error(
+        `Error processing redemption for user ${userId}:`,
+        error,
+      );
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
         throw error;
       }
       throw new BadRequestException('Error al procesar el canje');
@@ -544,13 +642,13 @@ export class RewardsService {
         orderBy: { created_at: 'desc' },
       });
 
-      const transformedRedemptions = redemptions.map(redemption => ({
+      const transformedRedemptions = redemptions.map((redemption) => ({
         id: Number(redemption.id),
         user_id: redemption.user_id,
         status: redemption.status || 'PENDING',
         total_points: redemption.total_points,
         created_at: redemption.created_at || new Date(),
-        lines: redemption.reward_redemption_lines.map(line => ({
+        lines: redemption.reward_redemption_lines.map((line) => ({
           id: Number(line.id),
           reward_id: line.reward_id,
           reward_name: line.rewards.name,
@@ -569,6 +667,209 @@ export class RewardsService {
     } catch (error) {
       this.logger.error(`Error getting redemptions for user ${userId}:`, error);
       throw new BadRequestException('Error al obtener los canjes del usuario');
+    }
+  }
+
+  async findAllRedemptions(
+    query: QueryRedemptionDto,
+  ): Promise<PaginatedRedemptionsResponseDto> {
+    try {
+      const {
+        page = 1,
+        limit = 10,
+        search,
+        sortField = 'created_at',
+        sortDirection = 'desc',
+        status,
+        minPoints,
+        maxPoints,
+        dateFrom,
+        dateTo,
+      } = query;
+
+      // Build where clause
+      const where: any = {};
+
+      // Search by user ID
+      if (search) {
+        where.user_id = {
+          contains: search,
+          mode: 'insensitive',
+        };
+      }
+
+      // Filter by status
+      if (status) {
+        where.status = status;
+      }
+
+      // Filter by points range
+      if (minPoints !== undefined || maxPoints !== undefined) {
+        where.total_points = {};
+        if (minPoints !== undefined) {
+          where.total_points.gte = minPoints;
+        }
+        if (maxPoints !== undefined) {
+          where.total_points.lte = maxPoints;
+        }
+      }
+
+      // Filter by date range
+      if (dateFrom || dateTo) {
+        where.created_at = {};
+        if (dateFrom) {
+          where.created_at.gte = new Date(dateFrom);
+        }
+        if (dateTo) {
+          where.created_at.lte = new Date(dateTo);
+        }
+      }
+
+      // Calculate pagination
+      const skip = (page - 1) * limit;
+
+      // Build orderBy clause
+      const orderBy: any = {};
+      orderBy[sortField] = sortDirection;
+
+      // Get total count
+      const total = await this.prisma.reward_redemptions.count({ where });
+
+      // Get redemptions with pagination
+      const redemptions = await this.prisma.reward_redemptions.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy,
+        include: {
+          reward_redemption_lines: {
+            include: {
+              rewards: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // Map to response DTOs
+      const data = redemptions.map((redemption) => ({
+        id: Number(redemption.id),
+        user_id: redemption.user_id,
+        status: redemption.status || 'PENDING',
+        total_points: redemption.total_points,
+        created_at: redemption.created_at || new Date(),
+        lines: redemption.reward_redemption_lines.map((line) => ({
+          id: line.id,
+          reward_id: line.reward_id,
+          reward_name: line.rewards.name,
+          quantity: line.quantity,
+          points_cost: line.points_cost,
+          total_points: line.points_cost * line.quantity,
+        })),
+      }));
+
+      // Calculate pagination info
+      const totalPages = Math.ceil(total / limit);
+      const hasNext = page < totalPages;
+      const hasPrev = page > 1;
+
+      this.logger.log(
+        `Found ${total} redemptions, returning page ${page} of ${totalPages}`,
+      );
+
+      return {
+        data,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+          hasNext,
+          hasPrev,
+        },
+      };
+    } catch (error) {
+      this.logger.error('Error getting all redemptions:', error);
+      throw new BadRequestException('Error al obtener los canjes');
+    }
+  }
+
+  async updateRedemptionStatus(
+    redemptionId: number,
+    updateData: UpdateRedemptionStatusDto,
+  ): Promise<RedemptionResponseDto> {
+    try {
+      this.logger.log(`Updating redemption ${redemptionId} status to ${updateData.status}`);
+
+      // Verificar que el canje existe
+      const existingRedemption = await this.prisma.reward_redemptions.findUnique({
+        where: { id: redemptionId },
+        include: {
+          reward_redemption_lines: {
+            include: {
+              rewards: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!existingRedemption) {
+        throw new NotFoundException(`Canje con ID ${redemptionId} no encontrado`);
+      }
+
+      // Actualizar el estado del canje
+      const updatedRedemption = await this.prisma.reward_redemptions.update({
+        where: { id: redemptionId },
+        data: {
+          status: updateData.status,
+        },
+        include: {
+          reward_redemption_lines: {
+            include: {
+              rewards: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      this.logger.log(`Redemption ${redemptionId} status updated successfully to ${updateData.status}`);
+
+      // Mapear a DTO de respuesta
+      return {
+        id: Number(updatedRedemption.id),
+        user_id: updatedRedemption.user_id,
+        status: updatedRedemption.status || 'PENDING',
+        total_points: updatedRedemption.total_points,
+        created_at: updatedRedemption.created_at || new Date(),
+        lines: updatedRedemption.reward_redemption_lines.map((line) => ({
+          id: line.id,
+          reward_id: line.reward_id,
+          reward_name: line.rewards.name,
+          quantity: line.quantity,
+          points_cost: line.points_cost,
+          total_points: line.points_cost * line.quantity,
+        })),
+      };
+    } catch (error) {
+      this.logger.error(`Error updating redemption ${redemptionId} status:`, error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException('Error al actualizar el estado del canje');
     }
   }
 }

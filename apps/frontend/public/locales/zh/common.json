@@ -255,6 +255,7 @@
       "orders": "订单",
       "categories": "分类",
       "rewards": "可兑换商品",
+      "redemptions": "奖励兑换",
       "settings": "设置",
       "welcome": "欢迎",
       "logout": "退出登录"
@@ -279,6 +280,7 @@
         "pending": "待处理",
         "accepted": "已接受",
         "delivered": "已交付",
+        "completed": "已完成",
         "cancelled": "已取消",
         "updating": "更新中...",
         "change_status": "更改状态",
@@ -902,6 +904,62 @@
     "points_expired": "积分已过期",
     "points_transaction": "积分交易",
     "error_loading_points": "加载积分时出错"
+  },
+  "redemptions": {
+    "title": "奖励兑换",
+    "subtitle": "管理用户进行的所有兑换",
+    "search_placeholder": "按用户ID搜索...",
+    "no_redemptions": "没有兑换记录",
+    "loading_redemptions": "加载兑换中...",
+    "error_loading_redemptions": "加载兑换时出错",
+    "table": {
+      "id": "ID",
+      "user_id": "用户",
+      "status": "状态",
+      "total_points": "总积分",
+      "created_at": "创建日期",
+      "actions": "操作",
+      "view_details": "查看详情"
+    },
+    "status": {
+      "pending": "待处理",
+      "processing": "处理中",
+      "completed": "已完成",
+      "cancelled": "已取消"
+    },
+    "filters": {
+      "all_statuses": "所有状态",
+      "min_points": "最小积分",
+      "max_points": "最大积分",
+      "date_from": "开始日期",
+      "date_to": "结束日期"
+    },
+    "placeholders": {
+      "min_points": "0",
+      "max_points": "1000"
+    },
+    "errors": {
+      "unknown_error": "未知错误"
+    },
+    "pagination": {
+      "previous": "上一页",
+      "next": "下一页",
+      "showing": "显示",
+      "of": "共",
+      "results": "条结果"
+    }
+  },
+  "redemption_detail": {
+    "title": "兑换详情",
+    "back_to_redemptions": "返回兑换列表",
+    "redemption_info": "兑换信息",
+    "user_info": "用户信息",
+    "items": "兑换商品",
+    "total_points": "总积分",
+    "status": "状态",
+    "created_at": "创建日期",
+    "no_items": "此兑换中没有商品",
+    "error_loading_detail": "加载兑换详情时出错"
   },
   "order_status": {
     "pending": "待处理",

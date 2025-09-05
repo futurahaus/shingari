@@ -255,6 +255,7 @@
       "orders": "Pedidos",
       "categories": "Categorías",
       "rewards": "Canjeables",
+      "redemptions": "Canjes de Recompensas",
       "settings": "Configuración",
       "welcome": "Bienvenido",
       "logout": "Cerrar Sesión"
@@ -279,6 +280,7 @@
         "pending": "Pendiente",
         "accepted": "Aceptada",
         "delivered": "Entregada",
+        "completed": "Completada",
         "cancelled": "Cancelada",
         "updating": "Actualizando...",
         "change_status": "Cambiar Estado",
@@ -903,6 +905,62 @@
     "points_expired": "Puntos expirados",
     "points_transaction": "Transacción de puntos",
     "error_loading_points": "Error al cargar los puntos"
+  },
+  "redemptions": {
+    "title": "Canjes de Recompensas",
+    "subtitle": "Gestiona todos los canjes realizados por los usuarios",
+    "search_placeholder": "Buscar por ID de usuario...",
+    "no_redemptions": "No hay canjes registrados",
+    "loading_redemptions": "Cargando canjes...",
+    "error_loading_redemptions": "Error al cargar los canjes",
+    "table": {
+      "id": "ID",
+      "user_id": "Usuario",
+      "status": "Estado",
+      "total_points": "Puntos Totales",
+      "created_at": "Fecha de Creación",
+      "actions": "Acciones",
+      "view_details": "Ver Detalle"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "processing": "Procesando",
+      "completed": "Completado",
+      "cancelled": "Cancelado"
+    },
+    "filters": {
+      "all_statuses": "Todos los Estados",
+      "min_points": "Puntos Mínimos",
+      "max_points": "Puntos Máximos",
+      "date_from": "Fecha Desde",
+      "date_to": "Fecha Hasta"
+    },
+    "placeholders": {
+      "min_points": "0",
+      "max_points": "1000"
+    },
+    "errors": {
+      "unknown_error": "Error desconocido"
+    },
+    "pagination": {
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "showing": "Mostrando",
+      "of": "de",
+      "results": "resultados"
+    }
+  },
+  "redemption_detail": {
+    "title": "Detalle del Canje",
+    "back_to_redemptions": "Volver a Canjes",
+    "redemption_info": "Información del Canje",
+    "user_info": "Información del Usuario",
+    "items": "Artículos Canjeados",
+    "total_points": "Total de Puntos",
+    "status": "Estado",
+    "created_at": "Fecha de Creación",
+    "no_items": "No hay artículos en este canje",
+    "error_loading_detail": "Error al cargar el detalle del canje"
   },
   "order_status": {
     "pending": "Pendiente",

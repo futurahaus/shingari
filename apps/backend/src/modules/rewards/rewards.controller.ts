@@ -20,9 +20,15 @@ import { RewardsService } from './rewards.service';
 import { CreateRewardDto } from './dto/create-reward.dto';
 import { UpdateRewardDto } from './dto/update-reward.dto';
 import { QueryRewardDto } from './dto/query-reward.dto';
-import { RewardResponseDto, PaginatedRewardsResponseDto } from './dto/reward-response.dto';
+import {
+  RewardResponseDto,
+  PaginatedRewardsResponseDto,
+} from './dto/reward-response.dto';
 import { RedeemRewardsDto } from './dto/redeem-rewards.dto';
 import { RedemptionResponseDto } from './dto/redemption-response.dto';
+import { QueryRedemptionDto } from './dto/query-redemption.dto';
+import { PaginatedRedemptionsResponseDto } from './dto/paginated-redemptions-response.dto';
+import { UpdateRedemptionStatusDto } from './dto/update-redemption-status.dto';
 import {
   ApiTags,
   ApiOperation,
@@ -115,7 +121,9 @@ export class RewardsController {
     status: 403,
     description: 'Acceso denegado. Se requieren permisos de administrador.',
   })
-  async create(@Body() createRewardDto: CreateRewardDto): Promise<RewardResponseDto> {
+  async create(
+    @Body() createRewardDto: CreateRewardDto,
+  ): Promise<RewardResponseDto> {
     return this.rewardsService.create(createRewardDto);
   }
 
@@ -123,7 +131,8 @@ export class RewardsController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Obtener lista de recompensas con paginación, búsqueda y filtros (requiere permisos de administrador)',
+    summary:
+      'Obtener lista de recompensas con paginación, búsqueda y filtros (requiere permisos de administrador)',
   })
   @ApiQuery({
     name: 'page',
@@ -196,7 +205,9 @@ export class RewardsController {
     status: 403,
     description: 'Acceso denegado. Se requieren permisos de administrador.',
   })
-  async findAll(@Query() query: QueryRewardDto): Promise<PaginatedRewardsResponseDto> {
+  async findAll(
+    @Query() query: QueryRewardDto,
+  ): Promise<PaginatedRewardsResponseDto> {
     return this.rewardsService.findAll(query);
   }
 
@@ -205,7 +216,8 @@ export class RewardsController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Obtener historial de canjes del usuario',
-    description: 'Devuelve todos los canjes realizados por el usuario autenticado.',
+    description:
+      'Devuelve todos los canjes realizados por el usuario autenticado.',
   })
   @ApiResponse({
     status: 200,
@@ -216,16 +228,164 @@ export class RewardsController {
     status: 401,
     description: 'No autorizado.',
   })
-  async getUserRedemptions(@NestRequest() req: any): Promise<RedemptionResponseDto[]> {
+  async getUserRedemptions(
+    @NestRequest() req: any,
+  ): Promise<RedemptionResponseDto[]> {
     const userId = req.user.sub;
     return this.rewardsService.getUserRedemptions(userId);
+  }
+
+  @Get('redemptions')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary:
+      'Obtener lista de todos los canjes con paginación, búsqueda y filtros (requiere permisos de administrador)',
+    description:
+      'Devuelve todos los canjes realizados por todos los usuarios con opciones de paginación, filtros y ordenamiento.',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Número de página',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Número de elementos por página',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Término de búsqueda para filtrar por ID de usuario',
+    example: 'uuid-here',
+  })
+  @ApiQuery({
+    name: 'sortField',
+    required: false,
+    type: String,
+    description: 'Campo por el cual ordenar',
+    enum: ['id', 'user_id', 'status', 'total_points', 'created_at'],
+    example: 'created_at',
+  })
+  @ApiQuery({
+    name: 'sortDirection',
+    required: false,
+    type: String,
+    description: 'Dirección del ordenamiento',
+    enum: ['asc', 'desc'],
+    example: 'desc',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    type: String,
+    description: 'Filtrar por estado del canje',
+    enum: ['PENDING', 'PROCESSING', 'COMPLETED', 'CANCELLED'],
+    example: 'PENDING',
+  })
+  @ApiQuery({
+    name: 'minPoints',
+    required: false,
+    type: Number,
+    description: 'Filtrar por puntos mínimos utilizados',
+    example: 100,
+  })
+  @ApiQuery({
+    name: 'maxPoints',
+    required: false,
+    type: Number,
+    description: 'Filtrar por puntos máximos utilizados',
+    example: 1000,
+  })
+  @ApiQuery({
+    name: 'dateFrom',
+    required: false,
+    type: String,
+    description: 'Filtrar por fecha de creación desde (ISO 8601)',
+    example: '2024-01-01T00:00:00Z',
+  })
+  @ApiQuery({
+    name: 'dateTo',
+    required: false,
+    type: String,
+    description: 'Filtrar por fecha de creación hasta (ISO 8601)',
+    example: '2024-12-31T23:59:59Z',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de canjes obtenida exitosamente.',
+    type: PaginatedRedemptionsResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autorizado.',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Acceso denegado. Se requieren permisos de administrador.',
+  })
+  async getAllRedemptions(
+    @Query() query: QueryRedemptionDto,
+  ): Promise<PaginatedRedemptionsResponseDto> {
+    return this.rewardsService.findAllRedemptions(query);
+  }
+
+  @Put('redemptions/:id/status')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Actualizar estado de un canje (requiere permisos de administrador)',
+    description: 'Permite a un administrador cambiar el estado de un canje específico.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'ID del canje a actualizar',
+    example: 1,
+  })
+  @ApiBody({
+    type: UpdateRedemptionStatusDto,
+    description: 'Datos para actualizar el estado del canje',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Estado del canje actualizado exitosamente.',
+    type: RedemptionResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos de entrada inválidos.',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'No autorizado.',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Acceso denegado. Se requieren permisos de administrador.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Canje no encontrado.',
+  })
+  async updateRedemptionStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateData: UpdateRedemptionStatusDto,
+  ): Promise<RedemptionResponseDto> {
+    return this.rewardsService.updateRedemptionStatus(id, updateData);
   }
 
   @Get(':id')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Obtener una recompensa específica por ID (requiere permisos de administrador)',
+    summary:
+      'Obtener una recompensa específica por ID (requiere permisos de administrador)',
   })
   @ApiParam({
     name: 'id',
@@ -249,7 +409,9 @@ export class RewardsController {
     status: 404,
     description: 'Recompensa no encontrada.',
   })
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<RewardResponseDto> {
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<RewardResponseDto> {
     return this.rewardsService.findOne(id);
   }
 
@@ -257,7 +419,8 @@ export class RewardsController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Actualizar una recompensa existente (requiere permisos de administrador)',
+    summary:
+      'Actualizar una recompensa existente (requiere permisos de administrador)',
   })
   @ApiParam({
     name: 'id',
@@ -314,7 +477,8 @@ export class RewardsController {
   })
   @ApiResponse({
     status: 400,
-    description: 'No se puede eliminar la recompensa porque está siendo utilizada.',
+    description:
+      'No se puede eliminar la recompensa porque está siendo utilizada.',
   })
   @ApiResponse({
     status: 401,
@@ -337,7 +501,8 @@ export class RewardsController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
   @ApiOperation({
-    summary: 'Verificar el stock disponible de una recompensa (requiere permisos de administrador)',
+    summary:
+      'Verificar el stock disponible de una recompensa (requiere permisos de administrador)',
   })
   @ApiParam({
     name: 'id',
@@ -382,7 +547,7 @@ export class RewardsController {
   ) {
     const reward = await this.rewardsService.findOne(id);
     const available = await this.rewardsService.checkStock(id, quantity);
-    
+
     return {
       available,
       currentStock: reward.stock,
@@ -395,21 +560,26 @@ export class RewardsController {
   @UseInterceptors(FileInterceptor('file'))
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Subir imagen de recompensa a Supabase Storage (Solo Admin)' })
-  @ApiResponse({ 
-    status: 201, 
-    description: 'Imagen subida exitosamente.', 
+  @ApiOperation({
+    summary: 'Subir imagen de recompensa a Supabase Storage (Solo Admin)',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Imagen subida exitosamente.',
     schema: {
       type: 'object',
       properties: {
         url: { type: 'string', description: 'URL pública de la imagen' },
-        path: { type: 'string', description: 'Ruta del archivo en el bucket' }
-      }
-    }
+        path: { type: 'string', description: 'Ruta del archivo en el bucket' },
+      },
+    },
   })
   @ApiResponse({ status: 400, description: 'Archivo no válido.' })
   @ApiResponse({ status: 401, description: 'No autorizado.' })
-  @ApiResponse({ status: 403, description: 'Prohibido - Se requiere acceso de administrador.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Prohibido - Se requiere acceso de administrador.',
+  })
   @HttpCode(HttpStatus.CREATED)
   async uploadImage(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
@@ -421,11 +591,20 @@ export class RewardsController {
   @Delete('images/:filePath')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Eliminar imagen de recompensa de Supabase Storage (Solo Admin)' })
-  @ApiParam({ name: 'filePath', description: 'Ruta del archivo a eliminar', example: 'rewards/image_123.jpg' })
+  @ApiOperation({
+    summary: 'Eliminar imagen de recompensa de Supabase Storage (Solo Admin)',
+  })
+  @ApiParam({
+    name: 'filePath',
+    description: 'Ruta del archivo a eliminar',
+    example: 'rewards/image_123.jpg',
+  })
   @ApiResponse({ status: 204, description: 'Imagen eliminada exitosamente.' })
   @ApiResponse({ status: 401, description: 'No autorizado.' })
-  @ApiResponse({ status: 403, description: 'Prohibido - Se requiere acceso de administrador.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Prohibido - Se requiere acceso de administrador.',
+  })
   @ApiResponse({ status: 404, description: 'Archivo no encontrado.' })
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteImage(@Param('filePath') filePath: string): Promise<void> {
@@ -438,7 +617,8 @@ export class RewardsController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Canjear recompensas por puntos',
-    description: 'Permite a un usuario autenticado canjear una o más recompensas usando sus puntos acumulados.',
+    description:
+      'Permite a un usuario autenticado canjear una o más recompensas usando sus puntos acumulados.',
   })
   @ApiBody({
     type: RedeemRewardsDto,
@@ -469,12 +649,12 @@ export class RewardsController {
       hasUser: !!req.user,
       user: req.user,
       headers: req.headers,
-      authorization: req.headers.authorization?.substring(0, 20) + '...'
+      authorization: req.headers.authorization?.substring(0, 20) + '...',
     });
-    
+
     const userId = req.user?.sub || req.user?.id;
     console.log('🔍 Controller Debug - Extracted userId:', userId);
-    
+
     return this.rewardsService.redeemRewards(userId, redeemData);
   }
 }

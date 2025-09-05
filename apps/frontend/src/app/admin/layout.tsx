@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/contexts/I18nContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Home, Users, Boxes, Settings, LogOut, FolderTree, Inbox, Menu, X, Gift } from 'lucide-react';
+import { Home, Users, Boxes, Settings, LogOut, FolderTree, Inbox, Menu, X, Gift, Receipt } from 'lucide-react';
 
 const sidebarOptions = [
   { name: 'admin.sidebar.dashboard', path: '/admin/dashboard', icon: <Home className="w-5 h-5 text-gray-400" /> },
@@ -15,6 +15,7 @@ const sidebarOptions = [
   { name: 'admin.sidebar.orders', path: '/admin/pedidos', icon: <Inbox className="w-5 h-5 text-gray-400" /> },
   { name: 'admin.sidebar.categories', path: '/admin/categorias', icon: <FolderTree className="w-5 h-5 text-gray-400" /> },
   { name: 'admin.sidebar.rewards', path: '/admin/canjeables', icon: <Gift className="w-5 h-5 text-gray-400" /> },
+  { name: 'admin.sidebar.redemptions', path: '/admin/canjes', icon: <Receipt className="w-5 h-5 text-gray-400" /> },
   { name: 'admin.sidebar.settings', path: '/admin/setup', icon: <Settings className="w-5 h-5 text-gray-400" /> },
 ];
 
