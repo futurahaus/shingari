@@ -33,6 +33,7 @@ import { Cache } from 'cache-manager';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { UpdateCategoriesOrderDto } from './dto/update-category.dto';
+import * as XLSX from 'xlsx'; // Importar XLSX para procesar archivos Excel
 
 // Tipo para el producto con categorías incluidas, específico para findAllPublic y findOne
 type ProductWithCategoriesForResponse = Omit<ProductPrismaType, 'image_url'> & {
@@ -1630,6 +1631,212 @@ export class ProductsService {
       this.logger.log(`Image deleted successfully: ${filePath}`);
     } catch (error) {
       this.logger.error('Error in deleteImage:', error);
+      throw error;
+    }
+  }
+
+  async processBulkDiscounts(file: Express.Multer.File): Promise<{
+    success: number;
+    errors: number;
+    details: Array<{ row: number; sku: string; userId: string; message: string }>;
+  }> {
+    try {
+      // Read Excel or CSV file
+      let data: any[][];
+      
+      if (file.mimetype === 'text/csv' || file.mimetype === 'application/csv') {
+        // Handle CSV files
+        const workbook = XLSX.read(file.buffer, { type: 'buffer' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      } else {
+        // Handle Excel files
+        const workbook = XLSX.read(file.buffer, { type: 'buffer' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      }
+
+      // Validate headers
+      const headers = data[0] as string[];
+      const expectedHeaders = ['SKU', 'USER_ID', 'PRECIO', 'VALIDO_DESDE', 'VALIDO_HASTA', 'ESTADO'];
+      const alternativeHeaders = ['SKU', 'USER_ID', 'PRECIO', 'VALIDO DESDE', 'VALIDO HASTA', 'ESTADO'];
+      
+      const hasExpectedHeaders = expectedHeaders.every(header => headers.includes(header));
+      const hasAlternativeHeaders = alternativeHeaders.every(header => headers.includes(header));
+      
+      if (!hasExpectedHeaders && !hasAlternativeHeaders) {
+        throw new BadRequestException('Invalid file structure. Expected columns: SKU, USER_ID, PRECIO, VALIDO_DESDE/VALIDO DESDE, VALIDO_HASTA/VALIDO HASTA, ESTADO');
+      }
+
+      const results = {
+        success: 0,
+        errors: 0,
+        details: [] as Array<{ row: number; sku: string; userId: string; message: string }>
+      };
+
+      // Process each row (skip header)
+      for (let i = 1; i < data.length; i++) {
+        const row = data[i] as any[];
+        const rowNumber = i + 1;
+
+        try {
+          // Extract data from row
+          const sku = row[0]?.toString()?.trim();
+          const userId = row[1]?.toString()?.trim();
+          const precio = parseFloat(row[2]);
+          
+          // Handle both header formats (with underscore and with space)
+          const validoDesdeIndex = headers.findIndex(h => h === 'VALIDO_DESDE' || h === 'VALIDO DESDE');
+          const validoHastaIndex = headers.findIndex(h => h === 'VALIDO_HASTA' || h === 'VALIDO HASTA');
+          const estadoIndex = headers.findIndex(h => h === 'ESTADO');
+          
+          const validoDesde = row[validoDesdeIndex];
+          const validoHasta = row[validoHastaIndex];
+          const estado = row[estadoIndex]?.toString()?.toLowerCase();
+
+          // Validate required fields
+          if (!sku || !userId || isNaN(precio) || precio <= 0) {
+            results.errors++;
+            results.details.push({
+              row: rowNumber,
+              sku: sku || 'N/A',
+              userId: userId || 'N/A',
+              message: 'Missing or invalid required fields (SKU, USER_ID, PRECIO)'
+            });
+            continue;
+          }
+
+          // Find product by SKU
+          const product = await this.prisma.products.findFirst({
+            where: { sku: sku }
+          });
+
+          if (!product) {
+            results.errors++;
+            results.details.push({
+              row: rowNumber,
+              sku,
+              userId,
+              message: 'Product not found with this SKU'
+            });
+            continue;
+          }
+
+          // Validate user exists
+          const user = await this.prisma.auth_users.findUnique({
+            where: { id: userId }
+          });
+
+          if (!user) {
+            results.errors++;
+            results.details.push({
+              row: rowNumber,
+              sku,
+              userId,
+              message: 'User not found with this USER_ID'
+            });
+            continue;
+          }
+
+          // Parse dates
+          let validFrom: Date | null = null;
+          let validTo: Date | null = null;
+
+          if (validoDesde) {
+            const desdeDate = new Date(validoDesde);
+            if (isNaN(desdeDate.getTime())) {
+              results.errors++;
+              results.details.push({
+                row: rowNumber,
+                sku,
+                userId,
+                message: 'Invalid VALIDO_DESDE date format'
+              });
+              continue;
+            }
+            validFrom = desdeDate;
+          }
+
+          if (validoHasta) {
+            const hastaDate = new Date(validoHasta);
+            if (isNaN(hastaDate.getTime())) {
+              results.errors++;
+              results.details.push({
+                row: rowNumber,
+                sku,
+                userId,
+                message: 'Invalid VALIDO_HASTA date format'
+              });
+              continue;
+            }
+            validTo = hastaDate;
+          }
+
+          // Determine if discount is active
+          const isActive = estado === 'activo' || estado === 'true' || estado === '1' || estado === '';
+
+          // Check if discount already exists for this user and product
+          const existingDiscount = await this.prisma.products_discounts.findFirst({
+            where: {
+              user_id: userId,
+              product_id: product.id,
+              is_active: true
+            }
+          });
+
+          if (existingDiscount) {
+            // Update existing discount
+            await this.prisma.products_discounts.update({
+              where: { id: existingDiscount.id },
+              data: {
+                price: new Prisma.Decimal(precio),
+                is_active: isActive,
+                valid_from: validFrom,
+                valid_to: validTo
+              }
+            });
+          } else {
+            // Create new discount
+            await this.prisma.products_discounts.create({
+              data: {
+                user_id: userId,
+                product_id: product.id,
+                price: new Prisma.Decimal(precio),
+                is_active: isActive,
+                valid_from: validFrom,
+                valid_to: validTo
+              }
+            });
+          }
+
+          results.success++;
+          results.details.push({
+            row: rowNumber,
+            sku,
+            userId,
+            message: 'Discount processed successfully'
+          });
+
+        } catch (error) {
+          results.errors++;
+          results.details.push({
+            row: rowNumber,
+            sku: row[0]?.toString() || 'N/A',
+            userId: row[1]?.toString() || 'N/A',
+            message: `Error processing row: ${error.message}`
+          });
+        }
+      }
+
+      // Clear cache after bulk operation
+      await this.clearProductCache();
+
+      return results;
+
+    } catch (error) {
+      this.logger.error('Error processing bulk discounts:', error);
       throw error;
     }
   }

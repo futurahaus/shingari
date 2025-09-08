@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useTranslation } from '@/contexts/I18nContext';
 import { api } from '@/lib/api';
 import { AddSpecialPriceModal } from './AddSpecialPriceModal';
+import { ImportSpecialPricesModal } from './ImportSpecialPricesModal';
 
 interface SpecialPrice {
   id: string;
@@ -27,6 +28,7 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [editingSpecialPrice, setEditingSpecialPrice] = useState<SpecialPrice | null>(null);
 
       const loadSpecialPrices = useCallback(() => {
@@ -56,6 +58,11 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
     setShowAddModal(false);
     setEditingSpecialPrice(null);
     loadSpecialPrices(); // Refresh the list
+  };
+
+  const handleImported = () => {
+    setShowImportModal(false);
+    loadSpecialPrices();
   };
 
   const handleEditSpecialPrice = (specialPrice: SpecialPrice) => {
@@ -125,12 +132,20 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
     <div className="mb-8">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">{t('admin.users.detail.special_price_list')}</h2>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer"
-        >
-          + {t('admin.users.detail.add_special_price')}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowImportModal(true)}
+            className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer"
+          >
+            + Importar precios
+          </button>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer"
+          >
+            + {t('admin.users.detail.add_special_price')}
+          </button>
+        </div>
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full border border-gray-200 rounded-lg">
@@ -193,6 +208,14 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
             setEditingSpecialPrice(null);
           }}
           onSpecialPriceAdded={handleSpecialPriceAdded}
+        />
+      )}
+
+      {showImportModal && (
+        <ImportSpecialPricesModal
+          userId={userId}
+          onClose={() => setShowImportModal(false)}
+          onImported={handleImported}
         />
       )}
     </div>
