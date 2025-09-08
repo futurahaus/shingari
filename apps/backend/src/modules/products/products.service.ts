@@ -1745,7 +1745,22 @@ export class ProductsService {
           let validTo: Date | null = null;
 
           if (validoDesde) {
-            const desdeDate = new Date(validoDesde);
+            let desdeDate: Date;
+            
+            // Handle different date formats that XLSX might return
+            if (typeof validoDesde === 'number') {
+              // XLSX might return Excel serial number (days since 1900-01-01)
+              // Excel date serial number to JavaScript Date
+              const excelEpoch = new Date(1900, 0, 1); // January 1, 1900
+              desdeDate = new Date(excelEpoch.getTime() + (validoDesde - 2) * 24 * 60 * 60 * 1000);
+            } else {
+              // Convert to string first to handle any type conversion issues
+              const dateStr = String(validoDesde).trim();
+              // Remove quotes if present
+              const cleanDateStr = dateStr.replace(/^["']|["']$/g, '');
+              desdeDate = new Date(cleanDateStr);
+            }
+            
             if (isNaN(desdeDate.getTime())) {
               results.errors++;
               results.details.push({
@@ -1760,7 +1775,22 @@ export class ProductsService {
           }
 
           if (validoHasta) {
-            const hastaDate = new Date(validoHasta);
+            let hastaDate: Date;
+            
+            // Handle different date formats that XLSX might return
+            if (typeof validoHasta === 'number') {
+              // XLSX might return Excel serial number (days since 1900-01-01)
+              // Excel date serial number to JavaScript Date
+              const excelEpoch = new Date(1900, 0, 1); // January 1, 1900
+              hastaDate = new Date(excelEpoch.getTime() + (validoHasta - 2) * 24 * 60 * 60 * 1000);
+            } else {
+              // Convert to string first to handle any type conversion issues
+              const dateStr = String(validoHasta).trim();
+              // Remove quotes if present
+              const cleanDateStr = dateStr.replace(/^["']|["']$/g, '');
+              hastaDate = new Date(cleanDateStr);
+            }
+            
             if (isNaN(hastaDate.getTime())) {
               results.errors++;
               results.details.push({

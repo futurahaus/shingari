@@ -49,7 +49,29 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
           return;
         }
 
-        const originalHeader = lines[0].split(',').map(h => h.trim());
+        // Parse CSV properly handling quoted fields
+        const parseCSVLine = (line: string): string[] => {
+          const result: string[] = [];
+          let current = '';
+          let inQuotes = false;
+
+          for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+              result.push(current.trim());
+              current = '';
+            } else {
+              current += char;
+            }
+          }
+          result.push(current.trim());
+          return result;
+        };
+
+        const originalHeader = parseCSVLine(lines[0]);
         const hasUserId = originalHeader.some(h => h.toUpperCase() === 'USER_ID');
 
         // Always enforce our header order and overwrite USER_ID with current user
@@ -58,7 +80,7 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
         const dataLines = lines.slice(1);
         const newLines = [newHeader.join(',')];
         for (const line of dataLines) {
-          const cols = line.split(',');
+          const cols = parseCSVLine(line);
           if (cols.every(c => c.trim() === '')) continue;
 
           // Map input based on whether original provided USER_ID
@@ -94,6 +116,33 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
       }
     };
     reader.readAsText(file);
+  };
+
+  const handleDownloadTemplate = () => {
+    const header = ['SKU', 'PRECIO', 'VALIDO_DESDE', 'VALIDO_HASTA', 'ESTADO'];
+    const sampleData = [
+      ['C2391', '10.50', '2025-01-01', '2025-12-31', 'activo'],
+      ['C2392', '15.75', '2025-01-01', '2025-12-31', 'activo'],
+      ['C2393', '8.25', '2025-01-01', '2025-12-31', 'activo']
+    ];
+
+    // Create CSV with simple formatting
+    const csvContent = [
+      header.join(','),
+      ...sampleData.map(row => row.join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'plantilla_precios_especiales.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showSuccess('Plantilla descargada', 'Se ha descargado la plantilla CSV correctamente', 3000);
   };
 
   const handleUpload = async () => {
@@ -180,6 +229,18 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointers"
             />
             <p className="mt-1 text-xs text-gray-500">Formato permitido: CSV (.csv). El ID del usuario se agregará automáticamente.</p>
+
+            <div className="mt-3">
+              <button
+                onClick={handleDownloadTemplate}
+                className="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 hover:text-blue-700 transition-colors cursor-pointer"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Descargar plantilla CSV
+              </button>
+            </div>
           </div>
 
           <button
