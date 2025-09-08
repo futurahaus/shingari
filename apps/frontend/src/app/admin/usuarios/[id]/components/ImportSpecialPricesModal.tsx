@@ -8,6 +8,7 @@ interface ImportSpecialPricesModalProps {
 
 export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> = ({ userId, onClose, onImported }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [processedFile, setProcessedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadResult, setUploadResult] = useState<any>(null);
@@ -16,25 +17,76 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
     const file = event.target.files?.[0] || null;
     if (!file) {
       setSelectedFile(null);
+      setProcessedFile(null);
       return;
     }
 
-    const allowedTypes = [
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'text/csv',
-      'application/csv'
-    ];
+    const csvMimeTypes = ['text/csv', 'application/csv'];
 
-    if (!allowedTypes.includes(file.type)) {
-      setUploadError('Seleccione un archivo válido (.xlsx, .xls, .csv)');
+    if (!csvMimeTypes.includes(file.type) && !file.name.toLowerCase().endsWith('.csv')) {
+      setUploadError('Este importador solo acepta CSV (.csv)');
       setSelectedFile(null);
+      setProcessedFile(null);
       return;
     }
 
     setUploadError(null);
     setSelectedFile(file);
     setUploadResult(null);
+
+    // Read and transform CSV to inject USER_ID column when missing
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const text = String(reader.result || '');
+        const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+        if (lines.length === 0) {
+          setUploadError('El archivo CSV está vacío');
+          setProcessedFile(null);
+          return;
+        }
+
+        const originalHeader = lines[0].split(',').map(h => h.trim());
+        const hasUserId = originalHeader.some(h => h.toUpperCase() === 'USER_ID');
+
+        let newHeader: string[];
+        if (hasUserId) {
+          newHeader = originalHeader;
+        } else {
+          // Expecting SKU, PRECIO, VALIDO_DESDE, VALIDO_HASTA, ESTADO
+          newHeader = ['SKU', 'USER_ID', 'PRECIO', 'VALIDO_DESDE', 'VALIDO_HASTA', 'ESTADO'];
+        }
+
+        const dataLines = lines.slice(1);
+        const newLines = [newHeader.join(',')];
+        for (const line of dataLines) {
+          const cols = line.split(',');
+          if (cols.every(c => c.trim() === '')) continue;
+
+          if (hasUserId) {
+            newLines.push(cols.join(','));
+          } else {
+            // Map by expected order without USER_ID: [SKU, PRECIO, VALIDO_DESDE, VALIDO_HASTA, ESTADO]
+            const sku = (cols[0] || '').trim();
+            const precio = (cols[1] || '').trim();
+            const validoDesde = (cols[2] || '').trim();
+            const validoHasta = (cols[3] || '').trim();
+            const estado = (cols[4] || '').trim();
+            const row = [sku, userId, precio, validoDesde, validoHasta, estado].join(',');
+            newLines.push(row);
+          }
+        }
+
+        const csvOut = newLines.join('\n');
+        const blob = new Blob([csvOut], { type: 'text/csv' });
+        const newFile = new File([blob], file.name.replace(/\.csv$/i, '') + '_with_user.csv', { type: 'text/csv' });
+        setProcessedFile(newFile);
+      } catch {
+        setUploadError('No se pudo procesar el CSV');
+        setProcessedFile(null);
+      }
+    };
+    reader.readAsText(file);
   };
 
   const handleUpload = async () => {
@@ -49,7 +101,8 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
 
     try {
       const formData = new FormData();
-      formData.append('file', selectedFile);
+      // Use processed file if available (adds USER_ID from current user)
+      formData.append('file', processedFile || selectedFile);
 
       const accessToken = localStorage.getItem('accessToken');
       const response = await fetch('http://localhost:3001/api/products/bulk-discounts/upload', {
@@ -92,16 +145,16 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
         <div className="space-y-4">
           <div>
             <label htmlFor="import-file" className="block text-sm font-medium text-gray-700 mb-2">
-              Seleccione archivo Excel o CSV
+              Seleccione archivo CSV
             </label>
             <input
               id="import-file"
               type="file"
-              accept=".xlsx,.xls,.csv"
+              accept=".csv"
               onChange={handleFileChange}
               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
-            <p className="mt-1 text-xs text-gray-500">Formatos permitidos: .xlsx, .xls, .csv</p>
+            <p className="mt-1 text-xs text-gray-500">Formato permitido: CSV (.csv). El ID del usuario se agregará automáticamente.</p>
           </div>
 
           <button
@@ -160,14 +213,13 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
 
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
             <p className="text-xs text-amber-800">
-              Nota: reutilizamos el formato del cargador masivo. Asegúrese de que la columna <span className="font-mono">USER_ID</span> contenga el ID del usuario actual mostrado arriba.
+              Nota: no incluya la columna <span className="font-mono">USER_ID</span>. Se insertará automáticamente con el ID del usuario actual mostrado arriba.
             </p>
             <div className="mt-2 bg-white border border-gray-200 rounded">
               <table className="min-w-full text-xs font-mono">
                 <thead>
                   <tr className="border-b border-gray-200">
                     <th className="text-left py-1 px-2 bg-gray-50">SKU</th>
-                    <th className="text-left py-1 px-2 bg-gray-50">USER_ID</th>
                     <th className="text-left py-1 px-2 bg-gray-50">PRECIO</th>
                     <th className="text-left py-1 px-2 bg-gray-50">VALIDO_DESDE</th>
                     <th className="text-left py-1 px-2 bg-gray-50">VALIDO_HASTA</th>
@@ -177,7 +229,6 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
                 <tbody>
                   <tr>
                     <td className="py-1 px-2">C2391</td>
-                    <td className="py-1 px-2">{userId}</td>
                     <td className="py-1 px-2">10</td>
                     <td className="py-1 px-2">2025-01-01</td>
                     <td className="py-1 px-2">2025-12-31</td>
