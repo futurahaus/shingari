@@ -520,4 +520,64 @@ export class ProductsController {
   // ): Promise<void> {
   //   return this.productsService.deleteDiscount(discountId);
   // }
+
+  @Post('bulk-discounts/upload')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Upload Excel or CSV file with bulk discount data (Admin only)' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'Excel file (.xlsx, .xls) or CSV file (.csv) with columns: SKU, USER_ID, PRECIO, VALIDO_DESDE, VALIDO_HASTA, ESTADO',
+        },
+      },
+    },
+  })
+  @ApiResponse({ 
+    status: 201, 
+    description: 'Bulk discounts processed successfully.',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'number', description: 'Number of successful imports' },
+        errors: { type: 'number', description: 'Number of errors' },
+        details: { 
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              row: { type: 'number' },
+              sku: { type: 'string' },
+              userId: { type: 'string' },
+              message: { type: 'string' }
+            }
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'Invalid file format or data.' })
+  async uploadBulkDiscounts(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No file provided');
+    }
+    
+    const allowedTypes = [
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'text/csv',
+      'application/csv'
+    ];
+    
+    if (!allowedTypes.includes(file.mimetype)) {
+      throw new BadRequestException('Invalid file type. Only Excel files (.xlsx, .xls) and CSV files (.csv) are allowed.');
+    }
+    
+    return this.productsService.processBulkDiscounts(file);
+  }
 }
