@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNotificationContext } from '@/contexts/NotificationContext';
 
 interface ImportSpecialPricesModalProps {
   userId: string;
@@ -12,6 +13,7 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadResult, setUploadResult] = useState<any>(null);
+  const { showWarning, showSuccess, showError } = useNotificationContext();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
@@ -42,6 +44,7 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
         const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
         if (lines.length === 0) {
           setUploadError('El archivo CSV está vacío');
+          showError('Importación', 'El archivo CSV está vacío', 4000);
           setProcessedFile(null);
           return;
         }
@@ -49,13 +52,8 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
         const originalHeader = lines[0].split(',').map(h => h.trim());
         const hasUserId = originalHeader.some(h => h.toUpperCase() === 'USER_ID');
 
-        let newHeader: string[];
-        if (hasUserId) {
-          newHeader = originalHeader;
-        } else {
-          // Expecting SKU, PRECIO, VALIDO_DESDE, VALIDO_HASTA, ESTADO
-          newHeader = ['SKU', 'USER_ID', 'PRECIO', 'VALIDO_DESDE', 'VALIDO_HASTA', 'ESTADO'];
-        }
+        // Always enforce our header order and overwrite USER_ID with current user
+        const newHeader: string[] = ['SKU', 'USER_ID', 'PRECIO', 'VALIDO_DESDE', 'VALIDO_HASTA', 'ESTADO'];
 
         const dataLines = lines.slice(1);
         const newLines = [newHeader.join(',')];
@@ -63,10 +61,18 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
           const cols = line.split(',');
           if (cols.every(c => c.trim() === '')) continue;
 
+          // Map input based on whether original provided USER_ID
           if (hasUserId) {
-            newLines.push(cols.join(','));
+            // Expected input with USER_ID: [SKU, USER_ID, PRECIO, VALIDO_DESDE, VALIDO_HASTA, ESTADO]
+            const sku = (cols[0] || '').trim();
+            const precio = (cols[2] || '').trim();
+            const validoDesde = (cols[3] || '').trim();
+            const validoHasta = (cols[4] || '').trim();
+            const estado = (cols[5] || '').trim();
+            const row = [sku, userId, precio, validoDesde, validoHasta, estado].join(',');
+            newLines.push(row);
           } else {
-            // Map by expected order without USER_ID: [SKU, PRECIO, VALIDO_DESDE, VALIDO_HASTA, ESTADO]
+            // Expected input without USER_ID: [SKU, PRECIO, VALIDO_DESDE, VALIDO_HASTA, ESTADO]
             const sku = (cols[0] || '').trim();
             const precio = (cols[1] || '').trim();
             const validoDesde = (cols[2] || '').trim();
@@ -83,6 +89,7 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
         setProcessedFile(newFile);
       } catch {
         setUploadError('No se pudo procesar el CSV');
+        showError('Importación', 'No se pudo procesar el CSV', 4000);
         setProcessedFile(null);
       }
     };
@@ -122,10 +129,28 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
 
       const result = await response.json();
       setUploadResult(result);
+      // Notifications based on result
+      if (result?.errors && result.errors > 0) {
+        const failedDetails: any[] = Array.isArray(result?.details) ? result.details : [];
+        const failedSkus: string[] = failedDetails
+          .filter((d) => !(d?.message || '').toLowerCase().includes('success'))
+          .map((d) => String(d?.sku || '').trim())
+          .filter((s) => s.length > 0);
+        const maxShow = 10;
+        const shown = failedSkus.slice(0, maxShow);
+        const moreCount = Math.max(0, failedSkus.length - shown.length);
+        const skuList = shown.join(', ') + (moreCount > 0 ? `, +${moreCount} más` : '');
+        const msg = `Éxitos: ${result.success} · Errores: ${result.errors}` + (skuList ? ` | SKUs: ${skuList}` : '');
+        showWarning('Importación con errores', msg, 8000);
+      } else {
+        showSuccess('Importación completada', `Filas importadas: ${result?.success ?? 0}`, 4000);
+      }
       // After successful upload, refresh parent list
       onImported();
     } catch (error) {
-      setUploadError(error instanceof Error ? error.message : 'Error al subir el archivo');
+      const message = error instanceof Error ? error.message : 'Error al subir el archivo';
+      setUploadError(message);
+      showError('Error de importación', message, 6000);
     } finally {
       setIsUploading(false);
     }
