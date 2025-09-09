@@ -1051,7 +1051,7 @@
     "spain": "España",
     "current_points": "Puntos actuales:",
     "points_you_will_earn": "Puntos que ganarás",
-    "products_with_iva": "Productos IVA {iva}% (sin IVA)",
+    "products_with_iva": "Productos IVA {{iva}}% (sin IVA)",
     "products_without_iva": "Productos sin IVA",
     "iva": "IVA",
     "subtotal_without_iva": "Subtotal (sin IVA)",

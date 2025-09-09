@@ -1050,7 +1050,7 @@
     "spain": "西班牙",
     "current_points": "当前积分：",
     "points_you_will_earn": "您将获得的积分",
-    "products_with_iva": "增值税 {iva}% 产品（不含税）",
+    "products_with_iva": "增值税 {{iva}}% 产品（不含税）",
     "products_without_iva": "无税产品",
     "iva": "增值税",
     "subtotal_without_iva": "小计（不含税）",
