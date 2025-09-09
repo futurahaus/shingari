@@ -549,6 +549,7 @@ model orders {
   status              order_states?
   invoice_file_url    String?           @db.VarChar
   cancellation_reason String?
+  cancellation_date   DateTime?         @db.Timestamp(6)
   order_addresses     order_addresses[]
   order_lines         order_lines[]
   order_payments      order_payments[]

@@ -422,6 +422,7 @@ export class OrdersService {
       created_at: order.created_at,
       updated_at: order.updated_at,
       delivery_date: order.delivery_date || null,
+      cancellation_reason: order.cancellation_reason || null,
       invoice_file_url: order.invoice_file_url || null,
       order_lines: order.order_lines.map((line: any) => ({
         id: line.id,

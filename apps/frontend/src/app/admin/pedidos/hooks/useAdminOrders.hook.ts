@@ -15,6 +15,7 @@ export interface Order {
   created_at: string;
   updated_at: string;
   delivery_date?: string;
+  cancellation_reason?: string;
   earned_points?: number;
   // Add more fields as needed
 }
@@ -25,6 +26,7 @@ export interface UpdateOrderData extends Record<string, unknown> {
   currency?: string;
   earned_points?: number;
   delivery_date?: string | null;
+  cancellation_reason?: string | null;
 }
 
 export interface PaginatedOrdersResponse {

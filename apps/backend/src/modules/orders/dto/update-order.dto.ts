@@ -64,4 +64,14 @@ export class UpdateOrderDto {
   @ValidateIf((o) => o.delivery_date !== null)
   @IsDateString()
   delivery_date?: string | null;
+
+  @ApiProperty({
+    description: 'Razón de cancelación de la orden',
+    required: false,
+    example: 'Cliente solicitó cancelación por cambio de planes',
+    nullable: true
+  })
+  @IsOptional()
+  @IsString()
+  cancellation_reason?: string | null;
 }

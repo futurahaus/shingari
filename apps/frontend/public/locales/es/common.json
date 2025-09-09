@@ -308,6 +308,7 @@
         "customer_id": "ID de Cliente",
         "status": "Estado",
         "delivery_date": "Fecha de entrega",
+        "cancellation_reason": "Razón de cancelación",
         "points": "Puntos",
         "total": "Total",
         "payment_method": "Método de pago",
@@ -340,6 +341,16 @@
         "date_help": "Selecciona cuándo se entregó o se entregará el pedido",
         "cancel": "Cancelar",
         "confirm": "Confirmar Entrega",
+        "updating": "Actualizando..."
+      },
+      "cancellation_modal": {
+        "title": "Cancelar Pedido",
+        "subtitle": "Proporciona la razón de cancelación para la orden #{{orderId}}",
+        "reason_label": "Razón de cancelación",
+        "reason_placeholder": "Describe el motivo de la cancelación...",
+        "reason_help": "Explica brevemente por qué se cancela este pedido",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar Cancelación",
         "updating": "Actualizando..."
       }
     },

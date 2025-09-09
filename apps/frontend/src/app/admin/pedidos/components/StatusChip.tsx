@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { useTranslation } from '@/contexts/I18nContext';
 import { useUpdateOrder } from '../hooks/useAdminOrders.hook';
 import { DatePickerModal } from './DatePickerModal';
+import { CancellationReasonModal } from './CancellationReasonModal';
 
-interface StatusChipProps {
+export interface StatusChipProps {
   orderId: string;
   currentStatus: string;
   className?: string;
+  onStatusChange?: () => void;
 }
 
 const statusOptions = [
@@ -19,11 +21,13 @@ const statusOptions = [
 export const StatusChip: React.FC<StatusChipProps> = ({ 
   orderId, 
   currentStatus, 
-  className = '' 
+  className = '',
+  onStatusChange
 }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showCancellationModal, setShowCancellationModal] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<string | null>(null);
   const updateOrderMutation = useUpdateOrder();
 
@@ -40,12 +44,21 @@ export const StatusChip: React.FC<StatusChipProps> = ({
       return;
     }
 
+    // If changing to 'cancelled', show cancellation reason modal first
+    if (newStatus === 'cancelled') {
+      setPendingStatus(newStatus);
+      setIsOpen(false);
+      setShowCancellationModal(true);
+      return;
+    }
+
     // Prepare update data
     const updateData: any = { status: newStatus };
     
-    // If changing back to 'pending', clear the delivery_date
+    // If changing back to 'pending', clear the delivery_date and cancellation_reason
     if (newStatus === 'pending') {
       updateData.delivery_date = null;
+      updateData.cancellation_reason = null;
     }
 
     try {
@@ -54,6 +67,8 @@ export const StatusChip: React.FC<StatusChipProps> = ({
         updateData
       });
       setIsOpen(false);
+      // Trigger refresh of the order details page
+      onStatusChange?.();
     } catch {
       // Error handling is done in the mutation
     }
@@ -72,6 +87,8 @@ export const StatusChip: React.FC<StatusChipProps> = ({
       });
       setShowDatePicker(false);
       setPendingStatus(null);
+      // Trigger refresh of the order details page
+      onStatusChange?.();
     } catch {
       // Error handling is done in the mutation
     }
@@ -79,6 +96,31 @@ export const StatusChip: React.FC<StatusChipProps> = ({
 
   const handleDatePickerClose = () => {
     setShowDatePicker(false);
+    setPendingStatus(null);
+  };
+
+  const handleCancellationConfirm = async (cancellationReason: string) => {
+    if (!pendingStatus) return;
+    
+    try {
+      await updateOrderMutation.mutateAsync({
+        orderId,
+        updateData: { 
+          status: pendingStatus,
+          cancellation_reason: cancellationReason
+        }
+      });
+      setShowCancellationModal(false);
+      setPendingStatus(null);
+      // Trigger refresh of the order details page
+      onStatusChange?.();
+    } catch {
+      // Error handling is done in the mutation
+    }
+  };
+
+  const handleCancellationClose = () => {
+    setShowCancellationModal(false);
     setPendingStatus(null);
   };
 
@@ -190,6 +232,15 @@ export const StatusChip: React.FC<StatusChipProps> = ({
         isOpen={showDatePicker}
         onClose={handleDatePickerClose}
         onConfirm={handleDatePickerConfirm}
+        orderId={orderId}
+        isLoading={updateOrderMutation.isPending}
+      />
+
+      {/* Cancellation Reason Modal */}
+      <CancellationReasonModal
+        isOpen={showCancellationModal}
+        onClose={handleCancellationClose}
+        onConfirm={handleCancellationConfirm}
         orderId={orderId}
         isLoading={updateOrderMutation.isPending}
       />

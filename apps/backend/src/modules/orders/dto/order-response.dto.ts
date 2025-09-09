@@ -128,6 +128,13 @@ export class OrderResponseDto {
   delivery_date?: Date;
 
   @ApiProperty({ 
+    description: 'Razón de cancelación de la orden',
+    required: false,
+    example: 'Cliente solicitó cancelación por cambio de planes'
+  })
+  cancellation_reason?: string;
+
+  @ApiProperty({ 
     description: 'URL del archivo de factura subido',
     required: false,
     example: 'https://spozhuqlvmaieeqtaxvq.supabase.co/storage/v1/object/public/shingari/orders/123e4567-e89b-12d3-a456-426614174000/invoice_1703123456789.pdf'
