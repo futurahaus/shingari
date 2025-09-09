@@ -58,6 +58,7 @@ interface Order {
   currency: string;
   created_at: string;
   updated_at: string;
+  delivery_date?: string;
   invoice_file_url?: string;
   order_lines: OrderLine[];
   order_addresses: OrderAddress[];
@@ -72,6 +73,15 @@ const formatDate = (dateString: string) => {
   if (!dateString) return '0000-00-00';
   const date = new Date(dateString);
   return date.toLocaleDateString('es-ES');
+};
+
+const formatDateTime = (dateString: string) => {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('es-ES') + ' ' + date.toLocaleTimeString('es-ES', { 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  });
 };
 
 export default function AdminOrderDetailPage() {
@@ -93,6 +103,8 @@ export default function AdminOrderDetailPage() {
     setLoading(true);
     api.get<Order>(`/orders/${orderId}`)
       .then((data) => {
+        console.log('🔍 Order data received:', data);
+        console.log('🔍 Delivery date:', data.delivery_date);
         setOrder(data);
         // Si ya hay una factura subida, agregarla a la lista de archivos
         if (data.invoice_file_url) {
@@ -270,6 +282,22 @@ export default function AdminOrderDetailPage() {
                   orderId={order.id} 
                   currentStatus={order.status}
                 />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
+              <div className="text-gray-500">{t('admin.orders.detail.delivery_date')}</div>
+              <div className="text-gray-900 text-right">
+                {(() => {
+                  console.log('🔍 Rendering delivery_date:', order.delivery_date);
+                  console.log('🔍 Type of delivery_date:', typeof order.delivery_date);
+                  return order.delivery_date ? (
+                    <span className="text-green-700 font-medium">
+                      {formatDateTime(order.delivery_date)}
+                    </span>
+                  ) : (
+                    <span className="text-gray-400">-</span>
+                  );
+                })()}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">

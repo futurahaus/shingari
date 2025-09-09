@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from '@/contexts/I18nContext';
 import { useUpdateOrder } from '../hooks/useAdminOrders.hook';
+import { DatePickerModal } from './DatePickerModal';
 
 interface StatusChipProps {
   orderId: string;
@@ -22,6 +23,8 @@ export const StatusChip: React.FC<StatusChipProps> = ({
 }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<string | null>(null);
   const updateOrderMutation = useUpdateOrder();
 
   const currentStatusOption = statusOptions.find(option => 
@@ -29,15 +32,54 @@ export const StatusChip: React.FC<StatusChipProps> = ({
   ) || statusOptions[0];
 
   const handleStatusChange = async (newStatus: string) => {
+    // If changing from 'pending' to 'delivered', show date picker first
+    if (currentStatus === 'pending' && newStatus === 'delivered') {
+      setPendingStatus(newStatus);
+      setIsOpen(false);
+      setShowDatePicker(true);
+      return;
+    }
+
+    // Prepare update data
+    const updateData: any = { status: newStatus };
+    
+    // If changing back to 'pending', clear the delivery_date
+    if (newStatus === 'pending') {
+      updateData.delivery_date = null;
+    }
+
     try {
       await updateOrderMutation.mutateAsync({
         orderId,
-        updateData: { status: newStatus }
+        updateData
       });
       setIsOpen(false);
     } catch {
       // Error handling is done in the mutation
     }
+  };
+
+  const handleDatePickerConfirm = async (deliveryDate: string) => {
+    if (!pendingStatus) return;
+    
+    try {
+      await updateOrderMutation.mutateAsync({
+        orderId,
+        updateData: { 
+          status: pendingStatus,
+          delivery_date: deliveryDate
+        }
+      });
+      setShowDatePicker(false);
+      setPendingStatus(null);
+    } catch {
+      // Error handling is done in the mutation
+    }
+  };
+
+  const handleDatePickerClose = () => {
+    setShowDatePicker(false);
+    setPendingStatus(null);
   };
 
   const handleClick = () => {
@@ -142,6 +184,15 @@ export const StatusChip: React.FC<StatusChipProps> = ({
           onClick={() => setIsOpen(false)}
         />
       )}
+
+      {/* Date Picker Modal */}
+      <DatePickerModal
+        isOpen={showDatePicker}
+        onClose={handleDatePickerClose}
+        onConfirm={handleDatePickerConfirm}
+        orderId={orderId}
+        isLoading={updateOrderMutation.isPending}
+      />
     </div>
   );
 };

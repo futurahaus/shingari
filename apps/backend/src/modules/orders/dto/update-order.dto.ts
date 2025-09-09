@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, IsEnum } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsEnum, IsDateString, ValidateIf } from 'class-validator';
 
 enum OrderStates {
   pending = 'pending',
@@ -53,4 +53,15 @@ export class UpdateOrderDto {
   @IsOptional()
   @IsString()
   invoice_file_url?: string;
+
+  @ApiProperty({
+    description: 'Fecha de entrega de la orden',
+    required: false,
+    example: '2025-01-20T10:30:00.000Z',
+    nullable: true
+  })
+  @IsOptional()
+  @ValidateIf((o) => o.delivery_date !== null)
+  @IsDateString()
+  delivery_date?: string | null;
 }

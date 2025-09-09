@@ -307,6 +307,7 @@
         "date": "Fecha",
         "customer_id": "ID de Cliente",
         "status": "Estado",
+        "delivery_date": "Fecha de entrega",
         "points": "Puntos",
         "total": "Total",
         "payment_method": "Método de pago",
@@ -331,6 +332,15 @@
           "subtotal": "Subtotal",
           "total": "Total"
         }
+      },
+      "delivery_date_modal": {
+        "title": "Establecer Fecha de Entrega",
+        "subtitle": "Selecciona la fecha y hora de entrega para la orden #{{orderId}}",
+        "date_label": "Fecha y hora de entrega",
+        "date_help": "Selecciona cuándo se entregó o se entregará el pedido",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar Entrega",
+        "updating": "Actualizando..."
       }
     },
     "rewards": {
