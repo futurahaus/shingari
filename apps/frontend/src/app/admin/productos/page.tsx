@@ -192,10 +192,6 @@ export default function AdminProductsPage() {
                 ))}
               </select>
             </div>
-
-            <div className="flex gap-2 items-center">
-              <span className="text-sm text-gray-600">{t('admin.products.sort_instruction')}</span>
-            </div>
           </div>
         </div>
 

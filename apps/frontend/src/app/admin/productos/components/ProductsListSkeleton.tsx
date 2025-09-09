@@ -16,29 +16,91 @@ export const ProductsListSkeleton: React.FC<ProductsListSkeletonProps> = ({
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('admin.products.table.sku')}
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
+              >
+                <div className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase">
+                  <div className="flex items-center gap-1">
+                    {t('admin.products.table.sku')}
+                  </div>
+                </div>
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('admin.products.table.product')}
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
+              >
+                <div className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase">
+                  <div className="flex items-center gap-1">
+                    {t('admin.products.table.product')}
+                  </div>
+                </div>
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t('admin.products.table.stock')}
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('admin.products.table.units_per_box')}
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
+              >
+                <div className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase">
+                  <div className="flex items-center gap-1">
+                    {t('admin.products.table.units_per_box')}
+                  </div>
+                </div>
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('admin.products.table.retail_price')}
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
+              >
+                <div className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase">
+                  <div className="flex items-center gap-1">
+                    {t('admin.products.table.retail_price')}
+                  </div>
+                </div>
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('admin.products.table.wholesale_price')}
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
+              >
+                <div className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase">
+                  <div className="flex items-center gap-1">
+                    {t('admin.products.table.wholesale_price')}
+                  </div>
+                </div>
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t('admin.products.table.retail_price_with_iva')}
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {t('admin.products.table.iva')}
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
+              >
+                <div className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase">
+                  <div className="flex items-center gap-1">
+                    {t('admin.products.table.iva')}
+                  </div>
+                </div>
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
+              >
+                <div className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase">
+                  <div className="flex items-center gap-1">
+                    {t('admin.products.table.created_at')}
+                  </div>
+                </div>
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
+              >
+                <div className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase">
+                  <div className="flex items-center gap-1">
+                    {t('admin.products.table.updated_at')}
+                  </div>
+                </div>
               </th>
               <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t('admin.products.table.actions')}
