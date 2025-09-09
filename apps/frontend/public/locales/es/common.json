@@ -651,6 +651,7 @@
       "last_update": "Última actualización",
       "descending": "Descendente",
       "ascending": "Ascendente",
+      "sort_instruction": "Haz clic en los encabezados de las columnas para ordenar",
       "table": {
         "product": "Producto",
         "stock": "Stock",
@@ -661,6 +662,8 @@
         "iva": "IVA (%)",
         "actions": "Acciones",
         "sku": "SKU",
+        "created_at": "Fecha de Creación",
+        "updated_at": "Última Actualización",
         "translated": "Traducido",
         "translate_product": "Traducir producto",
         "translate_product_with_locales": "Traducir producto (Ya traducido en: {{locales}})",

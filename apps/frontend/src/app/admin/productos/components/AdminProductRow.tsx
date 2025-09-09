@@ -99,6 +99,16 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
                 </div>
             </td>
 
+            {/* Created At */}
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {new Date(product.createdAt).toLocaleDateString()}
+            </td>
+
+            {/* Updated At */}
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {new Date(product.updatedAt).toLocaleDateString()}
+            </td>
+
             {/* Acciones */}
             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div className="flex items-center justify-end gap-2">

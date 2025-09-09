@@ -19,44 +19,55 @@ export const ProductRowSkeleton: React.FC = () => {
           </div>
         </div>
       </td>
-      
+
       {/* Stock */}
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="h-4 bg-gray-300 rounded w-12"></div>
       </td>
-      
+
       {/* Unidades por Caja */}
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="h-4 bg-gray-300 rounded w-16"></div>
       </td>
-      
+
       {/* Precio Minorista */}
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="h-4 bg-gray-300 rounded w-16"></div>
       </td>
-      
+
       {/* Precio Mayorista */}
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="h-4 bg-gray-300 rounded w-16"></div>
       </td>
-      
-      {/* Precio con Descuento */}
+
+      {/* Precio Minorista con IVA */}
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="h-4 bg-gray-300 rounded w-16"></div>
       </td>
-      
-      {/* Unidades Vendidas */}
+
+      {/* IVA */}
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="h-4 bg-gray-300 rounded w-12"></div>
       </td>
-      
+
+      {/* Fecha de Creación */}
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="h-4 bg-gray-300 rounded w-20"></div>
+      </td>
+
+      {/* Fecha de Actualización */}
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="h-4 bg-gray-300 rounded w-20"></div>
+      </td>
+
       {/* Acciones */}
       <td className="px-6 py-4 whitespace-nowrap text-right">
         <div className="flex items-center justify-end gap-2">
+          <div className="h-8 bg-gray-300 rounded-lg w-8"></div>
           <div className="h-8 bg-gray-300 rounded-lg w-8"></div>
           <div className="h-8 bg-gray-300 rounded-lg w-8"></div>
         </div>
       </td>
     </tr>
   );
-}; 
+};
