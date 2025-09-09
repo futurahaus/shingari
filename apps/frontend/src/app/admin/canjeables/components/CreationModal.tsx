@@ -139,7 +139,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
 
       onRewardCreated();
       onClose();
-      
+
       // Reset form and states
       setFormData({
         name: '',
@@ -151,16 +151,16 @@ export const CreationModal: React.FC<CreationModalProps> = ({
       setSelectedFile(null);
       setPreviewUrl('');
       setErrors({});
-      
+
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     } catch (error: any) {
       console.error('Error creating reward:', error);
-      
+
       // Try to extract more specific error message
       let errorMessage = 'Error al crear el canjeable';
-      
+
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.message) {
@@ -172,7 +172,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
       } else if (error.response?.status === 500) {
         errorMessage = 'Error del servidor. Por favor, inténtalo más tarde.';
       }
-      
+
       setErrors({ submit: errorMessage });
     } finally {
       setIsSubmitting(false);
@@ -280,14 +280,14 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                   : t('admin.rewards.modals.create.no_file_selected')}
               </span>
             </div>
-            
+
             {/* Image Preview */}
             {previewUrl && (
               <div className="flex flex-col items-center">
                 <div className="w-32 h-32 border-2 border-black rounded-lg bg-white flex items-center justify-center overflow-hidden relative">
-                  <img 
-                    src={previewUrl} 
-                    alt="Preview" 
+                  <img
+                    src={previewUrl}
+                    alt="Preview"
                     className="object-cover w-full h-full"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
