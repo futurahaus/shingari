@@ -1069,8 +1069,18 @@ export class ProductsService {
       }
     }
 
+    // Handle sorting with validation
     const orderBy: any = {};
-    orderBy[sortField] = sortDirection;
+    
+    // Validate sortField and set up ordering
+    const validSortFields = ['created_at', 'updated_at', 'sku', 'name', 'list_price', 'wholesale_price', 'iva', 'units_per_box'];
+    
+    if (validSortFields.includes(sortField)) {
+      orderBy[sortField] = sortDirection;
+    } else {
+      // Default to created_at if invalid sortField
+      orderBy['created_at'] = 'desc';
+    }
 
     const productsData = await this.prisma.products.findMany({
       orderBy,
