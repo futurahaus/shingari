@@ -215,10 +215,10 @@ export default function AdminProductsPage() {
                   <tr>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
                     >
                       <button
-                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded"
+                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -239,10 +239,10 @@ export default function AdminProductsPage() {
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
                     >
                       <button
-                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded"
+                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -266,10 +266,10 @@ export default function AdminProductsPage() {
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
                     >
                       <button
-                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded"
+                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -290,10 +290,10 @@ export default function AdminProductsPage() {
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
                     >
                       <button
-                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded"
+                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -314,10 +314,10 @@ export default function AdminProductsPage() {
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
                     >
                       <button
-                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded"
+                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -341,10 +341,10 @@ export default function AdminProductsPage() {
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
                     >
                       <button
-                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded"
+                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -365,10 +365,10 @@ export default function AdminProductsPage() {
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
                     >
                       <button
-                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded"
+                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -389,10 +389,10 @@ export default function AdminProductsPage() {
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
                     >
                       <button
-                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded"
+                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
