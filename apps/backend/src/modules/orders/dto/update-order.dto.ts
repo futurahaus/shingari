@@ -74,4 +74,15 @@ export class UpdateOrderDto {
   @IsOptional()
   @IsString()
   cancellation_reason?: string | null;
+
+  @ApiProperty({
+    description: 'Fecha de cancelación de la orden',
+    required: false,
+    example: '2025-01-20T10:30:00.000Z',
+    nullable: true
+  })
+  @IsOptional()
+  @ValidateIf((o) => o.cancellation_date !== null)
+  @IsDateString()
+  cancellation_date?: string | null;
 }

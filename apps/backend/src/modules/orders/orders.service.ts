@@ -161,6 +161,11 @@ export class OrdersService {
         updateData.delivery_date = updateOrderDto.delivery_date ? new Date(updateOrderDto.delivery_date) : null;
       }
 
+      // Handle cancellation_date conversion and null values
+      if (updateOrderDto.cancellation_date !== undefined) {
+        updateData.cancellation_date = updateOrderDto.cancellation_date ? new Date(updateOrderDto.cancellation_date) : null;
+      }
+
       const updatedOrder = await this.prisma.orders.update({
         where: { id },
         data: updateData,
@@ -423,6 +428,7 @@ export class OrdersService {
       updated_at: order.updated_at,
       delivery_date: order.delivery_date || null,
       cancellation_reason: order.cancellation_reason || null,
+      cancellation_date: order.cancellation_date || null,
       invoice_file_url: order.invoice_file_url || null,
       order_lines: order.order_lines.map((line: any) => ({
         id: line.id,

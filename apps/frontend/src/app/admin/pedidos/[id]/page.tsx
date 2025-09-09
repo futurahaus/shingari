@@ -60,6 +60,7 @@ interface Order {
   updated_at: string;
   delivery_date?: string;
   cancellation_reason?: string;
+  cancellation_date?: string;
   invoice_file_url?: string;
   order_lines: OrderLine[];
   order_addresses: OrderAddress[];
@@ -306,18 +307,32 @@ export default function AdminOrderDetailPage() {
               </div>
             )}
             {order.status === 'cancelled' && (
-              <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
-                <div className="text-gray-500">{t('admin.orders.detail.cancellation_reason')}</div>
-                <div className="text-gray-900 text-right">
-                  {order.cancellation_reason ? (
-                    <span className="text-red-700 font-medium">
-                      {order.cancellation_reason}
-                    </span>
-                  ) : (
-                    <span className="text-gray-400">-</span>
-                  )}
+              <>
+                <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
+                  <div className="text-gray-500">{t('admin.orders.detail.cancellation_date')}</div>
+                  <div className="text-gray-900 text-right">
+                    {order.cancellation_date ? (
+                      <span className="text-red-700 font-medium">
+                        {formatDateTime(order.cancellation_date)}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </div>
                 </div>
-              </div>
+                <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
+                  <div className="text-gray-500">{t('admin.orders.detail.cancellation_reason')}</div>
+                  <div className="text-gray-900 text-right">
+                    {order.cancellation_reason ? (
+                      <span className="text-red-700 font-medium">
+                        {order.cancellation_reason}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </div>
+                </div>
+              </>
             )}
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
               <div className="text-gray-500">{t('admin.orders.detail.points')}</div>

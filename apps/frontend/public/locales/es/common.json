@@ -309,6 +309,7 @@
         "status": "Estado",
         "delivery_date": "Fecha de entrega",
         "cancellation_reason": "Razón de cancelación",
+        "cancellation_date": "Fecha de cancelación",
         "points": "Puntos",
         "total": "Total",
         "payment_method": "Método de pago",
@@ -346,6 +347,8 @@
       "cancellation_modal": {
         "title": "Cancelar Pedido",
         "subtitle": "Proporciona la razón de cancelación para la orden #{{orderId}}",
+        "date_label": "Fecha y hora de cancelación",
+        "date_help": "Selecciona cuándo se canceló el pedido",
         "reason_label": "Razón de cancelación",
         "reason_placeholder": "Describe el motivo de la cancelación...",
         "reason_help": "Explica brevemente por qué se cancela este pedido",
