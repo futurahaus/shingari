@@ -60,6 +60,7 @@ interface Order {
   status: string;
   total_amount: number;
   currency: string;
+  order_number?: string;
   created_at: string;
   updated_at: string;
   order_lines: Array<{

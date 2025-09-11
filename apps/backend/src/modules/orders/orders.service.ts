@@ -24,26 +24,63 @@ export class OrdersService {
 
     try {
       const { user_id, ...orderDataWithoutUserId } = orderData;
+      this.logger.log('user_id received:', user_id);
       if (!user_id) {
         throw new Error('user_id is required to create an order');
       }
 
-      // Create the order first
-      const order = await this.prisma.orders.create({
-        data: {
-          user_id,
-          ...orderDataWithoutUserId,
-          earned_points: points_earned || 0,
-          order_lines: {
-            create: order_lines.map((line) => ({
+      // Generate order_number and create the order using raw SQL
+      const result: any[] = await this.prisma.$queryRaw`
+        with counter as (
+          insert into public.order_counters (date_key, last_value)
+          values (to_char(now(), 'YYYYMMDDHH24MI'), 1)
+          on conflict (date_key)
+            do update set last_value = public.order_counters.last_value + 1
+          returning last_value
+        )
+        insert into public.orders (user_id, total_amount, currency, status, earned_points, order_number)
+        select
+          ${user_id}::uuid,
+          ${orderDataWithoutUserId.total_amount}::decimal(10,2),
+          coalesce(${orderDataWithoutUserId.currency}, 'USD'),
+          coalesce(${orderDataWithoutUserId.status}, 'pending')::order_states,
+          ${points_earned || 0}::integer,
+          to_char(now(), 'YYYYMMDDHH24MI') || lpad(counter.last_value::text, 3, '0')
+        from counter
+        returning *;
+      `;
+
+      const orderRecord = result[0];
+      this.logger.log('Order created with order_number:', orderRecord.order_number);
+
+      // Create order lines
+      const orderLines = await Promise.all(
+        order_lines.map(async (line) => {
+          return await this.prisma.order_lines.create({
+            data: {
+              order_id: orderRecord.id,
               product_id: line.product_id,
               product_name: line.product_name,
               quantity: line.quantity,
               unit_price: line.unit_price,
-            })),
-          },
-          order_addresses: {
-            create: order_addresses.map((address) => ({
+            },
+            include: {
+              products: {
+                select: {
+                  image_url: true,
+                },
+              },
+            },
+          });
+        })
+      );
+
+      // Create order addresses
+      const orderAddresses = await Promise.all(
+        order_addresses.map(async (address) => {
+          return await this.prisma.order_addresses.create({
+            data: {
+              order_id: orderRecord.id,
               type: address.type,
               full_name: address.full_name,
               address_line1: address.address_line1,
@@ -53,23 +90,33 @@ export class OrdersService {
               postal_code: address.postal_code,
               country: address.country,
               phone: address.phone,
-            })),
-          },
-          order_payments: {
-            create: order_payments.map((payment) => ({
+            },
+          });
+        })
+      );
+
+      // Create order payments
+      const orderPayments = await Promise.all(
+        order_payments.map(async (payment) => {
+          return await this.prisma.order_payments.create({
+            data: {
+              order_id: orderRecord.id,
               payment_method: payment.payment_method,
               amount: payment.amount,
               transaction_id: payment.transaction_id,
               metadata: payment.metadata,
-            })),
-          },
-        },
-        include: {
-          order_lines: true,
-          order_addresses: true,
-          order_payments: true,
-        },
-      });
+            },
+          });
+        })
+      );
+
+      // Construct the complete order object
+      const order = {
+        ...orderRecord,
+        order_lines: orderLines,
+        order_addresses: orderAddresses,
+        order_payments: orderPayments,
+      };
 
       // If points were earned, create a points_ledger record and update user points
       if (points_earned && points_earned > 0) {
@@ -411,6 +458,7 @@ export class OrdersService {
       status: order.status,
       total_amount: order.total_amount,
       currency: order.currency,
+      order_number: order.order_number || null,
       created_at: order.created_at,
       updated_at: order.updated_at,
       invoice_file_url: order.invoice_file_url || null,

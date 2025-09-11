@@ -249,6 +249,11 @@ export default function OrderDetailPage() {
                   <span className="text-sm font-bold text-gray-900">
                     {t('dashboard.order')} {formatOrderId(order.id)}
                   </span>
+                  {order.order_number && (
+                    <span className="text-sm font-bold text-gray-700">
+                      #{order.order_number}
+                    </span>
+                  )}
                 </div>
                 <p className="text-xs sm:text-sm text-gray-600">
                   {t('dashboard.purchase_date')}: {formatDate(order.created_at, locale === 'zh' ? 'zh-CN' : 'es-ES')}

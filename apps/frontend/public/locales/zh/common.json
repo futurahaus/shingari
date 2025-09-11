@@ -304,6 +304,7 @@
         "delete_error_message": "无法删除文件。请重试。",
         "could_not_load_order": "无法加载订单。",
         "purchase_id": "购买ID",
+        "order_number": "订单号",
         "date": "日期",
         "customer_id": "客户ID",
         "status": "状态",

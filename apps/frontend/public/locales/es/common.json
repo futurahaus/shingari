@@ -304,6 +304,7 @@
         "delete_error_message": "No se pudo eliminar el archivo. Por favor, inténtalo de nuevo.",
         "could_not_load_order": "No se pudo cargar la orden.",
         "purchase_id": "ID de compra",
+        "order_number": "Número de pedido",
         "date": "Fecha",
         "customer_id": "ID de Cliente",
         "status": "Estado",
