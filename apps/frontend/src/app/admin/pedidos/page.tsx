@@ -132,7 +132,14 @@ export default function AdminOrdersPage() {
             <tbody className="bg-white divide-y divide-gray-200">
               {orders.map((order) => (
                 <tr key={order.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">#{order.id}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div className="flex flex-col">
+                      <span>#{order.id}</span>
+                      {order.order_number && (
+                        <span className="text-xs text-gray-500">#{order.order_number}</span>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {order.user_id ? (
                       <Link 

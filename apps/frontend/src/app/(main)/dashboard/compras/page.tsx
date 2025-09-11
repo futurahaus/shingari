@@ -169,6 +169,13 @@ export default function ComprasPage() {
                           <span className="text-sm font-medium text-gray-900">
                             {t('dashboard.order')} {formatOrderId(order.id)}
                           </span>
+                          
+                          {/* Order Number */}
+                          {order.order_number && (
+                            <span className="text-sm font-medium text-gray-700">
+                              #{order.order_number}
+                            </span>
+                          )}
                         </div>
 
                         {/* Order Details */}
