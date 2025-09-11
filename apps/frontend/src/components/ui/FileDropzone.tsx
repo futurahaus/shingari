@@ -102,12 +102,12 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
         onClick={handleClick}
         className={`
           relative overflow-hidden border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-200
-          ${isDragOver && !disabled && !isUploading 
-            ? 'border-blue-400 bg-blue-50' 
+          ${isDragOver && !disabled && !isUploading
+            ? 'border-blue-400 bg-blue-50'
             : 'border-gray-300 hover:border-gray-400'
           }
-          ${disabled || isUploading 
-            ? 'opacity-50 cursor-not-allowed' 
+          ${disabled || isUploading
+            ? 'opacity-50 cursor-not-allowed'
             : 'hover:bg-gray-50'
           }
         `}
@@ -166,7 +166,7 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({
         {/* Upload Text */}
         <div className="space-y-2">
           <p className="text-lg font-medium text-gray-700">
-            {isDragOver 
+            {isDragOver
               ? t('admin.upload.drop_file_here')
               : t('admin.upload.drag_drop_or_click')
             }
