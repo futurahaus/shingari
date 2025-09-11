@@ -100,10 +100,80 @@ export default function AdminOrderDetailPage() {
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<Array<{ url: string; path: string; name: string }>>([]);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editedOrder, setEditedOrder] = useState<Order | null>(null);
 
   // Function to refresh order data
   const refreshOrderData = () => {
     setRefreshKey(prev => prev + 1);
+  };
+
+  // Edit mode functions
+  const handleEditModeToggle = () => {
+    if (!isEditMode && order) {
+      // Enter edit mode - copy current order data
+      setEditedOrder(JSON.parse(JSON.stringify(order)));
+    } else {
+      // Exit edit mode - reset edited data
+      setEditedOrder(null);
+    }
+    setIsEditMode(!isEditMode);
+  };
+
+  const handleSaveChanges = async () => {
+    if (!editedOrder) return;
+
+    try {
+      // TODO: Implement actual API call to save changes
+      showSuccess(t('admin.orders.edit.save_success'), '');
+      setIsEditMode(false);
+      setEditedOrder(null);
+      refreshOrderData();
+    } catch {
+      showError(t('admin.orders.edit.save_error'), '');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditMode(false);
+    setEditedOrder(null);
+  };
+
+  // Reserved for future use - editing other order fields
+  // const handleOrderFieldChange = (field: string, value: any) => {
+  //   if (!editedOrder) return;
+  //   setEditedOrder({
+  //     ...editedOrder,
+  //     [field]: value
+  //   });
+  // };
+
+  const handleOrderLineQuantityChange = (lineId: string, newQuantity: number) => {
+    if (!editedOrder || newQuantity < 0) return;
+
+    const updatedOrderLines = editedOrder.order_lines.map(line => {
+      if (line.id === lineId) {
+        const unitPrice = parseFloat(line.unit_price);
+        const totalPrice = (unitPrice * newQuantity).toFixed(2);
+        return {
+          ...line,
+          quantity: newQuantity,
+          total_price: totalPrice
+        };
+      }
+      return line;
+    });
+
+    // Recalculate total amount
+    const newTotalAmount = updatedOrderLines.reduce((sum, line) => {
+      return sum + parseFloat(line.total_price);
+    }, 0).toFixed(2);
+
+    setEditedOrder({
+      ...editedOrder,
+      order_lines: updatedOrderLines,
+      total_amount: newTotalAmount
+    });
   };
 
   useEffect(() => {
@@ -256,8 +326,43 @@ export default function AdminOrderDetailPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center py-8 px-16">
       <div className="bg-white rounded-xl shadow-lg w-full p-0">
-        <div className="text-center pt-8 pb-4">
+        <div className="flex justify-between items-center pt-8 pb-4 px-8">
+          <div></div>
           <h2 className="font-bold text-lg">{t('admin.orders.detail.title')}</h2>
+          <div className="flex gap-2">
+            {isEditMode ? (
+              <>
+                <button
+                  onClick={handleSaveChanges}
+                  className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  {t('admin.orders.edit.save')}
+                </button>
+                <button
+                  onClick={handleCancelEdit}
+                  className="flex items-center gap-2 px-3 py-2 bg-gray-500 text-white text-sm font-medium rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  {t('admin.orders.edit.cancel')}
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={handleEditModeToggle}
+                className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                {t('admin.orders.edit.edit')}
+              </button>
+            )}
+          </div>
         </div>
         <div className="px-8">
           <div className="border-t border-gray-200">
@@ -361,12 +466,46 @@ export default function AdminOrderDetailPage() {
                 </tr>
               </thead>
               <tbody className="bg-white">
-                {order.order_lines.map((line) => (
+                {(isEditMode && editedOrder ? editedOrder.order_lines : order.order_lines).map((line) => (
                   <tr key={line.id} className="border-t border-gray-100">
                     <td className="px-6 py-4 text-gray-900">{line.product_name}</td>
-                    <td className="px-6 py-4 text-gray-900">{line.quantity}</td>
+                    <td className="px-6 py-4 text-gray-900">
+                      {isEditMode ? (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleOrderLineQuantityChange(line.id, line.quantity - 1)}
+                            disabled={line.quantity <= 0}
+                            className="w-8 h-8 flex items-center justify-center bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                            </svg>
+                          </button>
+                          <input
+                            type="number"
+                            value={line.quantity}
+                            onChange={(e) => {
+                              const newQuantity = parseInt(e.target.value) || 0;
+                              handleOrderLineQuantityChange(line.id, newQuantity);
+                            }}
+                            className="w-16 text-center border border-gray-300 rounded px-2 py-1"
+                            min="0"
+                          />
+                          <button
+                            onClick={() => handleOrderLineQuantityChange(line.id, line.quantity + 1)}
+                            className="w-8 h-8 flex items-center justify-center bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                          </button>
+                        </div>
+                      ) : (
+                        line.quantity
+                      )}
+                    </td>
                     <td className="px-6 py-4 text-gray-900">{formatCurrency(line.unit_price)}</td>
-                    <td className="px-6 py-4 text-gray-900">{formatCurrency((Number(line.unit_price) * line.quantity).toString())}</td>
+                    <td className="px-6 py-4 text-gray-900">{formatCurrency(line.total_price)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -374,7 +513,7 @@ export default function AdminOrderDetailPage() {
                 <tr className="bg-gray-50 border-t border-gray-200">
                   <td className="px-6 py-4 text-right font-bold" colSpan={3}>{t('admin.orders.detail.table.total')}</td>
                   <td className="px-6 py-4 text-gray-900 font-bold">
-                    {formatCurrency(order.order_lines.reduce((acc, line) => acc + Number(line.unit_price) * line.quantity, 0).toString())}
+                    {formatCurrency((isEditMode && editedOrder ? editedOrder.total_amount : order.total_amount))}
                   </td>
                 </tr>
               </tfoot>

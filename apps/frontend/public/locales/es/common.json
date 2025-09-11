@@ -355,6 +355,13 @@
         "cancel": "Cancelar",
         "confirm": "Confirmar Cancelación",
         "updating": "Actualizando..."
+      },
+      "edit": {
+        "edit": "Editar",
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "save_success": "Pedido actualizado correctamente",
+        "save_error": "Error al actualizar el pedido"
       }
     },
     "rewards": {
