@@ -333,6 +333,17 @@
         }
       }
     },
+    "upload": {
+      "drag_drop_or_click": "Arrastra y suelta un archivo aquí, o haz clic para seleccionar",
+      "drop_file_here": "Suelta el archivo aquí",
+      "uploading": "Subiendo archivo...",
+      "supported_formats": "Formatos soportados",
+      "max_size": "Tamaño máximo: {{size}}MB",
+      "file_too_large": "El archivo es demasiado grande. Tamaño máximo: {{maxSize}}MB",
+      "invalid_file_type": "Tipo de archivo no válido. Tipos permitidos: {{types}}",
+      "upload_complete": "Archivo subido exitosamente",
+      "upload_failed": "Error al subir el archivo"
+    },
     "rewards": {
       "title": "Canjeables",
       "subtitle": "Gestiona las recompensas que los usuarios pueden canjear con sus puntos",
