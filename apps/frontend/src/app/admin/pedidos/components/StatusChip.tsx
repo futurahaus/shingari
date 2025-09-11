@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { useTranslation } from '@/contexts/I18nContext';
 import { useUpdateOrder } from '../hooks/useAdminOrders.hook';
+import { DatePickerModal } from './DatePickerModal';
+import { CancellationReasonModal } from './CancellationReasonModal';
 
-interface StatusChipProps {
+export interface StatusChipProps {
   orderId: string;
   currentStatus: string;
   className?: string;
+  onStatusChange?: () => void;
 }
 
 const statusOptions = [
@@ -15,29 +18,112 @@ const statusOptions = [
   { value: 'cancelled', label: 'admin.orders.status.cancelled', color: 'bg-red-100 text-red-800' },
 ];
 
-export const StatusChip: React.FC<StatusChipProps> = ({ 
-  orderId, 
-  currentStatus, 
-  className = '' 
+export const StatusChip: React.FC<StatusChipProps> = ({
+  orderId,
+  currentStatus,
+  className = '',
+  onStatusChange
 }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showCancellationModal, setShowCancellationModal] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<string | null>(null);
   const updateOrderMutation = useUpdateOrder();
 
-  const currentStatusOption = statusOptions.find(option => 
+  const currentStatusOption = statusOptions.find(option =>
     option.value === currentStatus || t(option.label).toLowerCase() === currentStatus.toLowerCase()
   ) || statusOptions[0];
 
   const handleStatusChange = async (newStatus: string) => {
+    // If changing from 'pending' to 'delivered', show date picker first
+    if (currentStatus === 'pending' && newStatus === 'delivered') {
+      setPendingStatus(newStatus);
+      setIsOpen(false);
+      setShowDatePicker(true);
+      return;
+    }
+
+    // If changing to 'cancelled', show cancellation reason modal first
+    if (newStatus === 'cancelled') {
+      setPendingStatus(newStatus);
+      setIsOpen(false);
+      setShowCancellationModal(true);
+      return;
+    }
+
+    // Prepare update data
+    const updateData: any = { status: newStatus };
+
+    // If changing back to 'pending', clear the delivery_date, cancellation_reason, and cancellation_date
+    if (newStatus === 'pending') {
+      updateData.delivery_date = null;
+      updateData.cancellation_reason = null;
+      updateData.cancellation_date = null;
+    }
+
     try {
       await updateOrderMutation.mutateAsync({
         orderId,
-        updateData: { status: newStatus }
+        updateData
       });
       setIsOpen(false);
+      // Trigger refresh of the order details page
+      onStatusChange?.();
     } catch {
       // Error handling is done in the mutation
     }
+  };
+
+  const handleDatePickerConfirm = async (deliveryDate: string) => {
+    if (!pendingStatus) return;
+
+    try {
+      await updateOrderMutation.mutateAsync({
+        orderId,
+        updateData: {
+          status: pendingStatus,
+          delivery_date: deliveryDate
+        }
+      });
+      setShowDatePicker(false);
+      setPendingStatus(null);
+      // Trigger refresh of the order details page
+      onStatusChange?.();
+    } catch {
+      // Error handling is done in the mutation
+    }
+  };
+
+  const handleDatePickerClose = () => {
+    setShowDatePicker(false);
+    setPendingStatus(null);
+  };
+
+  const handleCancellationConfirm = async (cancellationReason: string, cancellationDate: string) => {
+    if (!pendingStatus) return;
+
+    try {
+      await updateOrderMutation.mutateAsync({
+        orderId,
+        updateData: {
+          status: pendingStatus,
+          cancellation_reason: cancellationReason,
+          cancellation_date: cancellationDate
+        }
+      });
+      setShowCancellationModal(false);
+      setPendingStatus(null);
+      // Trigger refresh of the order details page
+      onStatusChange?.();
+    } catch {
+      // Error handling is done in the mutation
+    }
+  };
+
+  const handleCancellationClose = () => {
+    setShowCancellationModal(false);
+    setPendingStatus(null);
   };
 
   const handleClick = () => {
@@ -52,8 +138,8 @@ export const StatusChip: React.FC<StatusChipProps> = ({
         onClick={handleClick}
         disabled={updateOrderMutation.isPending}
         className={`
-          inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-full 
-          ${currentStatusOption.color} 
+          inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-full
+          ${currentStatusOption.color}
           hover:shadow-md hover:scale-105 transition-all duration-200 cursor-pointer
           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
           border border-transparent hover:border-opacity-20
@@ -84,7 +170,7 @@ export const StatusChip: React.FC<StatusChipProps> = ({
           <div className="px-4 py-3 border-b border-gray-100">
             <h3 className="text-sm font-semibold text-gray-900">{t('admin.orders.status.change_status')}</h3>
           </div>
-          
+
           {/* Options */}
           <div className="py-2">
             {statusOptions.map((option) => (
@@ -95,8 +181,8 @@ export const StatusChip: React.FC<StatusChipProps> = ({
                 className={`
                   w-full text-left px-4 py-3 text-sm transition-all duration-150
                   hover:bg-gray-50 hover:shadow-sm
-                  ${option.value === currentStatusOption.value 
-                    ? 'bg-blue-50 border-r-2 border-blue-500 text-blue-900' 
+                  ${option.value === currentStatusOption.value
+                    ? 'bg-blue-50 border-r-2 border-blue-500 text-blue-900'
                     : 'text-gray-700'
                   }
                   disabled:opacity-50 disabled:cursor-not-allowed
@@ -110,13 +196,13 @@ export const StatusChip: React.FC<StatusChipProps> = ({
                   `}></div>
                   <span className="font-medium">{t(option.label)}</span>
                 </div>
-                
+
                 {option.value === currentStatusOption.value && (
                   <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 )}
-                
+
                 {option.value !== currentStatusOption.value && (
                   <svg className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
@@ -125,7 +211,7 @@ export const StatusChip: React.FC<StatusChipProps> = ({
               </button>
             ))}
           </div>
-          
+
           {/* Footer */}
           <div className="px-4 py-2 bg-gray-50 border-t border-gray-100 rounded-b-lg">
             <p className="text-xs text-gray-500">
@@ -137,11 +223,29 @@ export const StatusChip: React.FC<StatusChipProps> = ({
 
       {/* Overlay para cerrar el dropdown al hacer click fuera */}
       {isOpen && (
-        <div 
-          className="fixed inset-0 z-0" 
+        <div
+          className="fixed inset-0 z-0"
           onClick={() => setIsOpen(false)}
         />
       )}
+
+      {/* Date Picker Modal */}
+      <DatePickerModal
+        isOpen={showDatePicker}
+        onClose={handleDatePickerClose}
+        onConfirm={handleDatePickerConfirm}
+        orderId={orderId}
+        isLoading={updateOrderMutation.isPending}
+      />
+
+      {/* Cancellation Reason Modal */}
+      <CancellationReasonModal
+        isOpen={showCancellationModal}
+        onClose={handleCancellationClose}
+        onConfirm={handleCancellationConfirm}
+        orderId={orderId}
+        isLoading={updateOrderMutation.isPending}
+      />
     </div>
   );
 };
