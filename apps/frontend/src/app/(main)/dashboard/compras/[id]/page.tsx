@@ -192,6 +192,17 @@ const OrderDetailSkeleton = () => (
         ))}
       </div>
     </div>
+
+    {/* Invoice Section Skeleton */}
+    <div className="bg-white border border-gray-200 rounded-xl p-4">
+      <div className="mb-4">
+        <div className="w-16 h-5 bg-gray-200 rounded"></div>
+      </div>
+      <div className="flex items-center gap-3">
+        <div className="w-2 h-2 bg-gray-200 rounded-full"></div>
+        <div className="w-48 h-4 bg-gray-200 rounded"></div>
+      </div>
+    </div>
   </div>
 );
 
@@ -379,7 +390,7 @@ export default function OrderDetailPage() {
               {order.order_lines.map((line, index) => (
                 <div key={line.id} className="border border-gray-100 rounded-lg p-3">
                   {index > 0 && <hr className="border-gray-200 my-4" />}
-                  
+
                   {/* Mobile Layout */}
                   <div className="sm:hidden">
                     <div className="flex items-center gap-3 mb-3">
@@ -442,6 +453,54 @@ export default function OrderDetailPage() {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Invoice Section */}
+          <div className="bg-white border border-gray-200 rounded-xl p-4">
+            <div className="mb-4">
+              <h3 className="text-sm font-bold text-gray-900">{t('order_details.invoice')}</h3>
+            </div>
+            {order.invoice_file_url ? (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm font-medium text-gray-900">{t('order_details.invoice_available')}</span>
+                  </div>
+                  <p className="text-xs text-gray-600">
+                    {t('order_details.invoice')} {formatOrderId(order.id)}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => window.open(order.invoice_file_url, '_blank')}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors cursor-pointer"
+                  >
+                    {t('order_details.view_invoice')}
+                  </button>
+                  <button
+                    onClick={() => {
+                      const link = document.createElement('a');
+                      link.href = order.invoice_file_url!;
+                      link.download = `invoice-${formatOrderId(order.id)}.pdf`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
+                    className="px-4 py-2 bg-[#EA3D15] text-white rounded text-sm font-medium hover:bg-[#d43e0e] transition-colors cursor-pointer"
+                  >
+                    {t('order_details.download_invoice')}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                <div className="flex-1">
+                  <p className="text-sm text-gray-600">{t('order_details.no_invoice_available')}</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

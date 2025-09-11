@@ -990,7 +990,12 @@
     "product": "产品",
     "price": "价格",
     "unit_price": "单价",
-    "quantity": "数量"
+    "quantity": "数量",
+    "invoice": "发票",
+    "invoice_available": "发票可用",
+    "download_invoice": "下载发票",
+    "view_invoice": "查看发票",
+    "no_invoice_available": "此订单暂无发票"
   },
   "profile": {
     "name": "姓名",

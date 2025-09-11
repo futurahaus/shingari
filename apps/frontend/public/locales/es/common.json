@@ -991,7 +991,12 @@
     "product": "Producto",
     "price": "Precio",
     "unit_price": "Precio unitario",
-    "quantity": "Cantidad"
+    "quantity": "Cantidad",
+    "invoice": "Factura",
+    "invoice_available": "Factura disponible",
+    "download_invoice": "Descargar factura",
+    "view_invoice": "Ver factura",
+    "no_invoice_available": "No hay factura disponible para esta orden"
   },
   "profile": {
     "name": "Nombre",
