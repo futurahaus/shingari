@@ -44,6 +44,7 @@ export interface Order {
   order_number?: string;
   created_at: string;
   updated_at: string;
+  invoice_file_url?: string;
   order_lines: OrderLine[];
   order_addresses: OrderAddress[];
   order_payments: OrderPayment[];

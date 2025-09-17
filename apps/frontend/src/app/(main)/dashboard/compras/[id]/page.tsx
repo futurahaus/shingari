@@ -192,6 +192,17 @@ const OrderDetailSkeleton = () => (
         ))}
       </div>
     </div>
+
+    {/* Invoice Section Skeleton */}
+    <div className="bg-white border border-gray-200 rounded-xl p-4">
+      <div className="mb-4">
+        <div className="w-16 h-5 bg-gray-200 rounded"></div>
+      </div>
+      <div className="flex items-center gap-3">
+        <div className="w-2 h-2 bg-gray-200 rounded-full"></div>
+        <div className="w-48 h-4 bg-gray-200 rounded"></div>
+      </div>
+    </div>
   </div>
 );
 
@@ -384,7 +395,7 @@ export default function OrderDetailPage() {
               {order.order_lines.map((line, index) => (
                 <div key={line.id} className="border border-gray-100 rounded-lg p-3">
                   {index > 0 && <hr className="border-gray-200 my-4" />}
-                  
+
                   {/* Mobile Layout */}
                   <div className="sm:hidden">
                     <div className="flex items-center gap-3 mb-3">
@@ -447,6 +458,61 @@ export default function OrderDetailPage() {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Invoice Section */}
+          <div className="bg-white border border-gray-200 rounded-xl p-4">
+            <div className="mb-4">
+              <h3 className="text-sm font-bold text-gray-900">{t('order_details.invoice')}</h3>
+            </div>
+            {order.invoice_file_url ? (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm font-medium text-gray-900">{t('order_details.invoice_available')}</span>
+                  </div>
+                  <p className="text-xs text-gray-600">
+                    {t('order_details.invoice')} {formatOrderId(order.id)}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => window.open(order.invoice_file_url, '_blank')}
+                    className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                    title={t('order_details.view_invoice')}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => {
+                      const link = document.createElement('a');
+                      link.href = order.invoice_file_url!;
+                      link.download = `invoice-${formatOrderId(order.id)}.pdf`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
+                    className="p-2 bg-[#EA3D15] text-white hover:bg-[#d43e0e] rounded-lg transition-colors cursor-pointer"
+                    title={t('order_details.download_invoice')}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                <div className="flex-1">
+                  <p className="text-sm text-gray-600">{t('order_details.no_invoice_available')}</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

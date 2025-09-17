@@ -334,6 +334,17 @@
         }
       }
     },
+    "upload": {
+      "drag_drop_or_click": "拖拽文件到此处，或点击选择文件",
+      "drop_file_here": "在此处放下文件",
+      "uploading": "正在上传文件...",
+      "supported_formats": "支持的格式",
+      "max_size": "最大大小：{{size}}MB",
+      "file_too_large": "文件太大。最大大小：{{maxSize}}MB",
+      "invalid_file_type": "无效的文件类型。允许的类型：{{types}}",
+      "upload_complete": "文件上传成功",
+      "upload_failed": "文件上传失败"
+    },
     "rewards": {
       "title": "可兑换商品",
       "subtitle": "管理用户可以用积分兑换的奖励",
@@ -1002,7 +1013,12 @@
     "product": "产品",
     "price": "价格",
     "unit_price": "单价",
-    "quantity": "数量"
+    "quantity": "数量",
+    "invoice": "发票",
+    "invoice_available": "发票可用",
+    "download_invoice": "下载发票",
+    "view_invoice": "查看发票",
+    "no_invoice_available": "此订单暂无发票"
   },
   "profile": {
     "name": "姓名",

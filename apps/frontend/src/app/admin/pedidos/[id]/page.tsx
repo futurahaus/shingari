@@ -6,9 +6,9 @@ import Link from 'next/link';
 import { OrdersDetailSkeleton } from '../components/OrdersDetailSkeleton';
 import { StatusChip } from '../components/StatusChip';
 import { api } from '@/lib/api';
-import { Button } from '@/app/ui/components/Button';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { formatCurrency as formatCurrencyUtil } from '@/lib/currency';
+import { FileDropzone } from '@/components/ui/FileDropzone';
 
 interface OrderLine {
   id: string;
@@ -96,11 +96,11 @@ export default function AdminOrderDetailPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [deleting, setDeleting] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<Array<{ url: string; path: string; name: string }>>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Function to refresh order data
   const refreshOrderData = () => {
@@ -133,20 +133,22 @@ export default function AdminOrderDetailPage() {
     console.log('orderId:', orderId);
   }, [orderId]);
 
-  const handleFileUpload = async () => {
+  const handleFileUpload = async (file: File) => {
     console.log('🔄 handleFileUpload iniciado');
-    console.log('selectedFile:', selectedFile);
+    console.log('selectedFile:', file);
     console.log('orderId:', orderId);
 
-    if (!selectedFile || !orderId) {
+    if (!file || !orderId) {
       console.log('❌ No hay archivo seleccionado o orderId');
       return;
     }
 
     setUploading(true);
+    setUploadProgress(0);
+
     try {
       const formData = new FormData();
-      formData.append('file', selectedFile);
+      formData.append('file', file);
       formData.append('documentType', 'invoice');
 
       const token = localStorage.getItem('accessToken');
@@ -159,6 +161,17 @@ export default function AdminOrderDetailPage() {
       const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/orders/${orderId}/upload-document`;
       console.log('🌐 URL del API:', apiUrl);
 
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 100);
+
       // Intentar con fetch primero
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -167,6 +180,9 @@ export default function AdminOrderDetailPage() {
         },
         body: formData,
       });
+
+      clearInterval(progressInterval);
+      setUploadProgress(100);
 
       console.log('📡 Respuesta del servidor:', response.status, response.statusText);
 
@@ -183,23 +199,24 @@ export default function AdminOrderDetailPage() {
       setUploadedFiles([{
         url: result.url,
         path: result.path,
-        name: selectedFile.name
+        name: file.name
       }]);
 
-      setSelectedFile(null);
-      showSuccess(t('admin.orders.detail.file_uploaded'), t('admin.orders.detail.invoice_uploaded_success'));
+      setTimeout(() => {
+        showSuccess(t('admin.upload.upload_complete'), t('admin.orders.detail.invoice_uploaded_success'));
+      }, 500);
+
     } catch (error) {
       console.error('❌ Error al subir archivo:', error);
-      showError(t('admin.orders.detail.upload_error_title'), error instanceof Error ? error.message : t('admin.orders.detail.unknown_error'));
+      showError(t('admin.upload.upload_failed'), error instanceof Error ? error.message : t('admin.orders.detail.unknown_error'));
     } finally {
-      setUploading(false);
+      setTimeout(() => {
+        setUploading(false);
+        setUploadProgress(0);
+      }, 1000);
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setSelectedFile(file);
-  };
 
   const handleDeleteFile = async (filePath: string) => {
     if (!confirm(t('admin.orders.detail.confirm_delete_file'))) return;
@@ -399,44 +416,19 @@ export default function AdminOrderDetailPage() {
         <div className="mb-4 px-8">
           <h3 className="font-bold text-lg mb-4">{t('admin.orders.detail.invoice')}</h3>
 
-          {/* Mostrar input solo si no hay factura cargada */}
+          {/* Mostrar FileDropzone solo si no hay factura cargada */}
           {uploadedFiles.length === 0 && (
-            <div className="flex-1">
-              <label className="block font-medium mb-2">{t('admin.orders.detail.upload_invoice')}</label>
-              <div className="flex justify-between items-center gap-2 p-3 border rounded-xl bg-gray-50">
-                <label className={`px-4 py-2 rounded cursor-pointer transition-colors ${
-                  uploading
-                    ? 'bg-gray-400 text-white cursor-not-allowed'
-                    : 'bg-black text-white hover:bg-gray-800'
-                }`}>
-                  {uploading ? t('admin.orders.detail.uploading') : t('admin.orders.detail.select_file')}
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.gif"
-                    onChange={handleFileChange}
-                    disabled={uploading}
-                  />
-                </label>
-                <span className="text-gray-500 text-sm">
-                  {uploading ? t('admin.orders.detail.uploading_file') : selectedFile ? selectedFile.name : t('admin.orders.detail.no_file_selected')}
-                </span>
-                {selectedFile && !uploading && (
-                  <Button
-                    onPress={handleFileUpload}
-                    type="primary-admin"
-                    text={t('admin.orders.detail.upload_file')}
-                    testID="upload-button"
-                    inline
-                    textProps={{
-                      size: 'sm',
-                    }}
-                  />
-                )}
-                {uploading && (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                )}
-              </div>
+            <div className="space-y-2">
+              <label className="block font-medium text-sm text-gray-700">{t('admin.orders.detail.upload_invoice')}</label>
+              <FileDropzone
+                onFileSelect={handleFileUpload}
+                acceptedTypes={['.pdf', '.jpg', '.jpeg', '.png', '.gif', '.doc', '.docx']}
+                maxSize={10}
+                disabled={uploading}
+                isUploading={uploading}
+                uploadProgress={uploadProgress}
+                className="w-full"
+              />
             </div>
           )}
 
@@ -461,24 +453,32 @@ export default function AdminOrderDetailPage() {
                        href={file.url}
                        target="_blank"
                        rel="noopener noreferrer"
-                       className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                       className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
+                       title={t('admin.orders.detail.view_file')}
                      >
-                       {t('admin.orders.detail.view_file')}
+                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                       </svg>
                      </a>
                      <button
                        onClick={() => handleDeleteFile(file.path.split('/').pop() || '')}
                        disabled={deleting}
-                       className={`text-sm font-medium transition-colors ${
+                       className={`p-2 rounded-lg transition-colors cursor-pointer ${
                          deleting
                            ? 'text-gray-400 cursor-not-allowed'
-                           : 'text-red-600 hover:text-red-800'
+                           : 'text-red-600 hover:text-red-800 hover:bg-red-50'
                        }`}
+                       title={deleting ? t('admin.orders.detail.deleting') : t('admin.orders.detail.delete')}
                      >
-                       {deleting ? t('admin.orders.detail.deleting') : t('admin.orders.detail.delete')}
+                       {deleting ? (
+                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                       ) : (
+                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                         </svg>
+                       )}
                      </button>
-                     {deleting && (
-                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
-                     )}
                    </div>
                 </div>
               ))}

@@ -105,20 +105,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
                 {sidebarOptions.map(option => (
                   <li key={option.path}>
-                    <Link href={option.path} legacyBehavior>
-                      <a
-                        className={`flex items-center px-4 py-3 text-sm font-medium rounded-md transition-colors ${
-                          pathname === option.path
-                            ? 'bg-red-50 text-red-700 border-r-2 border-red-500'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                        }`}
-                        onClick={() => setIsSidebarOpen(false)}
-                      >
-                        <span className="mr-3">
-                          {option.icon}
-                        </span>
-                        {t(option.name)}
-                      </a>
+                    <Link
+                      href={option.path}
+                      className={`flex items-center px-4 py-3 text-sm font-medium rounded-md transition-colors ${
+                        pathname === option.path
+                          ? 'bg-red-50 text-red-700 border-r-2 border-red-500'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                      onClick={() => setIsSidebarOpen(false)}
+                    >
+                      <span className="mr-3">
+                        {option.icon}
+                      </span>
+                      {t(option.name)}
                     </Link>
                   </li>
                 ))}
