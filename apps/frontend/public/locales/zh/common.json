@@ -659,6 +659,7 @@
         "wholesale_price": "批发价",
         "retail_price_with_iva": "含税零售价",
         "iva": "增值税 (%)",
+        "status": "状态",
         "actions": "操作",
         "sku": "SKU",
         "created_at": "创建日期",
@@ -678,6 +679,16 @@
         "no_products": "没有产品",
         "try_other_terms": "尝试其他搜索词。",
         "start_creating": "开始创建您的第一个产品。"
+      },
+      "status": {
+        "active": "活跃",
+        "draft": "草稿",
+        "paused": "暂停",
+        "deleted": "已删除",
+        "all_statuses": "所有状态",
+        "change_status": "更改状态",
+        "status_updated": "状态更新成功",
+        "error_updating_status": "更新状态时出错"
       },
       "modals": {
         "create": {

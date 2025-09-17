@@ -270,6 +270,7 @@ export class ProductsService {
           ? Number(product.units_per_box)
           : undefined,
       iva: finalIvaValue,
+      status: product.status || undefined,
     };
   }
 
@@ -418,6 +419,7 @@ export class ProductsService {
               ? Number(product.units_per_box)
               : undefined,
           iva: finalIvaValue,
+          status: product.status || undefined,
           product_translations: includeAllTranslations
             ? product.product_translations?.map((t) => ({
                 id: t.id,
@@ -1003,14 +1005,21 @@ export class ProductsService {
       sortField = 'created_at',
       sortDirection = 'desc',
       categoryId,
+      status,
     } = queryProductDto as any;
     const skip = (page - 1) * limit;
 
-    const where: Prisma.productsWhereInput = {
-      status: {
+    const where: Prisma.productsWhereInput = {};
+
+    // Agregar filtro de estado si se proporciona
+    if (status) {
+      where.status = product_states[status as keyof typeof product_states];
+    } else {
+      // Por defecto, excluir productos eliminados
+      where.status = {
         not: product_states.deleted,
-      },
-    };
+      };
+    }
 
     // Agregar filtro de búsqueda si se proporciona
     if (search && search.trim()) {

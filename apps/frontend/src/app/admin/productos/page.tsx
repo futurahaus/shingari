@@ -19,6 +19,7 @@ export default function AdminProductsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchQuery, setSearchQuery] = useState(''); // Estado para la búsqueda real
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -42,7 +43,7 @@ export default function AdminProductsPage() {
     error,
     lastPage,
     refetch
-  } = useAdminProducts({ page, limit: 10, search: searchQuery, sortField, sortDirection, categoryId: selectedCategory, locale });
+  } = useAdminProducts({ page, limit: 10, search: searchQuery, sortField, sortDirection, categoryId: selectedCategory, status: selectedStatus, locale });
 
   const openEditModal = (product: Product) => {
     setSelectedProduct(product);
@@ -72,6 +73,13 @@ export default function AdminProductsPage() {
   };
 
   const handleTranslationUpdated = () => {
+    refetch();
+  };
+
+  const handleProductStatusChange = (productId: string, newStatus: string) => {
+    // Refetch the data to get the updated product
+    // We could also implement optimistic updates here if needed
+    console.log(`Product ${productId} status changed to ${newStatus}`);
     refetch();
   };
 
@@ -407,6 +415,9 @@ export default function AdminProductsPage() {
                         </div>
                       </button>
                     </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('admin.products.table.status')}
+                    </th>
                     <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {t('admin.products.table.actions')}
                     </th>
@@ -420,6 +431,7 @@ export default function AdminProductsPage() {
                       onEdit={openEditModal}
                       onDelete={openDeleteModal}
                       onTranslate={openTranslationModal}
+                      onStatusChange={handleProductStatusChange}
                       isLast={index === products.length - 1}
                       lastProductRef={lastProductRef}
                     />
