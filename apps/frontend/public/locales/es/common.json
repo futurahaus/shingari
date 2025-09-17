@@ -308,6 +308,9 @@
         "date": "Fecha",
         "customer_id": "ID de Cliente",
         "status": "Estado",
+        "delivery_date": "Fecha de entrega",
+        "cancellation_reason": "Razón de cancelación",
+        "cancellation_date": "Fecha de cancelación",
         "points": "Puntos",
         "total": "Total",
         "payment_method": "Método de pago",
@@ -332,6 +335,27 @@
           "subtotal": "Subtotal",
           "total": "Total"
         }
+      },
+      "delivery_date_modal": {
+        "title": "Establecer Fecha de Entrega",
+        "subtitle": "Selecciona la fecha y hora de entrega para la orden #{{orderId}}",
+        "date_label": "Fecha y hora de entrega",
+        "date_help": "Selecciona cuándo se entregó o se entregará el pedido",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar Entrega",
+        "updating": "Actualizando..."
+      },
+      "cancellation_modal": {
+        "title": "Cancelar Pedido",
+        "subtitle": "Proporciona la razón de cancelación para la orden #{{orderId}}",
+        "date_label": "Fecha y hora de cancelación",
+        "date_help": "Selecciona cuándo se canceló el pedido",
+        "reason_label": "Razón de cancelación",
+        "reason_placeholder": "Describe el motivo de la cancelación...",
+        "reason_help": "Explica brevemente por qué se cancela este pedido",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar Cancelación",
+        "updating": "Actualizando..."
       }
     },
     "rewards": {
@@ -660,6 +684,7 @@
         "wholesale_price": "Precio Mayorista",
         "retail_price_with_iva": "Precio con IVA Minorista",
         "iva": "IVA (%)",
+        "status": "Estado",
         "actions": "Acciones",
         "sku": "SKU",
         "translated": "Traducido",
@@ -677,6 +702,16 @@
         "no_products": "No hay productos",
         "try_other_terms": "Intenta con otros términos de búsqueda.",
         "start_creating": "Comienza creando tu primer producto."
+      },
+      "status": {
+        "active": "Activo",
+        "draft": "Borrador",
+        "paused": "Pausado",
+        "deleted": "Eliminado",
+        "all_statuses": "Todos los estados",
+        "change_status": "Cambiar Estado",
+        "status_updated": "Estado actualizado exitosamente",
+        "error_updating_status": "Error al actualizar el estado"
       },
       "modals": {
         "create": {

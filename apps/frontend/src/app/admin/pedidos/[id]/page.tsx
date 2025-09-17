@@ -59,6 +59,9 @@ interface Order {
   order_number?: string;
   created_at: string;
   updated_at: string;
+  delivery_date?: string;
+  cancellation_reason?: string;
+  cancellation_date?: string;
   invoice_file_url?: string;
   order_lines: OrderLine[];
   order_addresses: OrderAddress[];
@@ -75,6 +78,15 @@ const formatDate = (dateString: string) => {
   return date.toLocaleDateString('es-ES');
 };
 
+const formatDateTime = (dateString: string) => {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('es-ES') + ' ' + date.toLocaleTimeString('es-ES', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
 export default function AdminOrderDetailPage() {
   const { t } = useTranslation();
   const params = useParams();
@@ -84,10 +96,16 @@ export default function AdminOrderDetailPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<Array<{ url: string; path: string; name: string }>>([]);
+
+  // Function to refresh order data
+  const refreshOrderData = () => {
+    setRefreshKey(prev => prev + 1);
+  };
 
   useEffect(() => {
     if (!orderId) return;
@@ -106,7 +124,7 @@ export default function AdminOrderDetailPage() {
       })
       .catch(() => setError(t('admin.orders.detail.error_loading_order')))
       .finally(() => setLoading(false));
-  }, [orderId, t]);
+  }, [orderId, t, refreshKey]); // Added refreshKey as dependency
 
   // Log para verificar variables de entorno
   useEffect(() => {
@@ -119,7 +137,7 @@ export default function AdminOrderDetailPage() {
     console.log('🔄 handleFileUpload iniciado');
     console.log('selectedFile:', selectedFile);
     console.log('orderId:', orderId);
-    
+
     if (!selectedFile || !orderId) {
       console.log('❌ No hay archivo seleccionado o orderId');
       return;
@@ -133,11 +151,11 @@ export default function AdminOrderDetailPage() {
 
       const token = localStorage.getItem('accessToken');
       console.log('🔑 Token:', token ? 'Presente' : 'No encontrado');
-      
+
       if (!token) {
         throw new Error(t('admin.orders.detail.auth_token_missing'));
       }
-      
+
       const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/orders/${orderId}/upload-document`;
       console.log('🌐 URL del API:', apiUrl);
 
@@ -167,7 +185,7 @@ export default function AdminOrderDetailPage() {
         path: result.path,
         name: selectedFile.name
       }]);
-      
+
       setSelectedFile(null);
       showSuccess(t('admin.orders.detail.file_uploaded'), t('admin.orders.detail.invoice_uploaded_success'));
     } catch (error) {
@@ -179,7 +197,7 @@ export default function AdminOrderDetailPage() {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;    
+    const file = e.target.files?.[0] || null;
     setSelectedFile(file);
   };
 
@@ -273,12 +291,56 @@ export default function AdminOrderDetailPage() {
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
               <div className="text-gray-500">{t('admin.orders.detail.status')}</div>
               <div className="text-gray-900 text-right flex justify-end">
-                <StatusChip 
-                  orderId={order.id} 
+                <StatusChip
+                  orderId={order.id}
                   currentStatus={order.status}
+                  onStatusChange={refreshOrderData}
                 />
               </div>
             </div>
+            {/* Conditional display: Show delivery date for delivered orders, cancellation reason for cancelled orders */}
+            {order.status === 'delivered' && (
+              <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
+                <div className="text-gray-500">{t('admin.orders.detail.delivery_date')}</div>
+                <div className="text-gray-900 text-right">
+                  {order.delivery_date ? (
+                    <span className="text-green-700 font-medium">
+                      {formatDateTime(order.delivery_date)}
+                    </span>
+                  ) : (
+                    <span className="text-gray-400">-</span>
+                  )}
+                </div>
+              </div>
+            )}
+            {order.status === 'cancelled' && (
+              <>
+                <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
+                  <div className="text-gray-500">{t('admin.orders.detail.cancellation_date')}</div>
+                  <div className="text-gray-900 text-right">
+                    {order.cancellation_date ? (
+                      <span className="text-red-700 font-medium">
+                        {formatDateTime(order.cancellation_date)}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
+                  <div className="text-gray-500">{t('admin.orders.detail.cancellation_reason')}</div>
+                  <div className="text-gray-900 text-right">
+                    {order.cancellation_reason ? (
+                      <span className="text-red-700 font-medium">
+                        {order.cancellation_reason}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
               <div className="text-gray-500">{t('admin.orders.detail.points')}</div>
               <div className="text-gray-900 text-right">-</div>
@@ -336,15 +398,15 @@ export default function AdminOrderDetailPage() {
         </div>
         <div className="mb-4 px-8">
           <h3 className="font-bold text-lg mb-4">{t('admin.orders.detail.invoice')}</h3>
-          
+
           {/* Mostrar input solo si no hay factura cargada */}
           {uploadedFiles.length === 0 && (
             <div className="flex-1">
               <label className="block font-medium mb-2">{t('admin.orders.detail.upload_invoice')}</label>
               <div className="flex justify-between items-center gap-2 p-3 border rounded-xl bg-gray-50">
                 <label className={`px-4 py-2 rounded cursor-pointer transition-colors ${
-                  uploading 
-                    ? 'bg-gray-400 text-white cursor-not-allowed' 
+                  uploading
+                    ? 'bg-gray-400 text-white cursor-not-allowed'
                     : 'bg-black text-white hover:bg-gray-800'
                 }`}>
                   {uploading ? t('admin.orders.detail.uploading') : t('admin.orders.detail.select_file')}
@@ -377,7 +439,7 @@ export default function AdminOrderDetailPage() {
               </div>
             </div>
           )}
-          
+
           {/* Mostrar factura cargada */}
           {uploadedFiles.length > 0 && (
             <div className="space-y-2">
@@ -407,8 +469,8 @@ export default function AdminOrderDetailPage() {
                        onClick={() => handleDeleteFile(file.path.split('/').pop() || '')}
                        disabled={deleting}
                        className={`text-sm font-medium transition-colors ${
-                         deleting 
-                           ? 'text-gray-400 cursor-not-allowed' 
+                         deleting
+                           ? 'text-gray-400 cursor-not-allowed'
                            : 'text-red-600 hover:text-red-800'
                        }`}
                      >
