@@ -58,6 +58,9 @@ interface Order {
   currency: string;
   created_at: string;
   updated_at: string;
+  delivery_date?: string;
+  cancellation_reason?: string;
+  cancellation_date?: string;
   invoice_file_url?: string;
   order_lines: OrderLine[];
   order_addresses: OrderAddress[];
@@ -74,6 +77,15 @@ const formatDate = (dateString: string) => {
   return date.toLocaleDateString('es-ES');
 };
 
+const formatDateTime = (dateString: string) => {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('es-ES') + ' ' + date.toLocaleTimeString('es-ES', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
 export default function AdminOrderDetailPage() {
   const { t } = useTranslation();
   const params = useParams();
@@ -87,6 +99,12 @@ export default function AdminOrderDetailPage() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [deleting, setDeleting] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<Array<{ url: string; path: string; name: string }>>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Function to refresh order data
+  const refreshOrderData = () => {
+    setRefreshKey(prev => prev + 1);
+  };
 
   useEffect(() => {
     if (!orderId) return;
@@ -105,7 +123,7 @@ export default function AdminOrderDetailPage() {
       })
       .catch(() => setError(t('admin.orders.detail.error_loading_order')))
       .finally(() => setLoading(false));
-  }, [orderId, t]);
+  }, [orderId, t, refreshKey]); // Added refreshKey as dependency
 
   // Log para verificar variables de entorno
   useEffect(() => {
@@ -286,9 +304,53 @@ export default function AdminOrderDetailPage() {
                 <StatusChip
                   orderId={order.id}
                   currentStatus={order.status}
+                  onStatusChange={refreshOrderData}
                 />
               </div>
             </div>
+            {/* Conditional display: Show delivery date for delivered orders, cancellation reason for cancelled orders */}
+            {order.status === 'delivered' && (
+              <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
+                <div className="text-gray-500">{t('admin.orders.detail.delivery_date')}</div>
+                <div className="text-gray-900 text-right">
+                  {order.delivery_date ? (
+                    <span className="text-green-700 font-medium">
+                      {formatDateTime(order.delivery_date)}
+                    </span>
+                  ) : (
+                    <span className="text-gray-400">-</span>
+                  )}
+                </div>
+              </div>
+            )}
+            {order.status === 'cancelled' && (
+              <>
+                <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
+                  <div className="text-gray-500">{t('admin.orders.detail.cancellation_date')}</div>
+                  <div className="text-gray-900 text-right">
+                    {order.cancellation_date ? (
+                      <span className="text-red-700 font-medium">
+                        {formatDateTime(order.cancellation_date)}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
+                  <div className="text-gray-500">{t('admin.orders.detail.cancellation_reason')}</div>
+                  <div className="text-gray-900 text-right">
+                    {order.cancellation_reason ? (
+                      <span className="text-red-700 font-medium">
+                        {order.cancellation_reason}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
               <div className="text-gray-500">{t('admin.orders.detail.points')}</div>
               <div className="text-gray-900 text-right">-</div>
