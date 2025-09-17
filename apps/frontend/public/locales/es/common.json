@@ -690,6 +690,7 @@
         "wholesale_price": "Precio Mayorista",
         "retail_price_with_iva": "Precio con IVA Minorista",
         "iva": "IVA (%)",
+        "status": "Estado",
         "actions": "Acciones",
         "sku": "SKU",
         "translated": "Traducido",
@@ -707,6 +708,16 @@
         "no_products": "No hay productos",
         "try_other_terms": "Intenta con otros términos de búsqueda.",
         "start_creating": "Comienza creando tu primer producto."
+      },
+      "status": {
+        "active": "Activo",
+        "draft": "Borrador",
+        "paused": "Pausado",
+        "deleted": "Eliminado",
+        "all_statuses": "Todos los estados",
+        "change_status": "Cambiar Estado",
+        "status_updated": "Estado actualizado exitosamente",
+        "error_updating_status": "Error al actualizar el estado"
       },
       "modals": {
         "create": {

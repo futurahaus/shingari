@@ -176,6 +176,11 @@ export default function AdminOrderDetailPage() {
     });
   };
 
+  // Function to refresh order data
+  const refreshOrderData = () => {
+    setRefreshKey(prev => prev + 1);
+  };
+
   useEffect(() => {
     if (!orderId) return;
     setLoading(true);
