@@ -56,6 +56,7 @@ interface Order {
   status: string;
   total_amount: string;
   currency: string;
+  order_number?: string;
   created_at: string;
   updated_at: string;
   delivery_date?: string;
@@ -265,6 +266,12 @@ export default function AdminOrderDetailPage() {
               <div className="text-gray-500">{t('admin.orders.detail.purchase_id')}</div>
               <div className="text-gray-900 font-medium text-right">#{order.id.slice(0, 8).toUpperCase()}</div>
             </div>
+            {order.order_number && (
+              <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
+                <div className="text-gray-500">{t('admin.orders.detail.order_number')}</div>
+                <div className="text-gray-900 font-medium text-right">#{order.order_number}</div>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
               <div className="text-gray-500">{t('admin.orders.detail.date')}</div>
               <div className="text-gray-900 text-right">{formatDate(order.created_at)}</div>

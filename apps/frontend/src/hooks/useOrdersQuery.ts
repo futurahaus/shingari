@@ -41,6 +41,7 @@ export interface Order {
   status: string;
   total_amount: string;
   currency: string;
+  order_number?: string;
   created_at: string;
   updated_at: string;
   order_lines: OrderLine[];

@@ -114,6 +114,9 @@ export class OrderResponseDto {
   @ApiProperty({ description: 'Moneda' })
   currency: string;
 
+  @ApiProperty({ description: 'Número de orden', required: false })
+  order_number?: string;
+
   @ApiProperty({ description: 'Fecha de creación' })
   created_at: Date;
 
