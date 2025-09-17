@@ -188,42 +188,14 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
                 </div>
             </td>
 
-            {/* Status */}
-            <td className="px-6 py-4 whitespace-nowrap">
-                <div className="relative" ref={dropdownRef}>
-                    <button
-                        onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-                        disabled={isUpdatingStatus}
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusConfig.className} hover:opacity-80 transition-opacity ${isUpdatingStatus ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                    >
-                        <StatusIcon className={`w-3 h-3 mr-1.5 ${statusConfig.iconClassName}`} />
-                        {statusConfig.label}
-                        <FaChevronDown className={`w-2 h-2 ml-1 transition-transform ${isStatusDropdownOpen ? 'rotate-180' : ''}`} />
-                    </button>
+            {/* Created At */}
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {new Date(product.createdAt).toLocaleDateString()}
+            </td>
 
-                    {isStatusDropdownOpen && (
-                        <div className="absolute z-10 mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg">
-                            <div className="py-1">
-                                {statusOptions.map((option) => {
-                                    const OptionIcon = option.icon;
-                                    return (
-                                        <button
-                                            key={option.value}
-                                            onClick={() => handleStatusChange(option.value)}
-                                            disabled={option.value === product.status || isUpdatingStatus}
-                                            className={`w-full text-left px-3 py-2 text-xs flex items-center hover:bg-gray-50 ${
-                                                option.value === product.status ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'text-gray-700'
-                                            }`}
-                                        >
-                                            <OptionIcon className={`w-3 h-3 mr-2 ${option.className}`} />
-                                            {option.label}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
-                </div>
+            {/* Updated At */}
+            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {new Date(product.updatedAt).toLocaleDateString()}
             </td>
 
             {/* Acciones */}

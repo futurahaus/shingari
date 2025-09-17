@@ -30,7 +30,7 @@ export default function AdminProductsPage() {
 
   const lastProductRef = useRef<HTMLTableRowElement>(null!);
 
-  const [sortField, setSortField] = useState<'created_at' | 'updated_at'>('created_at');
+  const [sortField, setSortField] = useState<'created_at' | 'updated_at' | 'sku' | 'name' | 'list_price' | 'wholesale_price' | 'iva' | 'units_per_box'>('created_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   // Usar el hook para obtener categorías
@@ -113,11 +113,24 @@ export default function AdminProductsPage() {
     setPage(1); // Resetear a la primera página cuando se cambia de categoría
   }, []);
 
-  // Función para manejar el cambio de estado
-  const handleStatusChange = useCallback((status: string) => {
-    setSelectedStatus(status);
-    setPage(1); // Resetear a la primera página cuando se cambia de estado
-  }, []);
+  // Función para manejar el sorting de columnas
+  const handleColumnSort = useCallback((field: 'created_at' | 'updated_at' | 'sku' | 'name' | 'list_price' | 'wholesale_price' | 'iva' | 'units_per_box') => {
+    console.log('handleColumnSort called with field:', field); // Debug log
+    console.log('Current sortField:', sortField, 'Current sortDirection:', sortDirection); // Debug log
+
+    if (sortField === field) {
+      // Si es el mismo campo, cambiar la dirección
+      const newDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+      console.log('Same field, changing direction to:', newDirection); // Debug log
+      setSortDirection(newDirection);
+    } else {
+      // Si es un campo diferente, establecerlo y usar desc por defecto
+      console.log('Different field, setting field to:', field, 'and direction to desc'); // Debug log
+      setSortField(field);
+      setSortDirection('desc');
+    }
+    setPage(1); // Resetear a la primera página cuando se cambia el sorting
+  }, [sortField, sortDirection]);
 
   return (
     <div className="">
@@ -187,45 +200,6 @@ export default function AdminProductsPage() {
                 ))}
               </select>
             </div>
-
-            {/* Filtro de Estado */}
-            <div className="flex gap-2 items-center">
-              <label htmlFor="statusFilter" className="text-sm text-gray-600">{t('admin.products.table.status')}:</label>
-              <select
-                id="statusFilter"
-                value={selectedStatus}
-                onChange={(e) => handleStatusChange(e.target.value)}
-                className="border border-gray-300 rounded-lg px-2 py-1 text-sm min-w-[150px]"
-              >
-                <option value="all">{t('admin.products.status.all_statuses')}</option>
-                <option value="active">{t('admin.products.status.active')}</option>
-                <option value="draft">{t('admin.products.status.draft')}</option>
-                <option value="paused">{t('admin.products.status.paused')}</option>
-                <option value="deleted">{t('admin.products.status.deleted')}</option>
-              </select>
-            </div>
-
-            <div className="flex gap-2 items-center">
-              <label htmlFor="sortField" className="text-sm text-gray-600">{t('admin.products.sort_by')}:</label>
-              <select
-                id="sortField"
-                value={sortField}
-                onChange={e => setSortField(e.target.value as 'created_at' | 'updated_at')}
-                className="border border-gray-300 rounded-lg px-2 py-1 text-sm"
-              >
-                <option value="created_at">{t('admin.products.most_recent')}</option>
-                <option value="updated_at">{t('admin.products.last_update')}</option>
-              </select>
-              <select
-                id="sortDirection"
-                value={sortDirection}
-                onChange={e => setSortDirection(e.target.value as 'asc' | 'desc')}
-                className="border border-gray-300 rounded-lg px-2 py-1 text-sm"
-              >
-                <option value="desc">{t('admin.products.descending')}</option>
-                <option value="asc">{t('admin.products.ascending')}</option>
-              </select>
-            </div>
           </div>
         </div>
 
@@ -243,29 +217,203 @@ export default function AdminProductsPage() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {t('admin.products.table.sku')}
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
+                    >
+                      <button
+                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log('SKU clicked!'); // Debug log
+                          handleColumnSort('sku');
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <div className="flex items-center gap-1">
+                          {t('admin.products.table.sku')}
+                          {sortField === 'sku' && (
+                            <span className="text-gray-400">
+                              {sortDirection === 'asc' ? '↑' : '↓'}
+                            </span>
+                          )}
+                        </div>
+                      </button>
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {t('admin.products.table.product')}
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
+                    >
+                      <button
+                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log('Product Name clicked!'); // Debug log
+                          handleColumnSort('name');
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <div className="flex items-center gap-1">
+                          {t('admin.products.table.product')}
+                          {sortField === 'name' && (
+                            <span className="text-gray-400">
+                              {sortDirection === 'asc' ? '↑' : '↓'}
+                            </span>
+                          )}
+                        </div>
+                      </button>
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {t('admin.products.table.stock')}
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {t('admin.products.table.units_per_box')}
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
+                    >
+                      <button
+                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log('Units per Box clicked!'); // Debug log
+                          handleColumnSort('units_per_box');
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <div className="flex items-center gap-1">
+                          {t('admin.products.table.units_per_box')}
+                          {sortField === 'units_per_box' && (
+                            <span className="text-gray-400">
+                              {sortDirection === 'asc' ? '↑' : '↓'}
+                            </span>
+                          )}
+                        </div>
+                      </button>
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {t('admin.products.table.retail_price')}
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
+                    >
+                      <button
+                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log('Retail Price clicked!'); // Debug log
+                          handleColumnSort('list_price');
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <div className="flex items-center gap-1">
+                          {t('admin.products.table.retail_price')}
+                          {sortField === 'list_price' && (
+                            <span className="text-gray-400">
+                              {sortDirection === 'asc' ? '↑' : '↓'}
+                            </span>
+                          )}
+                        </div>
+                      </button>
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {t('admin.products.table.wholesale_price')}
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
+                    >
+                      <button
+                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log('Wholesale Price clicked!'); // Debug log
+                          handleColumnSort('wholesale_price');
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <div className="flex items-center gap-1">
+                          {t('admin.products.table.wholesale_price')}
+                          {sortField === 'wholesale_price' && (
+                            <span className="text-gray-400">
+                              {sortDirection === 'asc' ? '↑' : '↓'}
+                            </span>
+                          )}
+                        </div>
+                      </button>
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {t('admin.products.table.retail_price_with_iva')}
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {t('admin.products.table.iva')}
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
+                    >
+                      <button
+                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log('IVA clicked!'); // Debug log
+                          handleColumnSort('iva');
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <div className="flex items-center gap-1">
+                          {t('admin.products.table.iva')}
+                          {sortField === 'iva' && (
+                            <span className="text-gray-400">
+                              {sortDirection === 'asc' ? '↑' : '↓'}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
+                    >
+                      <button
+                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log('Created At clicked!'); // Debug log
+                          handleColumnSort('created_at');
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <div className="flex items-center gap-1">
+                          {t('admin.products.table.created_at')}
+                          {sortField === 'created_at' && (
+                            <span className="text-gray-400">
+                              {sortDirection === 'asc' ? '↑' : '↓'}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 tracking-wider"
+                    >
+                      <button
+                        className="w-full text-left cursor-pointer hover:bg-gray-100 select-none transition-colors duration-200 p-2 -m-2 rounded uppercase"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log('Updated At clicked!'); // Debug log
+                          handleColumnSort('updated_at');
+                        }}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <div className="flex items-center gap-1">
+                          {t('admin.products.table.updated_at')}
+                          {sortField === 'updated_at' && (
+                            <span className="text-gray-400">
+                              {sortDirection === 'asc' ? '↑' : '↓'}
+                            </span>
+                          )}
+                        </div>
+                      </button>
                     </th>
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {t('admin.products.table.status')}

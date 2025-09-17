@@ -18,6 +18,12 @@ export enum ProductSortByPrice {
 export enum ProductSortField {
   CREATED_AT = 'created_at',
   UPDATED_AT = 'updated_at',
+  SKU = 'sku',
+  NAME = 'name',
+  LIST_PRICE = 'list_price',
+  WHOLESALE_PRICE = 'wholesale_price',
+  IVA = 'iva',
+  UNITS_PER_BOX = 'units_per_box',
 }
 
 export enum SortDirection {

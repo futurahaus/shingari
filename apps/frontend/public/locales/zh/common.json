@@ -662,6 +662,7 @@
       "last_update": "最后更新",
       "descending": "降序",
       "ascending": "升序",
+      "sort_instruction": "点击列标题进行排序",
       "table": {
         "product": "产品",
         "stock": "库存",
@@ -673,6 +674,8 @@
         "status": "状态",
         "actions": "操作",
         "sku": "SKU",
+        "created_at": "创建日期",
+        "updated_at": "最后更新",
         "translated": "已翻译",
         "translate_product": "翻译产品",
         "translate_product_with_locales": "翻译产品（已在以下语言中翻译：{{locales}}）",
