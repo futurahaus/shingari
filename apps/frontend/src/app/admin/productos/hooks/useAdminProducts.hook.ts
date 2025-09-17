@@ -5,7 +5,7 @@ import { useNotificationContext } from '@/contexts/NotificationContext';
 import { PaginatedProductsResponse, Category } from '../interfaces/product.interfaces';
 
 // Función para obtener productos paginados
-const fetchAdminProducts = async (page: number, limit: number = 20, search?: string, sortField?: string, sortDirection?: string, categoryId?: string, locale?: string, includeAllTranslations?: boolean): Promise<PaginatedProductsResponse> => {
+const fetchAdminProducts = async (page: number, limit: number = 20, search?: string, sortField?: string, sortDirection?: string, categoryId?: string, status?: string, locale?: string, includeAllTranslations?: boolean): Promise<PaginatedProductsResponse> => {
     const params = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
@@ -24,6 +24,10 @@ const fetchAdminProducts = async (page: number, limit: number = 20, search?: str
     // Agregar filtro de categoría si existe
     if (categoryId && categoryId !== 'all') {
         params.append('categoryId', categoryId);
+    }
+    // Agregar filtro de estado si existe
+    if (status && status !== 'all') {
+        params.append('status', status);
     }
     // Agregar locale si existe
     if (locale) {
@@ -55,12 +59,13 @@ interface UseAdminProductsOptions {
     sortField?: string;
     sortDirection?: string;
     categoryId?: string;
+    status?: string;
     locale?: string;
     includeAllTranslations?: boolean;
     enabled?: boolean;
 }
 
-export const useAdminProducts = ({ page, limit = 20, search = '', sortField = 'created_at', sortDirection = 'desc', categoryId, locale, includeAllTranslations, enabled = true }: UseAdminProductsOptions) => {
+export const useAdminProducts = ({ page, limit = 20, search = '', sortField = 'created_at', sortDirection = 'desc', categoryId, status, locale, includeAllTranslations, enabled = true }: UseAdminProductsOptions) => {
     const { showError } = useNotificationContext();
 
     const {
@@ -69,8 +74,8 @@ export const useAdminProducts = ({ page, limit = 20, search = '', sortField = 'c
         error,
         refetch
     } = useQuery({
-        queryKey: ['admin-products', page, limit, search, sortField, sortDirection, categoryId, locale, includeAllTranslations],
-        queryFn: () => fetchAdminProducts(page, limit, search, sortField, sortDirection, categoryId, locale, includeAllTranslations),
+        queryKey: ['admin-products', page, limit, search, sortField, sortDirection, categoryId, status, locale, includeAllTranslations],
+        queryFn: () => fetchAdminProducts(page, limit, search, sortField, sortDirection, categoryId, status, locale, includeAllTranslations),
         staleTime: 2 * 60 * 1000, // 2 minutos - los productos pueden cambiar
         gcTime: 5 * 60 * 1000, // 5 minutos en cache
         retry: 2,
