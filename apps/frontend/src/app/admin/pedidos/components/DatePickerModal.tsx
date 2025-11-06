@@ -89,6 +89,7 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
               text={t('admin.orders.delivery_date_modal.cancel')}
               disabled={isLoading}
               inline
+              testID="date-picker-cancel-button"
               textProps={{
                 size: 'sm',
                 weight: 'medium'
@@ -100,6 +101,7 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
               text={isLoading ? t('admin.orders.delivery_date_modal.updating') : t('admin.orders.delivery_date_modal.confirm')}
               disabled={!selectedDate || isLoading}
               inline
+              testID="date-picker-confirm-button"
               textProps={{
                 size: 'sm',
                 weight: 'medium'
