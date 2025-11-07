@@ -286,9 +286,9 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
         const details = errorMessages.join('\n');
         
         if (hasErrors) {
-          showWarning('Importación completada con errores', `${summary}\n\n${details}`, 12000);
+          showWarning('Importación completada con errores', `${summary}\n\n${details}`, 20000); // 20 segundos
         } else {
-          showWarning('Importación completada', `${summary}\n\n${details}`, 10000);
+          showWarning('Importación completada', `${summary}\n\n${details}`, 15000); // 15 segundos
         }
         
         // Show individual notifications for specific issues
@@ -296,7 +296,7 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
           showError(
             'Productos no encontrados', 
             `${errorsByType.productNotFound.length} producto(s) no existen en el sistema. Verifica los SKUs e inténtalo de nuevo.`, 
-            8000
+            12000 // 12 segundos
           );
         }
         
@@ -304,13 +304,13 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
           showWarning(
             'Descuentos duplicados omitidos',
             `${errorsByType.duplicates.length} descuento(s) ya existían con los mismos valores y fueron omitidos.`,
-            6000
+            10000 // 10 segundos
           );
         }
       } else if (result?.success > 0) {
-        showSuccess('✅ Importación completada', `${result.success} precio(s) especial(es) importado(s) correctamente`, 5000);
+        showSuccess('✅ Importación completada', `${result.success} precio(s) especial(es) importado(s) correctamente`, 8000); // 8 segundos
       } else {
-        showWarning('Sin cambios', 'No se importaron registros', 4000);
+        showWarning('Sin cambios', 'No se importaron registros', 6000); // 6 segundos
       }
       // After successful upload, refresh parent list
       onImported();
