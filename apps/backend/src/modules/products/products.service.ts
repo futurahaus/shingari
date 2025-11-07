@@ -1080,10 +1080,10 @@ export class ProductsService {
 
     // Handle sorting with validation
     const orderBy: any = {};
-    
+
     // Validate sortField and set up ordering
     const validSortFields = ['created_at', 'updated_at', 'sku', 'name', 'list_price', 'wholesale_price', 'iva', 'units_per_box'];
-    
+
     if (validSortFields.includes(sortField)) {
       orderBy[sortField] = sortDirection;
     } else {
@@ -1662,13 +1662,35 @@ export class ProductsService {
     try {
       // Read Excel or CSV file
       let data: any[][];
-      
+
       if (file.mimetype === 'text/csv' || file.mimetype === 'application/csv') {
-        // Handle CSV files
-        const workbook = XLSX.read(file.buffer, { type: 'buffer' });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        // Handle CSV files - parse manually to handle quoted values with commas correctly
+        const csvText = file.buffer.toString('utf-8');
+        const lines = csvText.split(/\r?\n/).filter(l => l.trim().length > 0);
+
+        // Parse CSV manually handling quoted fields
+        const parseCSVLine = (line: string): string[] => {
+          const result: string[] = [];
+          let current = '';
+          let inQuotes = false;
+
+          for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+              result.push(current.trim());
+              current = '';
+            } else {
+              current += char;
+            }
+          }
+          result.push(current.trim());
+          return result;
+        };
+
+        data = lines.map(line => parseCSVLine(line));
       } else {
         // Handle Excel files
         const workbook = XLSX.read(file.buffer, { type: 'buffer' });
@@ -1681,10 +1703,10 @@ export class ProductsService {
       const headers = data[0] as string[];
       const expectedHeaders = ['SKU', 'USER_ID', 'PRECIO', 'VALIDO_DESDE', 'VALIDO_HASTA', 'ESTADO'];
       const alternativeHeaders = ['SKU', 'USER_ID', 'PRECIO', 'VALIDO DESDE', 'VALIDO HASTA', 'ESTADO'];
-      
+
       const hasExpectedHeaders = expectedHeaders.every(header => headers.includes(header));
       const hasAlternativeHeaders = alternativeHeaders.every(header => headers.includes(header));
-      
+
       if (!hasExpectedHeaders && !hasAlternativeHeaders) {
         throw new BadRequestException('Invalid file structure. Expected columns: SKU, USER_ID, PRECIO, VALIDO_DESDE/VALIDO DESDE, VALIDO_HASTA/VALIDO HASTA, ESTADO');
       }
@@ -1704,16 +1726,25 @@ export class ProductsService {
           // Extract data from row
           const sku = row[0]?.toString()?.trim();
           const userId = row[1]?.toString()?.trim();
-          const precio = parseFloat(row[2]);
-          
+
+          // Parse price handling both European (comma) and US (dot) decimal formats
+          let precioStr = row[2]?.toString()?.trim() || '';
+          // Remove quotes if present
+          precioStr = precioStr.replace(/^["']|["']$/g, '');
+          // Replace comma with dot for European format (e.g., "6,95" -> "6.95")
+          precioStr = precioStr.replace(',', '.');
+          const precio = parseFloat(precioStr);
+
           // Handle both header formats (with underscore and with space)
           const validoDesdeIndex = headers.findIndex(h => h === 'VALIDO_DESDE' || h === 'VALIDO DESDE');
           const validoHastaIndex = headers.findIndex(h => h === 'VALIDO_HASTA' || h === 'VALIDO HASTA');
           const estadoIndex = headers.findIndex(h => h === 'ESTADO');
-          
+
           const validoDesde = row[validoDesdeIndex];
           const validoHasta = row[validoHastaIndex];
-          const estado = row[estadoIndex]?.toString()?.toLowerCase();
+          // Parse estado, handling quotes and whitespace
+          let estado = row[estadoIndex]?.toString()?.trim() || '';
+          estado = estado.replace(/^["']|["']$/g, '').toLowerCase();
 
           // Validate required fields
           if (!sku || !userId || isNaN(precio) || precio <= 0) {
@@ -1765,7 +1796,7 @@ export class ProductsService {
 
           if (validoDesde) {
             let desdeDate: Date;
-            
+
             // Handle different date formats that XLSX might return
             if (typeof validoDesde === 'number') {
               // XLSX might return Excel serial number (days since 1900-01-01)
@@ -1779,7 +1810,7 @@ export class ProductsService {
               const cleanDateStr = dateStr.replace(/^["']|["']$/g, '');
               desdeDate = new Date(cleanDateStr);
             }
-            
+
             if (isNaN(desdeDate.getTime())) {
               results.errors++;
               results.details.push({
@@ -1795,7 +1826,7 @@ export class ProductsService {
 
           if (validoHasta) {
             let hastaDate: Date;
-            
+
             // Handle different date formats that XLSX might return
             if (typeof validoHasta === 'number') {
               // XLSX might return Excel serial number (days since 1900-01-01)
@@ -1809,7 +1840,7 @@ export class ProductsService {
               const cleanDateStr = dateStr.replace(/^["']|["']$/g, '');
               hastaDate = new Date(cleanDateStr);
             }
-            
+
             if (isNaN(hastaDate.getTime())) {
               results.errors++;
               results.details.push({
@@ -1824,48 +1855,30 @@ export class ProductsService {
           }
 
           // Determine if discount is active
+          // Log for debugging
+          this.logger.debug(`Row ${rowNumber}: estado="${estado}", isActive will be=${estado === 'activo' || estado === 'true' || estado === '1' || estado === ''}`);
           const isActive = estado === 'activo' || estado === 'true' || estado === '1' || estado === '';
 
-          // Check if discount already exists for this user and product
-          const existingDiscount = await this.prisma.products_discounts.findFirst({
-            where: {
+          // For bulk imports, always create a new discount record
+          // This allows multiple discounts per user-product combination
+          // Each row in the CSV will create a separate discount record
+          await this.prisma.products_discounts.create({
+            data: {
               user_id: userId,
               product_id: product.id,
-              is_active: true
+              price: new Prisma.Decimal(precio),
+              is_active: isActive,
+              valid_from: validFrom,
+              valid_to: validTo
             }
           });
-
-          if (existingDiscount) {
-            // Update existing discount
-            await this.prisma.products_discounts.update({
-              where: { id: existingDiscount.id },
-              data: {
-                price: new Prisma.Decimal(precio),
-                is_active: isActive,
-                valid_from: validFrom,
-                valid_to: validTo
-              }
-            });
-          } else {
-            // Create new discount
-            await this.prisma.products_discounts.create({
-              data: {
-                user_id: userId,
-                product_id: product.id,
-                price: new Prisma.Decimal(precio),
-                is_active: isActive,
-                valid_from: validFrom,
-                valid_to: validTo
-              }
-            });
-          }
 
           results.success++;
           results.details.push({
             row: rowNumber,
             sku,
             userId,
-            message: 'Discount processed successfully'
+            message: `Discount processed successfully (is_active: ${isActive}, estado: "${estado}")`
           });
 
         } catch (error) {

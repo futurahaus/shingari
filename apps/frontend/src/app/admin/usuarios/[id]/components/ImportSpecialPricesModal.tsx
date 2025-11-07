@@ -77,6 +77,16 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
         // Always enforce our header order and overwrite USER_ID with current user
         const newHeader: string[] = ['SKU', 'USER_ID', 'PRECIO', 'VALIDO_DESDE', 'VALIDO_HASTA', 'ESTADO'];
 
+        // Helper function to escape CSV values (add quotes if needed)
+        const escapeCSVValue = (value: string): string => {
+          // If value contains comma, newline, or quote, wrap it in quotes
+          if (value.includes(',') || value.includes('\n') || value.includes('"')) {
+            // Escape existing quotes by doubling them
+            return `"${value.replace(/"/g, '""')}"`;
+          }
+          return value;
+        };
+
         const dataLines = lines.slice(1);
         const newLines = [newHeader.join(',')];
         for (const line of dataLines) {
@@ -86,20 +96,20 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
           // Map input based on whether original provided USER_ID
           if (hasUserId) {
             // Expected input with USER_ID: [SKU, USER_ID, PRECIO, VALIDO_DESDE, VALIDO_HASTA, ESTADO]
-            const sku = (cols[0] || '').trim();
-            const precio = (cols[2] || '').trim();
-            const validoDesde = (cols[3] || '').trim();
-            const validoHasta = (cols[4] || '').trim();
-            const estado = (cols[5] || '').trim();
+            const sku = escapeCSVValue((cols[0] || '').trim());
+            const precio = escapeCSVValue((cols[2] || '').trim());
+            const validoDesde = escapeCSVValue((cols[3] || '').trim());
+            const validoHasta = escapeCSVValue((cols[4] || '').trim());
+            const estado = escapeCSVValue((cols[5] || '').trim());
             const row = [sku, userId, precio, validoDesde, validoHasta, estado].join(',');
             newLines.push(row);
           } else {
             // Expected input without USER_ID: [SKU, PRECIO, VALIDO_DESDE, VALIDO_HASTA, ESTADO]
-            const sku = (cols[0] || '').trim();
-            const precio = (cols[1] || '').trim();
-            const validoDesde = (cols[2] || '').trim();
-            const validoHasta = (cols[3] || '').trim();
-            const estado = (cols[4] || '').trim();
+            const sku = escapeCSVValue((cols[0] || '').trim());
+            const precio = escapeCSVValue((cols[1] || '').trim());
+            const validoDesde = escapeCSVValue((cols[2] || '').trim());
+            const validoHasta = escapeCSVValue((cols[3] || '').trim());
+            const estado = escapeCSVValue((cols[4] || '').trim());
             const row = [sku, userId, precio, validoDesde, validoHasta, estado].join(',');
             newLines.push(row);
           }
