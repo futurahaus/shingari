@@ -161,7 +161,8 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
       formData.append('file', processedFile || selectedFile);
 
       const accessToken = localStorage.getItem('accessToken');
-      const response = await fetch('http://localhost:3001/api/products/bulk-discounts/upload', {
+      const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/products/bulk-discounts/upload`;
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`,

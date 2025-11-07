@@ -265,7 +265,8 @@ export default function AdminSetupPage() {
 
           // Create a custom upload request with proper authentication
           const accessToken = localStorage.getItem('accessToken');
-          const response = await fetch('http://localhost:3001/api/products/bulk-discounts/upload', {
+          const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/products/bulk-discounts/upload`;
+          const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${accessToken}`,
