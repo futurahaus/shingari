@@ -44,7 +44,7 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
         const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
         if (lines.length === 0) {
           setUploadError('El archivo CSV está vacío');
-          showError('Importación', 'El archivo CSV está vacío', 4000);
+          showError('Importación', 'El archivo CSV está vacío', 0);
           setProcessedFile(null);
           return;
         }
@@ -121,7 +121,7 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
         setProcessedFile(newFile);
       } catch {
         setUploadError('No se pudo procesar el CSV');
-        showError('Importación', 'No se pudo procesar el CSV', 4000);
+        showError('Importación', 'No se pudo procesar el CSV', 0);
         setProcessedFile(null);
       }
     };
@@ -152,7 +152,7 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
     link.click();
     document.body.removeChild(link);
 
-    showSuccess('Plantilla descargada', 'Se ha descargado la plantilla CSV correctamente', 3000);
+    showSuccess('Plantilla descargada', 'Se ha descargada la plantilla CSV correctamente', 0);
   };
 
   const handleUpload = async () => {
@@ -286,9 +286,9 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
         const details = errorMessages.join('\n');
         
         if (hasErrors) {
-          showWarning('Importación completada con errores', `${summary}\n\n${details}`, 20000); // 20 segundos
+          showWarning('Importación completada con errores', `${summary}\n\n${details}`, 0); // No desaparece automáticamente
         } else {
-          showWarning('Importación completada', `${summary}\n\n${details}`, 15000); // 15 segundos
+          showWarning('Importación completada', `${summary}\n\n${details}`, 0); // No desaparece automáticamente
         }
         
         // Show individual notifications for specific issues
@@ -296,7 +296,7 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
           showError(
             'Productos no encontrados', 
             `${errorsByType.productNotFound.length} producto(s) no existen en el sistema. Verifica los SKUs e inténtalo de nuevo.`, 
-            12000 // 12 segundos
+            0 // No desaparece automáticamente
           );
         }
         
@@ -304,20 +304,20 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
           showWarning(
             'Descuentos duplicados omitidos',
             `${errorsByType.duplicates.length} descuento(s) ya existían con los mismos valores y fueron omitidos.`,
-            10000 // 10 segundos
+            0 // No desaparece automáticamente
           );
         }
       } else if (result?.success > 0) {
-        showSuccess('✅ Importación completada', `${result.success} precio(s) especial(es) importado(s) correctamente`, 8000); // 8 segundos
+        showSuccess('✅ Importación completada', `${result.success} precio(s) especial(es) importado(s) correctamente`, 0); // No desaparece automáticamente
       } else {
-        showWarning('Sin cambios', 'No se importaron registros', 6000); // 6 segundos
+        showWarning('Sin cambios', 'No se importaron registros', 0); // No desaparece automáticamente
       }
       // After successful upload, refresh parent list
       onImported();
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Error al subir el archivo';
       setUploadError(message);
-      showError('Error de importación', message, 6000);
+      showError('Error de importación', message, 0);
     } finally {
       setIsUploading(false);
     }
