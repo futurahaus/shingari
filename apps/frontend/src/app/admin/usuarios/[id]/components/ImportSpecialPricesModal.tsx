@@ -189,21 +189,128 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
 
       const result = await response.json();
       setUploadResult(result);
+      
       // Notifications based on result
-      if (result?.errors && result.errors > 0) {
-        const failedDetails: any[] = Array.isArray(result?.details) ? result.details : [];
-        const failedSkus: string[] = failedDetails
-          .filter((d) => !(d?.message || '').toLowerCase().includes('success'))
-          .map((d) => String(d?.sku || '').trim())
-          .filter((s) => s.length > 0);
-        const maxShow = 10;
-        const shown = failedSkus.slice(0, maxShow);
-        const moreCount = Math.max(0, failedSkus.length - shown.length);
-        const skuList = shown.join(', ') + (moreCount > 0 ? `, +${moreCount} más` : '');
-        const msg = `Éxitos: ${result.success} · Errores: ${result.errors}` + (skuList ? ` | SKUs: ${skuList}` : '');
-        showWarning('Importación con errores', msg, 8000);
+      const allDetails: any[] = Array.isArray(result?.details) ? result.details : [];
+      
+      // Separate skipped (duplicates) from actual errors
+      const skippedDetails = allDetails.filter((d) => 
+        (d?.message || '').toLowerCase().includes('duplicate') || 
+        (d?.message || '').toLowerCase().includes('skipped')
+      );
+      const errorDetails = allDetails.filter((d) => 
+        !(d?.message || '').toLowerCase().includes('success') &&
+        !(d?.message || '').toLowerCase().includes('duplicate') &&
+        !(d?.message || '').toLowerCase().includes('skipped')
+      );
+      
+      const hasErrors = result?.errors && result.errors > 0;
+      const hasSkipped = skippedDetails.length > 0;
+
+      if (hasErrors || hasSkipped) {
+        const errorsByType = {
+          productNotFound: [] as string[],
+          userNotFound: [] as string[],
+          invalidFields: [] as string[],
+          invalidDates: [] as string[],
+          duplicates: [] as string[],
+          other: [] as string[]
+        };
+
+        // Categorize errors by type
+        errorDetails.forEach((d) => {
+          const sku = String(d?.sku || '').trim();
+          const message = (d?.message || '').toLowerCase();
+          
+          if (message.includes('product not found')) {
+            errorsByType.productNotFound.push(sku);
+          } else if (message.includes('user not found')) {
+            errorsByType.userNotFound.push(sku);
+          } else if (message.includes('invalid') && message.includes('date')) {
+            errorsByType.invalidDates.push(sku);
+          } else if (message.includes('missing') || message.includes('invalid')) {
+            errorsByType.invalidFields.push(sku);
+          } else {
+            errorsByType.other.push(sku);
+          }
+        });
+
+        // Categorize duplicates
+        skippedDetails.forEach((d) => {
+          const sku = String(d?.sku || '').trim();
+          errorsByType.duplicates.push(sku);
+        });
+
+        // Build detailed error messages
+        const errorMessages: string[] = [];
+        
+        if (errorsByType.productNotFound.length > 0) {
+          const skus = errorsByType.productNotFound.slice(0, 5).join(', ');
+          const more = errorsByType.productNotFound.length > 5 ? ` (+${errorsByType.productNotFound.length - 5} más)` : '';
+          errorMessages.push(`❌ Productos no encontrados: ${skus}${more}`);
+        }
+        
+        if (errorsByType.userNotFound.length > 0) {
+          errorMessages.push(`❌ Usuario no válido: ${errorsByType.userNotFound.length} fila(s)`);
+        }
+        
+        if (errorsByType.invalidFields.length > 0) {
+          const skus = errorsByType.invalidFields.slice(0, 3).join(', ');
+          const more = errorsByType.invalidFields.length > 3 ? ` (+${errorsByType.invalidFields.length - 3} más)` : '';
+          errorMessages.push(`⚠️ Campos inválidos: ${skus}${more}`);
+        }
+        
+        if (errorsByType.invalidDates.length > 0) {
+          const skus = errorsByType.invalidDates.slice(0, 3).join(', ');
+          const more = errorsByType.invalidDates.length > 3 ? ` (+${errorsByType.invalidDates.length - 3} más)` : '';
+          errorMessages.push(`📅 Fechas inválidas: ${skus}${more}`);
+        }
+        
+        if (errorsByType.duplicates.length > 0) {
+          const skus = errorsByType.duplicates.slice(0, 5).join(', ');
+          const more = errorsByType.duplicates.length > 5 ? ` (+${errorsByType.duplicates.length - 5} más)` : '';
+          errorMessages.push(`ℹ️ Duplicados omitidos: ${skus}${more}`);
+        }
+        
+        if (errorsByType.other.length > 0) {
+          const skus = errorsByType.other.slice(0, 3).join(', ');
+          const more = errorsByType.other.length > 3 ? ` (+${errorsByType.other.length - 3} más)` : '';
+          errorMessages.push(`⚠️ Otros errores: ${skus}${more}`);
+        }
+
+        // Show summary notification
+        const summaryParts = [`✅ Importados: ${result.success}`];
+        if (hasErrors) summaryParts.push(`❌ Errores: ${result.errors}`);
+        if (hasSkipped) summaryParts.push(`ℹ️ Omitidos: ${errorsByType.duplicates.length}`);
+        const summary = summaryParts.join(' | ');
+        const details = errorMessages.join('\n');
+        
+        if (hasErrors) {
+          showWarning('Importación completada con errores', `${summary}\n\n${details}`, 12000);
+        } else {
+          showWarning('Importación completada', `${summary}\n\n${details}`, 10000);
+        }
+        
+        // Show individual notifications for specific issues
+        if (errorsByType.productNotFound.length > 0) {
+          showError(
+            'Productos no encontrados', 
+            `${errorsByType.productNotFound.length} producto(s) no existen en el sistema. Verifica los SKUs e inténtalo de nuevo.`, 
+            8000
+          );
+        }
+        
+        if (errorsByType.duplicates.length > 0 && !hasErrors) {
+          showWarning(
+            'Descuentos duplicados omitidos',
+            `${errorsByType.duplicates.length} descuento(s) ya existían con los mismos valores y fueron omitidos.`,
+            6000
+          );
+        }
+      } else if (result?.success > 0) {
+        showSuccess('✅ Importación completada', `${result.success} precio(s) especial(es) importado(s) correctamente`, 5000);
       } else {
-        showSuccess('Importación completada', `Filas importadas: ${result?.success ?? 0}`, 4000);
+        showWarning('Sin cambios', 'No se importaron registros', 4000);
       }
       // After successful upload, refresh parent list
       onImported();

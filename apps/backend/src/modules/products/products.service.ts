@@ -1859,9 +1859,45 @@ export class ProductsService {
           this.logger.debug(`Row ${rowNumber}: estado="${estado}", isActive will be=${estado === 'activo' || estado === 'true' || estado === '1' || estado === ''}`);
           const isActive = estado === 'activo' || estado === 'true' || estado === '1' || estado === '';
 
-          // For bulk imports, always create a new discount record
-          // This allows multiple discounts per user-product combination
-          // Each row in the CSV will create a separate discount record
+          // Check if an identical discount already exists
+          // Build where clause carefully to handle null dates
+          const whereClause: any = {
+            user_id: userId,
+            product_id: product.id,
+            price: new Prisma.Decimal(precio),
+            is_active: isActive
+          };
+
+          // Handle valid_from comparison (could be null)
+          if (validFrom === null) {
+            whereClause.valid_from = null;
+          } else {
+            whereClause.valid_from = validFrom;
+          }
+
+          // Handle valid_to comparison (could be null)
+          if (validTo === null) {
+            whereClause.valid_to = null;
+          } else {
+            whereClause.valid_to = validTo;
+          }
+
+          const existingDiscount = await this.prisma.products_discounts.findFirst({
+            where: whereClause
+          });
+
+          if (existingDiscount) {
+            // Skip duplicate - don't count as error or success
+            results.details.push({
+              row: rowNumber,
+              sku,
+              userId,
+              message: 'Duplicate discount skipped - identical record already exists'
+            });
+            continue;
+          }
+
+          // Create new discount record
           await this.prisma.products_discounts.create({
             data: {
               user_id: userId,
