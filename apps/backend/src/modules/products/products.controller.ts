@@ -27,6 +27,7 @@ import {
   PaginatedProductResponseDto,
 } from './dto/product-response.dto';
 import { ProductDiscountResponseDto } from './dto/product-discount-response.dto';
+import { ToggleStatusResponseDto } from './dto/toggle-status-response.dto';
 import {
   ApiTags,
   ApiOperation,
@@ -204,6 +205,28 @@ export class ProductsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async removeLogical(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.productsService.removeLogical(id.toString());
+  }
+
+  @Patch(':id/toggle-status')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Activar/Desactivar un producto (Solo Admin)' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID del producto a activar/desactivar',
+    type: 'integer',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Estado del producto actualizado exitosamente.',
+    type: ToggleStatusResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'No se puede cambiar el estado de un producto eliminado.' })
+  @ApiResponse({ status: 401, description: 'No autorizado.' })
+  @ApiResponse({ status: 403, description: 'Prohibido.' })
+  @ApiResponse({ status: 404, description: 'Producto no encontrado.' })
+  async toggleStatus(@Param('id', ParseIntPipe) id: number): Promise<ToggleStatusResponseDto> {
+    return this.productsService.toggleStatus(id.toString());
   }
 
   // --- User-Specific Endpoint ---

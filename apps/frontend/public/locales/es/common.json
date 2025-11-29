@@ -725,7 +725,16 @@
         "all_statuses": "Todos los estados",
         "change_status": "Cambiar Estado",
         "status_updated": "Estado actualizado exitosamente",
-        "error_updating_status": "Error al actualizar el estado"
+        "error_updating_status": "Error al actualizar el estado",
+        "on": "ON",
+        "off": "OFF",
+        "success_title": "Estado actualizado",
+        "activated": "Producto activado – ahora visible en la tienda",
+        "deactivated": "Producto desactivado – no disponible para venta",
+        "error_title": "Error",
+        "error_message": "No se pudo actualizar el estado del producto. Intenta nuevamente.",
+        "tooltip_active": "Producto activo – visible en la tienda",
+        "tooltip_inactive": "Producto inactivo – no disponible para venta"
       },
       "modals": {
         "create": {
