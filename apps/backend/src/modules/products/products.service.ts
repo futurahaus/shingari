@@ -29,6 +29,7 @@ import {
 } from './dto/product-response.dto';
 import { ProductDiscountResponseDto } from './dto/product-discount-response.dto';
 import { CategoryResponseDto } from './dto/category-response.dto';
+import { ToggleStatusResponseDto } from './dto/toggle-status-response.dto';
 import { Cache } from 'cache-manager';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -913,6 +914,41 @@ export class ProductsService {
       where: { id: productId },
       data: { status: product_states.deleted },
     });
+  }
+
+  async toggleStatus(id: string): Promise<ToggleStatusResponseDto> {
+    await this.clearProductCache();
+    const productId = parseInt(id);
+
+    // Check if product exists
+    const existingProduct = await this.prisma.products.findUnique({
+      where: { id: productId },
+    });
+
+    if (!existingProduct) {
+      throw new NotFoundException(`Producto con ID "${id}" no encontrado.`);
+    }
+
+    // Don't allow toggling deleted products
+    if (existingProduct.status === product_states.deleted) {
+      throw new BadRequestException('No se puede cambiar el estado de un producto eliminado.');
+    }
+
+    // Toggle between active and paused
+    const newStatus = existingProduct.status === product_states.active
+      ? product_states.paused
+      : product_states.active;
+
+    const updatedProduct = await this.prisma.products.update({
+      where: { id: productId },
+      data: { status: newStatus },
+    });
+
+    return {
+      id: updatedProduct.id.toString(),
+      status: updatedProduct.status || 'active',
+      updatedAt: updatedProduct.updated_at || new Date(),
+    };
   }
 
   async findDiscountsForUser(

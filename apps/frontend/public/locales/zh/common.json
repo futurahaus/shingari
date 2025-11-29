@@ -700,7 +700,16 @@
         "all_statuses": "所有状态",
         "change_status": "更改状态",
         "status_updated": "状态更新成功",
-        "error_updating_status": "更新状态时出错"
+        "error_updating_status": "更新状态时出错",
+        "on": "开",
+        "off": "关",
+        "success_title": "状态已更新",
+        "activated": "产品已激活",
+        "deactivated": "产品已暂停",
+        "error_title": "错误",
+        "error_message": "无法更新产品状态",
+        "tooltip_active": "产品已激活（在目录中可见）",
+        "tooltip_inactive": "产品已暂停（在目录中不可见）"
       },
       "modals": {
         "create": {
