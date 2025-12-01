@@ -4,13 +4,13 @@ import { FaEdit, FaTrash, FaGlobe, FaCheck } from 'react-icons/fa';
 import { useTranslation } from '@/contexts/I18nContext';
 import { AdminProductRowProps } from '../interfaces/product.interfaces';
 import { formatCurrency, formatPercentage } from '@/lib/currency';
+import { ProductStatusToggle } from './ProductStatusToggle';
 
 export const AdminProductRow: React.FC<AdminProductRowProps> = ({
     product,
     onEdit,
     onDelete,
     onTranslate,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onStatusChange,
     isLast = false,
     lastProductRef
@@ -109,6 +109,19 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
             {/* Updated At */}
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 {new Date(product.updatedAt).toLocaleDateString()}
+            </td>
+
+            {/* Estado (Toggle ON/OFF) - Solo mostrar si no está eliminado */}
+            <td className="px-6 py-4 whitespace-nowrap">
+                {product.status !== 'deleted' ? (
+                    <ProductStatusToggle
+                        productId={product.id}
+                        initialStatus={(product.status as 'active' | 'paused') || 'active'}
+                        onStatusChange={onStatusChange}
+                    />
+                ) : (
+                    <span className="text-xs text-gray-400 italic">Eliminado</span>
+                )}
             </td>
 
             {/* Acciones */}
