@@ -111,13 +111,17 @@ export const AdminProductRow: React.FC<AdminProductRowProps> = ({
                 {new Date(product.updatedAt).toLocaleDateString()}
             </td>
 
-            {/* Estado (Toggle ON/OFF) */}
+            {/* Estado (Toggle ON/OFF) - Solo mostrar si no está eliminado */}
             <td className="px-6 py-4 whitespace-nowrap">
-                <ProductStatusToggle
-                    productId={product.id}
-                    initialStatus={product.status || 'active'}
-                    onStatusChange={onStatusChange}
-                />
+                {product.status !== 'deleted' ? (
+                    <ProductStatusToggle
+                        productId={product.id}
+                        initialStatus={(product.status as 'active' | 'paused') || 'active'}
+                        onStatusChange={onStatusChange}
+                    />
+                ) : (
+                    <span className="text-xs text-gray-400 italic">Eliminado</span>
+                )}
             </td>
 
             {/* Acciones */}

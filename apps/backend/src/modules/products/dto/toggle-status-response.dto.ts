@@ -1,5 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+// Tipo estricto para estados de producto
+export type ProductStatusType = 'active' | 'paused';
+
 export class ToggleStatusResponseDto {
   @ApiProperty({
     description: 'ID del producto',
@@ -12,7 +15,7 @@ export class ToggleStatusResponseDto {
     example: 'active',
     enum: ['active', 'paused'],
   })
-  status: string;
+  status: ProductStatusType;
 
   @ApiProperty({
     description: 'Fecha de última actualización',

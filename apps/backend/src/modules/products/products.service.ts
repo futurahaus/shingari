@@ -917,37 +917,48 @@ export class ProductsService {
   }
 
   async toggleStatus(id: string): Promise<ToggleStatusResponseDto> {
+    // Validate ID format first
+    const productId = parseInt(id, 10);
+    if (isNaN(productId) || productId <= 0) {
+      throw new BadRequestException('ID de producto inválido.');
+    }
+
+    // Use transaction to ensure data consistency
+    const result = await this.prisma.$transaction(async (tx) => {
+      // Check if product exists
+      const existingProduct = await tx.products.findUnique({
+        where: { id: productId },
+      });
+
+      if (!existingProduct) {
+        throw new NotFoundException(`Producto con ID "${id}" no encontrado.`);
+      }
+
+      // Don't allow toggling deleted products
+      if (existingProduct.status === product_states.deleted) {
+        throw new BadRequestException('No se puede cambiar el estado de un producto eliminado.');
+      }
+
+      // Toggle between active and paused
+      const newStatus = existingProduct.status === product_states.active
+        ? product_states.paused
+        : product_states.active;
+
+      const updatedProduct = await tx.products.update({
+        where: { id: productId },
+        data: { status: newStatus },
+      });
+
+      return updatedProduct;
+    });
+
+    // Clear cache only after successful transaction
     await this.clearProductCache();
-    const productId = parseInt(id);
-
-    // Check if product exists
-    const existingProduct = await this.prisma.products.findUnique({
-      where: { id: productId },
-    });
-
-    if (!existingProduct) {
-      throw new NotFoundException(`Producto con ID "${id}" no encontrado.`);
-    }
-
-    // Don't allow toggling deleted products
-    if (existingProduct.status === product_states.deleted) {
-      throw new BadRequestException('No se puede cambiar el estado de un producto eliminado.');
-    }
-
-    // Toggle between active and paused
-    const newStatus = existingProduct.status === product_states.active
-      ? product_states.paused
-      : product_states.active;
-
-    const updatedProduct = await this.prisma.products.update({
-      where: { id: productId },
-      data: { status: newStatus },
-    });
 
     return {
-      id: updatedProduct.id.toString(),
-      status: updatedProduct.status || 'active',
-      updatedAt: updatedProduct.updated_at || new Date(),
+      id: result.id.toString(),
+      status: (result.status as 'active' | 'paused') || 'active',
+      updatedAt: result.updated_at || new Date(),
     };
   }
 

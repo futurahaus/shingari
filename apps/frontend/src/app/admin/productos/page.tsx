@@ -77,10 +77,11 @@ export default function AdminProductsPage() {
   };
 
   const handleProductStatusChange = (productId: string, newStatus: string) => {
-    // Refetch the data to get the updated product
-    // We could also implement optimistic updates here if needed
-    console.log(`Product ${productId} status changed to ${newStatus}`);
-    refetch();
+    // El toggle ya hace optimistic update, no necesitamos refetch
+    // Solo actualizamos el estado local si es necesario para otros componentes
+    // El estado visual ya está actualizado en ProductStatusToggle
+    void productId;
+    void newStatus;
   };
 
   const handlePageChange = (newPage: number) => {

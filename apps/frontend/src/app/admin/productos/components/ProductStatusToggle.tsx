@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { useTranslation } from '@/contexts/I18nContext';
 
+// Tipo estricto para estados de producto
+type ProductStatus = 'active' | 'paused' | 'deleted';
+
 interface ProductStatusToggleProps {
     productId: string;
-    initialStatus: string;
-    onStatusChange: (productId: string, newStatus: string) => void;
+    initialStatus: ProductStatus;
+    onStatusChange: (productId: string, newStatus: ProductStatus) => void;
 }
 
 export const ProductStatusToggle: React.FC<ProductStatusToggleProps> = ({
@@ -16,27 +19,39 @@ export const ProductStatusToggle: React.FC<ProductStatusToggleProps> = ({
 }) => {
     const { t } = useTranslation();
     const { showSuccess, showError } = useNotificationContext();
-    const [status, setStatus] = useState(initialStatus);
+    const [status, setStatus] = useState<ProductStatus>(initialStatus);
     const [isLoading, setIsLoading] = useState(false);
+    
+    // Ref para prevenir doble click
+    const isTogglingRef = useRef(false);
+
+    // Sincronizar estado cuando initialStatus cambia desde el padre
+    useEffect(() => {
+        setStatus(initialStatus);
+    }, [initialStatus]);
 
     const isActive = status === 'active';
 
     const handleToggle = async () => {
-        if (isLoading) return;
+        // Doble protección contra clicks rápidos
+        if (isLoading || isTogglingRef.current) return;
+        isTogglingRef.current = true;
 
         const previousStatus = status;
-        const newStatus = isActive ? 'paused' : 'active';
+        // El backend decide el nuevo estado, pero hacemos optimistic update
+        const optimisticNewStatus: ProductStatus = isActive ? 'paused' : 'active';
 
         // Optimistic update
-        setStatus(newStatus);
+        setStatus(optimisticNewStatus);
         setIsLoading(true);
 
         try {
-            const response = await api.patch<{ id: string; status: string; updatedAt: string }, Record<string, never>>(
+            const response = await api.patch<{ id: string; status: ProductStatus; updatedAt: string }, Record<string, never>>(
                 `/products/${productId}/toggle-status`,
                 {}
             );
 
+            // Usar el estado que retorna el backend (fuente de verdad)
             setStatus(response.status);
             onStatusChange(productId, response.status);
             
@@ -53,9 +68,12 @@ export const ProductStatusToggle: React.FC<ProductStatusToggleProps> = ({
                 t('admin.products.status.error_title'),
                 t('admin.products.status.error_message')
             );
-            console.error('Error toggling product status:', error);
+            if (process.env.NODE_ENV === 'development') {
+                console.error('Error toggling product status:', error);
+            }
         } finally {
             setIsLoading(false);
+            isTogglingRef.current = false;
         }
     };
 
