@@ -18,6 +18,7 @@ export interface ProductFilters {
   categoryFilters?: string | string[];
   search?: string;
   sortByPrice?: 'ASC' | 'DESC';
+  sortByName?: 'A_TO_Z' | 'Z_TO_A';
   page?: number;
   limit?: number;
 }
@@ -41,6 +42,7 @@ export function buildProductParams(filters: ProductFilters): URLSearchParams {
   if (filters.limit) params.append('limit', filters.limit.toString());
   if (filters.search) params.append('search', filters.search);
   if (filters.sortByPrice) params.append('sortByPrice', filters.sortByPrice);
+  if (filters.sortByName) params.append('sortByName', filters.sortByName);
   
   if (filters.categoryFilters) {
     if (Array.isArray(filters.categoryFilters)) {
