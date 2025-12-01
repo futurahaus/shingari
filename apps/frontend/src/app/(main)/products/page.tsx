@@ -38,7 +38,7 @@ interface Reward {
 interface ProductFiltersProps {
     filters: {
         type: string;
-        price: string;
+        sort: string;
         stock: string;
     };
     onFilterChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
@@ -586,14 +586,16 @@ const ProductFilters = ({
             </div>
             <div className="relative">
                 <select
-                    name="price"
-                    value={filters.price}
+                    name="sort"
+                    value={filters.sort}
                     onChange={onFilterChange}
                     className="w-full sm:w-auto appearance-none bg-gray-100 border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500"
                 >
-                    <option value="">{t('products.price_filter')}</option>
-                    <option value="ASC">{t('products.price_low_to_high')}</option>
-                    <option value="DESC">{t('products.price_high_to_low')}</option>
+                    <option value="">{t('products.sort_filter')}</option>
+                    <option value="name_asc">{t('products.name_a_to_z')}</option>
+                    <option value="name_desc">{t('products.name_z_to_a')}</option>
+                    <option value="price_asc">{t('products.price_low_to_high')}</option>
+                    <option value="price_desc">{t('products.price_high_to_low')}</option>
                 </select>
                 <ChevronDown className="h-5 w-5 text-[color:var(--list-item-color)] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
@@ -635,7 +637,7 @@ const ProductsSection = ({
     const router = useRouter();
     const [filters, setFilters] = useState({
         type: selectedCategory || '',
-        price: '',
+        sort: '',
         stock: '',
     });
 
@@ -645,10 +647,20 @@ const ProductsSection = ({
         ? childNamesOfSelectedParent
         : (categoryFilter || filters.type || undefined);
 
+    // Parse sort filter to separate sortByPrice and sortByName
+    const getSortFilters = () => {
+        const sortValue = filters.sort;
+        if (sortValue === 'name_asc') return { sortByName: 'A_TO_Z' as const };
+        if (sortValue === 'name_desc') return { sortByName: 'Z_TO_A' as const };
+        if (sortValue === 'price_asc') return { sortByPrice: 'ASC' as const };
+        if (sortValue === 'price_desc') return { sortByPrice: 'DESC' as const };
+        return {};
+    };
+
     const productFilters = {
         categoryFilters,
         search: searchQuery || undefined,
-        sortByPrice: (filters.price as 'ASC' | 'DESC') || undefined,
+        ...getSortFilters(),
         limit: 10,
     };
 

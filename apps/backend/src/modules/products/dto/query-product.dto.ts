@@ -15,6 +15,11 @@ export enum ProductSortByPrice {
   DESC = 'DESC',
 }
 
+export enum ProductSortByName {
+  A_TO_Z = 'A_TO_Z',
+  Z_TO_A = 'Z_TO_A',
+}
+
 export enum ProductSortField {
   CREATED_AT = 'created_at',
   UPDATED_AT = 'updated_at',
@@ -110,6 +115,14 @@ export class QueryProductDto {
   @IsOptional()
   @IsEnum(ProductSortByPrice)
   sortByPrice?: ProductSortByPrice;
+
+  @ApiPropertyOptional({
+    description: 'Ordenar por nombre (A-Z o Z-A)',
+    enum: ProductSortByName,
+  })
+  @IsOptional()
+  @IsEnum(ProductSortByName)
+  sortByName?: ProductSortByName;
 
   @ApiPropertyOptional({
     description: 'Campo por el que ordenar',

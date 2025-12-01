@@ -22,7 +22,11 @@ import {
 } from '../../../generated/prisma'; // Importar tipos y enums de Prisma
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { QueryProductDto, ProductSortByPrice } from './dto/query-product.dto';
+import {
+  QueryProductDto,
+  ProductSortByPrice,
+  ProductSortByName,
+} from './dto/query-product.dto';
 import {
   ProductResponseDto,
   PaginatedProductResponseDto,
@@ -465,6 +469,7 @@ export class ProductsService {
       searchName,
       categoryFilters,
       sortByPrice,
+      sortByName,
       locale = 'es',
     } = queryProductDto;
     const skip = (page - 1) * limit;
@@ -520,7 +525,9 @@ export class ProductsService {
     }
 
     const orderBy: Prisma.productsOrderByWithRelationInput = {};
-    if (sortByPrice) {
+    if (sortByName) {
+      orderBy.name = sortByName === ProductSortByName.A_TO_Z ? 'asc' : 'desc';
+    } else if (sortByPrice) {
       orderBy.list_price =
         sortByPrice === ProductSortByPrice.ASC ? 'asc' : 'desc';
     } else {
