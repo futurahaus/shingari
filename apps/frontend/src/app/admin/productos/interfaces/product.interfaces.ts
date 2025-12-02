@@ -60,6 +60,7 @@ export interface CreateProductData {
   unit_id?: number;
   units_per_box?: number;
   iva?: number;
+  sku: string;
 }
 
 export interface UpdateProductData {
@@ -106,4 +107,4 @@ export interface DeleteModalProps {
   onClose: () => void;
   product: Product | null;
   onProductDeleted: () => void;
-} 
+}
