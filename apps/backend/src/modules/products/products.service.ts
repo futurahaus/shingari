@@ -2158,4 +2158,266 @@ export class ProductsService {
 
     return Math.round(ivaValue);
   }
+
+  /**
+   * Importa productos desde un archivo Excel.
+   * - Si el SKU no existe: crea un nuevo producto
+   * - Si el SKU existe: actualiza el producto existente
+   * - Si la fila no tiene SKU: salta la fila
+   * Columnas esperadas: SKU, Nombre, Descripcion, Precio_mayorista, Precio_minorista, IVA
+   * @param file - Archivo Excel a procesar
+   * @returns Resultado de la importación con estadísticas y detalles
+   */
+  async importProducts(file: Express.Multer.File): Promise<{
+    created: number;
+    updated: number;
+    skipped: number;
+    errors: number;
+    details: Array<{
+      row: number;
+      sku: string;
+      action: 'created' | 'updated' | 'skipped' | 'error';
+      message: string;
+    }>;
+  }> {
+    const results = {
+      created: 0,
+      updated: 0,
+      skipped: 0,
+      errors: 0,
+      details: [] as Array<{
+        row: number;
+        sku: string;
+        action: 'created' | 'updated' | 'skipped' | 'error';
+        message: string;
+      }>,
+    };
+
+    try {
+      // Leer el archivo Excel
+      const workbook = XLSX.read(file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const data = XLSX.utils.sheet_to_json<string[]>(
+        workbook.Sheets[sheetName],
+        { header: 1 },
+      );
+
+      if (data.length < 2) {
+        throw new BadRequestException(
+          'El archivo está vacío o solo contiene encabezados',
+        );
+      }
+
+      // Validar encabezados
+      const headers = data[0];
+      const expectedHeaders = [
+        'SKU',
+        'Nombre',
+        'Descripcion',
+        'Precio_mayorista',
+        'Precio_minorista',
+        'IVA',
+      ];
+
+      const hasValidHeaders = expectedHeaders.every((header) =>
+        headers.includes(header),
+      );
+
+      if (!hasValidHeaders) {
+        throw new BadRequestException(
+          `Estructura de archivo inválida. Se esperan las columnas: ${expectedHeaders.join(', ')}`,
+        );
+      }
+
+      // Obtener índices de las columnas
+      const columnIndexes = {
+        sku: headers.indexOf('SKU'),
+        nombre: headers.indexOf('Nombre'),
+        descripcion: headers.indexOf('Descripcion'),
+        precioMayorista: headers.indexOf('Precio_mayorista'),
+        precioMinorista: headers.indexOf('Precio_minorista'),
+        iva: headers.indexOf('IVA'),
+      };
+
+      // Procesar cada fila (saltando encabezados)
+      for (let i = 1; i < data.length; i++) {
+        const row = data[i];
+        const rowNumber = i + 1;
+
+        try {
+          const sku = row[columnIndexes.sku]?.toString().trim();
+
+          // Si no hay SKU, saltar la fila
+          if (!sku) {
+            results.skipped++;
+            results.details.push({
+              row: rowNumber,
+              sku: 'N/A',
+              action: 'skipped',
+              message: 'Fila sin SKU - saltada',
+            });
+            continue;
+          }
+
+          // Extraer datos de la fila
+          const nombre = row[columnIndexes.nombre]?.toString().trim() || '';
+          const descripcion =
+            row[columnIndexes.descripcion]?.toString().trim() || '';
+          const precioMayorista = this.parsePrice(
+            row[columnIndexes.precioMayorista],
+          );
+          const precioMinorista = this.parsePrice(
+            row[columnIndexes.precioMinorista],
+          );
+          const iva = this.parseIvaForImport(row[columnIndexes.iva]);
+
+          // Validar datos requeridos
+          if (!nombre) {
+            results.errors++;
+            results.details.push({
+              row: rowNumber,
+              sku,
+              action: 'error',
+              message: 'El nombre del producto es requerido',
+            });
+            continue;
+          }
+
+          if (precioMinorista === null || precioMinorista <= 0) {
+            results.errors++;
+            results.details.push({
+              row: rowNumber,
+              sku,
+              action: 'error',
+              message: 'El precio minorista es requerido y debe ser mayor a 0',
+            });
+            continue;
+          }
+
+          // Buscar si el producto existe por SKU
+          const existingProduct = await this.prisma.products.findFirst({
+            where: { sku },
+          });
+
+          if (existingProduct) {
+            // Actualizar producto existente
+            await this.prisma.products.update({
+              where: { id: existingProduct.id },
+              data: {
+                name: nombre,
+                description: descripcion || null,
+                wholesale_price: precioMayorista
+                  ? new Prisma.Decimal(precioMayorista)
+                  : existingProduct.wholesale_price,
+                list_price: new Prisma.Decimal(precioMinorista),
+                iva:
+                  iva !== null ? new Prisma.Decimal(iva) : existingProduct.iva,
+                updated_at: new Date(),
+              },
+            });
+
+            results.updated++;
+            results.details.push({
+              row: rowNumber,
+              sku,
+              action: 'updated',
+              message: 'Producto actualizado exitosamente',
+            });
+          } else {
+            // Crear nuevo producto
+            await this.prisma.products.create({
+              data: {
+                sku,
+                name: nombre,
+                description: descripcion || null,
+                wholesale_price: precioMayorista
+                  ? new Prisma.Decimal(precioMayorista)
+                  : new Prisma.Decimal(0),
+                list_price: new Prisma.Decimal(precioMinorista),
+                iva: iva !== null ? new Prisma.Decimal(iva) : null,
+                status: product_states.active,
+                created_at: new Date(),
+                updated_at: new Date(),
+              },
+            });
+
+            results.created++;
+            results.details.push({
+              row: rowNumber,
+              sku,
+              action: 'created',
+              message: 'Producto creado exitosamente',
+            });
+          }
+        } catch (error) {
+          results.errors++;
+          const errorMessage =
+            error instanceof Error ? error.message : 'Error desconocido';
+          results.details.push({
+            row: rowNumber,
+            sku: row[columnIndexes.sku]?.toString() || 'N/A',
+            action: 'error',
+            message: `Error procesando fila: ${errorMessage}`,
+          });
+        }
+      }
+
+      // Limpiar caché después de la operación masiva
+      await this.clearProductCache();
+
+      return results;
+    } catch (error) {
+      this.logger.error('Error al importar productos:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Parsea un valor de precio desde el Excel.
+   * Maneja valores numéricos, strings y valores vacíos.
+   * @param value - Valor a parsear
+   * @returns Precio como número o null si no es válido
+   */
+  private parsePrice(value: string | number | undefined | null): number | null {
+    if (value === undefined || value === null || value === '') {
+      return null;
+    }
+
+    const numValue =
+      typeof value === 'number' ? value : parseFloat(value.toString().trim());
+
+    if (isNaN(numValue)) {
+      return null;
+    }
+
+    return Math.round(numValue * 100) / 100;
+  }
+
+  /**
+   * Parsea el valor de IVA desde el Excel para importación.
+   * Convierte porcentajes enteros (21) a decimales (0.21) si es necesario.
+   * @param value - Valor del IVA a parsear
+   * @returns IVA como decimal o null si no es válido
+   */
+  private parseIvaForImport(
+    value: string | number | undefined | null,
+  ): number | null {
+    if (value === undefined || value === null || value === '') {
+      return null;
+    }
+
+    const numValue =
+      typeof value === 'number' ? value : parseFloat(value.toString().trim());
+
+    if (isNaN(numValue)) {
+      return null;
+    }
+
+    // Si el valor es >= 1, asumir que está en porcentaje (ej: 21) y convertir a decimal (0.21)
+    if (numValue >= 1) {
+      return numValue / 100;
+    }
+
+    return numValue;
+  }
 }

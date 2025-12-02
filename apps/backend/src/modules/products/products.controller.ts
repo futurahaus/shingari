@@ -249,6 +249,91 @@ export class ProductsController {
     return new StreamableFile(buffer);
   }
 
+  @Post('admin/import')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Importar productos desde Excel (Solo Admin)',
+    description:
+      'Procesa un archivo Excel para crear o actualizar productos. Columnas: SKU, Nombre, Descripcion, Precio_mayorista, Precio_minorista, IVA. Si el SKU existe, actualiza; si no existe, crea; si no hay SKU, salta la fila.',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description:
+            'Archivo Excel (.xlsx) con columnas: SKU, Nombre, Descripcion, Precio_mayorista, Precio_minorista, IVA',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Productos importados exitosamente.',
+    schema: {
+      type: 'object',
+      properties: {
+        created: {
+          type: 'number',
+          description: 'Número de productos creados',
+        },
+        updated: {
+          type: 'number',
+          description: 'Número de productos actualizados',
+        },
+        skipped: {
+          type: 'number',
+          description: 'Número de filas saltadas (sin SKU)',
+        },
+        errors: { type: 'number', description: 'Número de errores' },
+        details: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              row: { type: 'number' },
+              sku: { type: 'string' },
+              action: { type: 'string' },
+              message: { type: 'string' },
+            },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Archivo inválido o formato incorrecto.',
+  })
+  @ApiResponse({ status: 401, description: 'No autorizado.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Prohibido - Se requiere acceso de administrador.',
+  })
+  @HttpCode(HttpStatus.CREATED)
+  async importProducts(@UploadedFile() file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('No se proporcionó ningún archivo');
+    }
+
+    const allowedTypes = [
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    ];
+
+    if (!allowedTypes.includes(file.mimetype)) {
+      throw new BadRequestException(
+        'Tipo de archivo inválido. Solo se permiten archivos Excel (.xlsx, .xls).',
+      );
+    }
+
+    return this.productsService.importProducts(file);
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard, AdminGuard) // Requiere autenticación y rol de administrador
   @ApiBearerAuth()

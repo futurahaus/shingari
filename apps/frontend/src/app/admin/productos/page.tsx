@@ -14,16 +14,22 @@ import { useAdminProducts, useCategories } from "./hooks/useAdminProducts.hook";
 import { Text } from "@/app/ui/components/Text";
 import { FaSearch } from "react-icons/fa";
 import { exportProductsToExcel } from "./services/productExport.service";
+import {
+  importProductsFromExcel,
+  validateExcelFile,
+} from "./services/productImport.service";
 
 export default function AdminProductsPage() {
   const { t, locale } = useTranslation();
-  const { showSuccess, showError } = useNotificationContext();
+  const { showSuccess, showError, showInfo } = useNotificationContext();
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchQuery, setSearchQuery] = useState(""); // Estado para la búsqueda real
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedStatus] = useState<string>("all");
   const [isExporting, setIsExporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -119,6 +125,62 @@ export default function AdminProductsPage() {
     }
   }, [t, showSuccess, showError]);
 
+  const handleImportClick = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleFileChange = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      // Reset input para permitir seleccionar el mismo archivo de nuevo
+      event.target.value = "";
+
+      try {
+        validateExcelFile(file);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : t("admin.products.import_error_message");
+        showError(t("admin.products.import_error"), errorMessage);
+        return;
+      }
+
+      setIsImporting(true);
+      try {
+        const result = await importProductsFromExcel(file);
+
+        // Mostrar resultado
+        const message = t("admin.products.import_result_message", {
+          created: result.created,
+          updated: result.updated,
+          skipped: result.skipped,
+          errors: result.errors,
+        });
+
+        if (result.errors > 0) {
+          showInfo(t("admin.products.import_partial_success"), message);
+        } else {
+          showSuccess(t("admin.products.import_success"), message);
+        }
+
+        // Refrescar la lista de productos
+        refetch();
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : t("admin.products.import_error_message");
+        showError(t("admin.products.import_error"), errorMessage);
+      } finally {
+        setIsImporting(false);
+      }
+    },
+    [t, showSuccess, showError, showInfo, refetch],
+  );
+
   const handlePageChange = (newPage: number) => {
     if (newPage !== page && newPage > 0 && newPage <= lastPage) {
       setPage(newPage);
@@ -195,6 +257,15 @@ export default function AdminProductsPage() {
 
   return (
     <div className="">
+      {/* Input file oculto para importación */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept=".xlsx,.xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        className="hidden"
+        aria-label={t("admin.products.import_products")}
+      />
       <div className="">
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
@@ -214,6 +285,19 @@ export default function AdminProductsPage() {
                 icon="FaDownload"
                 inline
                 disabled={isExporting}
+              />
+              <Button
+                onPress={handleImportClick}
+                type="secondary"
+                text={
+                  isImporting
+                    ? t("admin.products.importing")
+                    : t("admin.products.import_products")
+                }
+                testID="import-products-button"
+                icon="FaUpload"
+                inline
+                disabled={isImporting}
               />
               <Button
                 onPress={() => setShowCreateModal(true)}
