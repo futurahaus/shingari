@@ -2088,6 +2088,13 @@ export class ProductsService {
         wholesale_price: true,
         list_price: true,
         iva: true,
+        units_per_box: true,
+        products_stock: {
+          select: {
+            quantity: true,
+          },
+          take: 1,
+        },
       },
       orderBy: {
         sku: 'asc',
@@ -2102,6 +2109,8 @@ export class ProductsService {
       Precio_mayorista: product.wholesale_price?.toNumber() || 0,
       Precio_minorista: product.list_price?.toNumber() || 0,
       IVA: this.normalizeIvaForExport(product.iva?.toNumber()),
+      Stock: product.products_stock[0]?.quantity?.toNumber() || 0,
+      Unidades_por_caja: product.units_per_box || 0,
     }));
 
     // Crear workbook y worksheet
@@ -2116,6 +2125,8 @@ export class ProductsService {
       { wch: 18 }, // Precio_mayorista
       { wch: 18 }, // Precio_minorista
       { wch: 10 }, // IVA
+      { wch: 10 }, // Stock
+      { wch: 18 }, // Unidades_por_caja
     ];
     worksheet['!cols'] = columnWidths;
 
@@ -2164,7 +2175,7 @@ export class ProductsService {
    * - Si el SKU no existe: crea un nuevo producto
    * - Si el SKU existe: actualiza el producto existente
    * - Si la fila no tiene SKU: salta la fila
-   * Columnas esperadas: SKU, Nombre, Descripcion, Precio_mayorista, Precio_minorista, IVA
+   * Columnas esperadas: SKU, Nombre, Descripcion, Precio_mayorista, Precio_minorista, IVA, Stock, Unidades_por_caja
    * @param file - Archivo Excel a procesar
    * @returns Resultado de la importación con estadísticas y detalles
    */
@@ -2217,6 +2228,8 @@ export class ProductsService {
         'Precio_mayorista',
         'Precio_minorista',
         'IVA',
+        'Stock',
+        'Unidades_por_caja',
       ];
 
       const hasValidHeaders = expectedHeaders.every((header) =>
@@ -2237,6 +2250,8 @@ export class ProductsService {
         precioMayorista: headers.indexOf('Precio_mayorista'),
         precioMinorista: headers.indexOf('Precio_minorista'),
         iva: headers.indexOf('IVA'),
+        stock: headers.indexOf('Stock'),
+        unidadesPorCaja: headers.indexOf('Unidades_por_caja'),
       };
 
       // Procesar cada fila (saltando encabezados)
@@ -2270,6 +2285,10 @@ export class ProductsService {
             row[columnIndexes.precioMinorista],
           );
           const iva = this.parseIvaForImport(row[columnIndexes.iva]);
+          const stock = this.parseStock(row[columnIndexes.stock]);
+          const unidadesPorCaja = this.parseUnitsPerBox(
+            row[columnIndexes.unidadesPorCaja],
+          );
 
           // Validar datos requeridos
           if (!nombre) {
@@ -2312,9 +2331,18 @@ export class ProductsService {
                 list_price: new Prisma.Decimal(precioMinorista),
                 iva:
                   iva !== null ? new Prisma.Decimal(iva) : existingProduct.iva,
+                units_per_box:
+                  unidadesPorCaja !== null
+                    ? unidadesPorCaja
+                    : existingProduct.units_per_box,
                 updated_at: new Date(),
               },
             });
+
+            // Actualizar stock si se proporciona
+            if (stock !== null) {
+              await this.updateOrCreateStock(existingProduct.id, stock);
+            }
 
             results.updated++;
             results.details.push({
@@ -2325,7 +2353,7 @@ export class ProductsService {
             });
           } else {
             // Crear nuevo producto
-            await this.prisma.products.create({
+            const newProduct = await this.prisma.products.create({
               data: {
                 sku,
                 name: nombre,
@@ -2335,11 +2363,17 @@ export class ProductsService {
                   : new Prisma.Decimal(0),
                 list_price: new Prisma.Decimal(precioMinorista),
                 iva: iva !== null ? new Prisma.Decimal(iva) : null,
+                units_per_box: unidadesPorCaja,
                 status: product_states.active,
                 created_at: new Date(),
                 updated_at: new Date(),
               },
             });
+
+            // Crear stock si se proporciona
+            if (stock !== null && stock > 0) {
+              await this.updateOrCreateStock(newProduct.id, stock);
+            }
 
             results.created++;
             results.details.push({
@@ -2419,5 +2453,81 @@ export class ProductsService {
     }
 
     return numValue;
+  }
+
+  /**
+   * Parsea el valor de stock desde el Excel para importación.
+   * @param value - Valor del stock a parsear
+   * @returns Stock como número o null si no es válido
+   */
+  private parseStock(value: string | number | undefined | null): number | null {
+    if (value === undefined || value === null || value === '') {
+      return null;
+    }
+
+    const numValue =
+      typeof value === 'number' ? value : parseFloat(value.toString().trim());
+
+    if (isNaN(numValue) || numValue < 0) {
+      return null;
+    }
+
+    return Math.floor(numValue);
+  }
+
+  /**
+   * Parsea el valor de unidades por caja desde el Excel para importación.
+   * @param value - Valor de unidades por caja a parsear
+   * @returns Unidades por caja como número o null si no es válido
+   */
+  private parseUnitsPerBox(
+    value: string | number | undefined | null,
+  ): number | null {
+    if (value === undefined || value === null || value === '') {
+      return null;
+    }
+
+    const numValue =
+      typeof value === 'number' ? value : parseInt(value.toString().trim(), 10);
+
+    if (isNaN(numValue) || numValue < 0) {
+      return null;
+    }
+
+    return numValue;
+  }
+
+  /**
+   * Actualiza o crea el stock de un producto.
+   * Usa la primera unidad disponible si no hay stock existente.
+   * @param productId - ID del producto
+   * @param quantity - Cantidad de stock
+   */
+  private async updateOrCreateStock(
+    productId: number,
+    quantity: number,
+  ): Promise<void> {
+    const existingStock = await this.prisma.products_stock.findFirst({
+      where: { product_id: productId },
+    });
+
+    if (existingStock) {
+      await this.prisma.products_stock.update({
+        where: { id: existingStock.id },
+        data: { quantity: new Prisma.Decimal(quantity) },
+      });
+    } else {
+      // Obtener la primera unidad disponible para productos nuevos
+      const defaultUnit = await this.prisma.units.findFirst();
+      if (defaultUnit) {
+        await this.prisma.products_stock.create({
+          data: {
+            product_id: productId,
+            quantity: new Prisma.Decimal(quantity),
+            unit_id: defaultUnit.id,
+          },
+        });
+      }
+    }
   }
 }
