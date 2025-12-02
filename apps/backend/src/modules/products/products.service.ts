@@ -943,13 +943,16 @@ export class ProductsService {
 
       // Don't allow toggling deleted products
       if (existingProduct.status === product_states.deleted) {
-        throw new BadRequestException('No se puede cambiar el estado de un producto eliminado.');
+        throw new BadRequestException(
+          'No se puede cambiar el estado de un producto eliminado.',
+        );
       }
 
       // Toggle between active and paused
-      const newStatus = existingProduct.status === product_states.active
-        ? product_states.paused
-        : product_states.active;
+      const newStatus =
+        existingProduct.status === product_states.active
+          ? product_states.paused
+          : product_states.active;
 
       const updatedProduct = await tx.products.update({
         where: { id: productId },
@@ -1136,7 +1139,16 @@ export class ProductsService {
     const orderBy: any = {};
 
     // Validate sortField and set up ordering
-    const validSortFields = ['created_at', 'updated_at', 'sku', 'name', 'list_price', 'wholesale_price', 'iva', 'units_per_box'];
+    const validSortFields = [
+      'created_at',
+      'updated_at',
+      'sku',
+      'name',
+      'list_price',
+      'wholesale_price',
+      'iva',
+      'units_per_box',
+    ];
 
     if (validSortFields.includes(sortField)) {
       orderBy[sortField] = sortDirection;
@@ -1635,7 +1647,9 @@ export class ProductsService {
     await this.clearProductCache();
   }
 
-  async uploadImage(file: Express.Multer.File): Promise<{ url: string; path: string }> {
+  async uploadImage(
+    file: Express.Multer.File,
+  ): Promise<{ url: string; path: string }> {
     try {
       // Validar el archivo
       if (!file) {
@@ -1643,15 +1657,24 @@ export class ProductsService {
       }
 
       // Validar tipo de archivo
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+      const allowedTypes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/webp',
+      ];
       if (!allowedTypes.includes(file.mimetype)) {
-        throw new BadRequestException('Tipo de archivo no válido. Solo se permiten imágenes JPEG, PNG y WebP.');
+        throw new BadRequestException(
+          'Tipo de archivo no válido. Solo se permiten imágenes JPEG, PNG y WebP.',
+        );
       }
 
       // Validar tamaño (máximo 5MB)
       const maxSize = 5 * 1024 * 1024; // 5MB
       if (file.size > maxSize) {
-        throw new BadRequestException('El archivo es demasiado grande. El tamaño máximo es 5MB.');
+        throw new BadRequestException(
+          'El archivo es demasiado grande. El tamaño máximo es 5MB.',
+        );
       }
 
       // Generar nombre único para el archivo
@@ -1661,8 +1684,9 @@ export class ProductsService {
       const filePath = `products/${fileName}`;
 
       // Subir archivo a Supabase Storage
-      const { error } = await this.databaseService.getAdminClient().storage
-        .from('shingari')
+      const { error } = await this.databaseService
+        .getAdminClient()
+        .storage.from('shingari')
         .upload(filePath, file.buffer, {
           contentType: file.mimetype,
           cacheControl: '3600',
@@ -1674,8 +1698,9 @@ export class ProductsService {
       }
 
       // Obtener la URL pública del archivo
-      const { data: urlData } = this.databaseService.getAdminClient().storage
-        .from('shingari')
+      const { data: urlData } = this.databaseService
+        .getAdminClient()
+        .storage.from('shingari')
         .getPublicUrl(filePath);
 
       this.logger.log(`Image uploaded successfully: ${filePath}`);
@@ -1692,8 +1717,9 @@ export class ProductsService {
 
   async deleteImage(filePath: string): Promise<void> {
     try {
-      const { error } = await this.databaseService.getAdminClient().storage
-        .from('shingari')
+      const { error } = await this.databaseService
+        .getAdminClient()
+        .storage.from('shingari')
         .remove([filePath]);
 
       if (error) {
@@ -1711,7 +1737,12 @@ export class ProductsService {
   async processBulkDiscounts(file: Express.Multer.File): Promise<{
     success: number;
     errors: number;
-    details: Array<{ row: number; sku: string; userId: string; message: string }>;
+    details: Array<{
+      row: number;
+      sku: string;
+      userId: string;
+      message: string;
+    }>;
   }> {
     try {
       // Read Excel or CSV file
@@ -1720,7 +1751,7 @@ export class ProductsService {
       if (file.mimetype === 'text/csv' || file.mimetype === 'application/csv') {
         // Handle CSV files - parse manually to handle quoted values with commas correctly
         const csvText = file.buffer.toString('utf-8');
-        const lines = csvText.split(/\r?\n/).filter(l => l.trim().length > 0);
+        const lines = csvText.split(/\r?\n/).filter((l) => l.trim().length > 0);
 
         // Parse CSV manually handling quoted fields
         const parseCSVLine = (line: string): string[] => {
@@ -1744,7 +1775,7 @@ export class ProductsService {
           return result;
         };
 
-        data = lines.map(line => parseCSVLine(line));
+        data = lines.map((line) => parseCSVLine(line));
       } else {
         // Handle Excel files
         const workbook = XLSX.read(file.buffer, { type: 'buffer' });
@@ -1755,20 +1786,45 @@ export class ProductsService {
 
       // Validate headers
       const headers = data[0] as string[];
-      const expectedHeaders = ['SKU', 'USER_ID', 'PRECIO', 'VALIDO_DESDE', 'VALIDO_HASTA', 'ESTADO'];
-      const alternativeHeaders = ['SKU', 'USER_ID', 'PRECIO', 'VALIDO DESDE', 'VALIDO HASTA', 'ESTADO'];
+      const expectedHeaders = [
+        'SKU',
+        'USER_ID',
+        'PRECIO',
+        'VALIDO_DESDE',
+        'VALIDO_HASTA',
+        'ESTADO',
+      ];
+      const alternativeHeaders = [
+        'SKU',
+        'USER_ID',
+        'PRECIO',
+        'VALIDO DESDE',
+        'VALIDO HASTA',
+        'ESTADO',
+      ];
 
-      const hasExpectedHeaders = expectedHeaders.every(header => headers.includes(header));
-      const hasAlternativeHeaders = alternativeHeaders.every(header => headers.includes(header));
+      const hasExpectedHeaders = expectedHeaders.every((header) =>
+        headers.includes(header),
+      );
+      const hasAlternativeHeaders = alternativeHeaders.every((header) =>
+        headers.includes(header),
+      );
 
       if (!hasExpectedHeaders && !hasAlternativeHeaders) {
-        throw new BadRequestException('Invalid file structure. Expected columns: SKU, USER_ID, PRECIO, VALIDO_DESDE/VALIDO DESDE, VALIDO_HASTA/VALIDO HASTA, ESTADO');
+        throw new BadRequestException(
+          'Invalid file structure. Expected columns: SKU, USER_ID, PRECIO, VALIDO_DESDE/VALIDO DESDE, VALIDO_HASTA/VALIDO HASTA, ESTADO',
+        );
       }
 
       const results = {
         success: 0,
         errors: 0,
-        details: [] as Array<{ row: number; sku: string; userId: string; message: string }>
+        details: [] as Array<{
+          row: number;
+          sku: string;
+          userId: string;
+          message: string;
+        }>,
       };
 
       // Process each row (skip header)
@@ -1790,9 +1846,13 @@ export class ProductsService {
           const precio = parseFloat(precioStr);
 
           // Handle both header formats (with underscore and with space)
-          const validoDesdeIndex = headers.findIndex(h => h === 'VALIDO_DESDE' || h === 'VALIDO DESDE');
-          const validoHastaIndex = headers.findIndex(h => h === 'VALIDO_HASTA' || h === 'VALIDO HASTA');
-          const estadoIndex = headers.findIndex(h => h === 'ESTADO');
+          const validoDesdeIndex = headers.findIndex(
+            (h) => h === 'VALIDO_DESDE' || h === 'VALIDO DESDE',
+          );
+          const validoHastaIndex = headers.findIndex(
+            (h) => h === 'VALIDO_HASTA' || h === 'VALIDO HASTA',
+          );
+          const estadoIndex = headers.findIndex((h) => h === 'ESTADO');
 
           const validoDesde = row[validoDesdeIndex];
           const validoHasta = row[validoHastaIndex];
@@ -1807,14 +1867,15 @@ export class ProductsService {
               row: rowNumber,
               sku: sku || 'N/A',
               userId: userId || 'N/A',
-              message: 'Missing or invalid required fields (SKU, USER_ID, PRECIO)'
+              message:
+                'Missing or invalid required fields (SKU, USER_ID, PRECIO)',
             });
             continue;
           }
 
           // Find product by SKU
           const product = await this.prisma.products.findFirst({
-            where: { sku: sku }
+            where: { sku: sku },
           });
 
           if (!product) {
@@ -1823,14 +1884,14 @@ export class ProductsService {
               row: rowNumber,
               sku,
               userId,
-              message: 'Product not found with this SKU'
+              message: 'Product not found with this SKU',
             });
             continue;
           }
 
           // Validate user exists
           const user = await this.prisma.auth_users.findUnique({
-            where: { id: userId }
+            where: { id: userId },
           });
 
           if (!user) {
@@ -1839,7 +1900,7 @@ export class ProductsService {
               row: rowNumber,
               sku,
               userId,
-              message: 'User not found with this USER_ID'
+              message: 'User not found with this USER_ID',
             });
             continue;
           }
@@ -1856,7 +1917,9 @@ export class ProductsService {
               // XLSX might return Excel serial number (days since 1900-01-01)
               // Excel date serial number to JavaScript Date
               const excelEpoch = new Date(1900, 0, 1); // January 1, 1900
-              desdeDate = new Date(excelEpoch.getTime() + (validoDesde - 2) * 24 * 60 * 60 * 1000);
+              desdeDate = new Date(
+                excelEpoch.getTime() + (validoDesde - 2) * 24 * 60 * 60 * 1000,
+              );
             } else {
               // Convert to string first to handle any type conversion issues
               const dateStr = String(validoDesde).trim();
@@ -1871,7 +1934,7 @@ export class ProductsService {
                 row: rowNumber,
                 sku,
                 userId,
-                message: 'Invalid VALIDO_DESDE date format'
+                message: 'Invalid VALIDO_DESDE date format',
               });
               continue;
             }
@@ -1886,7 +1949,9 @@ export class ProductsService {
               // XLSX might return Excel serial number (days since 1900-01-01)
               // Excel date serial number to JavaScript Date
               const excelEpoch = new Date(1900, 0, 1); // January 1, 1900
-              hastaDate = new Date(excelEpoch.getTime() + (validoHasta - 2) * 24 * 60 * 60 * 1000);
+              hastaDate = new Date(
+                excelEpoch.getTime() + (validoHasta - 2) * 24 * 60 * 60 * 1000,
+              );
             } else {
               // Convert to string first to handle any type conversion issues
               const dateStr = String(validoHasta).trim();
@@ -1901,7 +1966,7 @@ export class ProductsService {
                 row: rowNumber,
                 sku,
                 userId,
-                message: 'Invalid VALIDO_HASTA date format'
+                message: 'Invalid VALIDO_HASTA date format',
               });
               continue;
             }
@@ -1910,8 +1975,14 @@ export class ProductsService {
 
           // Determine if discount is active
           // Log for debugging
-          this.logger.debug(`Row ${rowNumber}: estado="${estado}", isActive will be=${estado === 'activo' || estado === 'true' || estado === '1' || estado === ''}`);
-          const isActive = estado === 'activo' || estado === 'true' || estado === '1' || estado === '';
+          this.logger.debug(
+            `Row ${rowNumber}: estado="${estado}", isActive will be=${estado === 'activo' || estado === 'true' || estado === '1' || estado === ''}`,
+          );
+          const isActive =
+            estado === 'activo' ||
+            estado === 'true' ||
+            estado === '1' ||
+            estado === '';
 
           // Check if an identical discount already exists
           // Build where clause carefully to handle null dates
@@ -1919,7 +1990,7 @@ export class ProductsService {
             user_id: userId,
             product_id: product.id,
             price: new Prisma.Decimal(precio),
-            is_active: isActive
+            is_active: isActive,
           };
 
           // Handle valid_from comparison (could be null)
@@ -1936,9 +2007,10 @@ export class ProductsService {
             whereClause.valid_to = validTo;
           }
 
-          const existingDiscount = await this.prisma.products_discounts.findFirst({
-            where: whereClause
-          });
+          const existingDiscount =
+            await this.prisma.products_discounts.findFirst({
+              where: whereClause,
+            });
 
           if (existingDiscount) {
             // Skip duplicate - don't count as error or success
@@ -1946,7 +2018,8 @@ export class ProductsService {
               row: rowNumber,
               sku,
               userId,
-              message: 'Duplicate discount skipped - identical record already exists'
+              message:
+                'Duplicate discount skipped - identical record already exists',
             });
             continue;
           }
@@ -1959,8 +2032,8 @@ export class ProductsService {
               price: new Prisma.Decimal(precio),
               is_active: isActive,
               valid_from: validFrom,
-              valid_to: validTo
-            }
+              valid_to: validTo,
+            },
           });
 
           results.success++;
@@ -1968,16 +2041,15 @@ export class ProductsService {
             row: rowNumber,
             sku,
             userId,
-            message: `Discount processed successfully (is_active: ${isActive}, estado: "${estado}")`
+            message: `Discount processed successfully (is_active: ${isActive}, estado: "${estado}")`,
           });
-
         } catch (error) {
           results.errors++;
           results.details.push({
             row: rowNumber,
             sku: row[0]?.toString() || 'N/A',
             userId: row[1]?.toString() || 'N/A',
-            message: `Error processing row: ${error.message}`
+            message: `Error processing row: ${error.message}`,
           });
         }
       }
@@ -1986,10 +2058,104 @@ export class ProductsService {
       await this.clearProductCache();
 
       return results;
-
     } catch (error) {
       this.logger.error('Error processing bulk discounts:', error);
       throw error;
     }
+  }
+
+  /**
+   * Exporta todos los productos activos a un archivo Excel.
+   * Incluye: SKU, Nombre, Descripción, Precio_mayorista, Precio_minorista, IVA
+   * @returns Buffer del archivo Excel generado
+   */
+  async exportProducts(): Promise<{
+    buffer: Buffer;
+    filename: string;
+    mimeType: string;
+  }> {
+    // Obtener todos los productos no eliminados
+    const products = await this.prisma.products.findMany({
+      where: {
+        status: {
+          not: product_states.deleted,
+        },
+      },
+      select: {
+        sku: true,
+        name: true,
+        description: true,
+        wholesale_price: true,
+        list_price: true,
+        iva: true,
+      },
+      orderBy: {
+        sku: 'asc',
+      },
+    });
+
+    // Transformar los datos al formato de exportación
+    const exportData = products.map((product) => ({
+      SKU: product.sku || '',
+      Nombre: product.name || '',
+      Descripcion: product.description || '',
+      Precio_mayorista: product.wholesale_price?.toNumber() || 0,
+      Precio_minorista: product.list_price?.toNumber() || 0,
+      IVA: this.normalizeIvaForExport(product.iva?.toNumber()),
+    }));
+
+    // Crear workbook y worksheet
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+    // Configurar anchos de columna para mejor visualización
+    const columnWidths = [
+      { wch: 15 }, // SKU
+      { wch: 40 }, // Nombre
+      { wch: 50 }, // Descripcion
+      { wch: 18 }, // Precio_mayorista
+      { wch: 18 }, // Precio_minorista
+      { wch: 10 }, // IVA
+    ];
+    worksheet['!cols'] = columnWidths;
+
+    // Agregar worksheet al workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Productos');
+
+    // Generar buffer del archivo
+    const buffer = XLSX.write(workbook, {
+      type: 'buffer',
+      bookType: 'xlsx',
+    });
+
+    // Generar nombre de archivo con fecha
+    const dateStr = new Date().toISOString().split('T')[0];
+    const filename = `productos_export_${dateStr}.xlsx`;
+
+    return {
+      buffer: Buffer.from(buffer),
+      filename,
+      mimeType:
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    };
+  }
+
+  /**
+   * Normaliza el valor de IVA para exportación.
+   * Si el valor es menor a 1, se asume que está en formato decimal (0.21) y se convierte a porcentaje (21).
+   * @param ivaValue - Valor del IVA desde la base de datos
+   * @returns Valor del IVA como porcentaje entero
+   */
+  private normalizeIvaForExport(ivaValue: number | undefined | null): number {
+    if (ivaValue === undefined || ivaValue === null) {
+      return 0;
+    }
+
+    // Si el IVA es menor a 1, está en formato decimal (ej: 0.21 para 21%)
+    if (ivaValue < 1 && ivaValue > 0) {
+      return Math.round(ivaValue * 100);
+    }
+
+    return Math.round(ivaValue);
   }
 }

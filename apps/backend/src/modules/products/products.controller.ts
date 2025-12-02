@@ -10,14 +10,16 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
-  ParseUUIDPipe,
   ParseIntPipe,
   Request as NestRequest,
   UseInterceptors,
   UploadedFile,
   BadRequestException,
   Patch,
+  Res,
+  StreamableFile,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -54,17 +56,45 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get('categories')
-  @ApiOperation({ summary: 'Obtener una lista de todas las categorías de productos' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Número máximo de categorías a retornar' })
-  @ApiQuery({ name: 'locale', required: false, type: String, description: 'Locale for translations (es, zh)', example: 'es', default: 'es' })
-  @ApiQuery({ name: 'includeAllTranslations', required: false, type: Boolean, description: 'Include all translations for admin use', default: false })
-  @ApiResponse({ status: 200, description: 'Lista de categorías obtenida exitosamente.', type: [ProductDiscountResponseDto] })
+  @ApiOperation({
+    summary: 'Obtener una lista de todas las categorías de productos',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Número máximo de categorías a retornar',
+  })
+  @ApiQuery({
+    name: 'locale',
+    required: false,
+    type: String,
+    description: 'Locale for translations (es, zh)',
+    example: 'es',
+    default: 'es',
+  })
+  @ApiQuery({
+    name: 'includeAllTranslations',
+    required: false,
+    type: Boolean,
+    description: 'Include all translations for admin use',
+    default: false,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de categorías obtenida exitosamente.',
+    type: [ProductDiscountResponseDto],
+  })
   async findAllCategories(
     @Query('limit') limit?: number,
     @Query('locale') locale: string = 'es',
     @Query('includeAllTranslations') includeAllTranslations: boolean = false,
   ) {
-    return this.productsService.findAllCategories(limit, locale, includeAllTranslations);
+    return this.productsService.findAllCategories(
+      limit,
+      locale,
+      includeAllTranslations,
+    );
   }
 
   @Get('categories/parents')
@@ -77,7 +107,14 @@ export class ProductsController {
     type: Number,
     description: 'Número máximo de categorías padre a retornar',
   })
-  @ApiQuery({ name: 'locale', required: false, type: String, description: 'Locale for translations (es, zh)', example: 'es', default: 'es' })
+  @ApiQuery({
+    name: 'locale',
+    required: false,
+    type: String,
+    description: 'Locale for translations (es, zh)',
+    example: 'es',
+    default: 'es',
+  })
   @ApiResponse({
     status: 200,
     description: 'Lista de categorías padre obtenida exitosamente.',
@@ -114,11 +151,43 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener productos paginados (Solo Admin)' })
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Número de página', example: 1 })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Cantidad de productos por página', example: 20 })
-  @ApiQuery({ name: 'search', required: false, type: String, description: 'Término de búsqueda (SKU, nombre, ID)', example: 'laptop' })
-  @ApiQuery({ name: 'categoryId', required: false, type: String, description: 'ID de categoría para filtrar productos. Use "none" para productos sin categoría', example: '1' })
-  @ApiQuery({ name: 'locale', required: false, type: String, description: 'Locale for translations (es, zh)', example: 'es', default: 'es' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Número de página',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Cantidad de productos por página',
+    example: 20,
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Término de búsqueda (SKU, nombre, ID)',
+    example: 'laptop',
+  })
+  @ApiQuery({
+    name: 'categoryId',
+    required: false,
+    type: String,
+    description:
+      'ID de categoría para filtrar productos. Use "none" para productos sin categoría',
+    example: '1',
+  })
+  @ApiQuery({
+    name: 'locale',
+    required: false,
+    type: String,
+    description: 'Locale for translations (es, zh)',
+    example: 'es',
+    default: 'es',
+  })
   @ApiResponse({
     status: 200,
     description: 'Lista de productos paginada obtenida exitosamente.',
@@ -134,7 +203,50 @@ export class ProductsController {
     @Query('locale') locale: string = 'es',
     @Query('includeAllTranslations') includeAllTranslations: boolean = false,
   ): Promise<PaginatedProductResponseDto> {
-    return this.productsService.findAllForAdmin(queryProductDto, locale, includeAllTranslations);
+    return this.productsService.findAllForAdmin(
+      queryProductDto,
+      locale,
+      includeAllTranslations,
+    );
+  }
+
+  @Get('admin/export')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Exportar productos a Excel (Solo Admin)',
+    description:
+      'Genera y descarga un archivo Excel con todos los productos. Columnas: SKU, Nombre, Descripcion, Precio_mayorista, Precio_minorista, IVA',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Archivo Excel generado exitosamente.',
+    content: {
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': {
+        schema: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 401, description: 'No autorizado.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Prohibido - Se requiere acceso de administrador.',
+  })
+  async exportProducts(
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<StreamableFile> {
+    const { buffer, filename, mimeType } =
+      await this.productsService.exportProducts();
+
+    res.set({
+      'Content-Type': mimeType,
+      'Content-Disposition': `attachment; filename="${filename}"`,
+    });
+
+    return new StreamableFile(buffer);
   }
 
   @Post()
@@ -221,11 +333,16 @@ export class ProductsController {
     description: 'Estado del producto actualizado exitosamente.',
     type: ToggleStatusResponseDto,
   })
-  @ApiResponse({ status: 400, description: 'No se puede cambiar el estado de un producto eliminado.' })
+  @ApiResponse({
+    status: 400,
+    description: 'No se puede cambiar el estado de un producto eliminado.',
+  })
   @ApiResponse({ status: 401, description: 'No autorizado.' })
   @ApiResponse({ status: 403, description: 'Prohibido.' })
   @ApiResponse({ status: 404, description: 'Producto no encontrado.' })
-  async toggleStatus(@Param('id', ParseIntPipe) id: number): Promise<ToggleStatusResponseDto> {
+  async toggleStatus(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ToggleStatusResponseDto> {
     return this.productsService.toggleStatus(id.toString());
   }
 
@@ -258,7 +375,9 @@ export class ProductsController {
   @Get('debug/user-info')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Debug endpoint to check user role and clear cache' })
+  @ApiOperation({
+    summary: 'Debug endpoint to check user role and clear cache',
+  })
   async debugUserInfo(@NestRequest() req: any) {
     const userId: string = req.user.id;
     const userRole = await this.productsService.getUserRole(userId);
@@ -308,8 +427,14 @@ export class ProductsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Crear una nueva categoría (Solo Admin)' })
   @ApiBody({ type: CreateCategoryDto })
-  @ApiResponse({ status: 201, description: 'Categoría creada exitosamente.', type: CategoryResponseDto })
-  async createCategory(@Body() dto: CreateCategoryDto): Promise<CategoryResponseDto> {
+  @ApiResponse({
+    status: 201,
+    description: 'Categoría creada exitosamente.',
+    type: CategoryResponseDto,
+  })
+  async createCategory(
+    @Body() dto: CreateCategoryDto,
+  ): Promise<CategoryResponseDto> {
     return this.productsService.createCategory(dto);
   }
 
@@ -317,10 +442,21 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Actualizar una categoría existente (Solo Admin)' })
-  @ApiParam({ name: 'id', description: 'ID de la categoría a actualizar', type: 'string' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID de la categoría a actualizar',
+    type: 'string',
+  })
   @ApiBody({ type: UpdateCategoryDto })
-  @ApiResponse({ status: 200, description: 'Categoría actualizada exitosamente.', type: CategoryResponseDto })
-  async updateCategory(@Param('id') id: string, @Body() dto: UpdateCategoryDto): Promise<CategoryResponseDto> {
+  @ApiResponse({
+    status: 200,
+    description: 'Categoría actualizada exitosamente.',
+    type: CategoryResponseDto,
+  })
+  async updateCategory(
+    @Param('id') id: string,
+    @Body() dto: UpdateCategoryDto,
+  ): Promise<CategoryResponseDto> {
     return this.productsService.updateCategory(id, dto);
   }
 
@@ -328,8 +464,15 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Eliminar una categoría (Solo Admin)' })
-  @ApiParam({ name: 'id', description: 'ID de la categoría a eliminar', type: 'string' })
-  @ApiResponse({ status: 204, description: 'Categoría eliminada exitosamente.' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID de la categoría a eliminar',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Categoría eliminada exitosamente.',
+  })
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteCategory(@Param('id') id: string): Promise<void> {
     return this.productsService.deleteCategory(id);
@@ -338,10 +481,17 @@ export class ProductsController {
   @Patch('categories/order')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Actualizar el orden de múltiples categorías (Solo Admin)' })
+  @ApiOperation({
+    summary: 'Actualizar el orden de múltiples categorías (Solo Admin)',
+  })
   @ApiBody({ type: UpdateCategoriesOrderDto })
-  @ApiResponse({ status: 200, description: 'Órdenes de categorías actualizadas exitosamente.' })
-  async updateCategoriesOrder(@Body() dto: UpdateCategoriesOrderDto): Promise<void> {
+  @ApiResponse({
+    status: 200,
+    description: 'Órdenes de categorías actualizadas exitosamente.',
+  })
+  async updateCategoriesOrder(
+    @Body() dto: UpdateCategoriesOrderDto,
+  ): Promise<void> {
     return this.productsService.updateCategoriesOrder(dto);
   }
 
@@ -353,31 +503,53 @@ export class ProductsController {
   @ApiParam({ name: 'id', description: 'ID del producto', type: 'integer' })
   @ApiBody({ type: CreateProductTranslationDto })
   @ApiResponse({ status: 201, description: 'Traducción creada exitosamente.' })
-  @ApiResponse({ status: 400, description: 'Ya existe una traducción para este idioma.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Ya existe una traducción para este idioma.',
+  })
   @ApiResponse({ status: 404, description: 'Producto no encontrado.' })
   @HttpCode(HttpStatus.CREATED)
   async createProductTranslation(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: CreateProductTranslationDto,
   ): Promise<void> {
-    return this.productsService.createProductTranslation(id, dto.locale, dto.name, dto.description);
+    return this.productsService.createProductTranslation(
+      id,
+      dto.locale,
+      dto.name,
+      dto.description,
+    );
   }
 
   @Put(':id/translations/:locale')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Actualizar traducción de un producto (Solo Admin)' })
+  @ApiOperation({
+    summary: 'Actualizar traducción de un producto (Solo Admin)',
+  })
   @ApiParam({ name: 'id', description: 'ID del producto', type: 'integer' })
-  @ApiParam({ name: 'locale', description: 'Locale de la traducción', example: 'zh' })
+  @ApiParam({
+    name: 'locale',
+    description: 'Locale de la traducción',
+    example: 'zh',
+  })
   @ApiBody({ type: CreateProductTranslationDto })
-  @ApiResponse({ status: 200, description: 'Traducción actualizada exitosamente.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Traducción actualizada exitosamente.',
+  })
   @ApiResponse({ status: 404, description: 'Traducción no encontrada.' })
   async updateProductTranslation(
     @Param('id', ParseIntPipe) id: number,
     @Param('locale') locale: string,
     @Body() dto: CreateProductTranslationDto,
   ): Promise<void> {
-    return this.productsService.updateProductTranslation(id, locale, dto.name, dto.description);
+    return this.productsService.updateProductTranslation(
+      id,
+      locale,
+      dto.name,
+      dto.description,
+    );
   }
 
   @Delete(':id/translations/:locale')
@@ -385,8 +557,15 @@ export class ProductsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Eliminar traducción de un producto (Solo Admin)' })
   @ApiParam({ name: 'id', description: 'ID del producto', type: 'integer' })
-  @ApiParam({ name: 'locale', description: 'Locale de la traducción', example: 'zh' })
-  @ApiResponse({ status: 204, description: 'Traducción eliminada exitosamente.' })
+  @ApiParam({
+    name: 'locale',
+    description: 'Locale de la traducción',
+    example: 'zh',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Traducción eliminada exitosamente.',
+  })
   @ApiResponse({ status: 404, description: 'Traducción no encontrada.' })
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteProductTranslation(
@@ -403,40 +582,69 @@ export class ProductsController {
   @ApiParam({ name: 'id', description: 'ID de la categoría', type: 'string' })
   @ApiBody({ type: CreateCategoryTranslationDto })
   @ApiResponse({ status: 201, description: 'Traducción creada exitosamente.' })
-  @ApiResponse({ status: 400, description: 'Ya existe una traducción para este idioma.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Ya existe una traducción para este idioma.',
+  })
   @ApiResponse({ status: 404, description: 'Categoría no encontrada.' })
   @HttpCode(HttpStatus.CREATED)
   async createCategoryTranslation(
     @Param('id') id: string,
     @Body() dto: CreateCategoryTranslationDto,
   ): Promise<void> {
-    return this.productsService.createCategoryTranslation(Number(id), dto.locale, dto.name);
+    return this.productsService.createCategoryTranslation(
+      Number(id),
+      dto.locale,
+      dto.name,
+    );
   }
 
   @Put('categories/:id/translations/:locale')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Actualizar traducción de una categoría (Solo Admin)' })
+  @ApiOperation({
+    summary: 'Actualizar traducción de una categoría (Solo Admin)',
+  })
   @ApiParam({ name: 'id', description: 'ID de la categoría', type: 'string' })
-  @ApiParam({ name: 'locale', description: 'Locale de la traducción', example: 'zh' })
+  @ApiParam({
+    name: 'locale',
+    description: 'Locale de la traducción',
+    example: 'zh',
+  })
   @ApiBody({ type: CreateCategoryTranslationDto })
-  @ApiResponse({ status: 200, description: 'Traducción actualizada exitosamente.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Traducción actualizada exitosamente.',
+  })
   @ApiResponse({ status: 404, description: 'Traducción no encontrada.' })
   async updateCategoryTranslation(
     @Param('id') id: string,
     @Param('locale') locale: string,
     @Body() dto: CreateCategoryTranslationDto,
   ): Promise<void> {
-    return this.productsService.updateCategoryTranslation(Number(id), locale, dto.name);
+    return this.productsService.updateCategoryTranslation(
+      Number(id),
+      locale,
+      dto.name,
+    );
   }
 
   @Delete('categories/:id/translations/:locale')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Eliminar traducción de una categoría (Solo Admin)' })
+  @ApiOperation({
+    summary: 'Eliminar traducción de una categoría (Solo Admin)',
+  })
   @ApiParam({ name: 'id', description: 'ID de la categoría', type: 'string' })
-  @ApiParam({ name: 'locale', description: 'Locale de la traducción', example: 'zh' })
-  @ApiResponse({ status: 204, description: 'Traducción eliminada exitosamente.' })
+  @ApiParam({
+    name: 'locale',
+    description: 'Locale de la traducción',
+    example: 'zh',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Traducción eliminada exitosamente.',
+  })
   @ApiResponse({ status: 404, description: 'Traducción no encontrada.' })
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteCategoryTranslation(
@@ -450,17 +658,26 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @UseInterceptors(FileInterceptor('file'))
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Subir imagen de producto a Supabase Storage (Solo Admin)' })
-  @ApiResponse({ status: 201, description: 'Imagen subida exitosamente.', schema: {
-    type: 'object',
-    properties: {
-      url: { type: 'string', description: 'URL pública de la imagen' },
-      path: { type: 'string', description: 'Ruta del archivo en el bucket' }
-    }
-  }})
+  @ApiOperation({
+    summary: 'Subir imagen de producto a Supabase Storage (Solo Admin)',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Imagen subida exitosamente.',
+    schema: {
+      type: 'object',
+      properties: {
+        url: { type: 'string', description: 'URL pública de la imagen' },
+        path: { type: 'string', description: 'Ruta del archivo en el bucket' },
+      },
+    },
+  })
   @ApiResponse({ status: 400, description: 'Archivo no válido.' })
   @ApiResponse({ status: 401, description: 'No autorizado.' })
-  @ApiResponse({ status: 403, description: 'Prohibido - Se requiere acceso de administrador.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Prohibido - Se requiere acceso de administrador.',
+  })
   @HttpCode(HttpStatus.CREATED)
   async uploadImage(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
@@ -472,11 +689,20 @@ export class ProductsController {
   @Delete('images/:filePath')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Eliminar imagen de producto de Supabase Storage (Solo Admin)' })
-  @ApiParam({ name: 'filePath', description: 'Ruta del archivo a eliminar', example: 'products/image_123.jpg' })
+  @ApiOperation({
+    summary: 'Eliminar imagen de producto de Supabase Storage (Solo Admin)',
+  })
+  @ApiParam({
+    name: 'filePath',
+    description: 'Ruta del archivo a eliminar',
+    example: 'products/image_123.jpg',
+  })
   @ApiResponse({ status: 204, description: 'Imagen eliminada exitosamente.' })
   @ApiResponse({ status: 401, description: 'No autorizado.' })
-  @ApiResponse({ status: 403, description: 'Prohibido - Se requiere acceso de administrador.' })
+  @ApiResponse({
+    status: 403,
+    description: 'Prohibido - Se requiere acceso de administrador.',
+  })
   @ApiResponse({ status: 404, description: 'Archivo no encontrado.' })
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteImage(@Param('filePath') filePath: string): Promise<void> {
@@ -548,7 +774,9 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @UseInterceptors(FileInterceptor('file'))
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Upload Excel or CSV file with bulk discount data (Admin only)' })
+  @ApiOperation({
+    summary: 'Upload Excel or CSV file with bulk discount data (Admin only)',
+  })
   @ApiBody({
     schema: {
       type: 'object',
@@ -556,20 +784,24 @@ export class ProductsController {
         file: {
           type: 'string',
           format: 'binary',
-          description: 'Excel file (.xlsx, .xls) or CSV file (.csv) with columns: SKU, USER_ID, PRECIO, VALIDO_DESDE, VALIDO_HASTA, ESTADO',
+          description:
+            'Excel file (.xlsx, .xls) or CSV file (.csv) with columns: SKU, USER_ID, PRECIO, VALIDO_DESDE, VALIDO_HASTA, ESTADO',
         },
       },
     },
   })
-  @ApiResponse({ 
-    status: 201, 
+  @ApiResponse({
+    status: 201,
     description: 'Bulk discounts processed successfully.',
     schema: {
       type: 'object',
       properties: {
-        success: { type: 'number', description: 'Number of successful imports' },
+        success: {
+          type: 'number',
+          description: 'Number of successful imports',
+        },
         errors: { type: 'number', description: 'Number of errors' },
-        details: { 
+        details: {
           type: 'array',
           items: {
             type: 'object',
@@ -577,30 +809,32 @@ export class ProductsController {
               row: { type: 'number' },
               sku: { type: 'string' },
               userId: { type: 'string' },
-              message: { type: 'string' }
-            }
-          }
-        }
-      }
-    }
+              message: { type: 'string' },
+            },
+          },
+        },
+      },
+    },
   })
   @ApiResponse({ status: 400, description: 'Invalid file format or data.' })
   async uploadBulkDiscounts(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('No file provided');
     }
-    
+
     const allowedTypes = [
       'application/vnd.ms-excel',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'text/csv',
-      'application/csv'
+      'application/csv',
     ];
-    
+
     if (!allowedTypes.includes(file.mimetype)) {
-      throw new BadRequestException('Invalid file type. Only Excel files (.xlsx, .xls) and CSV files (.csv) are allowed.');
+      throw new BadRequestException(
+        'Invalid file type. Only Excel files (.xlsx, .xls) and CSV files (.csv) are allowed.',
+      );
     }
-    
+
     return this.productsService.processBulkDiscounts(file);
   }
 }
