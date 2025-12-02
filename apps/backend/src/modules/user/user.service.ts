@@ -746,9 +746,24 @@ export class UserService {
       throw new Error('Special price not found');
     }
 
-    // Delete the special price
-    await this.prismaService.products_discounts.delete({
-      where: { id: parseInt(specialPriceId) },
+    const productId = existingSpecialPrice.product_id;
+
+    // Use transaction to ensure atomicity: delete special price AND remove from favorites
+    await this.prismaService.$transaction(async (tx) => {
+      // Delete the special price
+      await tx.products_discounts.delete({
+        where: { id: parseInt(specialPriceId) },
+      });
+
+      // Auto-remove product from favorites if productId exists
+      if (productId) {
+        await tx.favorites.deleteMany({
+          where: {
+            user_id: userId,
+            product_id: productId,
+          },
+        });
+      }
     });
 
     return { success: true, message: 'Special price deleted successfully' };
