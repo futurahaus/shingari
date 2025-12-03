@@ -251,7 +251,13 @@ export class ProductsController {
 
   @Post('admin/import')
   @UseGuards(JwtAuthGuard, AdminGuard)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB max
+      },
+    }),
+  )
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Importar productos desde Excel (Solo Admin)',

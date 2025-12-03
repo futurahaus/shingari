@@ -2170,6 +2170,14 @@ export class ProductsService {
     return Math.round(ivaValue);
   }
 
+  // Constantes para importación
+  private readonly IMPORT_MAX_ROWS = 10000;
+  private readonly IMPORT_MAX_NAME_LENGTH = 255;
+  private readonly IMPORT_MAX_DESCRIPTION_LENGTH = 2000;
+  private readonly IMPORT_MAX_SKU_LENGTH = 50;
+  private readonly IMPORT_MAX_PRICE = 9999999.99;
+  private readonly SKU_REGEX = /^[a-zA-Z0-9\-_.]+$/;
+
   /**
    * Importa productos desde un archivo Excel.
    * - Si el SKU no existe: crea un nuevo producto
@@ -2221,6 +2229,13 @@ export class ProductsService {
         );
       }
 
+      // Validar límite de filas
+      if (data.length > this.IMPORT_MAX_ROWS + 1) {
+        throw new BadRequestException(
+          `El archivo excede el límite de ${this.IMPORT_MAX_ROWS} filas. Por favor, divida el archivo en partes más pequeñas.`,
+        );
+      }
+
       // Validar encabezados
       const headers = data[0];
       const expectedHeaders = [
@@ -2256,6 +2271,42 @@ export class ProductsService {
         unidadesPorCaja: headers.indexOf('Unidades_por_caja'),
       };
 
+      // Detectar SKUs duplicados en el archivo
+      const skuOccurrences = new Map<string, number[]>();
+      for (let i = 1; i < data.length; i++) {
+        const sku = data[i][columnIndexes.sku]?.toString().trim();
+        if (sku) {
+          const rows = skuOccurrences.get(sku) || [];
+          rows.push(i + 1);
+          skuOccurrences.set(sku, rows);
+        }
+      }
+
+      const duplicateSkus = Array.from(skuOccurrences.entries())
+        .filter(([, rows]) => rows.length > 1)
+        .map(([sku, rows]) => `${sku} (filas ${rows.join(', ')})`)
+        .slice(0, 5);
+
+      if (duplicateSkus.length > 0) {
+        throw new BadRequestException(
+          `SKUs duplicados en el archivo: ${duplicateSkus.join('; ')}${skuOccurrences.size > 5 ? '...' : ''}. Corrija los duplicados antes de importar.`,
+        );
+      }
+
+      // Pre-cargar todos los productos existentes por SKU (evita N+1 queries)
+      const allSkusInFile = Array.from(skuOccurrences.keys());
+      const existingProducts = await this.prisma.products.findMany({
+        where: { sku: { in: allSkusInFile } },
+        include: {
+          products_stock: {
+            select: { quantity: true },
+            take: 1,
+          },
+        },
+      });
+
+      const productsBySkuMap = new Map(existingProducts.map((p) => [p.sku, p]));
+
       // Procesar cada fila (saltando encabezados)
       for (let i = 1; i < data.length; i++) {
         const row = data[i];
@@ -2272,6 +2323,31 @@ export class ProductsService {
               sku: 'N/A',
               action: 'skipped',
               message: 'Fila sin SKU - saltada',
+            });
+            continue;
+          }
+
+          // Validar formato de SKU
+          if (!this.SKU_REGEX.test(sku)) {
+            results.errors++;
+            results.details.push({
+              row: rowNumber,
+              sku,
+              action: 'error',
+              message:
+                'SKU contiene caracteres inválidos. Solo se permiten letras, números, guiones y puntos.',
+            });
+            continue;
+          }
+
+          // Validar longitud de SKU
+          if (sku.length > this.IMPORT_MAX_SKU_LENGTH) {
+            results.errors++;
+            results.details.push({
+              row: rowNumber,
+              sku: sku.substring(0, 20) + '...',
+              action: 'error',
+              message: `SKU excede ${this.IMPORT_MAX_SKU_LENGTH} caracteres`,
             });
             continue;
           }
@@ -2304,6 +2380,30 @@ export class ProductsService {
             continue;
           }
 
+          // Validar longitud de nombre
+          if (nombre.length > this.IMPORT_MAX_NAME_LENGTH) {
+            results.errors++;
+            results.details.push({
+              row: rowNumber,
+              sku,
+              action: 'error',
+              message: `El nombre excede ${this.IMPORT_MAX_NAME_LENGTH} caracteres`,
+            });
+            continue;
+          }
+
+          // Validar longitud de descripción
+          if (descripcion.length > this.IMPORT_MAX_DESCRIPTION_LENGTH) {
+            results.errors++;
+            results.details.push({
+              row: rowNumber,
+              sku,
+              action: 'error',
+              message: `La descripción excede ${this.IMPORT_MAX_DESCRIPTION_LENGTH} caracteres`,
+            });
+            continue;
+          }
+
           if (precioMinorista === null || precioMinorista <= 0) {
             results.errors++;
             results.details.push({
@@ -2315,16 +2415,34 @@ export class ProductsService {
             continue;
           }
 
-          // Buscar si el producto existe por SKU (incluir stock para comparación)
-          const existingProduct = await this.prisma.products.findFirst({
-            where: { sku },
-            include: {
-              products_stock: {
-                select: { quantity: true },
-                take: 1,
-              },
-            },
-          });
+          // Validar rango de precios
+          if (precioMinorista > this.IMPORT_MAX_PRICE) {
+            results.errors++;
+            results.details.push({
+              row: rowNumber,
+              sku,
+              action: 'error',
+              message: `El precio minorista excede el máximo permitido (${this.IMPORT_MAX_PRICE})`,
+            });
+            continue;
+          }
+
+          if (
+            precioMayorista !== null &&
+            precioMayorista > this.IMPORT_MAX_PRICE
+          ) {
+            results.errors++;
+            results.details.push({
+              row: rowNumber,
+              sku,
+              action: 'error',
+              message: `El precio mayorista excede el máximo permitido (${this.IMPORT_MAX_PRICE})`,
+            });
+            continue;
+          }
+
+          // Usar el mapa pre-cargado en lugar de query individual
+          const existingProduct = productsBySkuMap.get(sku);
 
           if (existingProduct) {
             // Comparar valores para detectar cambios reales
@@ -2545,6 +2663,7 @@ export class ProductsService {
    * Usa la primera unidad disponible si no hay stock existente.
    * @param productId - ID del producto
    * @param quantity - Cantidad de stock
+   * @throws Error si no hay unidades configuradas en el sistema
    */
   private async updateOrCreateStock(
     productId: number,
@@ -2562,15 +2681,18 @@ export class ProductsService {
     } else {
       // Obtener la primera unidad disponible para productos nuevos
       const defaultUnit = await this.prisma.units.findFirst();
-      if (defaultUnit) {
-        await this.prisma.products_stock.create({
-          data: {
-            product_id: productId,
-            quantity: new Prisma.Decimal(quantity),
-            unit_id: defaultUnit.id,
-          },
-        });
+      if (!defaultUnit) {
+        throw new Error(
+          'No hay unidades configuradas en el sistema. Configure al menos una unidad antes de importar productos con stock.',
+        );
       }
+      await this.prisma.products_stock.create({
+        data: {
+          product_id: productId,
+          quantity: new Prisma.Decimal(quantity),
+          unit_id: defaultUnit.id,
+        },
+      });
     }
   }
 }
