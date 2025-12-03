@@ -4,11 +4,13 @@ export interface FavoriteProduct {
   id: number;
   name: string;
   description?: string;
-  image_url?: string;
-  list_price: string;
-  wholesale_price: string;
+  images: string[];
+  price: number;
+  originalPrice?: number;
+  discount: number;
   sku: string;
   status: string;
+  iva?: number;
 }
 
 export interface FavoriteResponse {

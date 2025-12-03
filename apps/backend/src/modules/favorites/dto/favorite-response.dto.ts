@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class FavoriteProductDto {
   @ApiProperty({
@@ -21,23 +21,29 @@ export class FavoriteProductDto {
   description?: string;
 
   @ApiProperty({
-    description: 'Product image URL',
-    example: 'https://example.com/coffee.jpg',
-    required: false,
+    description: 'Product images URLs',
+    example: ['https://example.com/coffee1.jpg', 'https://example.com/coffee2.jpg'],
+    type: [String],
   })
-  image_url?: string;
+  images: string[];
 
   @ApiProperty({
-    description: 'Product list price',
-    example: '25.99',
+    description: 'Product price (with IVA and discounts applied)',
+    example: 25.99,
   })
-  list_price: string;
+  price: number;
+
+  @ApiPropertyOptional({
+    description: 'Original price before discount',
+    example: 29.99,
+  })
+  originalPrice?: number;
 
   @ApiProperty({
-    description: 'Product wholesale price',
-    example: '18.99',
+    description: 'Discount percentage applied',
+    example: 10,
   })
-  wholesale_price: string;
+  discount: number;
 
   @ApiProperty({
     description: 'Product SKU',
@@ -51,6 +57,12 @@ export class FavoriteProductDto {
     enum: ['active', 'draft', 'paused', 'deleted'],
   })
   status: string;
+
+  @ApiPropertyOptional({
+    description: 'IVA percentage',
+    example: 21,
+  })
+  iva?: number;
 }
 
 export class FavoriteResponseDto {
