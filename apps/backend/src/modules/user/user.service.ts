@@ -1,9 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { Prisma } from '../../../generated/prisma';
 import { OrdersService } from '../orders/orders.service';
+import { FavoritesService } from '../favorites/favorites.service';
 
 interface PublicUser {
   first_name?: string;
@@ -67,7 +72,8 @@ export class UserService {
     private readonly supabaseService: DatabaseService,
     private readonly prismaService: PrismaService,
     private readonly ordersService: OrdersService,
-  ) { }
+    private readonly favoritesService: FavoritesService,
+  ) {}
 
   async updateUserProfile(
     userId: string,
@@ -198,7 +204,7 @@ export class UserService {
 
   async getUserById(userId: string): Promise<UserDetailsResponse> {
     try {
-      const user = await this.prismaService.auth_users.findUnique({
+      const user = (await this.prismaService.auth_users.findUnique({
         where: { id: userId },
         select: {
           id: true,
@@ -215,16 +221,18 @@ export class UserService {
           },
           users: true,
         },
-      }) as AdminUser | null;
+      })) as AdminUser | null;
 
       if (!user) {
         throw new NotFoundException('User not found');
       }
 
-      const publicProfile: Partial<PublicUser> = user.users as Partial<PublicUser>;
+      const publicProfile: Partial<PublicUser> =
+        user.users as Partial<PublicUser>;
 
       // Obtener el total facturado por el usuario
-      const totalBilled = await this.ordersService.getTotalBilledByUserId(userId);
+      const totalBilled =
+        await this.ordersService.getTotalBilledByUserId(userId);
 
       return {
         id: user.id,
@@ -233,7 +241,9 @@ export class UserService {
         updated_at: user.updated_at,
         email_confirmed_at: user.email_confirmed_at,
         last_sign_in_at: user.last_sign_in_at,
-        roles: Array.isArray(user.user_roles) ? user.user_roles.map((ur) => ur.roles.name) : [],
+        roles: Array.isArray(user.user_roles)
+          ? user.user_roles.map((ur) => ur.roles.name)
+          : [],
         meta_data: user.raw_user_meta_data,
         first_name: publicProfile?.first_name ?? '',
         last_name: publicProfile?.last_name ?? '',
@@ -295,7 +305,7 @@ export class UserService {
 
   async updateUser(
     userId: string,
-    userData: { email?: string; roles?: string[];[key: string]: any },
+    userData: { email?: string; roles?: string[]; [key: string]: any },
   ): Promise<UserDetailsResponse> {
     try {
       // Update user in Supabase auth if email is provided
@@ -473,7 +483,12 @@ export class UserService {
       },
       include: {
         products: {
-          select: { name: true, list_price: true, wholesale_price: true, sku: true },
+          select: {
+            name: true,
+            list_price: true,
+            wholesale_price: true,
+            sku: true,
+          },
         },
       },
     });
@@ -547,33 +562,49 @@ export class UserService {
     }
 
     // Check if a special price already exists for this user and product
-    const existingDiscount = await this.prismaService.products_discounts.findFirst({
-      where: {
-        user_id: user_id,
-        product_id: product_id,
-        is_active: true,
-      },
-    });
+    const existingDiscount =
+      await this.prismaService.products_discounts.findFirst({
+        where: {
+          user_id: user_id,
+          product_id: product_id,
+          is_active: true,
+        },
+      });
 
     if (existingDiscount) {
-      throw new Error('A special price already exists for this user and product');
+      throw new Error(
+        'A special price already exists for this user and product',
+      );
     }
 
-    // Create the special price
-    const specialPrice = await this.prismaService.products_discounts.create({
-      data: {
-        user_id,
-        product_id,
-        price: new Prisma.Decimal(price),
-        is_active,
-        valid_from: valid_from ? new Date(valid_from) : null,
-        valid_to: valid_to ? new Date(valid_to) : null,
-      },
-      include: {
-        products: {
-          select: { name: true, list_price: true, wholesale_price: true },
+    // Use transaction to ensure atomicity: create special price AND add to favorites
+    const specialPrice = await this.prismaService.$transaction(async (tx) => {
+      const createdSpecialPrice = await tx.products_discounts.create({
+        data: {
+          user_id,
+          product_id,
+          price: new Prisma.Decimal(price),
+          is_active,
+          valid_from: valid_from ? new Date(valid_from) : null,
+          valid_to: valid_to ? new Date(valid_to) : null,
         },
-      },
+        include: {
+          products: {
+            select: { name: true, list_price: true, wholesale_price: true },
+          },
+        },
+      });
+
+      // Auto-add product to favorites (upsert to handle race conditions)
+      await tx.favorites.upsert({
+        where: {
+          user_id_product_id: { user_id, product_id },
+        },
+        create: { user_id, product_id },
+        update: {}, // No update needed if already exists
+      });
+
+      return createdSpecialPrice;
     });
 
     return {
@@ -598,7 +629,7 @@ export class UserService {
       is_active?: boolean;
       valid_from?: string;
       valid_to?: string;
-    }
+    },
   ) {
     const {
       user_id,
@@ -610,9 +641,10 @@ export class UserService {
     } = updateSpecialPriceData;
 
     // Verify that the special price exists
-    const existingSpecialPrice = await this.prismaService.products_discounts.findUnique({
-      where: { id: parseInt(specialPriceId) },
-    });
+    const existingSpecialPrice =
+      await this.prismaService.products_discounts.findUnique({
+        where: { id: parseInt(specialPriceId) },
+      });
 
     if (!existingSpecialPrice) {
       throw new Error('Special price not found');
@@ -637,42 +669,61 @@ export class UserService {
     }
 
     // Check if another special price already exists for this user and product (excluding current one)
-    const existingDiscount = await this.prismaService.products_discounts.findFirst({
-      where: {
-        user_id: user_id,
-        product_id: product_id,
-        is_active: true,
-        id: { not: parseInt(specialPriceId) },
-      },
-    });
+    const existingDiscount =
+      await this.prismaService.products_discounts.findFirst({
+        where: {
+          user_id: user_id,
+          product_id: product_id,
+          is_active: true,
+          id: { not: parseInt(specialPriceId) },
+        },
+      });
 
     if (existingDiscount) {
-      throw new Error('A special price already exists for this user and product');
+      throw new Error(
+        'A special price already exists for this user and product',
+      );
     }
 
-    // Update the special price
-    const updatedSpecialPrice = await this.prismaService.products_discounts.update({
-      where: { id: parseInt(specialPriceId) },
-      data: {
-        user_id,
-        product_id,
-        price: new Prisma.Decimal(price),
-        is_active,
-        valid_from: valid_from ? new Date(valid_from) : null,
-        valid_to: valid_to ? new Date(valid_to) : null,
+    // Update the special price and ensure product is in favorites
+    const updatedSpecialPrice = await this.prismaService.$transaction(
+      async (tx) => {
+        const updated = await tx.products_discounts.update({
+          where: { id: parseInt(specialPriceId) },
+          data: {
+            user_id,
+            product_id,
+            price: new Prisma.Decimal(price),
+            is_active,
+            valid_from: valid_from ? new Date(valid_from) : null,
+            valid_to: valid_to ? new Date(valid_to) : null,
+          },
+          include: {
+            products: {
+              select: { name: true, list_price: true, wholesale_price: true },
+            },
+          },
+        });
+
+        // Ensure product is in favorites (handles legacy special prices)
+        await tx.favorites.upsert({
+          where: {
+            user_id_product_id: { user_id, product_id },
+          },
+          create: { user_id, product_id },
+          update: {},
+        });
+
+        return updated;
       },
-      include: {
-        products: {
-          select: { name: true, list_price: true, wholesale_price: true },
-        },
-      },
-    });
+    );
 
     return {
       id: updatedSpecialPrice.id,
       product: updatedSpecialPrice.products?.name || '',
       priceRetail: updatedSpecialPrice.products?.list_price?.toString() || '',
-      priceWholesale: updatedSpecialPrice.products?.wholesale_price?.toString() || '',
+      priceWholesale:
+        updatedSpecialPrice.products?.wholesale_price?.toString() || '',
       priceClient: updatedSpecialPrice.price?.toString() || '',
       isActive: updatedSpecialPrice.is_active,
       validFrom: updatedSpecialPrice.valid_from,
@@ -683,22 +734,66 @@ export class UserService {
   // Delete a special price for a user
   async deleteSpecialPrice(userId: string, specialPriceId: string) {
     // Verify that the special price exists and belongs to the user
-    const existingSpecialPrice = await this.prismaService.products_discounts.findFirst({
-      where: {
-        id: parseInt(specialPriceId),
-        user_id: userId,
-      },
-    });
+    const existingSpecialPrice =
+      await this.prismaService.products_discounts.findFirst({
+        where: {
+          id: parseInt(specialPriceId),
+          user_id: userId,
+        },
+      });
 
     if (!existingSpecialPrice) {
       throw new Error('Special price not found');
     }
 
-    // Delete the special price
-    await this.prismaService.products_discounts.delete({
-      where: { id: parseInt(specialPriceId) },
+    const productId = existingSpecialPrice.product_id;
+
+    // Use transaction to ensure atomicity: delete special price AND remove from favorites
+    await this.prismaService.$transaction(async (tx) => {
+      // Delete the special price
+      await tx.products_discounts.delete({
+        where: { id: parseInt(specialPriceId) },
+      });
+
+      // Auto-remove product from favorites if productId exists
+      if (productId) {
+        await tx.favorites.deleteMany({
+          where: {
+            user_id: userId,
+            product_id: productId,
+          },
+        });
+      }
     });
 
     return { success: true, message: 'Special price deleted successfully' };
+  }
+
+  /**
+   * Adds a product to user's favorites if it's not already there.
+   * Uses upsert to handle race conditions safely.
+   * This is used when a special price is assigned to ensure the product
+   * appears in the user's favorites list automatically.
+   */
+  private async addProductToFavoritesIfNotExists(
+    userId: string,
+    productId: number,
+  ): Promise<void> {
+    try {
+      const isAlreadyFavorite = await this.favoritesService.isFavorite(
+        userId,
+        productId,
+      );
+
+      if (!isAlreadyFavorite) {
+        await this.favoritesService.addFavorite(userId, productId);
+      }
+    } catch (error) {
+      // Ignore ConflictException (race condition: already added by another process)
+      if (error instanceof ConflictException) {
+        return;
+      }
+      throw error;
+    }
   }
 }
