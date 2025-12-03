@@ -8,6 +8,9 @@ import {
   IsArray,
   ArrayMinSize,
   IsInt,
+  MaxLength,
+  MinLength,
+  Matches,
 } from 'class-validator';
 
 // Ejemplo de un DTO para un item de metadatos, si los productos tuvieran campos flexibles
@@ -24,6 +27,24 @@ import {
 // }
 
 export class CreateProductDto {
+  @ApiProperty({
+    description:
+      'SKU del producto (único, requerido). Solo letras, números, guiones y guiones bajos.',
+    example: 'PROD-001',
+    type: String,
+    minLength: 1,
+    maxLength: 50,
+  })
+  @IsString()
+  @IsNotEmpty({ message: 'El SKU es requerido' })
+  @MinLength(1, { message: 'El SKU debe tener al menos 1 caracter' })
+  @MaxLength(50, { message: 'El SKU no puede exceder 50 caracteres' })
+  @Matches(/^[A-Za-z0-9_-]+$/, {
+    message:
+      'El SKU solo puede contener letras, números, guiones y guiones bajos',
+  })
+  sku: string;
+
   @ApiProperty({
     description: 'Nombre del producto',
     example: 'Laptop Gamer XYZ',
@@ -60,7 +81,8 @@ export class CreateProductDto {
   stock?: number;
 
   @ApiPropertyOptional({
-    description: 'IDs o nombres de las categorías a las que pertenece el producto',
+    description:
+      'IDs o nombres de las categorías a las que pertenece el producto',
     example: ['electronics', 'gaming', 'laptops'],
     type: [String],
   })
@@ -127,15 +149,6 @@ export class CreateProductDto {
   @IsOptional()
   iva?: number;
 
-  @ApiPropertyOptional({
-    description: 'SKU del producto',
-    example: '123456',
-    type: String,
-  })
-  @IsString()
-  @IsOptional()
-  sku?: string;
-
   // Si tuvieras metadatos o atributos customizables podrías usar algo como:
   // @ApiPropertyOptional({ type: [ProductMetadataDto], description: 'Metadatos adicionales del producto' })
   // @IsArray()
@@ -143,4 +156,4 @@ export class CreateProductDto {
   // @Type(() => ProductMetadataDto)
   // @IsOptional()
   // metadata?: ProductMetadataDto[];
-} 
+}
