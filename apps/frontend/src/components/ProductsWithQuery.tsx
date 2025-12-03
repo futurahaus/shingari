@@ -76,11 +76,14 @@ export function ProductsWithQuery({
     ? favorites.map(fav => ({
         id: fav.product_id.toString(),
         name: fav.product.name,
-        price: parseFloat(fav.product.list_price),
+        price: fav.product.price,
+        originalPrice: fav.product.originalPrice,
+        discount: fav.product.discount,
         description: fav.product.description || '',
-        images: fav.product.image_url ? [fav.product.image_url] : [],
+        images: fav.product.images || [],
         categories: [],
         sku: fav.product.sku,
+        iva: fav.product.iva,
       }))
     : enableInfiniteScroll 
       ? infiniteData?.pages.flatMap(page => page.data) || []
