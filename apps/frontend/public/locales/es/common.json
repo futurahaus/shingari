@@ -691,7 +691,7 @@
       "importing": "Importando...",
       "import_success": "Importación Exitosa",
       "import_partial_success": "Importación Parcial",
-      "import_result_message": "Creados: {{created}}, Actualizados: {{updated}}, Saltados: {{skipped}}, Errores: {{errors}}",
+      "import_result_message": "Creados: {{created}}, Actualizados: {{updated}}, Sin cambios: {{unchanged}}, Saltados: {{skipped}}, Errores: {{errors}}",
       "import_error": "Error al Importar",
       "import_error_message": "No se pudieron importar los productos. Inténtalo de nuevo.",
       "search_placeholder": "Buscar por SKU, nombre o ID...",

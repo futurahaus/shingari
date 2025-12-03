@@ -156,6 +156,7 @@ export default function AdminProductsPage() {
         const message = t("admin.products.import_result_message", {
           created: result.created,
           updated: result.updated,
+          unchanged: result.unchanged || 0,
           skipped: result.skipped,
           errors: result.errors,
         });

@@ -2182,24 +2182,26 @@ export class ProductsService {
   async importProducts(file: Express.Multer.File): Promise<{
     created: number;
     updated: number;
+    unchanged: number;
     skipped: number;
     errors: number;
     details: Array<{
       row: number;
       sku: string;
-      action: 'created' | 'updated' | 'skipped' | 'error';
+      action: 'created' | 'updated' | 'unchanged' | 'skipped' | 'error';
       message: string;
     }>;
   }> {
     const results = {
       created: 0,
       updated: 0,
+      unchanged: 0,
       skipped: 0,
       errors: 0,
       details: [] as Array<{
         row: number;
         sku: string;
-        action: 'created' | 'updated' | 'skipped' | 'error';
+        action: 'created' | 'updated' | 'unchanged' | 'skipped' | 'error';
         message: string;
       }>,
     };
@@ -2313,44 +2315,85 @@ export class ProductsService {
             continue;
           }
 
-          // Buscar si el producto existe por SKU
+          // Buscar si el producto existe por SKU (incluir stock para comparación)
           const existingProduct = await this.prisma.products.findFirst({
             where: { sku },
+            include: {
+              products_stock: {
+                select: { quantity: true },
+                take: 1,
+              },
+            },
           });
 
           if (existingProduct) {
-            // Actualizar producto existente
-            await this.prisma.products.update({
-              where: { id: existingProduct.id },
-              data: {
-                name: nombre,
-                description: descripcion || null,
-                wholesale_price: precioMayorista
-                  ? new Prisma.Decimal(precioMayorista)
-                  : existingProduct.wholesale_price,
-                list_price: new Prisma.Decimal(precioMinorista),
-                iva:
-                  iva !== null ? new Prisma.Decimal(iva) : existingProduct.iva,
-                units_per_box:
-                  unidadesPorCaja !== null
-                    ? unidadesPorCaja
-                    : existingProduct.units_per_box,
-                updated_at: new Date(),
-              },
-            });
+            // Comparar valores para detectar cambios reales
+            const currentStock =
+              existingProduct.products_stock[0]?.quantity?.toNumber() || 0;
+            const newWholesalePrice =
+              precioMayorista ?? existingProduct.wholesale_price?.toNumber();
+            const newIva = iva ?? existingProduct.iva?.toNumber();
+            const newUnitsPerBox =
+              unidadesPorCaja ?? existingProduct.units_per_box;
 
-            // Actualizar stock si se proporciona
-            if (stock !== null) {
-              await this.updateOrCreateStock(existingProduct.id, stock);
+            const hasProductChanges =
+              existingProduct.name !== nombre ||
+              (existingProduct.description || '') !== (descripcion || '') ||
+              existingProduct.wholesale_price?.toNumber() !==
+                newWholesalePrice ||
+              existingProduct.list_price?.toNumber() !== precioMinorista ||
+              existingProduct.iva?.toNumber() !== newIva ||
+              existingProduct.units_per_box !== newUnitsPerBox;
+
+            const hasStockChanges = stock !== null && currentStock !== stock;
+
+            // Solo actualizar si hay cambios reales
+            if (hasProductChanges || hasStockChanges) {
+              if (hasProductChanges) {
+                await this.prisma.products.update({
+                  where: { id: existingProduct.id },
+                  data: {
+                    name: nombre,
+                    description: descripcion || null,
+                    wholesale_price: precioMayorista
+                      ? new Prisma.Decimal(precioMayorista)
+                      : existingProduct.wholesale_price,
+                    list_price: new Prisma.Decimal(precioMinorista),
+                    iva:
+                      iva !== null
+                        ? new Prisma.Decimal(iva)
+                        : existingProduct.iva,
+                    units_per_box:
+                      unidadesPorCaja !== null
+                        ? unidadesPorCaja
+                        : existingProduct.units_per_box,
+                    updated_at: new Date(),
+                  },
+                });
+              }
+
+              // Actualizar stock solo si cambió
+              if (hasStockChanges) {
+                await this.updateOrCreateStock(existingProduct.id, stock);
+              }
+
+              results.updated++;
+              results.details.push({
+                row: rowNumber,
+                sku,
+                action: 'updated',
+                message: 'Producto actualizado exitosamente',
+              });
+            } else {
+              // No hay cambios, marcar como unchanged
+              results.unchanged++;
+              results.details.push({
+                row: rowNumber,
+                sku,
+                action: 'unchanged',
+                message: 'Sin cambios detectados',
+              });
             }
-
-            results.updated++;
-            results.details.push({
-              row: rowNumber,
-              sku,
-              action: 'updated',
-              message: 'Producto actualizado exitosamente',
-            });
           } else {
             // Crear nuevo producto
             const newProduct = await this.prisma.products.create({

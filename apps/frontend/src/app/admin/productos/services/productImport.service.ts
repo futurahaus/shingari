@@ -12,12 +12,13 @@ const API_BASE_URL =
 export interface ImportProductsResult {
   created: number;
   updated: number;
+  unchanged: number;
   skipped: number;
   errors: number;
   details: Array<{
     row: number;
     sku: string;
-    action: "created" | "updated" | "skipped" | "error";
+    action: "created" | "updated" | "unchanged" | "skipped" | "error";
     message: string;
   }>;
 }
