@@ -37,11 +37,11 @@ export class FavoritesService {
    * Get user role for price calculations
    */
   private async getUserRole(userId: string): Promise<string | null> {
-    const user = await this.prisma.auth_users.findUnique({
-      where: { id: userId },
-      select: { role: true },
+    const userRole = await this.prisma.user_roles.findFirst({
+      where: { user_id: userId },
+      include: { roles: true },
     });
-    return user?.role || null;
+    return userRole?.roles.name || null;
   }
 
   /**
@@ -85,15 +85,19 @@ export class FavoritesService {
     // Business users see wholesale price, others see list price
     const basePrice = userRole === 'business' ? wholesalePrice : listPrice;
 
-    // If user has a special discount price
-    if (userDiscountPrice !== null) {
+    // If user has a special discount price that is actually lower than base price
+    if (
+      userDiscountPrice !== null &&
+      userDiscountPrice < basePrice &&
+      basePrice > 0
+    ) {
       const discountPercent = Math.round(
         ((basePrice - userDiscountPrice) / basePrice) * 100,
       );
       return {
         price: userDiscountPrice,
         originalPrice: basePrice,
-        discount: discountPercent > 0 ? discountPercent : 0,
+        discount: discountPercent,
       };
     }
 
@@ -113,7 +117,7 @@ export class FavoritesService {
   }
 
   /**
-   * Transform product with calculated prices
+   * Transform product with calculated prices (fetches user data - use for single product)
    */
   private async transformProductForFavorite(
     product: ProductWithImages,
@@ -121,7 +125,17 @@ export class FavoritesService {
   ) {
     const userRole = await this.getUserRole(userId);
     const userDiscountPrice = await this.getUserDiscount(userId, product.id);
+    return this.transformProductSync(product, userRole, userDiscountPrice);
+  }
 
+  /**
+   * Transform product with pre-fetched user data (use for batch operations)
+   */
+  private transformProductSync(
+    product: ProductWithImages,
+    userRole: string | null,
+    userDiscountPrice: number | null,
+  ) {
     const { price, originalPrice, discount } = this.calculateProductPrice(
       {
         list_price: { toNumber: () => product.list_price.toNumber() },
@@ -230,6 +244,9 @@ export class FavoritesService {
   }
 
   async getFavorites(userId: string) {
+    // Fetch user role once (not N times)
+    const userRole = await this.getUserRole(userId);
+
     const favorites = await this.prisma.favorites.findMany({
       where: { user_id: userId },
       include: {
@@ -244,21 +261,45 @@ export class FavoritesService {
       orderBy: { created_at: 'desc' },
     });
 
-    // Transform the response with calculated prices
-    const transformedFavorites = await Promise.all(
-      favorites.map(async (favorite) => {
-        const transformedProduct = await this.transformProductForFavorite(
-          favorite.products,
-          userId,
-        );
-        return {
-          user_id: favorite.user_id,
-          product_id: favorite.product_id,
-          created_at: favorite.created_at,
-          product: transformedProduct,
-        };
-      }),
-    );
+    // Batch fetch all discounts for user's favorite products (not N queries)
+    const productIds = favorites.map((f) => f.product_id);
+    const now = new Date();
+    const discounts = await this.prisma.products_discounts.findMany({
+      where: {
+        user_id: userId,
+        product_id: { in: productIds },
+        is_active: true,
+        AND: [
+          { OR: [{ valid_from: { lte: now } }, { valid_from: null }] },
+          { OR: [{ valid_to: { gte: now } }, { valid_to: null }] },
+        ],
+      },
+      select: { product_id: true, price: true },
+    });
+
+    // Create a map for O(1) discount lookup
+    const discountMap = new Map<number, number>();
+    for (const d of discounts) {
+      if (d.product_id !== null) {
+        discountMap.set(d.product_id, d.price.toNumber());
+      }
+    }
+
+    // Transform without additional queries
+    const transformedFavorites = favorites.map((favorite) => {
+      const userDiscountPrice = discountMap.get(favorite.product_id) ?? null;
+      const transformedProduct = this.transformProductSync(
+        favorite.products,
+        userRole,
+        userDiscountPrice,
+      );
+      return {
+        user_id: favorite.user_id,
+        product_id: favorite.product_id,
+        created_at: favorite.created_at,
+        product: transformedProduct,
+      };
+    });
 
     return {
       favorites: transformedFavorites,
