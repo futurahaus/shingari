@@ -2446,21 +2446,34 @@ export class ProductsService {
 
           if (existingProduct) {
             // Comparar valores para detectar cambios reales
+            // Usar redondeo a 2 decimales para evitar falsos positivos por precisión flotante
+            const roundTo2 = (n: number | null | undefined): number =>
+              n != null ? Math.round(n * 100) / 100 : 0;
+
             const currentStock =
               existingProduct.products_stock[0]?.quantity?.toNumber() || 0;
-            const newWholesalePrice =
-              precioMayorista ?? existingProduct.wholesale_price?.toNumber();
-            const newIva = iva ?? existingProduct.iva?.toNumber();
+            const currentWholesalePrice = roundTo2(
+              existingProduct.wholesale_price?.toNumber(),
+            );
+            const currentListPrice = roundTo2(
+              existingProduct.list_price?.toNumber(),
+            );
+            const currentIva = roundTo2(existingProduct.iva?.toNumber());
+
+            const newWholesalePrice = roundTo2(
+              precioMayorista ?? existingProduct.wholesale_price?.toNumber(),
+            );
+            const newListPrice = roundTo2(precioMinorista);
+            const newIva = roundTo2(iva ?? existingProduct.iva?.toNumber());
             const newUnitsPerBox =
               unidadesPorCaja ?? existingProduct.units_per_box;
 
             const hasProductChanges =
               existingProduct.name !== nombre ||
               (existingProduct.description || '') !== (descripcion || '') ||
-              existingProduct.wholesale_price?.toNumber() !==
-                newWholesalePrice ||
-              existingProduct.list_price?.toNumber() !== precioMinorista ||
-              existingProduct.iva?.toNumber() !== newIva ||
+              currentWholesalePrice !== newWholesalePrice ||
+              currentListPrice !== newListPrice ||
+              currentIva !== newIva ||
               existingProduct.units_per_box !== newUnitsPerBox;
 
             const hasStockChanges = stock !== null && currentStock !== stock;
