@@ -2086,4 +2086,636 @@ export class ProductsService {
       throw error;
     }
   }
+
+  /**
+   * Exporta todos los productos activos a un archivo Excel.
+   * Incluye: SKU, Nombre, Descripción, Precio_mayorista, Precio_minorista, IVA
+   * @returns Buffer del archivo Excel generado
+   */
+  async exportProducts(): Promise<{
+    buffer: Buffer;
+    filename: string;
+    mimeType: string;
+  }> {
+    // Obtener todos los productos no eliminados
+    const products = await this.prisma.products.findMany({
+      where: {
+        status: {
+          not: product_states.deleted,
+        },
+      },
+      select: {
+        sku: true,
+        name: true,
+        description: true,
+        wholesale_price: true,
+        list_price: true,
+        iva: true,
+        units_per_box: true,
+        products_stock: {
+          select: {
+            quantity: true,
+          },
+          take: 1,
+        },
+      },
+      orderBy: {
+        sku: 'asc',
+      },
+    });
+
+    // Transformar los datos al formato de exportación
+    const exportData = products.map((product) => ({
+      SKU: product.sku || '',
+      Nombre: product.name || '',
+      Descripcion: product.description || '',
+      Precio_mayorista: product.wholesale_price?.toNumber() || 0,
+      Precio_minorista: product.list_price?.toNumber() || 0,
+      IVA: this.normalizeIvaForExport(product.iva?.toNumber()),
+      Stock: product.products_stock[0]?.quantity?.toNumber() || 0,
+      Unidades_por_caja: product.units_per_box || 0,
+    }));
+
+    // Crear workbook y worksheet
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+    // Configurar anchos de columna para mejor visualización
+    const columnWidths = [
+      { wch: 15 }, // SKU
+      { wch: 40 }, // Nombre
+      { wch: 50 }, // Descripcion
+      { wch: 18 }, // Precio_mayorista
+      { wch: 18 }, // Precio_minorista
+      { wch: 10 }, // IVA
+      { wch: 10 }, // Stock
+      { wch: 18 }, // Unidades_por_caja
+    ];
+    worksheet['!cols'] = columnWidths;
+
+    // Agregar worksheet al workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Productos');
+
+    // Generar buffer del archivo
+    const buffer = XLSX.write(workbook, {
+      type: 'buffer',
+      bookType: 'xlsx',
+    });
+
+    // Generar nombre de archivo con fecha
+    const dateStr = new Date().toISOString().split('T')[0];
+    const filename = `productos_export_${dateStr}.xlsx`;
+
+    return {
+      buffer: Buffer.from(buffer),
+      filename,
+      mimeType:
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    };
+  }
+
+  /**
+   * Normaliza el valor de IVA para exportación.
+   * Si el valor es menor a 1, se asume que está en formato decimal (0.21) y se convierte a porcentaje (21).
+   * @param ivaValue - Valor del IVA desde la base de datos
+   * @returns Valor del IVA como porcentaje entero
+   */
+  private normalizeIvaForExport(ivaValue: number | undefined | null): number {
+    if (ivaValue === undefined || ivaValue === null) {
+      return 0;
+    }
+
+    // Si el IVA es menor a 1, está en formato decimal (ej: 0.21 para 21%)
+    if (ivaValue < 1 && ivaValue > 0) {
+      return Math.round(ivaValue * 100);
+    }
+
+    return Math.round(ivaValue);
+  }
+
+  // Constantes para importación
+  private readonly IMPORT_MAX_ROWS = 10000;
+  private readonly IMPORT_MAX_NAME_LENGTH = 255;
+  private readonly IMPORT_MAX_DESCRIPTION_LENGTH = 2000;
+  private readonly IMPORT_MAX_SKU_LENGTH = 50;
+  private readonly IMPORT_MAX_PRICE = 9999999.99;
+  private readonly SKU_REGEX = /^[a-zA-Z0-9\-_.]+$/;
+
+  /**
+   * Importa productos desde un archivo Excel.
+   * - Si el SKU no existe: crea un nuevo producto
+   * - Si el SKU existe: actualiza el producto existente
+   * - Si la fila no tiene SKU: salta la fila
+   * Columnas esperadas: SKU, Nombre, Descripcion, Precio_mayorista, Precio_minorista, IVA, Stock, Unidades_por_caja
+   * @param file - Archivo Excel a procesar
+   * @returns Resultado de la importación con estadísticas y detalles
+   */
+  async importProducts(file: Express.Multer.File): Promise<{
+    created: number;
+    updated: number;
+    unchanged: number;
+    skipped: number;
+    errors: number;
+    details: Array<{
+      row: number;
+      sku: string;
+      action: 'created' | 'updated' | 'unchanged' | 'skipped' | 'error';
+      message: string;
+    }>;
+  }> {
+    const results = {
+      created: 0,
+      updated: 0,
+      unchanged: 0,
+      skipped: 0,
+      errors: 0,
+      details: [] as Array<{
+        row: number;
+        sku: string;
+        action: 'created' | 'updated' | 'unchanged' | 'skipped' | 'error';
+        message: string;
+      }>,
+    };
+
+    try {
+      // Leer el archivo Excel
+      const workbook = XLSX.read(file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const data = XLSX.utils.sheet_to_json<string[]>(
+        workbook.Sheets[sheetName],
+        { header: 1 },
+      );
+
+      if (data.length < 2) {
+        throw new BadRequestException(
+          'El archivo está vacío o solo contiene encabezados',
+        );
+      }
+
+      // Validar límite de filas
+      if (data.length > this.IMPORT_MAX_ROWS + 1) {
+        throw new BadRequestException(
+          `El archivo excede el límite de ${this.IMPORT_MAX_ROWS} filas. Por favor, divida el archivo en partes más pequeñas.`,
+        );
+      }
+
+      // Validar encabezados
+      const headers = data[0];
+      const expectedHeaders = [
+        'SKU',
+        'Nombre',
+        'Descripcion',
+        'Precio_mayorista',
+        'Precio_minorista',
+        'IVA',
+        'Stock',
+        'Unidades_por_caja',
+      ];
+
+      const hasValidHeaders = expectedHeaders.every((header) =>
+        headers.includes(header),
+      );
+
+      if (!hasValidHeaders) {
+        throw new BadRequestException(
+          `Estructura de archivo inválida. Se esperan las columnas: ${expectedHeaders.join(', ')}`,
+        );
+      }
+
+      // Obtener índices de las columnas
+      const columnIndexes = {
+        sku: headers.indexOf('SKU'),
+        nombre: headers.indexOf('Nombre'),
+        descripcion: headers.indexOf('Descripcion'),
+        precioMayorista: headers.indexOf('Precio_mayorista'),
+        precioMinorista: headers.indexOf('Precio_minorista'),
+        iva: headers.indexOf('IVA'),
+        stock: headers.indexOf('Stock'),
+        unidadesPorCaja: headers.indexOf('Unidades_por_caja'),
+      };
+
+      // Detectar SKUs duplicados en el archivo
+      const skuOccurrences = new Map<string, number[]>();
+      for (let i = 1; i < data.length; i++) {
+        const sku = data[i][columnIndexes.sku]?.toString().trim();
+        if (sku) {
+          const rows = skuOccurrences.get(sku) || [];
+          rows.push(i + 1);
+          skuOccurrences.set(sku, rows);
+        }
+      }
+
+      const duplicateSkus = Array.from(skuOccurrences.entries())
+        .filter(([, rows]) => rows.length > 1)
+        .map(([sku, rows]) => `${sku} (filas ${rows.join(', ')})`)
+        .slice(0, 5);
+
+      if (duplicateSkus.length > 0) {
+        throw new BadRequestException(
+          `SKUs duplicados en el archivo: ${duplicateSkus.join('; ')}${skuOccurrences.size > 5 ? '...' : ''}. Corrija los duplicados antes de importar.`,
+        );
+      }
+
+      // Pre-cargar todos los productos existentes por SKU (evita N+1 queries)
+      const allSkusInFile = Array.from(skuOccurrences.keys());
+      const existingProducts = await this.prisma.products.findMany({
+        where: { sku: { in: allSkusInFile } },
+        include: {
+          products_stock: {
+            select: { quantity: true },
+            take: 1,
+          },
+        },
+      });
+
+      const productsBySkuMap = new Map(existingProducts.map((p) => [p.sku, p]));
+
+      // Procesar cada fila (saltando encabezados)
+      for (let i = 1; i < data.length; i++) {
+        const row = data[i];
+        const rowNumber = i + 1;
+
+        try {
+          const sku = row[columnIndexes.sku]?.toString().trim();
+
+          // Si no hay SKU, saltar la fila
+          if (!sku) {
+            results.skipped++;
+            results.details.push({
+              row: rowNumber,
+              sku: 'N/A',
+              action: 'skipped',
+              message: 'Fila sin SKU - saltada',
+            });
+            continue;
+          }
+
+          // Validar formato de SKU
+          if (!this.SKU_REGEX.test(sku)) {
+            results.errors++;
+            results.details.push({
+              row: rowNumber,
+              sku,
+              action: 'error',
+              message:
+                'SKU contiene caracteres inválidos. Solo se permiten letras, números, guiones y puntos.',
+            });
+            continue;
+          }
+
+          // Validar longitud de SKU
+          if (sku.length > this.IMPORT_MAX_SKU_LENGTH) {
+            results.errors++;
+            results.details.push({
+              row: rowNumber,
+              sku: sku.substring(0, 20) + '...',
+              action: 'error',
+              message: `SKU excede ${this.IMPORT_MAX_SKU_LENGTH} caracteres`,
+            });
+            continue;
+          }
+
+          // Extraer datos de la fila
+          const nombre = row[columnIndexes.nombre]?.toString().trim() || '';
+          const descripcion =
+            row[columnIndexes.descripcion]?.toString().trim() || '';
+          const precioMayorista = this.parsePrice(
+            row[columnIndexes.precioMayorista],
+          );
+          const precioMinorista = this.parsePrice(
+            row[columnIndexes.precioMinorista],
+          );
+          const iva = this.parseIvaForImport(row[columnIndexes.iva]);
+          const stock = this.parseStock(row[columnIndexes.stock]);
+          const unidadesPorCaja = this.parseUnitsPerBox(
+            row[columnIndexes.unidadesPorCaja],
+          );
+
+          // Validar datos requeridos
+          if (!nombre) {
+            results.errors++;
+            results.details.push({
+              row: rowNumber,
+              sku,
+              action: 'error',
+              message: 'El nombre del producto es requerido',
+            });
+            continue;
+          }
+
+          // Validar longitud de nombre
+          if (nombre.length > this.IMPORT_MAX_NAME_LENGTH) {
+            results.errors++;
+            results.details.push({
+              row: rowNumber,
+              sku,
+              action: 'error',
+              message: `El nombre excede ${this.IMPORT_MAX_NAME_LENGTH} caracteres`,
+            });
+            continue;
+          }
+
+          // Validar longitud de descripción
+          if (descripcion.length > this.IMPORT_MAX_DESCRIPTION_LENGTH) {
+            results.errors++;
+            results.details.push({
+              row: rowNumber,
+              sku,
+              action: 'error',
+              message: `La descripción excede ${this.IMPORT_MAX_DESCRIPTION_LENGTH} caracteres`,
+            });
+            continue;
+          }
+
+          if (precioMinorista === null || precioMinorista <= 0) {
+            results.errors++;
+            results.details.push({
+              row: rowNumber,
+              sku,
+              action: 'error',
+              message: 'El precio minorista es requerido y debe ser mayor a 0',
+            });
+            continue;
+          }
+
+          // Validar rango de precios
+          if (precioMinorista > this.IMPORT_MAX_PRICE) {
+            results.errors++;
+            results.details.push({
+              row: rowNumber,
+              sku,
+              action: 'error',
+              message: `El precio minorista excede el máximo permitido (${this.IMPORT_MAX_PRICE})`,
+            });
+            continue;
+          }
+
+          if (
+            precioMayorista !== null &&
+            precioMayorista > this.IMPORT_MAX_PRICE
+          ) {
+            results.errors++;
+            results.details.push({
+              row: rowNumber,
+              sku,
+              action: 'error',
+              message: `El precio mayorista excede el máximo permitido (${this.IMPORT_MAX_PRICE})`,
+            });
+            continue;
+          }
+
+          // Usar el mapa pre-cargado en lugar de query individual
+          const existingProduct = productsBySkuMap.get(sku);
+
+          if (existingProduct) {
+            // Comparar valores para detectar cambios reales
+            const currentStock =
+              existingProduct.products_stock[0]?.quantity?.toNumber() || 0;
+            const newWholesalePrice =
+              precioMayorista ?? existingProduct.wholesale_price?.toNumber();
+            const newIva = iva ?? existingProduct.iva?.toNumber();
+            const newUnitsPerBox =
+              unidadesPorCaja ?? existingProduct.units_per_box;
+
+            const hasProductChanges =
+              existingProduct.name !== nombre ||
+              (existingProduct.description || '') !== (descripcion || '') ||
+              existingProduct.wholesale_price?.toNumber() !==
+                newWholesalePrice ||
+              existingProduct.list_price?.toNumber() !== precioMinorista ||
+              existingProduct.iva?.toNumber() !== newIva ||
+              existingProduct.units_per_box !== newUnitsPerBox;
+
+            const hasStockChanges = stock !== null && currentStock !== stock;
+
+            // Solo actualizar si hay cambios reales
+            if (hasProductChanges || hasStockChanges) {
+              if (hasProductChanges) {
+                await this.prisma.products.update({
+                  where: { id: existingProduct.id },
+                  data: {
+                    name: nombre,
+                    description: descripcion || null,
+                    wholesale_price: precioMayorista
+                      ? new Prisma.Decimal(precioMayorista)
+                      : existingProduct.wholesale_price,
+                    list_price: new Prisma.Decimal(precioMinorista),
+                    iva:
+                      iva !== null
+                        ? new Prisma.Decimal(iva)
+                        : existingProduct.iva,
+                    units_per_box:
+                      unidadesPorCaja !== null
+                        ? unidadesPorCaja
+                        : existingProduct.units_per_box,
+                    updated_at: new Date(),
+                  },
+                });
+              }
+
+              // Actualizar stock solo si cambió
+              if (hasStockChanges) {
+                await this.updateOrCreateStock(existingProduct.id, stock);
+              }
+
+              results.updated++;
+              results.details.push({
+                row: rowNumber,
+                sku,
+                action: 'updated',
+                message: 'Producto actualizado exitosamente',
+              });
+            } else {
+              // No hay cambios, marcar como unchanged
+              results.unchanged++;
+              results.details.push({
+                row: rowNumber,
+                sku,
+                action: 'unchanged',
+                message: 'Sin cambios detectados',
+              });
+            }
+          } else {
+            // Crear nuevo producto
+            const newProduct = await this.prisma.products.create({
+              data: {
+                sku,
+                name: nombre,
+                description: descripcion || null,
+                wholesale_price: precioMayorista
+                  ? new Prisma.Decimal(precioMayorista)
+                  : new Prisma.Decimal(0),
+                list_price: new Prisma.Decimal(precioMinorista),
+                iva: iva !== null ? new Prisma.Decimal(iva) : null,
+                units_per_box: unidadesPorCaja,
+                status: product_states.active,
+                created_at: new Date(),
+                updated_at: new Date(),
+              },
+            });
+
+            // Crear stock si se proporciona
+            if (stock !== null && stock > 0) {
+              await this.updateOrCreateStock(newProduct.id, stock);
+            }
+
+            results.created++;
+            results.details.push({
+              row: rowNumber,
+              sku,
+              action: 'created',
+              message: 'Producto creado exitosamente',
+            });
+          }
+        } catch (error) {
+          results.errors++;
+          const errorMessage =
+            error instanceof Error ? error.message : 'Error desconocido';
+          results.details.push({
+            row: rowNumber,
+            sku: row[columnIndexes.sku]?.toString() || 'N/A',
+            action: 'error',
+            message: `Error procesando fila: ${errorMessage}`,
+          });
+        }
+      }
+
+      // Limpiar caché después de la operación masiva
+      await this.clearProductCache();
+
+      return results;
+    } catch (error) {
+      this.logger.error('Error al importar productos:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Parsea un valor de precio desde el Excel.
+   * Maneja valores numéricos, strings y valores vacíos.
+   * @param value - Valor a parsear
+   * @returns Precio como número o null si no es válido
+   */
+  private parsePrice(value: string | number | undefined | null): number | null {
+    if (value === undefined || value === null || value === '') {
+      return null;
+    }
+
+    const numValue =
+      typeof value === 'number' ? value : parseFloat(value.toString().trim());
+
+    if (isNaN(numValue)) {
+      return null;
+    }
+
+    return Math.round(numValue * 100) / 100;
+  }
+
+  /**
+   * Parsea el valor de IVA desde el Excel para importación.
+   * Convierte porcentajes enteros (21) a decimales (0.21) si es necesario.
+   * @param value - Valor del IVA a parsear
+   * @returns IVA como decimal o null si no es válido
+   */
+  private parseIvaForImport(
+    value: string | number | undefined | null,
+  ): number | null {
+    if (value === undefined || value === null || value === '') {
+      return null;
+    }
+
+    const numValue =
+      typeof value === 'number' ? value : parseFloat(value.toString().trim());
+
+    if (isNaN(numValue)) {
+      return null;
+    }
+
+    // Si el valor es >= 1, asumir que está en porcentaje (ej: 21) y convertir a decimal (0.21)
+    if (numValue >= 1) {
+      return numValue / 100;
+    }
+
+    return numValue;
+  }
+
+  /**
+   * Parsea el valor de stock desde el Excel para importación.
+   * @param value - Valor del stock a parsear
+   * @returns Stock como número o null si no es válido
+   */
+  private parseStock(value: string | number | undefined | null): number | null {
+    if (value === undefined || value === null || value === '') {
+      return null;
+    }
+
+    const numValue =
+      typeof value === 'number' ? value : parseFloat(value.toString().trim());
+
+    if (isNaN(numValue) || numValue < 0) {
+      return null;
+    }
+
+    return Math.floor(numValue);
+  }
+
+  /**
+   * Parsea el valor de unidades por caja desde el Excel para importación.
+   * @param value - Valor de unidades por caja a parsear
+   * @returns Unidades por caja como número o null si no es válido
+   */
+  private parseUnitsPerBox(
+    value: string | number | undefined | null,
+  ): number | null {
+    if (value === undefined || value === null || value === '') {
+      return null;
+    }
+
+    const numValue =
+      typeof value === 'number' ? value : parseInt(value.toString().trim(), 10);
+
+    if (isNaN(numValue) || numValue < 0) {
+      return null;
+    }
+
+    return numValue;
+  }
+
+  /**
+   * Actualiza o crea el stock de un producto.
+   * Usa la primera unidad disponible si no hay stock existente.
+   * @param productId - ID del producto
+   * @param quantity - Cantidad de stock
+   * @throws Error si no hay unidades configuradas en el sistema
+   */
+  private async updateOrCreateStock(
+    productId: number,
+    quantity: number,
+  ): Promise<void> {
+    const existingStock = await this.prisma.products_stock.findFirst({
+      where: { product_id: productId },
+    });
+
+    if (existingStock) {
+      await this.prisma.products_stock.update({
+        where: { id: existingStock.id },
+        data: { quantity: new Prisma.Decimal(quantity) },
+      });
+    } else {
+      // Obtener la primera unidad disponible para productos nuevos
+      const defaultUnit = await this.prisma.units.findFirst();
+      if (!defaultUnit) {
+        throw new Error(
+          'No hay unidades configuradas en el sistema. Configure al menos una unidad antes de importar productos con stock.',
+        );
+      }
+      await this.prisma.products_stock.create({
+        data: {
+          product_id: productId,
+          quantity: new Prisma.Decimal(quantity),
+          unit_id: defaultUnit.id,
+        },
+      });
+    }
+  }
 }
