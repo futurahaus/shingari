@@ -198,11 +198,6 @@ export class ProductsService {
     let originalPriceWithIva: number | undefined;
     let finalIvaValue: number | undefined = undefined;
 
-    // Debug logging to help identify the issue
-    console.log(
-      `[DEBUG] Product ${product.id}: userId=${userId}, userRole=${userRole}, userDiscountPrice=${userDiscountPrice}`,
-    );
-
     // Normalize IVA value for consistent display (always as percentage)
     let normalizedIvaValue: number | undefined = undefined;
     if (product.iva) {
@@ -225,17 +220,10 @@ export class ProductsService {
       originalPriceWithIva = originalPrice
         ? originalPrice * (1 + ivaValue / 100)
         : undefined;
-
-      console.log(
-        `[DEBUG] Non-business user: applying IVA ${ivaValue}%, price ${price} -> ${priceWithIva}`,
-      );
     } else {
       // For business users, show prices without IVA but still include IVA info for display
       priceWithIva = price;
       originalPriceWithIva = originalPrice;
-      console.log(
-        `[DEBUG] Business user: NO IVA applied, price remains ${priceWithIva}`,
-      );
     }
 
     // Always include normalized IVA value in response for display purposes
@@ -342,14 +330,6 @@ export class ProductsService {
         let priceWithIva: number;
         let originalPriceWithIva: number | undefined;
         let finalIvaValue: number | undefined = undefined;
-
-        // Debug logging for bulk products
-        if (products.indexOf(product) === 0) {
-          // Log only for first product to avoid spam
-          console.log(
-            `[DEBUG BULK] Products list: userId=${userId}, userRole=${userRole}, firstProduct=${product.id}`,
-          );
-        }
 
         // Normalize IVA value for consistent display (always as percentage)
         let normalizedIvaValue: number | undefined = undefined;
@@ -1997,10 +1977,6 @@ export class ProductsService {
           }
 
           // Determine if discount is active
-          // Log for debugging
-          this.logger.debug(
-            `Row ${rowNumber}: estado="${estado}", isActive will be=${estado === 'activo' || estado === 'true' || estado === '1' || estado === ''}`,
-          );
           const isActive =
             estado === 'activo' ||
             estado === 'true' ||
@@ -2128,12 +2104,15 @@ export class ProductsService {
     const exportData = products.map((product) => ({
       SKU: product.sku || '',
       Nombre: product.name || '',
-      Descripcion: product.description || '',
+      Descripcion: (product.description || '').trim(),
       Precio_mayorista: product.wholesale_price?.toNumber() || 0,
       Precio_minorista: product.list_price?.toNumber() || 0,
       IVA: this.normalizeIvaForExport(product.iva?.toNumber()),
       Stock: product.products_stock[0]?.quantity?.toNumber() || 0,
-      Unidades_por_caja: product.units_per_box || 0,
+      Unidades_por_caja:
+        product.units_per_box && Number(product.units_per_box) > 0
+          ? Number(product.units_per_box)
+          : '',
     }));
 
     // Crear workbook y worksheet
@@ -2469,22 +2448,52 @@ export class ProductsService {
 
           if (existingProduct) {
             // Comparar valores para detectar cambios reales
+            // Usar redondeo a 2 decimales para evitar falsos positivos por precisión flotante
+            const roundTo2 = (n: number | null | undefined): number =>
+              n != null ? Math.round(n * 100) / 100 : 0;
+
             const currentStock =
               existingProduct.products_stock[0]?.quantity?.toNumber() || 0;
-            const newWholesalePrice =
-              precioMayorista ?? existingProduct.wholesale_price?.toNumber();
-            const newIva = iva ?? existingProduct.iva?.toNumber();
+            const currentWholesalePrice = roundTo2(
+              existingProduct.wholesale_price?.toNumber(),
+            );
+            const currentListPrice = roundTo2(
+              existingProduct.list_price?.toNumber(),
+            );
+            const currentIva = roundTo2(existingProduct.iva?.toNumber());
+            // Convertir BigInt a number para comparación correcta
+            const currentUnitsPerBox = existingProduct.units_per_box
+              ? Number(existingProduct.units_per_box)
+              : null;
+
+            const newWholesalePrice = roundTo2(
+              precioMayorista ?? existingProduct.wholesale_price?.toNumber(),
+            );
+            const newListPrice = roundTo2(precioMinorista);
+            const newIva = roundTo2(iva ?? existingProduct.iva?.toNumber());
+            // Normalizar: 0 se trata como null para unidades por caja
             const newUnitsPerBox =
-              unidadesPorCaja ?? existingProduct.units_per_box;
+              unidadesPorCaja !== null && unidadesPorCaja !== 0
+                ? unidadesPorCaja
+                : null;
+            const normalizedCurrentUnitsPerBox =
+              currentUnitsPerBox !== null && currentUnitsPerBox !== 0
+                ? currentUnitsPerBox
+                : null;
+
+            // Normalizar descripciones: trim y tratar vacío como null
+            const normalizedCurrentDesc = (
+              existingProduct.description || ''
+            ).trim();
+            const normalizedNewDesc = (descripcion || '').trim();
 
             const hasProductChanges =
               existingProduct.name !== nombre ||
-              (existingProduct.description || '') !== (descripcion || '') ||
-              existingProduct.wholesale_price?.toNumber() !==
-                newWholesalePrice ||
-              existingProduct.list_price?.toNumber() !== precioMinorista ||
-              existingProduct.iva?.toNumber() !== newIva ||
-              existingProduct.units_per_box !== newUnitsPerBox;
+              normalizedCurrentDesc !== normalizedNewDesc ||
+              currentWholesalePrice !== newWholesalePrice ||
+              currentListPrice !== newListPrice ||
+              currentIva !== newIva ||
+              normalizedCurrentUnitsPerBox !== newUnitsPerBox;
 
             const hasStockChanges = stock !== null && currentStock !== stock;
 
