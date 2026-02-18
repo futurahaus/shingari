@@ -907,10 +907,8 @@ export class ProductsService {
   }
 
   async removeLogical(id: string): Promise<void> {
-    await this.clearProductCache();
     const productId = parseInt(id);
 
-    // Check if product exists
     const existingProduct = await this.prisma.products.findUnique({
       where: { id: productId },
     });
@@ -919,11 +917,21 @@ export class ProductsService {
       throw new NotFoundException(`Producto con ID "${id}" no encontrado.`);
     }
 
-    // Update status to deleted (logical deletion)
-    await this.prisma.products.update({
-      where: { id: productId },
-      data: { status: product_states.deleted },
+    // Usar transacción para garantizar consistencia
+    await this.prisma.$transaction(async (tx) => {
+      // 1. Desasociar de order_lines (poner product_id en NULL)
+      await tx.order_lines.updateMany({
+        where: { product_id: productId },
+        data: { product_id: null },
+      });
+
+      // 2. Eliminar el producto (cascade elimina las demás relaciones)
+      await tx.products.delete({
+        where: { id: productId },
+      });
     });
+
+    await this.clearProductCache();
   }
 
   async toggleStatus(id: string): Promise<ToggleStatusResponseDto> {
