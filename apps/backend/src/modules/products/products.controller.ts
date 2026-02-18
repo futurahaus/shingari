@@ -395,13 +395,13 @@ export class ProductsController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, AdminGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Eliminar lógicamente un producto (Solo Admin)' })
+  @ApiOperation({ summary: 'Eliminar físicamente un producto y liberar SKU (Solo Admin)' })
   @ApiParam({
     name: 'id',
     description: 'ID del producto a eliminar',
     type: 'integer',
   })
-  @ApiResponse({ status: 204, description: 'Producto eliminado lógicamente.' })
+  @ApiResponse({ status: 204, description: 'Producto eliminado físicamente.' })
   @ApiResponse({ status: 401, description: 'No autorizado.' })
   @ApiResponse({ status: 403, description: 'Prohibido.' })
   @ApiResponse({ status: 404, description: 'Producto no encontrado.' })
