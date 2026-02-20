@@ -2043,6 +2043,15 @@ export class ProductsService {
             },
           });
 
+          // Auto-add product to favorites (same behavior as individual assignment)
+          await this.prisma.favorites.upsert({
+            where: {
+              user_id_product_id: { user_id: userId, product_id: product.id },
+            },
+            create: { user_id: userId, product_id: product.id },
+            update: {},
+          });
+
           results.success++;
           results.details.push({
             row: rowNumber,
