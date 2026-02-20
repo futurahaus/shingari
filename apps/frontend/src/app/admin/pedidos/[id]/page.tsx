@@ -234,7 +234,7 @@ export default function AdminOrderDetailPage() {
 
       setUploadedFiles([]);
       showSuccess(t('admin.orders.detail.file_deleted'), t('admin.orders.detail.invoice_deleted_success'));
-    } catch (error) {
+    } catch {
       showError(t('admin.orders.detail.delete_error_title'), t('admin.orders.detail.delete_error_message'));
     } finally {
       setDeleting(false);
