@@ -359,20 +359,54 @@ export class AuthService {
   }
 
   async requestPasswordReset(email: string): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL;
+    if (!frontendUrl) {
+      this.logger.logError(
+        'Password Reset Request',
+        new Error('FRONTEND_URL no está configurado en las variables de entorno'),
+      );
+      throw new BadRequestException(
+        'Configuración incompleta. Contacte al administrador.',
+      );
+    }
+
     try {
+      const redirectTo = `${frontendUrl.replace(/\/$/, '')}/auth/reset-password`;
       const { error } = await this.databaseService
         .getClient()
         .auth.resetPasswordForEmail(email, {
-          redirectTo: `${process.env.FRONTEND_URL}/auth/reset-password`,
+          redirectTo,
         });
 
       if (error) {
         this.logger.logError('Password Reset Request', error);
+        const errMsg = error.message || '';
+        const errStatus = (error as { status?: number }).status;
+
+        if (errStatus === 429) {
+          throw new BadRequestException(
+            'Demasiados intentos. Espere unos minutos antes de intentar de nuevo.',
+          );
+        }
+        if (errMsg.includes('redirect') || errMsg.includes('url')) {
+          throw new BadRequestException(
+            'Error de configuración. La URL de redirección debe estar en la lista de URLs permitidas en Supabase (Authentication > URL Configuration).',
+          );
+        }
+        if (errMsg.includes('email') && errMsg.toLowerCase().includes('disabled')) {
+          throw new BadRequestException(
+            'El restablecimiento de contraseña por email no está habilitado. Contacte al administrador.',
+          );
+        }
+
         throw new BadRequestException(
-          'Error al solicitar el restablecimiento de contraseña',
+          `Error al solicitar el restablecimiento de contraseña. ${errMsg}`,
         );
       }
     } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       this.logger.logError('Password Reset Request', error);
       throw new BadRequestException(
         'Error al solicitar el restablecimiento de contraseña',
