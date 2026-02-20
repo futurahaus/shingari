@@ -126,20 +126,8 @@ export default function AdminOrderDetailPage() {
       .finally(() => setLoading(false));
   }, [orderId, t, refreshKey]); // Added refreshKey as dependency
 
-  // Log para verificar variables de entorno
-  useEffect(() => {
-    console.log('🔧 Variables de entorno:');
-    console.log('NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
-    console.log('orderId:', orderId);
-  }, [orderId]);
-
   const handleFileUpload = async (file: File) => {
-    console.log('🔄 handleFileUpload iniciado');
-    console.log('selectedFile:', file);
-    console.log('orderId:', orderId);
-
     if (!file || !orderId) {
-      console.log('❌ No hay archivo seleccionado o orderId');
       return;
     }
 
@@ -152,14 +140,12 @@ export default function AdminOrderDetailPage() {
       formData.append('documentType', 'invoice');
 
       const token = localStorage.getItem('accessToken');
-      console.log('🔑 Token:', token ? 'Presente' : 'No encontrado');
 
       if (!token) {
         throw new Error(t('admin.orders.detail.auth_token_missing'));
       }
 
       const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/orders/${orderId}/upload-document`;
-      console.log('🌐 URL del API:', apiUrl);
 
       // Simulate upload progress
       const progressInterval = setInterval(() => {
@@ -184,16 +170,12 @@ export default function AdminOrderDetailPage() {
       clearInterval(progressInterval);
       setUploadProgress(100);
 
-      console.log('📡 Respuesta del servidor:', response.status, response.statusText);
-
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ Error en la respuesta:', errorText);
         throw new Error(t('admin.orders.detail.upload_error', { status: response.status, statusText: response.statusText, error: errorText }));
       }
 
       const result: DocumentUploadResponse = await response.json();
-      console.log('✅ Resultado exitoso:', result);
 
       // Reemplazar la factura existente o agregar una nueva
       setUploadedFiles([{
@@ -207,7 +189,6 @@ export default function AdminOrderDetailPage() {
       }, 500);
 
     } catch (error) {
-      console.error('❌ Error al subir archivo:', error);
       showError(t('admin.upload.upload_failed'), error instanceof Error ? error.message : t('admin.orders.detail.unknown_error'));
     } finally {
       setTimeout(() => {
@@ -248,13 +229,12 @@ export default function AdminOrderDetailPage() {
       });
 
       if (!updateResponse.ok) {
-        console.warn(t('admin.orders.detail.could_not_clear_db_url'));
+        // Could not clear invoice URL from database
       }
 
       setUploadedFiles([]);
       showSuccess(t('admin.orders.detail.file_deleted'), t('admin.orders.detail.invoice_deleted_success'));
     } catch (error) {
-      console.error('Error al eliminar archivo:', error);
       showError(t('admin.orders.detail.delete_error_title'), t('admin.orders.detail.delete_error_message'));
     } finally {
       setDeleting(false);

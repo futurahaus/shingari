@@ -117,13 +117,11 @@ export function I18nProvider({ children }: I18nProviderProps) {
           return fallbacks[key] || key;
         }
         // Return the key if translation not found and not loading
-        console.warn(`Translation missing for key: ${key} in locale: ${locale}`);
         return key;
       }
     }
 
     if (typeof value !== 'string') {
-      console.warn(`Translation value is not a string for key: ${key}`);
       return key;
     }
 

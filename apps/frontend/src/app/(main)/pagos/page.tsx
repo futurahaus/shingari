@@ -234,8 +234,6 @@ export default function PagosPage() {
         points_earned: pointsEarned,
       };
 
-      console.log('Sending order data:', JSON.stringify(orderData, null, 2));
-
       const order = await api.post<{ id: string }, typeof orderData>('/orders', orderData);
 
       // Vaciar el carrito después de crear la orden exitosamente
@@ -243,7 +241,6 @@ export default function PagosPage() {
 
       router.push(`/congrats?orderId=${order.id}`);
     } catch (error) {
-      console.error('Error al procesar el pago:', error);
       alert(t('payment.payment_error'));
     } finally {
       setIsLoading(false);

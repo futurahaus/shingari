@@ -43,8 +43,6 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
   // Reset form when modal opens/closes or product changes
   useEffect(() => {
     if (isOpen && product) {
-      console.log('Resetting form for product:', product);
-      console.log('Product has translations:', product.translations);
       setTranslationData({
         locale: 'zh',
         name: '',
@@ -60,15 +58,11 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
     if (!product) return;
 
     setFetchingTranslation(true);
-    console.log('Fetching translation for product:', product.id, 'locale:', translationData.locale);
 
     try {
-      // First, check if the product object already has translations (from admin list)
       if (product.translations && Array.isArray(product.translations) && product.translations.length > 0) {
-        console.log('Product already has translations:', product.translations);
         const translation = product.translations.find((t: ExistingTranslation) => t.locale === translationData.locale);
         if (translation) {
-          console.log('Found existing translation in product data:', translation);
           setExistingTranslation(translation);
           setTranslationData({
             locale: translation.locale,
@@ -76,15 +70,9 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
             description: translation.description || ''
           });
           return;
-        } else {
-          console.log('No translation found for locale in product data:', translationData.locale);
         }
-      } else {
-        console.log('Product has no translations array or empty translations');
       }
 
-      // If no translation in product data, clear the fields
-      console.log('Clearing form for new translation');
       setExistingTranslation(null);
       setTranslationData(prev => ({
         ...prev,
@@ -92,8 +80,7 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
         description: ''
       }));
 
-    } catch (err) {
-      console.error('Error processing existing translation:', err);
+    } catch {
       setExistingTranslation(null);
       setTranslationData(prev => ({
         ...prev,
@@ -132,14 +119,6 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
     setSuccess(null);
 
     try {
-      console.log('Sending translation data:', {
-        productId: product.id,
-        locale: translationData.locale,
-        name: translationData.name,
-        description: translationData.description,
-        isUpdate: !!existingTranslation
-      });
-
       let response;
 
       if (existingTranslation) {
@@ -158,8 +137,6 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
         });
       }
 
-      console.log('Translation response:', response);
-
       setSuccess(existingTranslation ? 'Traducción actualizada exitosamente' : 'Traducción guardada exitosamente');
       onTranslationUpdated();
 
@@ -169,8 +146,6 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
       }, 1500);
 
     } catch (err: unknown) {
-      console.error('Error saving translation:', err);
-
       if (err instanceof Error) {
         setError(err.message);
       } else if (typeof err === 'object' && err !== null && 'response' in err) {
@@ -201,14 +176,7 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
     setError(null);
 
     try {
-      console.log('Deleting translation:', {
-        productId: product.id,
-        locale: translationData.locale
-      });
-
-      const response = await api.delete(`/products/${product.id}/translations/${translationData.locale}`);
-
-      console.log('Delete translation response:', response);
+      await api.delete(`/products/${product.id}/translations/${translationData.locale}`);
 
       setSuccess('Traducción eliminada exitosamente');
       setExistingTranslation(null);

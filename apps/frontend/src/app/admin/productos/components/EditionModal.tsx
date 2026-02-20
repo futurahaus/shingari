@@ -180,7 +180,6 @@ export const EditionModal: React.FC<EditionModalProps> = ({
         delete payload.unit_id;
       }
 
-      console.log('Payload for update:', payload);
       await api.put(`/products/${product.id}`, payload as unknown as Record<string, unknown>);
       
       // Limpiar formulario y estados

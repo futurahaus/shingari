@@ -281,7 +281,6 @@ export default function OrderDetailPage() {
                 <button
                   onClick={() => {
                     // Lógica para repetir compra
-                    console.log('Repetir compra:', order.id);
                   }}
                   className="px-4 py-2 bg-[#EA3D15] text-white rounded text-sm font-medium hover:bg-[#d43e0e] transition-colors cursor-pointer"
                 >

@@ -35,23 +35,7 @@ const RewardsCartPage = () => {
   const canAfford = userPoints >= totalPointsCost;
   const remainingPoints = userPoints - totalPointsCost;
 
-  // Debug the calculation issue
-  console.log('🔍 Rewards Cart Debug:', {
-    totalPointsCost,
-    userPoints,
-    canAfford,
-    remainingPoints,
-    pointsData: pointsData?.balance,
-    cartItems: rewardsCart.map(r => ({
-      id: r.id,
-      name: r.name,
-      points_cost: r.points_cost,
-      quantity: r.quantity,
-      total: r.points_cost * r.quantity
-    }))
-  });
-
-      // Redirect if not authenticated
+  // Redirect if not authenticated
   useEffect(() => {
     if (!user) {
       router.push('/products?rewards=true');
@@ -80,30 +64,6 @@ const RewardsCartPage = () => {
         })),
         total_points: totalPointsCost
       };
-
-      console.log('🔍 Frontend Debug - Redemption Data:', {
-        userCurrentPoints: userPoints,
-        totalPointsCost,
-        canAfford,
-        redemptionData,
-        cartDetails: rewardsCart.map(r => ({
-          id: r.id,
-          name: r.name,
-          quantity: r.quantity,
-          points_cost: r.points_cost,
-          total: r.quantity * r.points_cost
-        }))
-      });
-
-      // Debug authentication
-      const accessToken = localStorage.getItem('accessToken');
-      console.log('🔍 Auth Debug:', {
-        hasToken: !!accessToken,
-        tokenLength: accessToken?.length,
-        tokenPrefix: accessToken?.substring(0, 20) + '...',
-        userFromContext: !!user,
-        userId: user?.id
-      });
 
       await api.post('/rewards/redeem', redemptionData);
 

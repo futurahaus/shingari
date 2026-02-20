@@ -77,9 +77,8 @@ const ColorSection: React.FC<{ title: string; colors: Record<string, string | { 
 export default function ComponentsListPage() {
   const [activeTab, setActiveTab] = useState<'components' | 'colors'>('components');
 
-  const handleButtonClick = (action: string) => {
-    console.log(`Botón clickeado: ${action}`);
-    // Aquí podrías agregar notificaciones o otras acciones
+  const handleButtonClick = (_action: string) => {
+    // Demo handler - no action needed
   };
 
   return (
@@ -450,7 +449,7 @@ export default function ComponentsListPage() {
                       <Input
                         label="Nombre"
                         value=""
-                        onChangeValue={(value) => console.log('Nombre:', value)}
+                        onChangeValue={() => {}}
                         placeholder="Ingresa tu nombre"
                         testID="name-input"
                       />
@@ -458,7 +457,7 @@ export default function ComponentsListPage() {
                       <Input
                         label="Email"
                         value=""
-                        onChangeValue={(value) => console.log('Email:', value)}
+                        onChangeValue={() => {}}
                         placeholder="ejemplo@email.com"
                         type="email"
                         testID="email-input"
@@ -467,7 +466,7 @@ export default function ComponentsListPage() {
                       <Input
                         label="Teléfono"
                         value=""
-                        onChangeValue={(value) => console.log('Teléfono:', value)}
+                        onChangeValue={() => {}}
                         placeholder="+34 123 456 789"
                         type="tel"
                         testID="phone-input"
@@ -476,7 +475,7 @@ export default function ComponentsListPage() {
                       <Input
                         label="URL"
                         value=""
-                        onChangeValue={(value) => console.log('URL:', value)}
+                        onChangeValue={() => {}}
                         placeholder="https://ejemplo.com"
                         type="url"
                         testID="url-input"
@@ -491,41 +490,41 @@ export default function ComponentsListPage() {
                       <Input
                         label="Contraseña"
                         value=""
-                        onChangeValue={(value) => console.log('Contraseña:', value)}
+                        onChangeValue={() => {}}
                         type="password"
                         placeholder="Ingresa tu contraseña"
                         iconRight="FaEye"
-                        iconRightOnPress={() => console.log('Mostrar/ocultar contraseña')}
+                        iconRightOnPress={() => {}}
                         testID="password-input"
                       />
                       
                       <Input
                         label="Buscar"
                         value=""
-                        onChangeValue={(value) => console.log('Búsqueda:', value)}
+                        onChangeValue={() => {}}
                         placeholder="Buscar productos..."
                         iconRight="FaSearch"
-                        iconRightOnPress={() => console.log('Ejecutar búsqueda')}
+                        iconRightOnPress={() => {}}
                         testID="search-input"
                       />
                       
                       <Input
                         label="Limpiar"
                         value="texto de ejemplo"
-                        onChangeValue={(value) => console.log('Valor:', value)}
+                        onChangeValue={() => {}}
                         placeholder="Escribe algo..."
                         iconRight="FaTimes"
-                        iconRightOnPress={() => console.log('Limpiar campo')}
+                        iconRightOnPress={() => {}}
                         testID="clear-input"
                       />
                       
                       <Input
                         label="Calendario"
                         value=""
-                        onChangeValue={(value) => console.log('Fecha:', value)}
+                        onChangeValue={() => {}}
                         placeholder="Seleccionar fecha"
                         iconRight="FaCalendar"
-                        iconRightOnPress={() => console.log('Abrir calendario')}
+                        iconRightOnPress={() => {}}
                         testID="calendar-input"
                       />
                     </div>
@@ -538,7 +537,7 @@ export default function ComponentsListPage() {
                       <Input
                         label="Campo con Error"
                         value="valor incorrecto"
-                        onChangeValue={(value) => console.log('Valor:', value)}
+                        onChangeValue={() => {}}
                         placeholder="Campo requerido"
                         error="Este campo es obligatorio"
                         testID="error-input"
@@ -547,7 +546,7 @@ export default function ComponentsListPage() {
                       <Input
                         label="Campo Deshabilitado"
                         value="valor fijo"
-                        onChangeValue={(value) => console.log('Valor:', value)}
+                        onChangeValue={() => {}}
                         placeholder="No se puede editar"
                         disabled={true}
                         testID="disabled-input"
@@ -556,7 +555,7 @@ export default function ComponentsListPage() {
                       <Input
                         label="Campo Normal"
                         value=""
-                        onChangeValue={(value) => console.log('Valor:', value)}
+                        onChangeValue={() => {}}
                         placeholder="Campo funcional"
                         testID="normal-input"
                       />
@@ -564,7 +563,7 @@ export default function ComponentsListPage() {
                       <Input
                         label="Campo con Valor"
                         value="texto predefinido"
-                        onChangeValue={(value) => console.log('Valor:', value)}
+                        onChangeValue={() => {}}
                         placeholder="Escribe aquí"
                         testID="filled-input"
                       />
@@ -582,7 +581,7 @@ export default function ComponentsListPage() {
                           <Input
                             label="Email"
                             value=""
-                            onChangeValue={(value) => console.log('Email:', value)}
+                            onChangeValue={() => {}}
                             placeholder="tu@email.com"
                             type="email"
                             testID="login-email"
@@ -590,15 +589,15 @@ export default function ComponentsListPage() {
                           <Input
                             label="Contraseña"
                             value=""
-                            onChangeValue={(value) => console.log('Password:', value)}
+                            onChangeValue={() => {}}
                             type="password"
                             placeholder="Tu contraseña"
                             iconRight="FaEye"
-                            iconRightOnPress={() => console.log('Toggle password')}
+                            iconRightOnPress={() => {}}
                             testID="login-password"
                           />
                           <Button
-                            onPress={() => console.log('Iniciar sesión')}
+                            onPress={() => {}}
                             type="primary"
                             text="Iniciar Sesión"
                             testID="login-button"
@@ -613,14 +612,14 @@ export default function ComponentsListPage() {
                           <Input
                             label="Nombre completo"
                             value=""
-                            onChangeValue={(value) => console.log('Nombre:', value)}
+                            onChangeValue={() => {}}
                             placeholder="Juan Pérez"
                             testID="register-name"
                           />
                           <Input
                             label="Email"
                             value=""
-                            onChangeValue={(value) => console.log('Email:', value)}
+                            onChangeValue={() => {}}
                             placeholder="juan@email.com"
                             type="email"
                             testID="register-email"
@@ -628,22 +627,22 @@ export default function ComponentsListPage() {
                           <Input
                             label="Contraseña"
                             value=""
-                            onChangeValue={(value) => console.log('Password:', value)}
+                            onChangeValue={() => {}}
                             type="password"
                             placeholder="Mínimo 8 caracteres"
                             iconRight="FaEye"
-                            iconRightOnPress={() => console.log('Toggle password')}
+                            iconRightOnPress={() => {}}
                             testID="register-password"
                           />
                           <div className="flex gap-2">
                             <Button
-                              onPress={() => console.log('Registrar')}
+                              onPress={() => {}}
                               type="primary"
                               text="Registrar"
                               testID="register-button"
                             />
                             <Button
-                              onPress={() => console.log('Cancelar')}
+                              onPress={() => {}}
                               type="secondary"
                               text="Cancelar"
                               testID="cancel-register-button"
