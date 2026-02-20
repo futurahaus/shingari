@@ -52,7 +52,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         try {
           const response = await api.get(`/products/${item.id}`) as { data?: { iva?: number } };
           return { id: item.id, iva: response.data?.iva };
-        } catch (error) {
+        } catch {
           return { id: item.id, iva: undefined };
         }
       });

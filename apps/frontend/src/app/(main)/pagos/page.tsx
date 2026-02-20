@@ -240,7 +240,7 @@ export default function PagosPage() {
       clearCart();
 
       router.push(`/congrats?orderId=${order.id}`);
-    } catch (error) {
+    } catch {
       alert(t('payment.payment_error'));
     } finally {
       setIsLoading(false);

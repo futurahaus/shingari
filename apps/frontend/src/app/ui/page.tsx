@@ -77,6 +77,7 @@ const ColorSection: React.FC<{ title: string; colors: Record<string, string | { 
 export default function ComponentsListPage() {
   const [activeTab, setActiveTab] = useState<'components' | 'colors'>('components');
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Demo handler, action param not used
   const handleButtonClick = (_action: string) => {
     // Demo handler - no action needed
   };

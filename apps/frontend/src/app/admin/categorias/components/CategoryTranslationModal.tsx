@@ -112,17 +112,15 @@ export function CategoryTranslationModal({ isOpen, onClose, category, onTranslat
     setSuccess(null);
 
     try {
-      let response;
-
       if (existingTranslation) {
         // Update existing translation
-        response = await api.put(`/products/categories/${category.id}/translations/${translationData.locale}`, {
+        await api.put(`/products/categories/${category.id}/translations/${translationData.locale}`, {
           locale: translationData.locale,
           name: translationData.name
         });
       } else {
         // Create new translation
-        response = await api.post(`/products/categories/${category.id}/translations`, {
+        await api.post(`/products/categories/${category.id}/translations`, {
           locale: translationData.locale,
           name: translationData.name
         });

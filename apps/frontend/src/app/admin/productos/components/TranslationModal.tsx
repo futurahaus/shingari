@@ -119,18 +119,16 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
     setSuccess(null);
 
     try {
-      let response;
-
       if (existingTranslation) {
         // Update existing translation
-        response = await api.put(`/products/${product.id}/translations/${translationData.locale}`, {
+        await api.put(`/products/${product.id}/translations/${translationData.locale}`, {
           locale: translationData.locale,
           name: translationData.name,
           description: translationData.description
         });
       } else {
         // Create new translation
-        response = await api.post(`/products/${product.id}/translations`, {
+        await api.post(`/products/${product.id}/translations`, {
           locale: translationData.locale,
           name: translationData.name,
           description: translationData.description
