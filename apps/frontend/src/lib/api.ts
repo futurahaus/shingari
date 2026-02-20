@@ -134,13 +134,8 @@ class ApiClient {
         // For successful responses, try to parse JSON
     try {
       const jsonData = await response.json();
-      console.log('API Client - Parsed JSON successfully:', jsonData);
       return jsonData;
-    } catch (error) {
-      console.error('API Client - Failed to parse response as JSON:', error);
-      console.error('API Client - Response status:', response.status);
-      console.error('API Client - Response headers:', Array.from(response.headers.entries()));
-
+    } catch {
       // If JSON parsing fails, return empty object
       return {} as T;
     }

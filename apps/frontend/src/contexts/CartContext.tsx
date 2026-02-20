@@ -53,7 +53,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           const response = await api.get(`/products/${item.id}`) as { data?: { iva?: number } };
           return { id: item.id, iva: response.data?.iva };
         } catch (error) {
-          console.warn(`Failed to fetch IVA for product ${item.id}:`, error);
           return { id: item.id, iva: undefined };
         }
       });
@@ -66,8 +65,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         ...item,
         iva: item.iva !== undefined ? item.iva : ivaMap.get(item.id)
       }));
-    } catch (error) {
-      console.error('Cart migration failed:', error);
+    } catch {
       return cartItems;
     }
   };

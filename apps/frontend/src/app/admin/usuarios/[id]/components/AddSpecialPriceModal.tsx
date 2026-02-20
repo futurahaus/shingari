@@ -97,19 +97,16 @@ export const AddSpecialPriceModal: React.FC<AddSpecialPriceModalProps> = ({
     // Load products for the search
     api.get('/products/admin/all?limit=1000')
       .then((response) => {
-        console.log('Products response:', response); // Debug log
         // The API returns a paginated response with data property
         const typedResponse = response as PaginatedResponse<Product>;
         if (typedResponse && typedResponse.data && Array.isArray(typedResponse.data)) {
           setProducts(typedResponse.data);
           setFilteredProducts(typedResponse.data);
         } else {
-          console.error('Unexpected products response format:', response);
           setError(t('admin.users.detail.unexpected_response_format'));
         }
       })
-      .catch((err) => {
-        console.error('Error loading products:', err);
+      .catch(() => {
         setError(t('admin.users.detail.error_loading_products'));
       })
       .finally(() => setLoading(false));

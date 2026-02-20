@@ -26,7 +26,6 @@ const Newsletter = () => {
           <Button
             onPress={() => {
               // Lógica para suscribirse al newsletter
-              console.log('Suscribirse al newsletter');
             }}
             type="primary"
             size='sm'

@@ -40,8 +40,6 @@ export function CategoryTranslationModal({ isOpen, onClose, category, onTranslat
   // Reset form when modal opens/closes or category changes
   useEffect(() => {
     if (isOpen && category) {
-      console.log('Resetting form for category:', category);
-      console.log('Category has translations:', category.translations);
       setTranslationData({
         locale: 'zh',
         name: ''
@@ -56,38 +54,27 @@ export function CategoryTranslationModal({ isOpen, onClose, category, onTranslat
     if (!category) return;
 
     setFetchingTranslation(true);
-    console.log('Fetching translation for category:', category.id, 'locale:', translationData.locale);
 
     try {
-      // First, check if the category object already has translations (from admin list)
       if (category.translations && Array.isArray(category.translations) && category.translations.length > 0) {
-        console.log('Category already has translations:', category.translations);
         const translation = category.translations.find((t: ExistingTranslation) => t.locale === translationData.locale);
         if (translation) {
-          console.log('Found existing translation in category data:', translation);
           setExistingTranslation(translation);
           setTranslationData({
             locale: translation.locale,
             name: translation.name || ''
           });
           return;
-        } else {
-          console.log('No translation found for locale in category data:', translationData.locale);
         }
-      } else {
-        console.log('Category has no translations array or empty translations');
       }
 
-      // If no translation in category data, clear the fields
-      console.log('Clearing form for new translation');
       setExistingTranslation(null);
       setTranslationData(prev => ({
         ...prev,
         name: ''
       }));
 
-    } catch (err) {
-      console.error('Error processing existing translation:', err);
+    } catch {
       setExistingTranslation(null);
       setTranslationData(prev => ({
         ...prev,
@@ -125,13 +112,6 @@ export function CategoryTranslationModal({ isOpen, onClose, category, onTranslat
     setSuccess(null);
 
     try {
-      console.log('Sending translation data:', {
-        categoryId: category.id,
-        locale: translationData.locale,
-        name: translationData.name,
-        isUpdate: !!existingTranslation
-      });
-
       let response;
 
       if (existingTranslation) {
@@ -148,8 +128,6 @@ export function CategoryTranslationModal({ isOpen, onClose, category, onTranslat
         });
       }
 
-      console.log('Translation response:', response);
-
       setSuccess(existingTranslation ? t('admin.categories.translation_updated_success') : t('admin.categories.translation_saved_success'));
       onTranslationUpdated();
 
@@ -159,8 +137,6 @@ export function CategoryTranslationModal({ isOpen, onClose, category, onTranslat
       }, 1500);
 
     } catch (err: unknown) {
-      console.error('Error saving translation:', err);
-
       if (err instanceof Error) {
         setError(err.message);
       } else if (typeof err === 'object' && err !== null && 'response' in err) {
@@ -191,14 +167,7 @@ export function CategoryTranslationModal({ isOpen, onClose, category, onTranslat
     setError(null);
 
     try {
-      console.log('Deleting translation:', {
-        categoryId: category.id,
-        locale: translationData.locale
-      });
-
-      const response = await api.delete(`/products/categories/${category.id}/translations/${translationData.locale}`);
-
-      console.log('Delete translation response:', response);
+      await api.delete(`/products/categories/${category.id}/translations/${translationData.locale}`);
 
       setSuccess(t('admin.categories.translation_deleted_success'));
       setExistingTranslation(null);

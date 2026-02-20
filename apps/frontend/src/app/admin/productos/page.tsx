@@ -228,26 +228,10 @@ export default function AdminProductsPage() {
         | "iva"
         | "units_per_box",
     ) => {
-      console.log("handleColumnSort called with field:", field); // Debug log
-      console.log(
-        "Current sortField:",
-        sortField,
-        "Current sortDirection:",
-        sortDirection,
-      ); // Debug log
-
       if (sortField === field) {
-        // Si es el mismo campo, cambiar la dirección
         const newDirection = sortDirection === "asc" ? "desc" : "asc";
-        console.log("Same field, changing direction to:", newDirection); // Debug log
         setSortDirection(newDirection);
       } else {
-        // Si es un campo diferente, establecerlo y usar desc por defecto
-        console.log(
-          "Different field, setting field to:",
-          field,
-          "and direction to desc",
-        ); // Debug log
         setSortField(field);
         setSortDirection("desc");
       }
@@ -386,7 +370,6 @@ export default function AdminProductsPage() {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          console.log("SKU clicked!"); // Debug log
                           handleColumnSort("sku");
                         }}
                         style={{ cursor: "pointer" }}
@@ -410,7 +393,6 @@ export default function AdminProductsPage() {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          console.log("Product Name clicked!"); // Debug log
                           handleColumnSort("name");
                         }}
                         style={{ cursor: "pointer" }}
@@ -440,7 +422,6 @@ export default function AdminProductsPage() {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          console.log("Units per Box clicked!"); // Debug log
                           handleColumnSort("units_per_box");
                         }}
                         style={{ cursor: "pointer" }}
@@ -464,7 +445,6 @@ export default function AdminProductsPage() {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          console.log("Retail Price clicked!"); // Debug log
                           handleColumnSort("list_price");
                         }}
                         style={{ cursor: "pointer" }}
@@ -488,7 +468,6 @@ export default function AdminProductsPage() {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          console.log("Wholesale Price clicked!"); // Debug log
                           handleColumnSort("wholesale_price");
                         }}
                         style={{ cursor: "pointer" }}
@@ -518,7 +497,6 @@ export default function AdminProductsPage() {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          console.log("IVA clicked!"); // Debug log
                           handleColumnSort("iva");
                         }}
                         style={{ cursor: "pointer" }}
@@ -542,7 +520,6 @@ export default function AdminProductsPage() {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          console.log("Created At clicked!"); // Debug log
                           handleColumnSort("created_at");
                         }}
                         style={{ cursor: "pointer" }}
@@ -566,7 +543,6 @@ export default function AdminProductsPage() {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          console.log("Updated At clicked!"); // Debug log
                           handleColumnSort("updated_at");
                         }}
                         style={{ cursor: "pointer" }}

@@ -47,7 +47,6 @@ export const Banner = () => {
               <Button
                 onPress={() => {
                   // Lógica para navegar a tienda particulares
-                  console.log('Navegar a tienda particulares');
                 }}
                 type="primary"
                 text={t('banner.button_individuals')}
