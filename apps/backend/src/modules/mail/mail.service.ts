@@ -125,7 +125,7 @@ export class MailService {
                 <p><strong>Estado:</strong> ${order.status}</p>
                 ${userId ? `<p><strong>Usuario:</strong> ${userId}</p>` : '<p><strong>Usuario:</strong> No autenticado</p>'}
                 <br>
-                <p><a href="https://shingari.onrender.com/admin/pedidos/${order.id}" style="background-color: #EA3D15; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Ver orden en el panel de admin</a></p>
+                <p><a href="${process.env.FRONTEND_URL}/admin/pedidos/${order.id}" style="background-color: #EA3D15; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Ver orden en el panel de admin</a></p>
             `;
 
       try {
@@ -143,7 +143,7 @@ export class MailService {
       `💰 *Total:* €${order.total_amount?.toLocaleString('es-ES', { minimumFractionDigits: 2 }) || '0.00'}\n` +
       `📊 *Estado:* ${order.status}\n` +
       `👤 *Usuario:* ${userId || 'No autenticado'}\n\n` +
-      `🔗 Ver en admin: https://shingari.onrender.com/admin/pedidos/${order.id}`;
+      `🔗 Ver en admin: ${process.env.FRONTEND_URL}/admin/pedidos/${order.id}`;
 
     await this.sendAdminWhatsApp(whatsappMessage);
 
@@ -169,7 +169,7 @@ export class MailService {
                 <p><strong>Estado:</strong> ${redemption.status}</p>
                 ${userId ? `<p><strong>Usuario:</strong> ${userId}</p>` : '<p><strong>Usuario:</strong> No autenticado</p>'}
                 <br>
-                <p><a href="https://shingari.onrender.com/admin/canjes/${redemption.id}" style="background-color: #EA3D15; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Ver canje en el panel de admin</a></p>
+                <p><a href="${process.env.FRONTEND_URL}/admin/canjes/${redemption.id}" style="background-color: #EA3D15; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Ver canje en el panel de admin</a></p>
             `;
 
       try {
@@ -187,7 +187,7 @@ export class MailService {
       `⭐ *Puntos:* ${redemption.total_points?.toLocaleString('es-ES') || '0'} pts\n` +
       `📊 *Estado:* ${redemption.status}\n` +
       `👤 *Usuario:* ${userId || 'No autenticado'}\n\n` +
-      `🔗 Ver en admin: https://shingari.onrender.com/admin/canjes/${redemption.id}`;
+      `🔗 Ver en admin: ${process.env.FRONTEND_URL}/admin/canjes/${redemption.id}`;
 
     await this.sendAdminWhatsApp(whatsappMessage);
 
