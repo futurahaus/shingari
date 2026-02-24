@@ -33,6 +33,7 @@
     "loading": "加载中...",
     "error": "错误",
     "success": "成功",
+    "warning": "警告",
     "cancel": "取消",
     "save": "保存",
     "edit": "编辑",
@@ -1231,6 +1232,17 @@
     "download_invoice": "下载发票",
     "view_invoice": "查看发票",
     "no_invoice_available": "此订单暂无发票"
+  },
+  "order_edit": {
+    "add_product": "添加产品",
+    "remove_product": "删除产品",
+    "confirm_remove": "确定要从订单中删除此产品吗？",
+    "order_not_editable": "此订单无法编辑",
+    "search_products": "搜索产品...",
+    "min_one_product": "订单必须至少有一个产品",
+    "product_added": "产品已添加到订单",
+    "product_removed": "产品已从订单中删除",
+    "quantity_updated": "数量已更新"
   },
   "profile": {
     "name": "姓名",

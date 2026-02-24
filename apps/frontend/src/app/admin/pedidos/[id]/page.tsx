@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from '@/contexts/I18nContext';
-import {  useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { OrdersDetailSkeleton } from '../components/OrdersDetailSkeleton';
 import { StatusChip } from '../components/StatusChip';
@@ -9,6 +9,8 @@ import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { formatCurrency as formatCurrencyUtil } from '@/lib/currency';
 import { FileDropzone } from '@/components/ui/FileDropzone';
+import { AddProductToOrderModal } from '@/components/orders/AddProductToOrderModal';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 interface OrderLine {
   id: string;
@@ -140,6 +142,44 @@ export default function AdminOrderDetailPage() {
   const [deleting, setDeleting] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<Array<{ url: string; path: string; name: string }>>([]);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [showAddProductModal, setShowAddProductModal] = useState(false);
+  const [updatingLineId, setUpdatingLineId] = useState<string | null>(null);
+  const [confirmRemoveLine, setConfirmRemoveLine] = useState<string | null>(null);
+  const [confirmDeleteFile, setConfirmDeleteFile] = useState<string | null>(null);
+
+  const isOrderEditable = order?.status === 'pending' || order?.status === 'accepted';
+
+  const handleUpdateQuantity = async (lineId: string, newQuantity: number) => {
+    if (!orderId || newQuantity < 1) return;
+    setUpdatingLineId(lineId);
+    try {
+      await api.patch(`/orders/${orderId}/lines/${lineId}`, { quantity: newQuantity });
+      showSuccess(t('common.success'), t('order_edit.quantity_updated'));
+      refreshOrderData();
+    } catch {
+      showError(t('common.error'), t('errors.unknown'));
+    } finally {
+      setUpdatingLineId(null);
+    }
+  };
+
+  const handleRemoveLine = async (lineId: string) => {
+    if (!orderId) return;
+    setUpdatingLineId(lineId);
+    try {
+      await api.delete(`/orders/${orderId}/lines/${lineId}`);
+      showSuccess(t('common.success'), t('order_edit.product_removed'));
+      refreshOrderData();
+    } catch (err: unknown) {
+      const msg = err && typeof err === 'object' && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : null;
+      showError(t('common.error'), msg || t('errors.unknown'));
+    } finally {
+      setUpdatingLineId(null);
+      setConfirmRemoveLine(null);
+    }
+  };
 
   // Function to refresh order data
   const refreshOrderData = () => {
@@ -239,8 +279,6 @@ export default function AdminOrderDetailPage() {
 
 
   const handleDeleteFile = async (filePath: string) => {
-    if (!confirm(t('admin.orders.detail.confirm_delete_file'))) return;
-
     setDeleting(true);
     try {
       const token = localStorage.getItem('accessToken');
@@ -277,6 +315,7 @@ export default function AdminOrderDetailPage() {
       showError(t('admin.orders.detail.delete_error_title'), t('admin.orders.detail.delete_error_message'));
     } finally {
       setDeleting(false);
+      setConfirmDeleteFile(null);
     }
   };
 
@@ -396,7 +435,18 @@ export default function AdminOrderDetailPage() {
           </div>
         </div>
         <div className="mb-8 px-8">
-          <h3 className="font-bold text-lg mb-4">{t('admin.orders.detail.purchased_products')}</h3>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <h3 className="font-bold text-lg">{t('admin.orders.detail.purchased_products')}</h3>
+            {isOrderEditable && (
+              <button
+                type="button"
+                onClick={() => setShowAddProductModal(true)}
+                className="px-4 py-2 bg-[#EA3D15] text-white rounded-lg text-sm font-medium hover:bg-[#d43e0e] transition-colors"
+              >
+                {t('order_edit.add_product')}
+              </button>
+            )}
+          </div>
           <div className="rounded-xl border border-gray-200 overflow-hidden">
             <table className="min-w-full text-sm">
               <thead className="bg-gray-50">
@@ -406,6 +456,9 @@ export default function AdminOrderDetailPage() {
                   <th className="px-6 py-3 text-left font-medium text-gray-500">{t('admin.orders.detail.table.quantity')}</th>
                   <th className="px-6 py-3 text-left font-medium text-gray-500">{t('admin.orders.detail.table.price')}</th>
                   <th className="px-6 py-3 text-left font-medium text-gray-500">{t('admin.orders.detail.table.subtotal')}</th>
+                  {isOrderEditable && (
+                    <th className="px-6 py-3 text-left font-medium text-gray-500">{t('common.edit')}</th>
+                  )}
                 </tr>
               </thead>
               <tbody className="bg-white">
@@ -413,15 +466,54 @@ export default function AdminOrderDetailPage() {
                   <tr key={line.id} className="border-t border-gray-100">
                     <td className="px-6 py-4 text-gray-900">{line.product_name}</td>
                     <td className="px-6 py-4 text-gray-900">{line.product_sku || '-'}</td>
-                    <td className="px-6 py-4 text-gray-900">{line.quantity}</td>
+                    <td className="px-6 py-4 text-gray-900">
+                      {isOrderEditable ? (
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            disabled={updatingLineId === line.id || line.quantity <= 1}
+                            onClick={() => handleUpdateQuantity(line.id, line.quantity - 1)}
+                            className="w-7 h-7 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            -
+                          </button>
+                          <span className="min-w-[1.5rem] text-center">{line.quantity}</span>
+                          <button
+                            type="button"
+                            disabled={updatingLineId === line.id}
+                            onClick={() => handleUpdateQuantity(line.id, line.quantity + 1)}
+                            className="w-7 h-7 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            +
+                          </button>
+                        </div>
+                      ) : (
+                        line.quantity
+                      )}
+                    </td>
                     <td className="px-6 py-4 text-gray-900">{formatCurrency(line.unit_price)}</td>
                     <td className="px-6 py-4 text-gray-900">{formatCurrency((Number(line.unit_price) * line.quantity).toString())}</td>
+                    {isOrderEditable && (
+                      <td className="px-6 py-4">
+                        <button
+                          type="button"
+                          disabled={updatingLineId === line.id || order.order_lines.length <= 1}
+                          onClick={() => setConfirmRemoveLine(line.id)}
+                          className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                          title={t('order_edit.remove_product')}
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
               <tfoot>
                 <tr className="bg-gray-50 border-t border-gray-200">
-                  <td className="px-6 py-4 text-right font-bold" colSpan={4}>{t('admin.orders.detail.table.total')}</td>
+                  <td className="px-6 py-4 text-right font-bold" colSpan={isOrderEditable ? 5 : 4}>{t('admin.orders.detail.table.total')}</td>
                   <td className="px-6 py-4 text-gray-900 font-bold">
                     {formatCurrency(order.order_lines.reduce((acc, line) => acc + Number(line.unit_price) * line.quantity, 0).toString())}
                   </td>
@@ -429,6 +521,13 @@ export default function AdminOrderDetailPage() {
               </tfoot>
             </table>
           </div>
+          <AddProductToOrderModal
+            orderId={orderId}
+            isOpen={showAddProductModal}
+            onClose={() => setShowAddProductModal(false)}
+            onSuccess={refreshOrderData}
+            isAdmin
+          />
           {order.order_lines.length > 0 && (
             <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
               <h4 className="font-semibold text-sm text-gray-700 mb-3">{t('admin.orders.detail.price_breakdown')}</h4>
@@ -515,7 +614,7 @@ export default function AdminOrderDetailPage() {
                        </svg>
                      </a>
                      <button
-                       onClick={() => handleDeleteFile(file.path.split('/').pop() || '')}
+                       onClick={() => setConfirmDeleteFile(file.path.split('/').pop() || '')}
                        disabled={deleting}
                        className={`p-2 rounded-lg transition-colors cursor-pointer ${
                          deleting
@@ -539,6 +638,27 @@ export default function AdminOrderDetailPage() {
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={!!confirmRemoveLine}
+        onClose={() => setConfirmRemoveLine(null)}
+        onConfirm={async () => { if (confirmRemoveLine) await handleRemoveLine(confirmRemoveLine); }}
+        title={t('order_edit.remove_product')}
+        message={t('order_edit.confirm_remove')}
+        confirmLabel={t('common.delete')}
+        variant="danger"
+        confirmLoading={updatingLineId === confirmRemoveLine}
+      />
+      <ConfirmModal
+        isOpen={!!confirmDeleteFile}
+        onClose={() => setConfirmDeleteFile(null)}
+        onConfirm={async () => { if (confirmDeleteFile) await handleDeleteFile(confirmDeleteFile); }}
+        title={t('admin.orders.detail.delete')}
+        message={t('admin.orders.detail.confirm_delete_file')}
+        confirmLabel={t('common.delete')}
+        variant="danger"
+        confirmLoading={deleting}
+      />
     </div>
   );
 }

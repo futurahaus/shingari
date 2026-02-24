@@ -1,12 +1,16 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Sidebar from '@/components/layout/Sidebar';
 import { useTranslation, useI18n } from '@/contexts/I18nContext';
 import { useOrderDetail } from '@/hooks/useOrdersQuery';
 import { formatCurrency as formatCurrencyUtil } from '@/lib/currency';
+import { api } from '@/lib/api';
+import { useNotificationContext } from '@/contexts/NotificationContext';
+import { AddProductToOrderModal } from '@/components/orders/AddProductToOrderModal';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 const getStatusConfig = (status: string, t: (key: string) => string) => {
   switch (status.toLowerCase()) {
@@ -211,8 +215,46 @@ export default function OrderDetailPage() {
   const orderId = params.id as string;
   const { t } = useTranslation();
   const { locale } = useI18n();
+  const { showSuccess, showError } = useNotificationContext();
 
   const { data: order, isLoading, error, refetch } = useOrderDetail(orderId);
+  const [showAddProductModal, setShowAddProductModal] = useState(false);
+  const [updatingLineId, setUpdatingLineId] = useState<string | null>(null);
+  const [confirmRemoveLine, setConfirmRemoveLine] = useState<string | null>(null);
+
+  const isOrderEditable = order?.status === 'pending' || order?.status === 'accepted';
+
+  const handleUpdateQuantity = async (lineId: string, newQuantity: number) => {
+    if (!orderId || newQuantity < 1) return;
+    setUpdatingLineId(lineId);
+    try {
+      await api.patch(`/orders/${orderId}/lines/${lineId}`, { quantity: newQuantity });
+      showSuccess(t('common.success'), t('order_edit.quantity_updated'));
+      refetch();
+    } catch {
+      showError(t('common.error'), t('errors.unknown'));
+    } finally {
+      setUpdatingLineId(null);
+    }
+  };
+
+  const handleRemoveLine = async (lineId: string) => {
+    if (!orderId) return;
+    setUpdatingLineId(lineId);
+    try {
+      await api.delete(`/orders/${orderId}/lines/${lineId}`);
+      showSuccess(t('common.success'), t('order_edit.product_removed'));
+      refetch();
+    } catch (err: unknown) {
+      const msg = err && typeof err === 'object' && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : null;
+      showError(t('common.error'), msg || t('errors.unknown'));
+    } finally {
+      setUpdatingLineId(null);
+      setConfirmRemoveLine(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -378,15 +420,24 @@ export default function OrderDetailPage() {
 
           {/* Products Card */}
           <div className="bg-white border border-gray-200 rounded-xl p-4">
-            <div className="mb-4">
-              <h3 className="text-sm font-medium text-gray-900 mb-3">{t('order_details.products')}</h3>
-              {/* Desktop Headers */}
-              <div className="hidden sm:flex justify-between items-center text-xs font-medium text-gray-500 border-b border-gray-100 pb-2">
-                <span className="flex-1">{t('order_details.product')}</span>
-                <div className="flex gap-4">
-                  <span className="w-20 text-center">{t('order_details.price')}</span>
-                  <span className="w-20 text-center">{t('order_details.subtotal')}</span>
-                </div>
+            <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <h3 className="text-sm font-medium text-gray-900">{t('order_details.products')}</h3>
+              {isOrderEditable && (
+                <button
+                  type="button"
+                  onClick={() => setShowAddProductModal(true)}
+                  className="px-4 py-2 bg-[#EA3D15] text-white rounded-lg text-sm font-medium hover:bg-[#d43e0e] transition-colors w-fit"
+                >
+                  {t('order_edit.add_product')}
+                </button>
+              )}
+            </div>
+            {/* Desktop Headers */}
+            <div className="hidden sm:flex justify-between items-center text-xs font-medium text-gray-500 border-b border-gray-100 pb-2 mb-2">
+              <span className="flex-1">{t('order_details.product')}</span>
+              <div className="flex gap-4">
+                <span className="w-20 text-center">{t('order_details.price')}</span>
+                <span className="w-20 text-center">{t('order_details.subtotal')}</span>
               </div>
             </div>
 
@@ -413,8 +464,46 @@ export default function OrderDetailPage() {
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium text-gray-900 mb-1">{line.product_name}</p>
-                        <p className="text-xs text-gray-500">{t('order_details.quantity')}: {line.quantity}</p>
+                        <p className="text-xs text-gray-500">
+                          {t('order_details.quantity')}:{' '}
+                          {isOrderEditable ? (
+                            <span className="inline-flex items-center gap-1">
+                              <button
+                                type="button"
+                                disabled={updatingLineId === line.id || line.quantity <= 1}
+                                onClick={() => handleUpdateQuantity(line.id, line.quantity - 1)}
+                                className="w-6 h-6 flex items-center justify-center border rounded text-xs disabled:opacity-50"
+                              >
+                                -
+                              </button>
+                              {line.quantity}
+                              <button
+                                type="button"
+                                disabled={updatingLineId === line.id}
+                                onClick={() => handleUpdateQuantity(line.id, line.quantity + 1)}
+                                className="w-6 h-6 flex items-center justify-center border rounded text-xs disabled:opacity-50"
+                              >
+                                +
+                              </button>
+                            </span>
+                          ) : (
+                            line.quantity
+                          )}
+                        </p>
                       </div>
+                      {isOrderEditable && order.order_lines.length > 1 && (
+                        <button
+                          type="button"
+                          disabled={updatingLineId === line.id}
+                          onClick={() => setConfirmRemoveLine(line.id)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded"
+                          title={t('order_edit.remove_product')}
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div className="text-center">
@@ -446,17 +535,62 @@ export default function OrderDetailPage() {
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium text-gray-900">{line.product_name}</p>
-                        <p className="text-xs text-gray-500">{t('order_details.quantity')}: {line.quantity}</p>
+                        <p className="text-xs text-gray-500">
+                          {t('order_details.quantity')}:{' '}
+                          {isOrderEditable ? (
+                            <span className="inline-flex items-center gap-1">
+                              <button
+                                type="button"
+                                disabled={updatingLineId === line.id || line.quantity <= 1}
+                                onClick={() => handleUpdateQuantity(line.id, line.quantity - 1)}
+                                className="w-7 h-7 flex items-center justify-center border rounded hover:bg-gray-50 disabled:opacity-50"
+                              >
+                                -
+                              </button>
+                              {line.quantity}
+                              <button
+                                type="button"
+                                disabled={updatingLineId === line.id}
+                                onClick={() => handleUpdateQuantity(line.id, line.quantity + 1)}
+                                className="w-7 h-7 flex items-center justify-center border rounded hover:bg-gray-50 disabled:opacity-50"
+                              >
+                                +
+                              </button>
+                            </span>
+                          ) : (
+                            line.quantity
+                          )}
+                        </p>
                       </div>
                     </div>
-                    <div className="flex gap-4">
+                    <div className="flex items-center gap-4">
                       <span className="text-sm text-gray-900 w-20 text-center">{formatCurrency(line.unit_price)}</span>
                       <span className="text-sm text-gray-900 w-20 text-center">{formatCurrency(line.total_price)}</span>
+                      {isOrderEditable && order.order_lines.length > 1 && (
+                        <button
+                          type="button"
+                          disabled={updatingLineId === line.id}
+                          onClick={() => setConfirmRemoveLine(line.id)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded"
+                          title={t('order_edit.remove_product')}
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
               ))}
             </div>
+            <AddProductToOrderModal
+              orderId={orderId}
+              isOpen={showAddProductModal}
+              onClose={() => setShowAddProductModal(false)}
+              onSuccess={() => refetch()}
+              isAdmin={false}
+            />
           </div>
 
           {/* Invoice Section */}
@@ -515,6 +649,17 @@ export default function OrderDetailPage() {
           </div>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={!!confirmRemoveLine}
+        onClose={() => setConfirmRemoveLine(null)}
+        onConfirm={async () => { if (confirmRemoveLine) await handleRemoveLine(confirmRemoveLine); }}
+        title={t('order_edit.remove_product')}
+        message={t('order_edit.confirm_remove')}
+        confirmLabel={t('common.delete')}
+        variant="danger"
+        confirmLoading={updatingLineId === confirmRemoveLine}
+      />
     </div>
   );
 }

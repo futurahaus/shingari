@@ -3,6 +3,7 @@ import {
     Get,
     Post,
     Put,
+    Patch,
     Delete,
     Body,
     Param,
@@ -19,6 +20,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { AddOrderLineDto } from './dto/add-order-line.dto';
+import { UpdateOrderLineDto } from './dto/update-order-line.dto';
 import { OrderResponseDto } from './dto/order-response.dto';
 import { DocumentUploadResponseDto } from './dto/document-upload-response.dto';
 import { MailService } from '../mail/mail.service';
@@ -174,6 +177,65 @@ export class OrdersController {
             this.logger.error(`Error updating order ${id}:`, error);
             throw error;
         }
+    }
+
+    @Post(':id/lines')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Añadir producto a una orden' })
+    @ApiParam({ name: 'id', description: 'ID de la orden' })
+    @ApiBody({ type: AddOrderLineDto })
+    @ApiResponse({ status: 200, description: 'Producto añadido. Orden actualizada.', type: OrderResponseDto })
+    @ApiResponse({ status: 400, description: 'Pedido no editable o producto no disponible.' })
+    @ApiResponse({ status: 403, description: 'Sin permiso para editar esta orden.' })
+    @ApiResponse({ status: 404, description: 'Orden o producto no encontrado.' })
+    async addOrderLine(
+        @Param('id', ParseUUIDPipe) id: string,
+        @Body() dto: AddOrderLineDto,
+        @NestRequest() req,
+    ): Promise<OrderResponseDto> {
+        const isAdmin = await this.ordersService.isUserAdmin(req.user.id);
+        return this.ordersService.addOrderLine(id, dto, req.user.id, isAdmin);
+    }
+
+    @Patch(':id/lines/:lineId')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Actualizar cantidad de un producto en la orden' })
+    @ApiParam({ name: 'id', description: 'ID de la orden' })
+    @ApiParam({ name: 'lineId', description: 'ID de la línea de orden' })
+    @ApiBody({ type: UpdateOrderLineDto })
+    @ApiResponse({ status: 200, description: 'Cantidad actualizada.', type: OrderResponseDto })
+    @ApiResponse({ status: 400, description: 'Pedido no editable.' })
+    @ApiResponse({ status: 403, description: 'Sin permiso para editar esta orden.' })
+    @ApiResponse({ status: 404, description: 'Orden o línea no encontrada.' })
+    async updateOrderLine(
+        @Param('id', ParseUUIDPipe) id: string,
+        @Param('lineId', ParseUUIDPipe) lineId: string,
+        @Body() dto: UpdateOrderLineDto,
+        @NestRequest() req,
+    ): Promise<OrderResponseDto> {
+        const isAdmin = await this.ordersService.isUserAdmin(req.user.id);
+        return this.ordersService.updateOrderLine(id, lineId, dto, req.user.id, isAdmin);
+    }
+
+    @Delete(':id/lines/:lineId')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Eliminar producto de una orden' })
+    @ApiParam({ name: 'id', description: 'ID de la orden' })
+    @ApiParam({ name: 'lineId', description: 'ID de la línea de orden' })
+    @ApiResponse({ status: 200, description: 'Producto eliminado. Orden actualizada.', type: OrderResponseDto })
+    @ApiResponse({ status: 400, description: 'Pedido no editable o debe tener al menos un producto.' })
+    @ApiResponse({ status: 403, description: 'Sin permiso para editar esta orden.' })
+    @ApiResponse({ status: 404, description: 'Orden o línea no encontrada.' })
+    async removeOrderLine(
+        @Param('id', ParseUUIDPipe) id: string,
+        @Param('lineId', ParseUUIDPipe) lineId: string,
+        @NestRequest() req,
+    ): Promise<OrderResponseDto> {
+        const isAdmin = await this.ordersService.isUserAdmin(req.user.id);
+        return this.ordersService.removeOrderLine(id, lineId, req.user.id, isAdmin);
     }
 
     @Post(':id/upload-document')

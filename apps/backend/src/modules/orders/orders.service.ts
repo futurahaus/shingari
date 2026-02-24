@@ -1,9 +1,19 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { DatabaseService } from '../database/database.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { AddOrderLineDto } from './dto/add-order-line.dto';
+import { UpdateOrderLineDto } from './dto/update-order-line.dto';
 import { OrderResponseDto } from './dto/order-response.dto';
+
+const EDITABLE_STATUSES = ['pending', 'accepted'];
 
 @Injectable()
 export class OrdersService {
@@ -529,6 +539,210 @@ export class OrdersService {
       this.logger.error(`Error getting total billed for user ${userId}:`, error);
       return 0;
     }
+  }
+
+  async addOrderLine(
+    orderId: string,
+    dto: AddOrderLineDto,
+    userId: string,
+    isAdmin = false,
+  ): Promise<OrderResponseDto> {
+    const order = await this.assertOrderEditable(orderId);
+    if (!isAdmin && order.user_id !== userId) {
+      throw new ForbiddenException('No tienes permiso para editar esta orden');
+    }
+
+    const product = await this.prisma.products.findUnique({
+      where: { id: dto.product_id },
+    });
+    if (!product) {
+      throw new NotFoundException(`Producto con ID ${dto.product_id} no encontrado`);
+    }
+    if (product.status !== 'active') {
+      throw new BadRequestException('El producto no está disponible');
+    }
+
+    const unitPrice = await this.getUnitPriceForProduct(dto.product_id, order.user_id);
+
+    const existingLine = await this.prisma.order_lines.findFirst({
+      where: {
+        order_id: orderId,
+        product_id: dto.product_id,
+      },
+    });
+
+    if (existingLine) {
+      await this.prisma.order_lines.update({
+        where: { id: existingLine.id },
+        data: { quantity: existingLine.quantity + dto.quantity },
+      });
+    } else {
+      await this.prisma.order_lines.create({
+        data: {
+          order_id: orderId,
+          product_id: dto.product_id,
+          product_name: product.name,
+          quantity: dto.quantity,
+          unit_price: unitPrice,
+        },
+      });
+    }
+
+    await this.recalculateTotals(orderId);
+    return this.findOne(orderId);
+  }
+
+  async updateOrderLine(
+    orderId: string,
+    lineId: string,
+    dto: UpdateOrderLineDto,
+    userId: string,
+    isAdmin = false,
+  ): Promise<OrderResponseDto> {
+    const order = await this.assertOrderEditable(orderId);
+    if (!isAdmin && order.user_id !== userId) {
+      throw new ForbiddenException('No tienes permiso para editar esta orden');
+    }
+
+    const line = await this.prisma.order_lines.findFirst({
+      where: { id: lineId, order_id: orderId },
+    });
+    if (!line) {
+      throw new NotFoundException('Línea de orden no encontrada');
+    }
+
+    await this.prisma.order_lines.update({
+      where: { id: lineId },
+      data: { quantity: dto.quantity },
+    });
+
+    await this.recalculateTotals(orderId);
+    return this.findOne(orderId);
+  }
+
+  async removeOrderLine(
+    orderId: string,
+    lineId: string,
+    userId: string,
+    isAdmin = false,
+  ): Promise<OrderResponseDto> {
+    const order = await this.assertOrderEditable(orderId);
+    if (!isAdmin && order.user_id !== userId) {
+      throw new ForbiddenException('No tienes permiso para editar esta orden');
+    }
+
+    const lines = await this.prisma.order_lines.findMany({
+      where: { order_id: orderId },
+    });
+    if (lines.length <= 1) {
+      throw new BadRequestException('El pedido debe tener al menos un producto');
+    }
+
+    const line = lines.find((l) => l.id === lineId);
+    if (!line) {
+      throw new NotFoundException('Línea de orden no encontrada');
+    }
+
+    await this.prisma.order_lines.delete({
+      where: { id: lineId },
+    });
+
+    await this.recalculateTotals(orderId);
+    return this.findOne(orderId);
+  }
+
+  private async assertOrderEditable(orderId: string) {
+    const order = await this.prisma.orders.findUnique({
+      where: { id: orderId },
+    });
+    if (!order) {
+      throw new NotFoundException(`Orden con ID ${orderId} no encontrada`);
+    }
+    const status = String(order.status || '').toLowerCase();
+    if (!EDITABLE_STATUSES.includes(status)) {
+      throw new BadRequestException('Este pedido no se puede editar');
+    }
+    return order;
+  }
+
+  private async recalculateTotals(orderId: string): Promise<void> {
+    const lines = await this.prisma.order_lines.findMany({
+      where: { order_id: orderId },
+    });
+
+    let total = 0;
+    for (const line of lines) {
+      const unitPrice = Number(line.unit_price);
+      total += unitPrice * line.quantity;
+    }
+    total = Math.round(total * 100) / 100;
+
+    const firstPayment = await this.prisma.order_payments.findFirst({
+      where: { order_id: orderId },
+    });
+
+    await this.prisma.$transaction([
+      this.prisma.orders.update({
+        where: { id: orderId },
+        data: {
+          total_amount: total,
+          updated_at: new Date(),
+        },
+      }),
+      ...(firstPayment
+        ? [
+            this.prisma.order_payments.update({
+              where: { id: firstPayment.id },
+              data: { amount: total },
+            }),
+          ]
+        : []),
+    ]);
+  }
+
+  async isUserAdmin(userId: string): Promise<boolean> {
+    const userRole = await this.prisma.user_roles.findFirst({
+      where: {
+        user_id: userId,
+        roles: { name: 'admin' },
+      },
+    });
+    return !!userRole;
+  }
+
+  private async getUnitPriceForProduct(
+    productId: number,
+    orderUserId: string,
+  ): Promise<number> {
+    const product = await this.prisma.products.findUnique({
+      where: { id: productId },
+    });
+    if (!product) throw new NotFoundException('Producto no encontrado');
+
+    const userRole = await this.prisma.user_roles.findFirst({
+      where: { user_id: orderUserId },
+      include: { roles: { select: { name: true } } },
+    });
+    const isBusiness = userRole?.roles?.name === 'business';
+
+    const discount = await this.prisma.products_discounts.findFirst({
+      where: {
+        product_id: productId,
+        user_id: orderUserId,
+        is_active: true,
+        AND: [
+          { OR: [{ valid_from: { lte: new Date() } }, { valid_from: null }] },
+          { OR: [{ valid_to: { gte: new Date() } }, { valid_to: null }] },
+        ],
+      },
+    });
+
+    if (discount) {
+      return Number(discount.price);
+    }
+    return isBusiness
+      ? Number(product.wholesale_price)
+      : Number(product.list_price);
   }
 
   private mapToOrderResponse(order: any): OrderResponseDto {

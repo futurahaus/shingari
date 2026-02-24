@@ -33,6 +33,7 @@
     "loading": "Cargando...",
     "error": "Error",
     "success": "Éxito",
+    "warning": "Aviso",
     "cancel": "Cancelar",
     "save": "Guardar",
     "edit": "Editar",
@@ -1261,6 +1262,17 @@
     "download_invoice": "Descargar factura",
     "view_invoice": "Ver factura",
     "no_invoice_available": "No hay factura disponible para esta orden"
+  },
+  "order_edit": {
+    "add_product": "Agregar producto",
+    "remove_product": "Eliminar producto",
+    "confirm_remove": "¿Estás seguro de eliminar este producto del pedido?",
+    "order_not_editable": "Este pedido no se puede editar",
+    "search_products": "Buscar productos...",
+    "min_one_product": "El pedido debe tener al menos un producto",
+    "product_added": "Producto agregado al pedido",
+    "product_removed": "Producto eliminado del pedido",
+    "quantity_updated": "Cantidad actualizada"
   },
   "profile": {
     "name": "Nombre",
