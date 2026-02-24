@@ -2,6 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
+import { useTranslation } from '@/contexts/I18nContext';
 
 export interface User {
   id: string;
@@ -36,6 +37,7 @@ interface UseAdminUsersOptions {
 }
 
 export const useAdminUsers = ({ enabled = true }: UseAdminUsersOptions = {}) => {
+  const { t } = useTranslation();
   const { showError } = useNotificationContext();
 
   const {
@@ -55,16 +57,16 @@ export const useAdminUsers = ({ enabled = true }: UseAdminUsersOptions = {}) => 
   // Manejar errores con useEffect
   React.useEffect(() => {
     if (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
-      showError('Error', `Error al cargar usuarios: ${errorMsg}`);
+      const errorMsg = error instanceof Error ? error.message : t('errors.unknown');
+      showError(t('common.error'), t('admin.users.hooks.load_error', { error: errorMsg }));
       console.error('Error fetching admin users:', error);
     }
-  }, [error, showError]);
+  }, [error, showError, t]);
 
   return {
     users,
     loading,
-    error: error ? (error instanceof Error ? error.message : 'Error desconocido') : null,
+    error: error ? (error instanceof Error ? error.message : t('errors.unknown')) : null,
     refetch
   };
 }; 

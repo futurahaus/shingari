@@ -85,6 +85,15 @@ export class AuthService {
         );
       }
 
+      // When email confirmation is enabled, Supabase does NOT return error for duplicate email.
+      // Check identities - if empty, the user already exists.
+      if (data.user) {
+        const identities = (data.user as { identities?: unknown[] }).identities ?? [];
+        if (identities.length === 0) {
+          throw new ConflictException('Email already registered');
+        }
+      }
+
       return {
         message:
           'Registration successful. Please check your email to confirm your account.',

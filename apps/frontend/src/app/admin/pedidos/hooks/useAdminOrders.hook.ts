@@ -2,6 +2,7 @@ import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
+import { useTranslation } from '@/contexts/I18nContext';
 
 export interface Order {
   id: string;
@@ -69,6 +70,7 @@ interface UseAdminOrdersOptions {
 }
 
 export const useAdminOrders = ({ page, limit = 20, search = '', sortField = 'created_at', sortDirection = 'desc', enabled = true }: UseAdminOrdersOptions) => {
+  const { t } = useTranslation();
   const { showError } = useNotificationContext();
   const {
     data,
@@ -85,11 +87,11 @@ export const useAdminOrders = ({ page, limit = 20, search = '', sortField = 'cre
   });
   React.useEffect(() => {
     if (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
-      showError('Error', `Error al cargar pedidos: ${errorMsg}`);
+      const errorMsg = error instanceof Error ? error.message : t('errors.unknown');
+      showError(t('common.error'), t('admin.orders.hooks.load_error', { error: errorMsg }));
       console.error('Error fetching admin orders:', error);
     }
-  }, [error, showError]);
+  }, [error, showError, t]);
   return {
     orders: data?.data || [],
     total: data?.total || 0,
@@ -97,13 +99,14 @@ export const useAdminOrders = ({ page, limit = 20, search = '', sortField = 'cre
     lastPage: data?.lastPage || 1,
     limit: data?.limit || limit,
     loading,
-    error: error ? (error instanceof Error ? error.message : 'Error desconocido') : null,
+    error: error ? (error instanceof Error ? error.message : t('errors.unknown')) : null,
     refetch
   };
 };
 
 // Hook para actualizar una orden
 export const useUpdateOrder = () => {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { showSuccess, showError } = useNotificationContext();
 
@@ -112,16 +115,16 @@ export const useUpdateOrder = () => {
       const response = await api.put<Order, UpdateOrderData>(`/orders/${orderId}`, updateData);
       return response;
     },
-    onSuccess: (updatedOrder, { orderId }) => {
-      showSuccess('Éxito', `Orden ${orderId} actualizada correctamente`);
+    onSuccess: (_updatedOrder, { orderId }) => {
+      showSuccess(t('common.success'), t('admin.orders.hooks.update_success', { orderId }));
       
       // Invalidar y refetch las queries relacionadas
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
       queryClient.invalidateQueries({ queryKey: ['order', orderId] });
     },
     onError: (error: any) => {
-      const errorMsg = error?.response?.data?.message || error?.message || 'Error desconocido';
-      showError('Error', `Error al actualizar la orden: ${errorMsg}`);
+      const errorMsg = error?.response?.data?.message || error?.message || t('errors.unknown');
+      showError(t('common.error'), t('admin.orders.hooks.update_error', { error: errorMsg }));
       console.error('Error updating order:', error);
     },
   });

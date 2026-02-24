@@ -1,6 +1,38 @@
 'use client';
 
 import { useState } from 'react';
+
+/** Fallbacks when t() returns the key (translations not loaded) */
+const AUTH_ERROR_FALLBACKS: Record<string, { es: string; zh: string }> = {
+  'auth.email_already_registered': { es: 'Este correo electrónico ya está registrado', zh: '此邮箱已被注册' },
+  'auth.registration_failed': { es: 'Error en el registro. Por favor, inténtalo más tarde.', zh: '注册失败。请稍后重试。' },
+  'auth.confirm_email_first': { es: 'Por favor, confirma tu correo electrónico antes de iniciar sesión', zh: '请先确认您的邮箱后再登录' },
+  'auth.invalid_credentials': { es: 'Usuario o contraseña incorrectos', zh: '用户名或密码错误' },
+};
+
+/** Maps known backend auth messages (English) to translated strings. Returns original message if no match. */
+function getTranslatedAuthError(
+  message: string,
+  t: (key: string) => string,
+  locale: string
+): string {
+  if (!message?.trim()) return '';
+  const trimmed = message.trim().toLowerCase();
+  const known: Record<string, string> = {
+    'email already registered': 'auth.email_already_registered',
+    'registration failed. please try again later.': 'auth.registration_failed',
+    'please confirm your email before logging in': 'auth.confirm_email_first',
+    'invalid login credentials': 'auth.invalid_credentials',
+  };
+  for (const [en, key] of Object.entries(known)) {
+    if (trimmed.includes(en) || trimmed === en) {
+      const translated = t(key);
+      const fallback = AUTH_ERROR_FALLBACKS[key]?.[locale === 'zh' ? 'zh' : 'es'];
+      return translated !== key ? translated : (fallback || message);
+    }
+  }
+  return message;
+}
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { FaTimes } from 'react-icons/fa';
@@ -24,7 +56,7 @@ interface LoginModalProps {
 export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModalProps) {
   const router = useRouter();
   const { login } = useAuth();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: ''
@@ -54,14 +86,19 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || t('auth.register_error'));
+        const msg = data.message || '';
+        throw new Error(getTranslatedAuthError(msg, t, locale));
       }
 
-      setSuccessMessage(data.message);
+      const successMsg = t('auth.registration_success');
+      const fallback = locale === 'zh' ? '注册成功。请检查您的邮箱以确认您的账户。' : 'Registro exitoso. Revisa tu correo electrónico para confirmar tu cuenta.';
+      setSuccessMessage(successMsg !== 'auth.registration_success' ? successMsg : fallback);
       setFormData({ email: '', password: '' });
     } catch (err) {
-      console.error('Registration error:', err);
-      setError(err instanceof Error ? err.message : t('auth.register_error'));
+      const msg = err instanceof Error ? err.message : '';
+      const translated = getTranslatedAuthError(msg, t, locale) || t('auth.register_error');
+      const fallback = locale === 'zh' ? '注册用户错误' : 'Error al registrar usuario';
+      setError((translated && !translated.startsWith('auth.')) ? translated : fallback);
     } finally {
       setIsLoadingRegister(false);
     }
@@ -88,7 +125,8 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || t('auth.login_error'));
+        const msg = data.message || '';
+        throw new Error(getTranslatedAuthError(msg, t, locale) || t('auth.login_error'));
       }
 
       localStorage.setItem('accessToken', data.accessToken);
@@ -112,7 +150,10 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
         router.push('/dashboard');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('auth.login_error'));
+      const msg = err instanceof Error ? err.message : '';
+      const translated = getTranslatedAuthError(msg, t, locale) || t('auth.login_error');
+      const fallback = locale === 'zh' ? '登录错误' : 'Error al iniciar sesión';
+      setError((translated && !translated.startsWith('auth.')) ? translated : fallback);
     } finally {
       setIsLoadingLogin(false);
     }

@@ -112,12 +112,25 @@ export function I18nProvider({ children }: I18nProviderProps) {
             'common.add_to_favorites': 'Agregar a favoritos',
             'common.remove_from_favorites': 'Eliminar de favoritos',
             'common.no_image': 'Sin imagen',
-            'common.view_details': 'Ver detalles'
+            'common.view_details': 'Ver detalles',
+            'auth.registration_success': 'Registro exitoso. Revisa tu correo electrónico para confirmar tu cuenta.',
+            'auth.email_already_registered': 'Este correo electrónico ya está registrado',
+            'auth.registration_failed': 'Error en el registro. Por favor, inténtalo más tarde.',
+            'auth.confirm_email_first': 'Por favor, confirma tu correo electrónico antes de iniciar sesión',
+            'auth.invalid_credentials': 'Usuario o contraseña incorrectos',
           };
           return fallbacks[key] || key;
         }
-        // Return the key if translation not found and not loading
-        return key;
+        // Fallback for common auth keys when translation not found (locale-aware)
+        const authFallbacks: Record<string, { es: string; zh: string }> = {
+          'auth.registration_success': { es: 'Registro exitoso. Revisa tu correo electrónico para confirmar tu cuenta.', zh: '注册成功。请检查您的邮箱以确认您的账户。' },
+          'auth.email_already_registered': { es: 'Este correo electrónico ya está registrado', zh: '此邮箱已被注册' },
+          'auth.registration_failed': { es: 'Error en el registro. Por favor, inténtalo más tarde.', zh: '注册失败。请稍后重试。' },
+          'auth.confirm_email_first': { es: 'Por favor, confirma tu correo electrónico antes de iniciar sesión', zh: '请先确认您的邮箱后再登录' },
+          'auth.invalid_credentials': { es: 'Usuario o contraseña incorrectos', zh: '用户名或密码错误' },
+        };
+        const fb = authFallbacks[key];
+        return fb ? fb[locale === 'zh' ? 'zh' : 'es'] : key;
       }
     }
 

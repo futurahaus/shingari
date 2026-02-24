@@ -1,6 +1,16 @@
 "use client";
 import React, { useState, useRef, useCallback } from "react";
 import { useTranslation } from "@/contexts/I18nContext";
+
+function getTranslatedErrorMessage(err: unknown, t: (key: string, params?: Record<string, string>) => string): string {
+  if (err instanceof Error) {
+    const key = (err as Error & { translationKey?: string }).translationKey;
+    const params = (err as Error & { translationParams?: Record<string, string> }).translationParams;
+    if (key) return params ? t(key, params) : t(key);
+    return err.message;
+  }
+  return t("errors.unknown");
+}
 import { useNotificationContext } from "@/contexts/NotificationContext";
 import { EditionModal } from "./components/EditionModal";
 import { CreationModal } from "./components/CreationModal";
@@ -115,10 +125,7 @@ export default function AdminProductsPage() {
         t("admin.products.export_success_message"),
       );
     } catch (err) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : t("admin.products.export_error_message");
+      const errorMessage = getTranslatedErrorMessage(err, t);
       showError(t("admin.products.export_error"), errorMessage);
     } finally {
       setIsExporting(false);
@@ -140,10 +147,7 @@ export default function AdminProductsPage() {
       try {
         validateExcelFile(file);
       } catch (err) {
-        const errorMessage =
-          err instanceof Error
-            ? err.message
-            : t("admin.products.import_error_message");
+        const errorMessage = getTranslatedErrorMessage(err, t);
         showError(t("admin.products.import_error"), errorMessage);
         return;
       }
@@ -170,10 +174,7 @@ export default function AdminProductsPage() {
         // Refrescar la lista de productos
         refetch();
       } catch (err) {
-        const errorMessage =
-          err instanceof Error
-            ? err.message
-            : t("admin.products.import_error_message");
+        const errorMessage = getTranslatedErrorMessage(err, t);
         showError(t("admin.products.import_error"), errorMessage);
       } finally {
         setIsImporting(false);

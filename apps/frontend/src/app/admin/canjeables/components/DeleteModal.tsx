@@ -35,7 +35,7 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
       onClose();
     } catch (err) {
       console.error('Error deleting reward:', err);
-      setError('Error al eliminar el canjeable');
+      setError(t('admin.rewards.modals.delete.error_deleting'));
     } finally {
       setIsDeleting(false);
     }
@@ -76,8 +76,8 @@ export const DeleteModal: React.FC<DeleteModalProps> = ({
               </Text>
             )}
             <div className="mt-2 flex items-center space-x-4 text-sm text-gray-600">
-              <span>Costo: {reward.points_cost} puntos</span>
-              <span>Stock: {reward.stock || 0}</span>
+              <span>{t('admin.rewards.modals.delete.cost_display', { points: reward.points_cost })}</span>
+              <span>{t('admin.rewards.modals.delete.stock_display', { stock: reward.stock || 0 })}</span>
             </div>
           </div>
         </div>

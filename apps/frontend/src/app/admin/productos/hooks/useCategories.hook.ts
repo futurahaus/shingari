@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
+import { useTranslation } from '@/contexts/I18nContext';
 
 export interface CategoryTranslation {
   id: number;
@@ -27,6 +28,7 @@ const fetchCategories = async (includeAllTranslations: boolean = false): Promise
 
 export const useCategories = (includeAllTranslations: boolean = false) => {
   const { showError } = useNotificationContext();
+  const { t } = useTranslation();
 
   const {
     data: categories = [],
@@ -44,15 +46,15 @@ export const useCategories = (includeAllTranslations: boolean = false) => {
   // Manejar errores con useEffect
   useEffect(() => {
     if (error) {
-      showError('Error', 'No se pudieron cargar las categorías');
+      showError(t('common.error'), t('admin.products.hooks.load_categories_error', { error: error instanceof Error ? error.message : t('errors.unknown') }));
       console.error('Error fetching categories:', error);
     }
-  }, [error, showError]);
+  }, [error, showError, t]);
 
   return {
     categories,
     loading,
-    error: error ? (error instanceof Error ? error.message : 'Error desconocido') : null,
+    error: error ? (error instanceof Error ? error.message : t('errors.unknown')) : null,
     refetch
   };
 }; 

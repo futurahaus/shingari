@@ -118,7 +118,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
         if (!response.ok) {
           const errorText = await response.text();
           throw new Error(
-            `Error al subir imagen: ${response.status} ${response.statusText} - ${errorText}`,
+            t('admin.products.modals.create.error_upload_image', { status: response.status, statusText: response.statusText, error: errorText }),
           );
         }
 
@@ -136,11 +136,11 @@ export const CreationModal: React.FC<CreationModalProps> = ({
   const handleCreateProduct = async () => {
     // Validar campos requeridos antes de enviar
     if (!createForm.sku.trim()) {
-      showError("Error", "El SKU es requerido");
+      showError(t('common.error'), t('admin.products.modals.create.sku_required'));
       return;
     }
     if (!createForm.name.trim()) {
-      showError("Error", "El nombre del producto es requerido");
+      showError(t('common.error'), t('admin.products.modals.create.name_required'));
       return;
     }
 
@@ -222,8 +222,8 @@ export const CreationModal: React.FC<CreationModalProps> = ({
       // Manejar error específico de SKU duplicado
       if (errorMessage.toLowerCase().includes("sku")) {
         showError(
-          "SKU Duplicado",
-          "Ya existe un producto con este SKU. Por favor, usa un SKU diferente.",
+          t('admin.products.modals.create.sku_duplicate'),
+          t('admin.products.modals.create.sku_duplicate_message'),
         );
       } else {
         showError(
@@ -376,7 +376,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                               e.stopPropagation();
                               handleRemoveImage(0);
                             }}
-                            title="Eliminar imagen"
+                            title={t('admin.products.modals.create.remove_image')}
                           >
                             <FaTimes size={12} />
                           </button>
@@ -409,7 +409,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                               e.stopPropagation();
                               handleRemoveImage(idx + 1);
                             }}
-                            title="Eliminar imagen"
+                            title={t('admin.products.modals.create.remove_image')}
                           >
                             <FaTimes size={12} />
                           </button>

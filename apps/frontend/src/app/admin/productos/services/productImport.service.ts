@@ -43,7 +43,9 @@ export async function importProductsFromExcel(
   const accessToken = getAccessToken();
 
   if (!accessToken) {
-    throw new Error("No se encontró token de autenticación");
+    const err = new Error("No se encontró token de autenticación");
+    (err as Error & { translationKey?: string }).translationKey = "admin.products.import.no_token";
+    throw err;
   }
 
   const formData = new FormData();
@@ -59,18 +61,25 @@ export async function importProductsFromExcel(
 
   if (!response.ok) {
     if (response.status === 401) {
-      throw new Error("No autorizado. Por favor, inicia sesión nuevamente.");
+      const err = new Error("No autorizado. Por favor, inicia sesión nuevamente.");
+      (err as Error & { translationKey?: string }).translationKey = "admin.products.import.unauthorized";
+      throw err;
     }
     if (response.status === 403) {
-      throw new Error("No tienes permisos para importar productos.");
+      const err = new Error("No tienes permisos para importar productos.");
+      (err as Error & { translationKey?: string }).translationKey = "errors.forbidden";
+      throw err;
     }
     if (response.status === 400) {
       const errorData = await response.json();
-      throw new Error(
-        errorData.message || "Archivo inválido o formato incorrecto.",
-      );
+      const err = new Error(errorData.message || "Archivo inválido o formato incorrecto.");
+      (err as Error & { translationKey?: string }).translationKey = "admin.products.import.invalid_file";
+      throw err;
     }
-    throw new Error(`Error al importar productos: ${response.statusText}`);
+    const err = new Error(`Error al importar productos: ${response.statusText}`);
+    (err as Error & { translationKey?: string }).translationKey = "admin.products.import.import_error";
+    (err as Error & { translationParams?: Record<string, string> }).translationParams = { statusText: response.statusText };
+    throw err;
   }
 
   const result: ImportProductsResult = await response.json();
@@ -98,17 +107,17 @@ export function validateExcelFile(file: File): boolean {
     !validTypes.includes(file.type) &&
     !validExtensions.includes(fileExtension)
   ) {
-    throw new Error(
-      "Tipo de archivo inválido. Solo se permiten archivos Excel (.xlsx, .xls).",
-    );
+    const err = new Error("Tipo de archivo inválido. Solo se permiten archivos Excel (.xlsx, .xls).");
+    (err as Error & { translationKey?: string }).translationKey = "admin.products.import.invalid_type";
+    throw err;
   }
 
   // Límite de 10MB
   const maxSize = 10 * 1024 * 1024;
   if (file.size > maxSize) {
-    throw new Error(
-      "El archivo es demasiado grande. El tamaño máximo es 10MB.",
-    );
+    const err = new Error("El archivo es demasiado grande. El tamaño máximo es 10MB.");
+    (err as Error & { translationKey?: string }).translationKey = "admin.products.import.file_too_large";
+    throw err;
   }
 
   return true;

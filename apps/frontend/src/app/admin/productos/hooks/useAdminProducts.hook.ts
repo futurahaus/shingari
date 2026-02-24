@@ -2,6 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
+import { useTranslation } from '@/contexts/I18nContext';
 import { PaginatedProductsResponse, Category } from '../interfaces/product.interfaces';
 
 // Función para obtener productos paginados
@@ -67,6 +68,7 @@ interface UseAdminProductsOptions {
 
 export const useAdminProducts = ({ page, limit = 20, search = '', sortField = 'created_at', sortDirection = 'desc', categoryId, status, locale, includeAllTranslations, enabled = true }: UseAdminProductsOptions) => {
     const { showError } = useNotificationContext();
+    const { t } = useTranslation();
 
     const {
         data,
@@ -85,11 +87,11 @@ export const useAdminProducts = ({ page, limit = 20, search = '', sortField = 'c
     // Manejar errores con useEffect
     React.useEffect(() => {
         if (error) {
-            const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
-            showError('Error', `Error al cargar productos: ${errorMsg}`);
+            const errorMsg = error instanceof Error ? error.message : t('errors.unknown');
+            showError(t('common.error'), t('admin.products.hooks.load_products_error', { error: errorMsg }));
             console.error('Error fetching admin products:', error);
         }
-    }, [error, showError]);
+    }, [error, showError, t]);
 
     return {
         products: data?.data || [],
@@ -98,7 +100,7 @@ export const useAdminProducts = ({ page, limit = 20, search = '', sortField = 'c
         lastPage: data?.lastPage || 1,
         limit: data?.limit || limit,
         loading,
-        error: error ? (error instanceof Error ? error.message : 'Error desconocido') : null,
+        error: error ? (error instanceof Error ? error.message : t('errors.unknown')) : null,
         refetch
     };
 };
@@ -106,6 +108,7 @@ export const useAdminProducts = ({ page, limit = 20, search = '', sortField = 'c
 // Hook para obtener categorías
 export const useCategories = (locale?: string) => {
     const { showError } = useNotificationContext();
+    const { t } = useTranslation();
 
     const {
         data: categories = [],
@@ -123,16 +126,16 @@ export const useCategories = (locale?: string) => {
     // Manejar errores con useEffect
     React.useEffect(() => {
         if (error) {
-            const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
-            showError('Error', `Error al cargar categorías: ${errorMsg}`);
+            const errorMsg = error instanceof Error ? error.message : t('errors.unknown');
+            showError(t('common.error'), t('admin.products.hooks.load_categories_error', { error: errorMsg }));
             console.error('Error fetching categories:', error);
         }
-    }, [error, showError]);
+    }, [error, showError, t]);
 
     return {
         categories,
         loading,
-        error: error ? (error instanceof Error ? error.message : 'Error desconocido') : null,
+        error: error ? (error instanceof Error ? error.message : t('errors.unknown')) : null,
         refetch
     };
 }; 

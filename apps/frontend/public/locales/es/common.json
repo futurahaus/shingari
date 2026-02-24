@@ -22,6 +22,12 @@
     "chinese": "Chino",
     "select": "Idioma"
   },
+  "errors": {
+    "unknown": "Error desconocido",
+    "server": "Error del servidor: {{status}}",
+    "unauthorized": "No autorizado. Por favor, inicia sesión nuevamente.",
+    "forbidden": "No tienes permisos para realizar esta acción."
+  },
   "common": {
     "search": "Buscar",
     "loading": "Cargando...",
@@ -118,6 +124,7 @@
     "redeem_x_points": "Canjear {{points}} puntos",
     "points_deduction_warning": "Al completar el canje, los puntos serán deducidos de tu cuenta inmediatamente.",
     "error_loading_redemption": "No se pudo cargar el canje",
+    "error_processing_redemption": "Error al procesar el canje. Inténtalo de nuevo.",
     "quantity": "Cantidad",
     "status": "Estado",
     "points": "puntos",
@@ -134,7 +141,10 @@
     "no_products_found": "No se han encontrado productos para esta categoría.",
     "no_favorites_found": "No tienes productos favoritos aún.",
     "loading_more": "Cargando más productos...",
-    "loading_products": "Cargando productos..."
+    "loading_products": "Cargando productos...",
+    "not_found": "Producto no encontrado",
+    "not_found_description": "El producto que buscas no existe o no está disponible.",
+    "view_all_products": "Ver todos los productos"
   },
   "quantity_controls": {
     "quantity_updated": "Cantidad actualizada",
@@ -211,6 +221,11 @@
     "close_modal": "Cerrar modal",
     "login_error": "Error al iniciar sesión",
     "register_error": "Error al registrar usuario",
+    "registration_success": "Registro exitoso. Revisa tu correo electrónico para confirmar tu cuenta.",
+    "email_already_registered": "Este correo electrónico ya está registrado",
+    "registration_failed": "Error en el registro. Por favor, inténtalo más tarde.",
+    "confirm_email_first": "Por favor, confirma tu correo electrónico antes de iniciar sesión",
+    "invalid_credentials": "Usuario o contraseña incorrectos",
     "reset_password": {
       "title": "Restablecer Contraseña",
       "new_password": "Nueva Contraseña",
@@ -223,6 +238,36 @@
       "password_too_short": "La contraseña debe tener al menos 6 caracteres",
       "reset_error": "Error al restablecer la contraseña",
       "success_message": "Contraseña restablecida exitosamente. Redirigiendo al inicio de sesión..."
+    },
+    "forgot_password_modal": {
+      "title": "Restablecer Contraseña",
+      "email_label": "Correo electrónico",
+      "error_server": "Error al procesar la respuesta del servidor",
+      "error_request": "Error al solicitar el restablecimiento de contraseña",
+      "success": "Se ha enviado un correo electrónico con instrucciones para restablecer tu contraseña.",
+      "sending": "Enviando...",
+      "button": "Enviar instrucciones"
+    },
+    "role_selection": {
+      "title": "¡Bienvenido! Por favor selecciona tu rol",
+      "subtitle": "Esto nos ayudará a personalizar tu experiencia. Puedes cambiar esto más tarde en la configuración de tu perfil.",
+      "consumer": "Consumidor Final",
+      "business": "Empresa",
+      "assigning": "Asignando rol...",
+      "error": "Error al asignar el rol"
+    },
+    "verify_email": {
+      "title": "Verificación de correo",
+      "success": "¡Correo verificado exitosamente!",
+      "verifying": "Verificando tu correo...",
+      "error_no_params": "No se encontraron parámetros de verificación. Por favor revisa el enlace e inténtalo de nuevo.",
+      "error_verify": "Error al verificar el correo",
+      "error_complete": "Error al completar la autenticación. Por favor intenta iniciar sesión manualmente.",
+      "link_expired": "El enlace de verificación ha expirado. Solicita uno nuevo:",
+      "go_to_login": "Ir a Iniciar sesión",
+      "role_assigned": "¡Rol {{role}} asignado exitosamente! Redirigiendo...",
+      "role_consumer": "Consumidor Final",
+      "role_business": "Empresa"
     }
   },
   "banner": {
@@ -339,6 +384,11 @@
           "total": "Total"
         }
       },
+      "hooks": {
+        "load_error": "Error al cargar pedidos: {{error}}",
+        "update_success": "Orden {{orderId}} actualizada correctamente",
+        "update_error": "Error al actualizar la orden: {{error}}"
+      },
       "delivery_date_modal": {
         "title": "Establecer Fecha de Entrega",
         "subtitle": "Selecciona la fecha y hora de entrega para la orden #{{orderId}}",
@@ -359,6 +409,11 @@
         "cancel": "Cancelar",
         "confirm": "Confirmar Cancelación",
         "updating": "Actualizando..."
+      },
+      "hooks": {
+        "load_error": "Error al cargar pedidos: {{error}}",
+        "update_success": "Orden {{orderId}} actualizada correctamente",
+        "update_error": "Error al actualizar la orden: {{error}}"
       }
     },
     "upload": {
@@ -424,21 +479,51 @@
           "stock_placeholder": "50",
           "create_reward": "Crear Canjeable",
           "creating": "Creando...",
-          "reward_created": "Canjeable creado exitosamente"
+          "reward_created": "Canjeable creado exitosamente",
+          "name_required": "El nombre es requerido",
+          "points_required": "El costo en puntos debe ser mayor a 0",
+          "stock_non_negative": "El stock no puede ser negativo",
+          "error_upload_image": "Error al subir la imagen",
+          "error_creating": "Error al crear el canjeable",
+          "invalid_data": "Datos inválidos. Por favor, verifica la información.",
+          "server_error": "Error del servidor. Por favor, inténtalo más tarde.",
+          "remove_image": "Eliminar imagen"
         },
         "edit": {
           "title": "Editar canjeable",
           "update_reward": "Actualizar Canjeable",
           "updating": "Actualizando...",
-          "reward_updated": "Canjeable actualizado exitosamente"
+          "reward_updated": "Canjeable actualizado exitosamente",
+          "name_required": "El nombre es requerido",
+          "points_required": "El costo en puntos debe ser mayor a 0",
+          "stock_non_negative": "El stock no puede ser negativo",
+          "error_upload_image": "Error al subir la imagen",
+          "error_updating": "Error al actualizar el canjeable",
+          "remove_current_image": "Eliminar imagen actual",
+          "current_image": "Imagen actual",
+          "change_image": "Cambiar imagen",
+          "remove_new_image": "Eliminar imagen nueva",
+          "new_image": "Nueva imagen"
         },
         "delete": {
           "title": "Eliminar canjeable",
           "message": "¿Estás seguro de que quieres eliminar este canjeable? Esta acción no se puede deshacer.",
           "delete_reward": "Eliminar Canjeable",
           "deleting": "Eliminando...",
-          "reward_deleted": "Canjeable eliminado exitosamente"
+          "reward_deleted": "Canjeable eliminado exitosamente",
+          "error_deleting": "Error al eliminar el canjeable",
+          "cost_display": "Costo: {{points}} puntos",
+          "stock_display": "Stock: {{stock}}"
         }
+      },
+      "hooks": {
+        "load_error": "Error al cargar canjeables: {{error}}",
+        "create_success": "Canjeable creado exitosamente",
+        "create_error": "Error al crear canjeable: {{error}}",
+        "update_success": "Canjeable actualizado exitosamente",
+        "update_error": "Error al actualizar canjeable: {{error}}",
+        "delete_success": "Canjeable eliminado exitosamente",
+        "delete_error": "Error al eliminar canjeable: {{error}}"
       }
     },
     "dashboard": {
@@ -590,7 +675,58 @@
       "cancel": "Cancelar",
       "saving": "Guardando...",
       "save": "Guardar",
-      "update": "Actualizar"
+      "update": "Actualizar",
+      "hooks": {
+        "load_error": "Error al cargar usuarios: {{error}}"
+      },
+      "import_special_prices": {
+        "title": "Importar precios",
+        "current_user": "Usuario actual:",
+        "select_file": "Seleccione archivo CSV",
+        "format_info": "Formato permitido: CSV (.csv). El ID del usuario se agregará automáticamente.",
+        "download_template": "Descargar plantilla CSV",
+        "processing": "Procesando…",
+        "upload_button": "Subir y procesar",
+        "correct": "Correctos",
+        "errors": "Errores",
+        "row": "Fila",
+        "sku": "SKU",
+        "user": "User",
+        "status": "Estado",
+        "note_no_column": "Nota: no incluya la columna",
+        "note_auto_insert": ". Se insertará automáticamente con el ID del usuario actual mostrado arriba.",
+        "close": "Cerrar",
+        "csv_only": "Este importador solo acepta CSV (.csv)",
+        "file_empty": "El archivo CSV está vacío",
+        "process_error": "No se pudo procesar el CSV",
+        "select_first": "Seleccione un archivo primero",
+        "upload_error": "Error al subir el archivo",
+        "import_error": "Error de importación",
+        "products_not_found": "Productos no encontrados",
+        "invalid_user": "Usuario no válido",
+        "invalid_fields": "Campos inválidos",
+        "invalid_dates": "Fechas inválidas",
+        "duplicates_skipped": "Duplicados omitidos",
+        "other_errors": "Otros errores",
+        "imported": "Importados",
+        "omitted": "Omitidos",
+        "more": "más",
+        "rows": "fila(s)",
+        "completed_with_errors": "Importación completada con errores",
+        "completed": "Importación completada",
+        "success_count": "{{count}} precio(s) especial(es) importado(s) correctamente",
+        "no_records": "Sin cambios",
+        "no_records_message": "No se importaron registros",
+        "duplicates_omitted": "Descuentos duplicados omitidos",
+        "template_downloaded": "Plantilla descargada",
+        "template_success": "Se ha descargada la plantilla CSV correctamente",
+        "import_title": "Importación",
+        "plus_more": " (+{{count}} más)",
+        "products_not_found_message": "{{count}} producto(s) no existen en el sistema. Verifica los SKUs e inténtalo de nuevo.",
+        "duplicates_omitted_message": "{{count}} descuento(s) ya existían con los mismos valores y fueron omitidos.",
+        "success_imported": "✅ Importación completada",
+        "error_import_title": "Error de importación"
+      }
     },
     "categories": {
       "title": "Categorías",
@@ -675,7 +811,15 @@
       "info_1": "Esta página te permite asignarte el rol de administrador",
       "info_2": "Una vez asignado, tendrás acceso completo al panel de administración",
       "info_3": "El rol de administrador te permite gestionar usuarios, productos y configuraciones",
-      "info_4": "Después de asignar el rol, serás redirigido automáticamente"
+      "info_4": "Después de asignar el rol, serás redirigido automáticamente",
+      "whatsapp": {
+        "error_status": "Error al obtener estado",
+        "error_restart": "Error al reiniciar",
+        "error_logout": "Error al desconectar",
+        "error_qr_generate": "No se pudo generar el código QR",
+        "error_qr": "Error al generar QR",
+        "verify_config": "Verifique que EVOLUTION_API_URL, EVOLUTION_API_KEY y EVOLUTION_INSTANCE_NAME estén configurados en el servidor."
+      }
     },
     "products": {
       "title": "Control de Stock",
@@ -783,6 +927,12 @@
           "uploading": "Subiendo...",
           "product_created": "Producto Creado",
           "product_created_success": "El producto se ha creado exitosamente",
+          "sku_required": "El SKU es requerido",
+          "name_required": "El nombre del producto es requerido",
+          "sku_duplicate": "SKU Duplicado",
+          "sku_duplicate_message": "Ya existe un producto con este SKU. Por favor, usa un SKU diferente.",
+          "remove_image": "Eliminar imagen",
+          "error_upload_image": "Error al subir imagen: {{status}} {{statusText}} - {{error}}",
           "error_creating": "Error al Crear",
           "error_creating_message": "Error al crear producto: Error desconocido",
           "error_uploading_images": "Error al subir imágenes",
@@ -853,9 +1003,30 @@
           "loading": "Cargando traducción existente...",
           "translation_saved": "Traducción guardada exitosamente",
           "translation_updated": "Traducción actualizada exitosamente",
+          "translation_deleted": "Traducción eliminada exitosamente",
+          "product_not_found": "Producto no encontrado.",
+          "translation_not_found": "Traducción no encontrada.",
           "error_saving": "Error al guardar traducción",
-          "error_updating": "Error al actualizar traducción"
+          "error_updating": "Error al actualizar traducción",
+          "error_deleting": "Error al eliminar la traducción"
         }
+      },
+      "hooks": {
+        "load_products_error": "Error al cargar productos: {{error}}",
+        "load_categories_error": "Error al cargar categorías: {{error}}"
+      },
+      "import": {
+        "no_token": "No se encontró token de autenticación",
+        "unauthorized": "No autorizado. Por favor, inicia sesión nuevamente.",
+        "invalid_file": "Archivo inválido o formato incorrecto.",
+        "import_error": "Error al importar productos: {{statusText}}",
+        "invalid_type": "Tipo de archivo inválido. Solo se permiten archivos Excel (.xlsx, .xls).",
+        "file_too_large": "El archivo es demasiado grande. El tamaño máximo es 10MB."
+      },
+      "export": {
+        "no_token": "No se encontró token de autenticación",
+        "unauthorized": "No autorizado. Por favor, inicia sesión nuevamente.",
+        "export_error": "Error al exportar productos: {{statusText}}"
       }
     }
   },
@@ -1040,7 +1211,17 @@
     "status": "Estado",
     "created_at": "Fecha de Creación",
     "no_items": "No hay artículos en este canje",
-    "error_loading_detail": "Error al cargar el detalle del canje"
+    "error_loading_detail": "Error al cargar el detalle del canje",
+    "canje_not_found": "Canje no encontrado",
+    "redemption_id": "ID del Canje",
+    "reward": "Recompensa",
+    "points_per_unit": "Puntos por Unidad",
+    "total": "Total",
+    "user_id": "ID de Usuario",
+    "summary": "Resumen",
+    "total_items": "Total de Artículos",
+    "total_points_label": "Total de Puntos",
+    "final_total": "Total Final"
   },
   "order_status": {
     "pending": "Pendiente",

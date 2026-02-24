@@ -659,7 +659,7 @@ export default function AdminSetupPage() {
       } catch (err) {
         const msg = err instanceof Error
           ? err.message
-          : (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Error al obtener estado';
+          : (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? t('admin.setup.whatsapp.error_status');
         setError(msg);
         setStatus(null);
       } finally {
@@ -697,7 +697,7 @@ export default function AdminSetupPage() {
       } catch (err) {
         const msg = err instanceof Error
           ? err.message
-          : (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Error al reiniciar';
+          : (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? t('admin.setup.whatsapp.error_restart');
         setError(msg);
       } finally {
         setIsRestarting(false);
@@ -714,7 +714,7 @@ export default function AdminSetupPage() {
       } catch (err) {
         const msg = err instanceof Error
           ? err.message
-          : (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Error al desconectar';
+          : (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? t('admin.setup.whatsapp.error_logout');
         setError(msg);
       } finally {
         setIsLoggingOut(false);
@@ -745,12 +745,12 @@ export default function AdminSetupPage() {
           });
           setQrCodeDataUrl(dataUrl);
         } else {
-          setError('No se pudo generar el código QR');
+          setError(t('admin.setup.whatsapp.error_qr_generate'));
         }
       } catch (err) {
         const msg = err instanceof Error
           ? err.message
-          : (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Error al generar QR';
+          : (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? t('admin.setup.whatsapp.error_qr');
         setError(msg);
       } finally {
         setIsFetchingQr(false);
@@ -771,7 +771,7 @@ export default function AdminSetupPage() {
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <p className="text-sm text-red-700">{error}</p>
             <p className="text-xs text-red-600 mt-2">
-              Verifique que EVOLUTION_API_URL, EVOLUTION_API_KEY y EVOLUTION_INSTANCE_NAME estén configurados en el servidor.
+              {t('admin.setup.whatsapp.verify_config')}
             </p>
           </div>
         </div>

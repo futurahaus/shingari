@@ -110,7 +110,7 @@ export default function AdminUsersPage() {
           typeof (error as { message: unknown }).message === 'string'
         );
       }
-      let message = 'Error desconocido';
+      let message = t('errors.unknown');
       if (isErrorWithMessage(err)) {
         message = err.message;
       }

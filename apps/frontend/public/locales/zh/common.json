@@ -22,6 +22,12 @@
     "chinese": "中文",
     "select": "语言"
   },
+  "errors": {
+    "unknown": "未知错误",
+    "server": "服务器错误：{{status}}",
+    "unauthorized": "未授权。请重新登录。",
+    "forbidden": "您没有权限执行此操作。"
+  },
   "common": {
     "search": "搜索",
     "loading": "加载中...",
@@ -118,6 +124,7 @@
     "redeem_x_points": "兑换 {{points}} 积分",
     "points_deduction_warning": "完成兑换后，积分将立即从您的账户中扣除。",
     "error_loading_redemption": "无法加载兑换详情",
+    "error_processing_redemption": "处理兑换时出错。请重试。",
     "quantity": "数量",
     "status": "状态",
     "points": "积分",
@@ -134,7 +141,10 @@
     "no_products_found": "该类别下没有找到产品。",
     "no_favorites_found": "您还没有收藏的产品。",
     "loading_more": "加载更多产品...",
-    "loading_products": "加载产品中..."
+    "loading_products": "加载产品中...",
+    "not_found": "产品未找到",
+    "not_found_description": "您查找的产品不存在或不可用。",
+    "view_all_products": "查看所有产品"
   },
   "quantity_controls": {
     "quantity_updated": "数量已更新",
@@ -211,6 +221,11 @@
     "close_modal": "关闭模态框",
     "login_error": "登录错误",
     "register_error": "注册用户错误",
+    "registration_success": "注册成功。请检查您的邮箱以确认您的账户。",
+    "email_already_registered": "此邮箱已被注册",
+    "registration_failed": "注册失败。请稍后重试。",
+    "confirm_email_first": "请先确认您的邮箱后再登录",
+    "invalid_credentials": "用户名或密码错误",
     "reset_password": {
       "title": "重置密码",
       "new_password": "新密码",
@@ -223,6 +238,36 @@
       "password_too_short": "密码必须至少包含6个字符",
       "reset_error": "重置密码时出错",
       "success_message": "密码重置成功。正在重定向到登录页面..."
+    },
+    "forgot_password_modal": {
+      "title": "重置密码",
+      "email_label": "电子邮箱",
+      "error_server": "处理服务器响应时出错",
+      "error_request": "请求密码重置时出错",
+      "success": "我们已发送包含重置密码说明的电子邮件。",
+      "sending": "发送中...",
+      "button": "发送说明"
+    },
+    "role_selection": {
+      "title": "欢迎！请选择您的角色",
+      "subtitle": "这将帮助我们个性化您的体验。请稍后在个人资料设置中更改。",
+      "consumer": "个人消费者",
+      "business": "企业",
+      "assigning": "分配角色中...",
+      "error": "分配角色时出错"
+    },
+    "verify_email": {
+      "title": "邮箱验证",
+      "success": "邮箱验证成功！",
+      "verifying": "正在验证您的邮箱...",
+      "error_no_params": "未找到验证参数。请检查链接并重试。",
+      "error_verify": "验证邮箱时出错",
+      "error_complete": "完成身份验证时出错。请尝试手动登录。",
+      "link_expired": "验证链接已过期。请通过以下方式申请新链接：",
+      "go_to_login": "前往登录",
+      "role_assigned": "角色 {{role}} 分配成功！正在重定向...",
+      "role_consumer": "个人消费者",
+      "role_business": "企业"
     }
   },
   "banner": {
@@ -335,6 +380,11 @@
           "subtotal": "小计",
           "total": "总计"
         }
+      },
+      "hooks": {
+        "load_error": "加载订单时出错：{{error}}",
+        "update_success": "订单 {{orderId}} 已成功更新",
+        "update_error": "更新订单时出错：{{error}}"
       }
     },
     "upload": {
@@ -400,21 +450,51 @@
           "stock_placeholder": "50",
           "create_reward": "创建可兑换商品",
           "creating": "创建中...",
-          "reward_created": "可兑换商品创建成功"
+          "reward_created": "可兑换商品创建成功",
+          "name_required": "名称为必填项",
+          "points_required": "积分成本必须大于0",
+          "stock_non_negative": "库存不能为负数",
+          "error_upload_image": "上传图片时出错",
+          "error_creating": "创建可兑换商品时出错",
+          "invalid_data": "数据无效。请检查信息。",
+          "server_error": "服务器错误。请稍后重试。",
+          "remove_image": "删除图片"
         },
         "edit": {
           "title": "编辑可兑换商品",
           "update_reward": "更新可兑换商品",
           "updating": "更新中...",
-          "reward_updated": "可兑换商品更新成功"
+          "reward_updated": "可兑换商品更新成功",
+          "name_required": "名称为必填项",
+          "points_required": "积分成本必须大于0",
+          "stock_non_negative": "库存不能为负数",
+          "error_upload_image": "上传图片时出错",
+          "error_updating": "更新可兑换商品时出错",
+          "remove_current_image": "删除当前图片",
+          "current_image": "当前图片",
+          "change_image": "更换图片",
+          "remove_new_image": "删除新图片",
+          "new_image": "新图片"
         },
         "delete": {
           "title": "删除可兑换商品",
           "message": "您确定要删除这个可兑换商品吗？此操作无法撤销。",
           "delete_reward": "删除可兑换商品",
           "deleting": "删除中...",
-          "reward_deleted": "可兑换商品删除成功"
+          "reward_deleted": "可兑换商品删除成功",
+          "error_deleting": "删除可兑换商品时出错",
+          "cost_display": "成本：{{points}} 积分",
+          "stock_display": "库存：{{stock}}"
         }
+      },
+      "hooks": {
+        "load_error": "加载可兑换商品时出错：{{error}}",
+        "create_success": "可兑换商品创建成功",
+        "create_error": "创建可兑换商品时出错：{{error}}",
+        "update_success": "可兑换商品更新成功",
+        "update_error": "更新可兑换商品时出错：{{error}}",
+        "delete_success": "可兑换商品删除成功",
+        "delete_error": "删除可兑换商品时出错：{{error}}"
       }
     },
     "dashboard": {
@@ -565,7 +645,58 @@
       "cancel": "取消",
       "saving": "保存中...",
       "save": "保存",
-      "update": "更新"
+      "update": "更新",
+      "hooks": {
+        "load_error": "加载用户时出错：{{error}}"
+      },
+      "import_special_prices": {
+        "title": "导入价格",
+        "current_user": "当前用户：",
+        "select_file": "选择 CSV 文件",
+        "format_info": "允许的格式：CSV (.csv)。用户 ID 将自动添加。",
+        "download_template": "下载 CSV 模板",
+        "processing": "处理中…",
+        "upload_button": "上传并处理",
+        "correct": "正确",
+        "errors": "错误",
+        "row": "行",
+        "sku": "SKU",
+        "user": "用户",
+        "status": "状态",
+        "note_no_column": "注意：请勿包含列",
+        "note_auto_insert": "。将使用上面显示的当前用户 ID 自动插入。",
+        "close": "关闭",
+        "csv_only": "此导入器仅接受 CSV (.csv)",
+        "file_empty": "CSV 文件为空",
+        "process_error": "无法处理 CSV",
+        "select_first": "请先选择文件",
+        "upload_error": "上传文件时出错",
+        "import_error": "导入错误",
+        "products_not_found": "未找到产品",
+        "invalid_user": "用户无效",
+        "invalid_fields": "字段无效",
+        "invalid_dates": "日期无效",
+        "duplicates_skipped": "已跳过重复项",
+        "other_errors": "其他错误",
+        "imported": "已导入",
+        "omitted": "已省略",
+        "more": "更多",
+        "rows": "行",
+        "completed_with_errors": "导入完成（有错误）",
+        "completed": "导入完成",
+        "success_count": "已成功导入 {{count}} 个特价",
+        "no_records": "无变化",
+        "no_records_message": "未导入任何记录",
+        "duplicates_omitted": "已跳过重复折扣",
+        "template_downloaded": "模板已下载",
+        "template_success": "CSV 模板已成功下载",
+        "import_title": "导入",
+        "plus_more": " （+{{count}} 更多）",
+        "products_not_found_message": "{{count}} 个产品在系统中不存在。请验证 SKU 后重试。",
+        "duplicates_omitted_message": "{{count}} 个折扣已存在相同值，已跳过。",
+        "success_imported": "✅ 导入完成",
+        "error_import_title": "导入错误"
+      }
     },
     "categories": {
       "title": "分类",
@@ -650,7 +781,15 @@
       "info_1": "此页面允许您为自己分配管理员角色",
       "info_2": "分配后，您将拥有管理员面板的完全访问权限",
       "info_3": "管理员角色允许您管理用户、产品和配置",
-      "info_4": "分配角色后，您将被自动重定向"
+      "info_4": "分配角色后，您将被自动重定向",
+      "whatsapp": {
+        "error_status": "获取状态时出错",
+        "error_restart": "重启时出错",
+        "error_logout": "断开连接时出错",
+        "error_qr_generate": "无法生成二维码",
+        "error_qr": "生成二维码时出错",
+        "verify_config": "请确保在服务器上配置了 EVOLUTION_API_URL、EVOLUTION_API_KEY 和 EVOLUTION_INSTANCE_NAME。"
+      }
     },
     "products": {
       "title": "库存控制",
@@ -758,6 +897,12 @@
           "uploading": "上传中...",
           "product_created": "产品已创建",
           "product_created_success": "产品创建成功",
+          "sku_required": "SKU 为必填项",
+          "name_required": "产品名称为必填项",
+          "sku_duplicate": "SKU 重复",
+          "sku_duplicate_message": "已存在使用此 SKU 的产品。请使用其他 SKU。",
+          "remove_image": "删除图片",
+          "error_upload_image": "上传图片时出错：{{status}} {{statusText}} - {{error}}",
           "error_creating": "创建错误",
           "error_creating_message": "创建产品时出错：未知错误",
           "error_uploading_images": "上传图片错误",
@@ -828,9 +973,30 @@
           "loading": "加载现有翻译中...",
           "translation_saved": "翻译保存成功",
           "translation_updated": "翻译更新成功",
+          "translation_deleted": "翻译删除成功",
+          "product_not_found": "未找到产品。",
+          "translation_not_found": "未找到翻译。",
           "error_saving": "保存翻译时出错",
-          "error_updating": "更新翻译时出错"
+          "error_updating": "更新翻译时出错",
+          "error_deleting": "删除翻译时出错"
         }
+      },
+      "hooks": {
+        "load_products_error": "加载产品时出错：{{error}}",
+        "load_categories_error": "加载分类时出错：{{error}}"
+      },
+      "import": {
+        "no_token": "未找到身份验证令牌",
+        "unauthorized": "未授权。请重新登录。",
+        "invalid_file": "文件无效或格式错误。",
+        "import_error": "导入产品时出错：{{statusText}}",
+        "invalid_type": "无效的文件类型。仅允许 Excel 文件 (.xlsx, .xls)。",
+        "file_too_large": "文件太大。最大大小为 10MB。"
+      },
+      "export": {
+        "no_token": "未找到身份验证令牌",
+        "unauthorized": "未授权。请重新登录。",
+        "export_error": "导出产品时出错：{{statusText}}"
       }
     }
   },
@@ -1015,7 +1181,17 @@
     "status": "状态",
     "created_at": "创建日期",
     "no_items": "此兑换中没有商品",
-    "error_loading_detail": "加载兑换详情时出错"
+    "error_loading_detail": "加载兑换详情时出错",
+    "canje_not_found": "未找到兑换",
+    "redemption_id": "兑换 ID",
+    "reward": "奖励",
+    "points_per_unit": "每单位积分",
+    "total": "总计",
+    "user_id": "用户 ID",
+    "summary": "摘要",
+    "total_items": "商品总数",
+    "total_points_label": "总积分",
+    "final_total": "最终总计"
   },
   "order_status": {
     "pending": "待处理",
