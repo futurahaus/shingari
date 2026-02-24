@@ -50,6 +50,7 @@ interface DocumentUploadResponse {
 interface Order {
   id: string;
   user_id?: string;
+  user_internal_id?: string;
   user_email?: string;
   user_name?: string;
   user_trade_name?: string;
@@ -276,12 +277,16 @@ export default function AdminOrderDetailPage() {
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
               <div className="text-gray-500">{t('admin.orders.detail.customer_id')}</div>
               <div className="text-gray-900 font-medium text-right">
-                {order.user_id ? (
-                  <Link href={`/admin/usuarios/${order.user_id}`} className="text-blue-600 hover:text-blue-800 hover:underline">
-                    #{order.user_id.slice(0, 6)}
-                  </Link>
+                {order.user_internal_id?.trim() ? (
+                  order.user_id ? (
+                    <Link href={`/admin/usuarios/${order.user_id}`} className="text-blue-600 hover:text-blue-800 hover:underline">
+                      #{order.user_internal_id}
+                    </Link>
+                  ) : (
+                    <>#{order.user_internal_id}</>
+                  )
                 ) : (
-                  '-'
+                  <span className="text-gray-500">{t('admin.orders.detail.no_internal_id')}</span>
                 )}
               </div>
             </div>

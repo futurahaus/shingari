@@ -101,6 +101,9 @@ export class OrderResponseDto {
   @ApiProperty({ description: 'Nombre comercial del usuario' })
   user_trade_name?: string;
 
+  @ApiProperty({ description: 'ID interno del cliente', required: false })
+  user_internal_id?: string;
+
   @ApiProperty({ 
     description: 'Estado de la orden',
     enum: OrderStates,

@@ -174,6 +174,18 @@ export class OrdersService {
         },
         order_addresses: true,
         order_payments: true,
+        users: {
+          include: {
+            users: {
+              select: {
+                internal_id: true,
+                first_name: true,
+                last_name: true,
+                trade_name: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -259,6 +271,18 @@ export class OrdersService {
         },
         order_addresses: true,
         order_payments: true,
+        users: {
+          include: {
+            users: {
+              select: {
+                internal_id: true,
+                first_name: true,
+                last_name: true,
+                trade_name: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
         created_at: 'desc',
@@ -282,6 +306,18 @@ export class OrdersService {
         },
         order_addresses: true,
         order_payments: true,
+        users: {
+          include: {
+            users: {
+              select: {
+                internal_id: true,
+                first_name: true,
+                last_name: true,
+                trade_name: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
         created_at: 'desc',
@@ -468,6 +504,7 @@ export class OrdersService {
         ? `${order.users.users.first_name} ${order.users.users.last_name}`.trim()
         : order.users?.users?.trade_name || null,
       user_trade_name: order.users?.users?.trade_name || null,
+      user_internal_id: order.users?.users?.internal_id ?? null,
       status: order.status,
       total_amount: order.total_amount,
       currency: order.currency,

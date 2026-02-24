@@ -355,6 +355,7 @@
         "order_number": "Número de pedido",
         "date": "Fecha",
         "customer_id": "ID de Cliente",
+        "no_internal_id": "Sin id interno",
         "status": "Estado",
         "delivery_date": "Fecha de entrega",
         "cancellation_reason": "Razón de cancelación",

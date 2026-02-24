@@ -355,6 +355,7 @@
         "order_number": "订单号",
         "date": "日期",
         "customer_id": "客户ID",
+        "no_internal_id": "无内部ID",
         "status": "状态",
         "points": "积分",
         "total": "总计",
