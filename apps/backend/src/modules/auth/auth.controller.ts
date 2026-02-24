@@ -138,7 +138,7 @@ export class AuthController {
   })
   async logout(): Promise<SimpleMessageResponseDto> {
     await this.authService.signOut();
-    return { message: 'Successfully logged out' };
+    return { message: 'Sesión cerrada exitosamente' };
   }
 
   @Post('reset-password')
@@ -266,6 +266,6 @@ export class AuthController {
     @Body() assignRoleDto: AssignRoleDto,
   ): Promise<SimpleMessageResponseDto> {
     await this.authService.assignRole(assignRoleDto);
-    return { message: 'Role assigned successfully' };
+    return { message: 'Rol asignado exitosamente' };
   }
 }
