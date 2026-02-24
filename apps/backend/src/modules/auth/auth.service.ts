@@ -68,9 +68,23 @@ export class AuthService {
         'Supabase signUp response: ' + JSON.stringify({ data, error }),
       );
 
+      // Log environment configuration for debugging
+      this.logger.logInfo(
+        `Registration attempt - Frontend URL: ${process.env.FRONTEND_URL}, Supabase URL: ${process.env.SUPABASE_URL}`,
+      );
+
       // If error is present, handle as before
       if (error) {
         const msg = error.message?.toLowerCase() || '';
+        const errorStatus = (error as any)?.status;
+        const errorCode = (error as any)?.code;
+
+        // Log detailed error information for debugging
+        this.logger.logError(
+          'Supabase signUp error details',
+          new Error(`Status: ${errorStatus}, Code: ${errorCode}, Message: ${error.message}`),
+        );
+
         if (
           msg.includes('already registered') ||
           msg.includes('already exists') ||
@@ -80,8 +94,22 @@ export class AuthService {
         ) {
           throw new ConflictException('Email already registered');
         }
+
+        // Handle specific error codes
+        if (errorCode === 'unexpected_failure' || errorStatus === 500) {
+          throw new ConflictException(
+            'Registration service temporarily unavailable. Please check Supabase configuration and try again.',
+          );
+        }
+
+        if (msg.includes('email') && (msg.includes('provider') || msg.includes('disabled'))) {
+          throw new ConflictException(
+            'Email authentication is not properly configured. Please contact support.',
+          );
+        }
+
         throw new ConflictException(
-          'Registration failed. Please try again later.',
+          `Registration failed: ${error.message || 'Please try again later.'}`,
         );
       }
 
