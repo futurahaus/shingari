@@ -78,7 +78,7 @@ describe('AuthService', () => {
         },
       });
       expect(result).toEqual({
-        message: 'Registration successful. Please check your email to confirm your account.',
+        message: 'Registro exitoso. Revisa tu correo electrónico para confirmar tu cuenta.',
         user: {
           id: mockUser.id,
           email: mockUser.email,

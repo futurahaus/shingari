@@ -92,24 +92,24 @@ export class AuthService {
           msg.includes('user with this email') ||
           msg.includes('email is already')
         ) {
-          throw new ConflictException('Email already registered');
+          throw new ConflictException('Este correo electrónico ya está registrado');
         }
 
         // Handle specific error codes
         if (errorCode === 'unexpected_failure' || errorStatus === 500) {
           throw new ConflictException(
-            'Registration service temporarily unavailable. Please check Supabase configuration and try again.',
+            'Servicio de registro temporalmente no disponible. Verifica la configuración de Supabase e inténtalo de nuevo.',
           );
         }
 
         if (msg.includes('email') && (msg.includes('provider') || msg.includes('disabled'))) {
           throw new ConflictException(
-            'Email authentication is not properly configured. Please contact support.',
+            'La autenticación por correo no está configurada correctamente. Contacta al soporte.',
           );
         }
 
         throw new ConflictException(
-          `Registration failed: ${error.message || 'Please try again later.'}`,
+          `Error en el registro: ${error.message || 'Por favor, inténtalo más tarde.'}`,
         );
       }
 
@@ -118,13 +118,13 @@ export class AuthService {
       if (data.user) {
         const identities = (data.user as { identities?: unknown[] }).identities ?? [];
         if (identities.length === 0) {
-          throw new ConflictException('Email already registered');
+          throw new ConflictException('Este correo electrónico ya está registrado');
         }
       }
 
       return {
         message:
-          'Registration successful. Please check your email to confirm your account.',
+          'Registro exitoso. Revisa tu correo electrónico para confirmar tu cuenta.',
         user: {
           id: data.user?.id,
           email: data.user?.email,
@@ -151,7 +151,7 @@ export class AuthService {
     if (authError) {
       if (authError.message.includes('Email not confirmed')) {
         throw new UnauthorizedException(
-          'Please confirm your email before logging in',
+          'Por favor, confirma tu correo electrónico antes de iniciar sesión',
         );
       }
       this.logger.logError('User Authentication', authError);
@@ -269,7 +269,7 @@ export class AuthService {
         .auth.admin.getUserById(payload.sub);
 
       if (error || !user) {
-        throw new UnauthorizedException('Invalid refresh token');
+        throw new UnauthorizedException('Token de actualización no válido');
       }
 
       // Fetch user roles
@@ -302,7 +302,7 @@ export class AuthService {
       return this.generateTokens(enrichedUser);
     } catch (error) {
       this.logger.logError('Token Refresh', error);
-      throw new UnauthorizedException('Invalid refresh token');
+      throw new UnauthorizedException('Token de actualización no válido');
     }
   }
 
@@ -337,7 +337,7 @@ export class AuthService {
       }
 
       this.logger.logInfo('Email verified successfully');
-      return { message: 'Email verified successfully', user };
+      return { message: 'Correo verificado exitosamente', user };
     } catch (error) {
       this.logger.logError('Email verification', error);
       throw error;
@@ -515,7 +515,7 @@ export class AuthService {
 
         if (createRoleError) {
           this.logger.logError('Role Creation', createRoleError);
-          throw new BadRequestException('Failed to create role');
+          throw new BadRequestException('Error al crear el rol');
         }
 
         // Assign the new role to the user
@@ -529,7 +529,7 @@ export class AuthService {
 
         if (assignError) {
           this.logger.logError('Role Assignment', assignError);
-          throw new BadRequestException('Failed to assign role to user');
+          throw new BadRequestException('Error al asignar el rol al usuario');
         }
       } else {
         // Role exists, assign it to the user
@@ -549,7 +549,7 @@ export class AuthService {
           }
 
           this.logger.logError('Role Assignment', assignError);
-          throw new BadRequestException('Failed to assign role to user');
+          throw new BadRequestException('Error al asignar el rol al usuario');
         }
       }
 
@@ -564,7 +564,7 @@ export class AuthService {
 
       if (updateError) {
         this.logger.logError('User Metadata Update', updateError);
-        throw new BadRequestException('Failed to update user metadata');
+        throw new BadRequestException('Error al actualizar los metadatos del usuario');
       }
 
       this.logger.logInfo(`Role ${role} assigned successfully to user ${userId}`);
@@ -605,7 +605,7 @@ export class AuthService {
 
       if (profileError) {
         this.logger.logError('Profile Update', profileError);
-        throw new BadRequestException('Failed to update user profile');
+        throw new BadRequestException('Error al actualizar el perfil del usuario');
       }
 
       this.logger.logInfo(`Profile updated successfully for user ${userId}`);
@@ -629,7 +629,7 @@ export class AuthService {
       if (profileError && profileError.code !== 'PGRST116') {
         // PGRST116 is "not found" error, which is fine for new users
         this.logger.logError('Profile Fetch', profileError);
-        throw new BadRequestException('Failed to fetch user profile');
+        throw new BadRequestException('Error al obtener el perfil del usuario');
       }
 
       // Get user email from auth.users table
@@ -639,7 +639,7 @@ export class AuthService {
 
       if (userError || !user) {
         this.logger.logError('User Fetch', userError);
-        throw new BadRequestException('Failed to fetch user data');
+        throw new BadRequestException('Error al obtener los datos del usuario');
       }
 
       const completeProfile = {
