@@ -170,6 +170,7 @@ export class OrdersService {
               select: {
                 image_url: true,
                 sku: true,
+                iva: true,
               },
             },
           },
@@ -186,7 +187,12 @@ export class OrdersService {
                 trade_name: true,
               },
             },
-          },
+            user_roles: {
+              include: {
+                roles: { select: { name: true } },
+              },
+            },
+          } as any,
         },
       },
     });
@@ -237,6 +243,7 @@ export class OrdersService {
                 select: {
                   image_url: true,
                   sku: true,
+                  iva: true,
                 },
               },
             },
@@ -246,7 +253,12 @@ export class OrdersService {
           users: {
             include: {
               users: true,
-            },
+              user_roles: {
+                include: {
+                  roles: { select: { name: true } },
+                },
+              },
+            } as any,
           },
         },
       });
@@ -269,6 +281,7 @@ export class OrdersService {
               select: {
                 image_url: true,
                 sku: true,
+                iva: true,
               },
             },
           },
@@ -285,7 +298,12 @@ export class OrdersService {
                 trade_name: true,
               },
             },
-          },
+            user_roles: {
+              include: {
+                roles: { select: { name: true } },
+              },
+            },
+          } as any,
         },
       },
       orderBy: {
@@ -305,6 +323,7 @@ export class OrdersService {
               select: {
                 image_url: true,
                 sku: true,
+                iva: true,
               },
             },
           },
@@ -321,7 +340,12 @@ export class OrdersService {
                 trade_name: true,
               },
             },
-          },
+            user_roles: {
+              include: {
+                roles: { select: { name: true } },
+              },
+            },
+          } as any,
         },
       },
       orderBy: {
@@ -359,6 +383,7 @@ export class OrdersService {
                 select: {
                   image_url: true,
                   sku: true,
+                  iva: true,
                 },
               },
             },
@@ -368,7 +393,12 @@ export class OrdersService {
           users: {
             include: {
               users: true, // This includes public_users data
-            },
+              user_roles: {
+                include: {
+                  roles: { select: { name: true } },
+                },
+              },
+            } as any,
           },
         },
         orderBy,
@@ -502,10 +532,15 @@ export class OrdersService {
   }
 
   private mapToOrderResponse(order: any): OrderResponseDto {
+    const userIsBusiness =
+      order.users?.user_roles?.some(
+        (ur: { roles?: { name?: string } }) => ur.roles?.name === 'business',
+      ) ?? false;
     const response = {
       id: order.id,
       user_id: order.user_id,
       user_email: order.users?.email || null,
+      user_is_business: userIsBusiness,
       user_name: order.users?.users?.first_name && order.users?.users?.last_name
         ? `${order.users.users.first_name} ${order.users.users.last_name}`.trim()
         : order.users?.users?.trade_name || null,
@@ -521,16 +556,25 @@ export class OrdersService {
       cancellation_reason: order.cancellation_reason || null,
       cancellation_date: order.cancellation_date || null,
       invoice_file_url: order.invoice_file_url || null,
-      order_lines: order.order_lines.map((line: any) => ({
-        id: line.id,
-        product_id: line.product_id,
-        product_name: line.product_name,
-        quantity: line.quantity,
-        unit_price: line.unit_price,
-        total_price: line.total_price,
-        product_image: line.products?.image_url || null,
-        product_sku: line.products?.sku || null,
-      })),
+      order_lines: order.order_lines.map((line: any) => {
+        const ivaRaw = line.products?.iva;
+        let productIva: number | null = null;
+        if (ivaRaw != null) {
+          const ivaNum = typeof ivaRaw === 'object' && ivaRaw.toNumber ? ivaRaw.toNumber() : Number(ivaRaw);
+          productIva = ivaNum < 1 && ivaNum > 0 ? ivaNum * 100 : ivaNum;
+        }
+        return {
+          id: line.id,
+          product_id: line.product_id,
+          product_name: line.product_name,
+          quantity: line.quantity,
+          unit_price: line.unit_price,
+          total_price: line.total_price,
+          product_image: line.products?.image_url || null,
+          product_sku: line.products?.sku || null,
+          product_iva: productIva,
+        };
+      }),
       order_addresses: order.order_addresses.map((address: any) => ({
         id: address.id,
         type: address.type,

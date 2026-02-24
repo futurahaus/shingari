@@ -15,6 +15,7 @@ interface OrderLine {
   product_id: number;
   product_name: string;
   product_sku?: string;
+  product_iva?: number;
   quantity: number;
   unit_price: string;
   total_price: string;
@@ -52,6 +53,7 @@ interface Order {
   id: string;
   user_id?: string;
   user_internal_id?: string;
+  user_is_business?: boolean;
   user_email?: string;
   user_name?: string;
   user_trade_name?: string;
@@ -88,6 +90,41 @@ const formatDateTime = (dateString: string) => {
     minute: '2-digit'
   });
 };
+
+function computePriceBreakdown(
+  orderLines: OrderLine[],
+  totalAmount: number,
+  userIsBusiness: boolean
+): { subtotal: number; iva: number; total: number } {
+  const DEFAULT_IVA = 21;
+  let subtotal = 0;
+  let ivaAmount = 0;
+
+  if (userIsBusiness) {
+    for (const line of orderLines) {
+      const lineSubtotal = Number(line.unit_price) * line.quantity;
+      const ivaPct = line.product_iva ?? DEFAULT_IVA;
+      const lineIva = Math.round(lineSubtotal * (ivaPct / 100) * 100) / 100;
+      subtotal += lineSubtotal;
+      ivaAmount += lineIva;
+    }
+    subtotal = Math.round(subtotal * 100) / 100;
+    ivaAmount = Math.round(ivaAmount * 100) / 100;
+    return { subtotal, iva: ivaAmount, total: totalAmount };
+  }
+
+  for (const line of orderLines) {
+    const lineTotal = Number(line.unit_price) * line.quantity;
+    const ivaPct = line.product_iva ?? DEFAULT_IVA;
+    const lineSubtotal = Math.round((lineTotal / (1 + ivaPct / 100)) * 100) / 100;
+    const lineIva = Math.round((lineTotal - lineSubtotal) * 100) / 100;
+    subtotal += lineSubtotal;
+    ivaAmount += lineIva;
+  }
+  subtotal = Math.round(subtotal * 100) / 100;
+  ivaAmount = Math.round(ivaAmount * 100) / 100;
+  return { subtotal, iva: ivaAmount, total: totalAmount };
+}
 
 export default function AdminOrderDetailPage() {
   const { t } = useTranslation();
@@ -392,6 +429,34 @@ export default function AdminOrderDetailPage() {
               </tfoot>
             </table>
           </div>
+          {order.order_lines.length > 0 && (
+            <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+              <h4 className="font-semibold text-sm text-gray-700 mb-3">{t('admin.orders.detail.price_breakdown')}</h4>
+              {(() => {
+                const breakdown = computePriceBreakdown(
+                  order.order_lines,
+                  Number(order.total_amount),
+                  order.user_is_business ?? false
+                );
+                return (
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">{t('admin.orders.detail.subtotal_without_iva')}</span>
+                      <span className="text-gray-900 font-medium">{formatCurrency(breakdown.subtotal.toString())}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">{t('admin.orders.detail.total_iva')}</span>
+                      <span className="text-gray-900 font-medium">{formatCurrency(breakdown.iva.toString())}</span>
+                    </div>
+                    <div className="flex justify-between pt-2 border-t border-gray-200">
+                      <span className="text-gray-900 font-bold">{t('admin.orders.detail.table.total')}</span>
+                      <span className="text-gray-900 font-bold">{formatCurrency(order.total_amount)}</span>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
         </div>
         <div className="mb-8 px-8">
           <h3 className="font-bold text-lg mb-2">{t('admin.orders.detail.shipping_address')}</h3>
