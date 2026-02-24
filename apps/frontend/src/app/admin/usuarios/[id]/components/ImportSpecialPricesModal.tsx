@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import * as XLSX from 'xlsx';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { useTranslation } from '@/contexts/I18nContext';
 
@@ -26,9 +27,12 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
     }
 
     const csvMimeTypes = ['text/csv', 'application/csv'];
+    const excelMimeTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+    const isCsv = csvMimeTypes.includes(file.type) || file.name.toLowerCase().endsWith('.csv');
+    const isExcel = excelMimeTypes.includes(file.type) || file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls');
 
-    if (!csvMimeTypes.includes(file.type) && !file.name.toLowerCase().endsWith('.csv')) {
-      setUploadError(t('admin.users.import_special_prices.csv_only'));
+    if (!isCsv && !isExcel) {
+      setUploadError(t('admin.users.import_special_prices.invalid_format'));
       setSelectedFile(null);
       setProcessedFile(null);
       return;
@@ -38,124 +42,134 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
     setSelectedFile(file);
     setUploadResult(null);
 
-    // Read and transform CSV to inject USER_ID column when missing
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const text = String(reader.result || '');
-        const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
-        if (lines.length === 0) {
-          const msg = t('admin.users.import_special_prices.file_empty');
+    const excelDateToIso = (c: unknown): string => {
+      if (c == null || c === '') return '';
+      if (typeof c === 'number' && c >= 1 && c < 100000) {
+        const d = new Date((c - 25569) * 86400 * 1000);
+        return isNaN(d.getTime()) ? String(c) : d.toISOString().slice(0, 10);
+      }
+      return String(c ?? '');
+    };
+
+    const transformRowsToCsv = (data: unknown[][], dateColIndices?: number[]): string => {
+      if (data.length === 0) return '';
+      const originalHeader = (data[0] || []).map(h => String(h || '').trim());
+      const hasUserId = originalHeader.some(h => h.toUpperCase() === 'USER_ID');
+      const newHeader = ['SKU', 'USER_ID', 'PRECIO', 'VALIDO_DESDE', 'VALIDO_HASTA', 'ESTADO'];
+      const escapeCSVValue = (value: string): string => {
+        if (value.includes(',') || value.includes('\n') || value.includes('"')) {
+          return `"${value.replace(/"/g, '""')}"`;
+        }
+        return value;
+      };
+      const newLines = [newHeader.join(',')];
+      for (let i = 1; i < data.length; i++) {
+        const rawRow = data[i];
+        const cols = (dateColIndices
+          ? rawRow.map((c, ci) => (dateColIndices.includes(ci) ? excelDateToIso(c) : String(c ?? '').trim()))
+          : rawRow.map(c => String(c ?? '').trim())
+        );
+        if (cols.every(c => c === '')) continue;
+        let sku: string; let precio: string; let validoDesde: string; let validoHasta: string; let estado: string;
+        if (hasUserId) {
+          sku = cols[0] || ''; precio = cols[2] || ''; validoDesde = cols[3] || ''; validoHasta = cols[4] || ''; estado = cols[5] || '';
+        } else {
+          sku = cols[0] || ''; precio = cols[1] || ''; validoDesde = cols[2] || ''; validoHasta = cols[3] || ''; estado = cols[4] || '';
+        }
+        newLines.push([escapeCSVValue(sku), userId, escapeCSVValue(precio), escapeCSVValue(validoDesde), escapeCSVValue(validoHasta), escapeCSVValue(estado)].join(','));
+      }
+      return newLines.join('\n');
+    };
+
+    if (isExcel) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const buffer = reader.result as ArrayBuffer;
+          const workbook = XLSX.read(buffer, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const data: unknown[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+          if (!data.length || data.every(row => row.every(c => !String(c).trim()))) {
+            const msg = t('admin.users.import_special_prices.file_empty');
+            setUploadError(msg);
+            showError(t('admin.users.import_special_prices.import_title'), msg, 0);
+            setProcessedFile(null);
+            return;
+          }
+          const header = (data[0] || []).map(h => String(h || '').trim().toUpperCase());
+          const dateColIndices = header
+            .map((h, i) => (h === 'VALIDO_DESDE' || h === 'VALIDO DESDE' || h === 'VALIDO_HASTA' || h === 'VALIDO HASTA' ? i : -1))
+            .filter(i => i >= 0);
+          const csvOut = transformRowsToCsv(data, dateColIndices);
+          const blob = new Blob([csvOut], { type: 'text/csv' });
+          const newFile = new File([blob], file.name.replace(/\.(xlsx|xls)$/i, '') + '_with_user.csv', { type: 'text/csv' });
+          setProcessedFile(newFile);
+        } catch {
+          const msg = t('admin.users.import_special_prices.process_error');
           setUploadError(msg);
           showError(t('admin.users.import_special_prices.import_title'), msg, 0);
           setProcessedFile(null);
-          return;
         }
-
-        // Parse CSV properly handling quoted fields
-        const parseCSVLine = (line: string): string[] => {
-          const result: string[] = [];
-          let current = '';
-          let inQuotes = false;
-
-          for (let i = 0; i < line.length; i++) {
-            const char = line[i];
-
-            if (char === '"') {
-              inQuotes = !inQuotes;
-            } else if (char === ',' && !inQuotes) {
-              result.push(current.trim());
-              current = '';
-            } else {
-              current += char;
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const text = String(reader.result || '').replace(/^\uFEFF/, '');
+          const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+          if (lines.length === 0) {
+            const msg = t('admin.users.import_special_prices.file_empty');
+            setUploadError(msg);
+            showError(t('admin.users.import_special_prices.import_title'), msg, 0);
+            setProcessedFile(null);
+            return;
+          }
+          const delimiter = lines[0].includes(';') ? ';' : ',';
+          const parseCSVLine = (line: string): string[] => {
+            const result: string[] = [];
+            let current = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+              const char = line[i];
+              if (char === '"') inQuotes = !inQuotes;
+              else if (char === delimiter && !inQuotes) { result.push(current.trim()); current = ''; }
+              else current += char;
             }
-          }
-          result.push(current.trim());
-          return result;
-        };
-
-        const originalHeader = parseCSVLine(lines[0]);
-        const hasUserId = originalHeader.some(h => h.toUpperCase() === 'USER_ID');
-
-        // Always enforce our header order and overwrite USER_ID with current user
-        const newHeader: string[] = ['SKU', 'USER_ID', 'PRECIO', 'VALIDO_DESDE', 'VALIDO_HASTA', 'ESTADO'];
-
-        // Helper function to escape CSV values (add quotes if needed)
-        const escapeCSVValue = (value: string): string => {
-          // If value contains comma, newline, or quote, wrap it in quotes
-          if (value.includes(',') || value.includes('\n') || value.includes('"')) {
-            // Escape existing quotes by doubling them
-            return `"${value.replace(/"/g, '""')}"`;
-          }
-          return value;
-        };
-
-        const dataLines = lines.slice(1);
-        const newLines = [newHeader.join(',')];
-        for (const line of dataLines) {
-          const cols = parseCSVLine(line);
-          if (cols.every(c => c.trim() === '')) continue;
-
-          // Map input based on whether original provided USER_ID
-          if (hasUserId) {
-            // Expected input with USER_ID: [SKU, USER_ID, PRECIO, VALIDO_DESDE, VALIDO_HASTA, ESTADO]
-            const sku = escapeCSVValue((cols[0] || '').trim());
-            const precio = escapeCSVValue((cols[2] || '').trim());
-            const validoDesde = escapeCSVValue((cols[3] || '').trim());
-            const validoHasta = escapeCSVValue((cols[4] || '').trim());
-            const estado = escapeCSVValue((cols[5] || '').trim());
-            const row = [sku, userId, precio, validoDesde, validoHasta, estado].join(',');
-            newLines.push(row);
-          } else {
-            // Expected input without USER_ID: [SKU, PRECIO, VALIDO_DESDE, VALIDO_HASTA, ESTADO]
-            const sku = escapeCSVValue((cols[0] || '').trim());
-            const precio = escapeCSVValue((cols[1] || '').trim());
-            const validoDesde = escapeCSVValue((cols[2] || '').trim());
-            const validoHasta = escapeCSVValue((cols[3] || '').trim());
-            const estado = escapeCSVValue((cols[4] || '').trim());
-            const row = [sku, userId, precio, validoDesde, validoHasta, estado].join(',');
-            newLines.push(row);
-          }
+            result.push(current.trim());
+            return result;
+          };
+          const data = lines.map(l => parseCSVLine(l));
+          const csvOut = transformRowsToCsv(data);
+          const blob = new Blob([csvOut], { type: 'text/csv' });
+          const newFile = new File([blob], file.name.replace(/\.csv$/i, '') + '_with_user.csv', { type: 'text/csv' });
+          setProcessedFile(newFile);
+        } catch {
+          const msg = t('admin.users.import_special_prices.process_error');
+          setUploadError(msg);
+          showError(t('admin.users.import_special_prices.import_title'), msg, 0);
+          setProcessedFile(null);
         }
-
-        const csvOut = newLines.join('\n');
-        const blob = new Blob([csvOut], { type: 'text/csv' });
-        const newFile = new File([blob], file.name.replace(/\.csv$/i, '') + '_with_user.csv', { type: 'text/csv' });
-        setProcessedFile(newFile);
-      } catch {
-        const msg = t('admin.users.import_special_prices.process_error');
-        setUploadError(msg);
-        showError(t('admin.users.import_special_prices.import_title'), msg, 0);
-        setProcessedFile(null);
-      }
-    };
-    reader.readAsText(file);
+      };
+      reader.readAsText(file);
+    }
   };
 
   const handleDownloadTemplate = () => {
-    const header = ['SKU', 'PRECIO', 'VALIDO_DESDE', 'VALIDO_HASTA', 'ESTADO'];
-    const sampleData = [
+    const data = [
+      ['SKU', 'PRECIO', 'VALIDO_DESDE', 'VALIDO_HASTA', 'ESTADO'],
       ['C2391', '10.50', '2025-01-01', '2025-12-31', 'activo'],
       ['C2392', '15.75', '2025-01-01', '2025-12-31', 'activo'],
-      ['C2393', '8.25', '2025-01-01', '2025-12-31', 'activo']
+      ['C2393', '8.25', '2025-01-01', '2025-12-31', 'activo'],
     ];
-
-    // Create CSV with simple formatting
-    const csvContent = [
-      header.join(','),
-      ...sampleData.map(row => row.join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'plantilla_precios_especiales.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    ws['!cols'] = [
+      { wch: 12 }, { wch: 10 }, { wch: 14 }, { wch: 14 }, { wch: 10 }
+    ];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Plantilla');
+    XLSX.writeFile(wb, 'plantilla_precios_especiales.xlsx');
     showSuccess(t('admin.users.import_special_prices.template_downloaded'), t('admin.users.import_special_prices.template_success'), 0);
   };
 
@@ -346,7 +360,7 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
             <input
               id="import-file"
               type="file"
-              accept=".csv"
+              accept=".csv,.xlsx,.xls"
               onChange={handleFileChange}
               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointers"
             />
