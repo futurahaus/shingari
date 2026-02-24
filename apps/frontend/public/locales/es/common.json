@@ -227,6 +227,8 @@
     "registration_failed": "Error en el registro. Por favor, inténtalo más tarde.",
     "confirm_email_first": "Por favor, confirma tu correo electrónico antes de iniciar sesión",
     "invalid_credentials": "Usuario o contraseña incorrectos",
+    "service_unavailable": "Servicio de registro temporalmente no disponible. Por favor, inténtalo más tarde.",
+    "email_auth_not_configured": "La autenticación por correo no está configurada correctamente. Contacta al soporte.",
     "reset_password": {
       "title": "Restablecer Contraseña",
       "new_password": "Nueva Contraseña",

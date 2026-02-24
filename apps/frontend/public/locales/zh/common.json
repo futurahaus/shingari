@@ -227,6 +227,8 @@
     "registration_failed": "注册失败。请稍后重试。",
     "confirm_email_first": "请先确认您的邮箱后再登录",
     "invalid_credentials": "用户名或密码错误",
+    "service_unavailable": "注册服务暂时不可用。请稍后重试。",
+    "email_auth_not_configured": "邮箱认证配置不正确。请联系客服。",
     "reset_password": {
       "title": "重置密码",
       "new_password": "新密码",

@@ -8,9 +8,11 @@ const AUTH_ERROR_FALLBACKS: Record<string, { es: string; zh: string }> = {
   'auth.registration_failed': { es: 'Error en el registro. Por favor, inténtalo más tarde.', zh: '注册失败。请稍后重试。' },
   'auth.confirm_email_first': { es: 'Por favor, confirma tu correo electrónico antes de iniciar sesión', zh: '请先确认您的邮箱后再登录' },
   'auth.invalid_credentials': { es: 'Usuario o contraseña incorrectos', zh: '用户名或密码错误' },
+  'auth.service_unavailable': { es: 'Servicio de registro temporalmente no disponible. Por favor, inténtalo más tarde.', zh: '注册服务暂时不可用。请稍后重试。' },
+  'auth.email_auth_not_configured': { es: 'La autenticación por correo no está configurada correctamente. Contacta al soporte.', zh: '邮箱认证配置不正确。请联系客服。' },
 };
 
-/** Maps known backend auth messages (English) to translated strings. Returns original message if no match. */
+/** Maps known backend auth messages (Spanish/English) to translated strings. Returns original message if no match. */
 function getTranslatedAuthError(
   message: string,
   t: (key: string) => string,
@@ -19,13 +21,21 @@ function getTranslatedAuthError(
   if (!message?.trim()) return '';
   const trimmed = message.trim().toLowerCase();
   const known: Record<string, string> = {
+    // Spanish (backend now returns Spanish)
+    'servicio de registro temporalmente no disponible': 'auth.service_unavailable',
+    'la autenticación por correo no está configurada': 'auth.email_auth_not_configured',
+    'error en el registro': 'auth.registration_failed',
+    'este correo electrónico ya está registrado': 'auth.email_already_registered',
+    'por favor, confirma tu correo electrónico': 'auth.confirm_email_first',
+    // English (legacy / backward compatibility)
     'email already registered': 'auth.email_already_registered',
     'registration failed. please try again later.': 'auth.registration_failed',
+    'registration service temporarily unavailable': 'auth.service_unavailable',
     'please confirm your email before logging in': 'auth.confirm_email_first',
     'invalid login credentials': 'auth.invalid_credentials',
   };
-  for (const [en, key] of Object.entries(known)) {
-    if (trimmed.includes(en) || trimmed === en) {
+  for (const [pattern, key] of Object.entries(known)) {
+    if (trimmed.includes(pattern) || trimmed === pattern) {
       const translated = t(key);
       const fallback = AUTH_ERROR_FALLBACKS[key]?.[locale === 'zh' ? 'zh' : 'es'];
       return translated !== key ? translated : (fallback || message);
