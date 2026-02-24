@@ -3,6 +3,7 @@ import { FaTimes } from 'react-icons/fa';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
 import { Input } from '@/app/ui/components/Input';
+import { useTranslation } from '@/contexts/I18nContext';
 
 interface ForgotPasswordModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface ForgotPasswordModalProps {
 }
 
 export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordModalProps) {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -39,20 +41,20 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
             data = JSON.parse(text);
           } catch (e) {
             console.error('Error parsing JSON:', e);
-            throw new Error('Error al procesar la respuesta del servidor');
+            throw new Error(t('auth.forgot_password_modal.error_server'));
           }
         }
       }
 
       if (!response.ok) {
-        throw new Error(data?.message || 'Error al solicitar el restablecimiento de contraseña');
+        throw new Error(data?.message || t('auth.forgot_password_modal.error_request'));
       }
 
-      setSuccessMessage('Se ha enviado un correo electrónico con instrucciones para restablecer tu contraseña.');
+      setSuccessMessage(t('auth.forgot_password_modal.success'));
       setEmail('');
     } catch (err) {
       console.error('Password reset error:', err);
-      setError(err instanceof Error ? err.message : 'Error al solicitar el restablecimiento de contraseña');
+      setError(err instanceof Error ? err.message : t('auth.forgot_password_modal.error_request'));
     } finally {
       setIsLoading(false);
     }
@@ -72,7 +74,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
         </button>
         <div className="p-6">
           <Text as="h2" size="2xl" weight="semibold" color="primary" className="text-center mb-6">
-            Restablecer Contraseña
+            {t('auth.forgot_password_modal.title')}
           </Text>
           <div className="space-y-4">
             {error && (
@@ -91,7 +93,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
             )}
 
             <Input
-              label="Correo electrónico"
+              label={t('auth.forgot_password_modal.email_label')}
               value={email}
               onChangeValue={setEmail}
               type="email"
@@ -103,7 +105,7 @@ export default function ForgotPasswordModal({ isOpen, onClose }: ForgotPasswordM
             <Button
               onPress={handleSubmit}
               type="primary"
-              text={isLoading ? "Enviando..." : "Enviar instrucciones"}
+              text={isLoading ? t('auth.forgot_password_modal.sending') : t('auth.forgot_password_modal.button')}
               testID="forgot-password-submit-button"
             />
           </div>

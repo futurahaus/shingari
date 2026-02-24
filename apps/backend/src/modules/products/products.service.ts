@@ -1916,30 +1916,13 @@ export class ProductsService {
             continue;
           }
 
-          // Parse dates
+          // Parse dates (Excel serial, ISO, DD/MM/YYYY, MM/DD/YYYY)
           let validFrom: Date | null = null;
           let validTo: Date | null = null;
 
           if (validoDesde) {
-            let desdeDate: Date;
-
-            // Handle different date formats that XLSX might return
-            if (typeof validoDesde === 'number') {
-              // XLSX might return Excel serial number (days since 1900-01-01)
-              // Excel date serial number to JavaScript Date
-              const excelEpoch = new Date(1900, 0, 1); // January 1, 1900
-              desdeDate = new Date(
-                excelEpoch.getTime() + (validoDesde - 2) * 24 * 60 * 60 * 1000,
-              );
-            } else {
-              // Convert to string first to handle any type conversion issues
-              const dateStr = String(validoDesde).trim();
-              // Remove quotes if present
-              const cleanDateStr = dateStr.replace(/^["']|["']$/g, '');
-              desdeDate = new Date(cleanDateStr);
-            }
-
-            if (isNaN(desdeDate.getTime())) {
+            const desdeDate = this.parseFlexibleDate(validoDesde);
+            if (!desdeDate) {
               results.errors++;
               results.details.push({
                 row: rowNumber,
@@ -1953,25 +1936,8 @@ export class ProductsService {
           }
 
           if (validoHasta) {
-            let hastaDate: Date;
-
-            // Handle different date formats that XLSX might return
-            if (typeof validoHasta === 'number') {
-              // XLSX might return Excel serial number (days since 1900-01-01)
-              // Excel date serial number to JavaScript Date
-              const excelEpoch = new Date(1900, 0, 1); // January 1, 1900
-              hastaDate = new Date(
-                excelEpoch.getTime() + (validoHasta - 2) * 24 * 60 * 60 * 1000,
-              );
-            } else {
-              // Convert to string first to handle any type conversion issues
-              const dateStr = String(validoHasta).trim();
-              // Remove quotes if present
-              const cleanDateStr = dateStr.replace(/^["']|["']$/g, '');
-              hastaDate = new Date(cleanDateStr);
-            }
-
-            if (isNaN(hastaDate.getTime())) {
+            const hastaDate = this.parseFlexibleDate(validoHasta);
+            if (!hastaDate) {
               results.errors++;
               results.details.push({
                 row: rowNumber,
@@ -2614,6 +2580,39 @@ export class ProductsService {
       this.logger.error('Error al importar productos:', error);
       throw error;
     }
+  }
+
+  /**
+   * Parsea fechas flexibles: Excel serial (número o string), ISO YYYY-MM-DD, DD/MM/YYYY, MM/DD/YYYY.
+   * @param value - Valor a parsear (number, string)
+   * @returns Date o null si no es válido
+   */
+  private parseFlexibleDate(value: unknown): Date | null {
+    if (value == null || value === '') return null;
+    const str = String(value).trim().replace(/^["']|["']$/g, '');
+    if (!str) return null;
+
+    // 1. Excel serial (number or numeric string)
+    const num = Number(str);
+    if (!isNaN(num) && num >= 1 && num < 100000) {
+      const d = new Date((num - 25569) * 86400 * 1000);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    // 2. ISO YYYY-MM-DD
+    let d = new Date(str);
+    if (!isNaN(d.getTime())) return d;
+
+    // 3. DD/MM/YYYY or MM/DD/YYYY
+    const parts = str.split(/[/\-.]/);
+    if (parts.length === 3) {
+      const [a, b, c] = parts.map((p) => parseInt(p, 10));
+      if (isNaN(a) || isNaN(b) || isNaN(c)) return null;
+      if (a > 12) return new Date(c, b - 1, a); // DD/MM/YYYY
+      if (b > 12) return new Date(c, a - 1, b); // MM/DD/YYYY
+      return new Date(c, b - 1, a); // Ambiguo: asumir DD/MM (España)
+    }
+    return null;
   }
 
   /**

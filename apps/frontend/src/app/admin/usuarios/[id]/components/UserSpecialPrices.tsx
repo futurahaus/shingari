@@ -3,6 +3,7 @@ import { useTranslation } from '@/contexts/I18nContext';
 import { api } from '@/lib/api';
 import { AddSpecialPriceModal } from './AddSpecialPriceModal';
 import { ImportSpecialPricesModal } from './ImportSpecialPricesModal';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 interface SpecialPrice {
   id: string;
@@ -30,6 +31,7 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
   const [showAddModal, setShowAddModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [editingSpecialPrice, setEditingSpecialPrice] = useState<SpecialPrice | null>(null);
+  const [specialPriceToDelete, setSpecialPriceToDelete] = useState<string | null>(null);
 
       const loadSpecialPrices = useCallback(() => {
     if (!userId) return;
@@ -71,16 +73,14 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
   };
 
   const handleDeleteSpecialPrice = async (specialPriceId: string) => {
-    if (!confirm(t('admin.users.detail.confirm_delete_special_price'))) {
-      return;
-    }
-
     try {
       await api.delete(`/user/admin/${userId}/special-prices/${specialPriceId}`);
       loadSpecialPrices(); // Refresh the list
     } catch (err) {
       const error = err instanceof Error ? err.message : 'Unknown error';
       setError(t('admin.users.detail.error_deleting_special_price') + ': ' + error);
+    } finally {
+      setSpecialPriceToDelete(null);
     }
   };
 
@@ -184,7 +184,7 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
                       <button
                         className="p-2 text-black rounded-lg transition duration-200 hover:bg-gray-100 cursor-pointer"
                         title={t('admin.users.detail.delete_special_price')}
-                        onClick={() => handleDeleteSpecialPrice(row.id)}
+                        onClick={() => setSpecialPriceToDelete(row.id)}
                       >
                         <svg stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 448 512" height="16" width="16" xmlns="http://www.w3.org/2000/svg">
                           <path d="M432 32H312l-9.4-18.7A24 24 0 0 0 281.1 0H166.8a23.72 23.72 0 0 0-21.4 13.3L136 32H16A16 16 0 0 0 0 48v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16zM53.2 467a48 48 0 0 0 47.9 45h245.8a48 48 0 0 0 47.9-45L416 128H32z"></path>
@@ -218,6 +218,16 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
           onImported={handleImported}
         />
       )}
+
+      <ConfirmModal
+        isOpen={!!specialPriceToDelete}
+        onClose={() => setSpecialPriceToDelete(null)}
+        onConfirm={async () => { if (specialPriceToDelete) await handleDeleteSpecialPrice(specialPriceToDelete); }}
+        title={t('admin.users.detail.delete_special_price')}
+        message={t('admin.users.detail.confirm_delete_special_price')}
+        confirmLabel={t('common.delete')}
+        variant="danger"
+      />
     </div>
   );
 };

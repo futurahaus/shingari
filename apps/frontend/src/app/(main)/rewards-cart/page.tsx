@@ -74,7 +74,7 @@ const RewardsCartPage = () => {
 
     } catch (err: any) {
       console.error('Redemption error:', err);
-      const errorMessage = err.response?.data?.message || 'Error al procesar el canje. Inténtalo de nuevo.';
+      const errorMessage = err.response?.data?.message || t('products.error_processing_redemption');
       setError(errorMessage);
 
       // If it's a points error, refresh points data

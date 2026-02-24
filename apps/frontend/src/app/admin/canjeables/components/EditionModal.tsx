@@ -69,15 +69,15 @@ export const EditionModal: React.FC<EditionModalProps> = ({
     const newErrors: Record<string, string> = {};
 
     if (formData.name !== undefined && !formData.name.trim()) {
-      newErrors.name = 'El nombre es requerido';
+      newErrors.name = t('admin.rewards.modals.edit.name_required');
     }
 
     if (formData.points_cost !== undefined && formData.points_cost <= 0) {
-      newErrors.points_cost = 'El costo en puntos debe ser mayor a 0';
+      newErrors.points_cost = t('admin.rewards.modals.edit.points_required');
     }
 
     if (formData.stock !== undefined && formData.stock < 0) {
-      newErrors.stock = 'El stock no puede ser negativo';
+      newErrors.stock = t('admin.rewards.modals.edit.stock_non_negative');
     }
 
     setErrors(newErrors);
@@ -126,8 +126,8 @@ export const EditionModal: React.FC<EditionModalProps> = ({
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Error al subir imagen: ${response.status} ${response.statusText} - ${errorText}`);
+      await response.text(); // Consume body
+      throw new Error(t('admin.rewards.modals.edit.error_upload_image'));
     }
 
     const result = await response.json();
@@ -150,7 +150,7 @@ export const EditionModal: React.FC<EditionModalProps> = ({
           imageUrl = await uploadImageToSupabase(selectedFile);
           setFormData(prev => ({ ...prev, image_url: imageUrl }));
         } catch {
-          showError('Error', 'Error al subir la imagen');
+          showError(t('common.error'), t('admin.rewards.modals.edit.error_upload_image'));
           setUploadingImage(false);
           return;
         }
@@ -169,7 +169,7 @@ export const EditionModal: React.FC<EditionModalProps> = ({
       onClose();
     } catch (error) {
       console.error('Error updating reward:', error);
-      setErrors({ submit: 'Error al actualizar el canjeable' });
+      setErrors({ submit: t('admin.rewards.modals.edit.error_updating') });
     } finally {
       setIsSubmitting(false);
       setUploadingImage(false);
@@ -308,13 +308,13 @@ export const EditionModal: React.FC<EditionModalProps> = ({
                     type="button"
                     className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-500 hover:text-white text-gray-700 text-xs z-10 cursor-pointer"
                     onClick={handleRemoveCurrentImage}
-                    title="Eliminar imagen actual"
+                    title={t('admin.rewards.modals.edit.remove_current_image')}
                   >
                     <FaTimes size={12} />
                   </button>
                 </div>
                 <span className="mt-2 text-sm text-black font-medium text-center leading-tight">
-                  Imagen actual
+                  {t('admin.rewards.modals.edit.current_image')}
                 </span>
               </div>
             )}
@@ -323,7 +323,7 @@ export const EditionModal: React.FC<EditionModalProps> = ({
               <Button
                 onPress={handleFileButtonClick}
                 type="primary-admin"
-                text={currentImageUrl && !previewUrl ? "Cambiar imagen" : t('admin.rewards.modals.create.select_file')}
+                text={currentImageUrl && !previewUrl ? t('admin.rewards.modals.edit.change_image') : t('admin.rewards.modals.create.select_file')}
                 testID="select-file-button"
                 inline
                 htmlType="button"
@@ -360,13 +360,13 @@ export const EditionModal: React.FC<EditionModalProps> = ({
                     type="button"
                     className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-500 hover:text-white text-gray-700 text-xs z-10 cursor-pointer"
                     onClick={handleRemoveImage}
-                    title="Eliminar imagen nueva"
+                    title={t('admin.rewards.modals.edit.remove_new_image')}
                   >
                     <FaTimes size={12} />
                   </button>
                 </div>
                 <span className="mt-2 text-sm text-black font-medium text-center leading-tight">
-                  Nueva imagen
+                  {t('admin.rewards.modals.edit.new_image')}
                 </span>
               </div>
             )}

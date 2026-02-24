@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { api } from '@/lib/api';
+import { useTranslation } from '@/contexts/I18nContext';
 
 interface RoleSelectionModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ export default function RoleSelectionModal({
   onRoleSelected,
   userId
 }: RoleSelectionModalProps) {
+  const { t } = useTranslation();
   const [selectedRole, setSelectedRole] = useState<'consumer' | 'business' | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +35,7 @@ export default function RoleSelectionModal({
       onRoleSelected(role);
     } catch (err) {
       console.error('Error assigning role:', err);
-      setError(err instanceof Error ? err.message : 'Error al asignar el rol');
+      setError(err instanceof Error ? err.message : t('auth.role_selection.error'));
     } finally {
       setIsLoading(false);
     }
@@ -46,10 +48,10 @@ export default function RoleSelectionModal({
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            ¡Bienvenido! Por favor selecciona tu rol
+            {t('auth.role_selection.title')}
           </h2>
           <p className="text-gray-600 mb-6">
-            Esto nos ayudará a personalizar tu experiencia. Puedes cambiar esto más tarde en la configuración de tu perfil.
+            {t('auth.role_selection.subtitle')}
           </p>
 
           {error && (
@@ -75,7 +77,7 @@ export default function RoleSelectionModal({
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Consumidor Final</h3>
+                  <h3 className="font-semibold text-gray-900">{t('auth.role_selection.consumer')}</h3>
                   {/* <p className="text-sm text-gray-600">Quiero navegar y comprar productos</p> */}
                 </div>
               </div>
@@ -97,7 +99,7 @@ export default function RoleSelectionModal({
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">Empresa</h3>
+                  <h3 className="font-semibold text-gray-900">{t('auth.role_selection.business')}</h3>
                   {/* <p className="text-sm text-gray-600">Quiero vender productos y gestionar mi negocio</p> */}
                 </div>
               </div>
@@ -107,7 +109,7 @@ export default function RoleSelectionModal({
           {isLoading && (
             <div className="mt-4 flex items-center justify-center">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-red-500"></div>
-              <span className="ml-2 text-sm text-gray-600">Asignando rol...</span>
+              <span className="ml-2 text-sm text-gray-600">{t('auth.role_selection.assigning')}</span>
             </div>
           )}
         </div>

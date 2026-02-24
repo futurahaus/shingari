@@ -50,15 +50,15 @@ export const CreationModal: React.FC<CreationModalProps> = ({
     const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'El nombre es requerido';
+      newErrors.name = t('admin.rewards.modals.create.name_required');
     }
 
     if (formData.points_cost <= 0) {
-      newErrors.points_cost = 'El costo en puntos debe ser mayor a 0';
+      newErrors.points_cost = t('admin.rewards.modals.create.points_required');
     }
 
     if (formData.stock !== undefined && formData.stock < 0) {
-      newErrors.stock = 'El stock no puede ser negativo';
+      newErrors.stock = t('admin.rewards.modals.create.stock_non_negative');
     }
 
     setErrors(newErrors);
@@ -102,7 +102,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Error al subir imagen: ${response.status} ${response.statusText} - ${errorText}`);
+      throw new Error(t('admin.rewards.modals.create.error_upload_image', { status: response.status, statusText: response.statusText, error: errorText }));
     }
 
     const result = await response.json();
@@ -125,7 +125,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
           imageUrl = await uploadImageToSupabase(selectedFile);
           setFormData(prev => ({ ...prev, image_url: imageUrl }));
         } catch {
-          showError('Error', 'Error al subir la imagen');
+          showError(t('common.error'), t('admin.rewards.modals.create.error_upload_image'));
           setUploadingImage(false);
           return;
         }
@@ -159,18 +159,18 @@ export const CreationModal: React.FC<CreationModalProps> = ({
       console.error('Error creating reward:', error);
 
       // Try to extract more specific error message
-      let errorMessage = 'Error al crear el canjeable';
+      let errorMessage = t('admin.rewards.modals.create.error_creating');
 
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error.message) {
         errorMessage = error.message;
       } else if (error.response?.status === 401) {
-        errorMessage = 'No autorizado. Por favor, inicia sesión nuevamente.';
+        errorMessage = t('errors.unauthorized');
       } else if (error.response?.status === 400) {
-        errorMessage = 'Datos inválidos. Por favor, verifica la información.';
+        errorMessage = t('admin.rewards.modals.create.invalid_data');
       } else if (error.response?.status === 500) {
-        errorMessage = 'Error del servidor. Por favor, inténtalo más tarde.';
+        errorMessage = t('admin.rewards.modals.create.server_error');
       }
 
       setErrors({ submit: errorMessage });
@@ -298,7 +298,7 @@ export const CreationModal: React.FC<CreationModalProps> = ({
                     type="button"
                     className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 hover:bg-red-500 hover:text-white text-gray-700 text-xs z-10 cursor-pointer"
                     onClick={handleRemoveImage}
-                    title="Eliminar imagen"
+                    title={t('admin.rewards.modals.create.remove_image')}
                   >
                     <FaTimes size={12} />
                   </button>

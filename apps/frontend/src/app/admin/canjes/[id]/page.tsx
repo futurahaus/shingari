@@ -53,17 +53,17 @@ export default function RedemptionDetailPage() {
       const foundRedemption = data.data.find((r: Redemption) => r.id === parseInt(redemptionId));
 
       if (!foundRedemption) {
-        throw new Error('Canje no encontrado');
+        throw new Error(t('redemption_detail.canje_not_found'));
       }
 
       setRedemption(foundRedemption);
     } catch (err) {
       console.error('Error fetching redemption detail:', err);
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : t('errors.unknown'));
     } finally {
       setLoading(false);
     }
-  }, [redemptionId]);
+  }, [redemptionId, t]);
 
   useEffect(() => {
     if (redemptionId) {
@@ -126,7 +126,7 @@ export default function RedemptionDetailPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Canje no encontrado
+            {t('redemption_detail.canje_not_found')}
           </h3>
           <Link
             href="/admin/canjes"
@@ -183,7 +183,7 @@ export default function RedemptionDetailPage() {
             </h2>
             <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
               <div>
-                <dt className="text-sm font-medium text-gray-500">ID del Canje</dt>
+                <dt className="text-sm font-medium text-gray-500">{t('redemption_detail.redemption_id')}</dt>
                 <dd className="mt-1 text-sm text-gray-900">#{redemption.id}</dd>
               </div>
               <div>
@@ -222,16 +222,16 @@ export default function RedemptionDetailPage() {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Recompensa
+                        {t('redemption_detail.reward')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         {t('dashboard.quantity')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Puntos por Unidad
+                        {t('redemption_detail.points_per_unit')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Total
+                        {t('redemption_detail.total')}
                       </th>
                     </tr>
                   </thead>
@@ -274,7 +274,7 @@ export default function RedemptionDetailPage() {
             </h2>
             <dl className="space-y-4">
               <div>
-                <dt className="text-sm font-medium text-gray-500">ID de Usuario</dt>
+                <dt className="text-sm font-medium text-gray-500">{t('redemption_detail.user_id')}</dt>
                 <dd className="mt-1 text-sm text-gray-900 font-mono">{redemption.user_id}</dd>
               </div>
             </dl>
@@ -284,24 +284,24 @@ export default function RedemptionDetailPage() {
           <div className="bg-white shadow rounded-lg p-6">
             <h2 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
               <Calendar className="w-5 h-5 mr-2 text-gray-400" />
-              Resumen
+              {t('redemption_detail.summary')}
             </h2>
             <dl className="space-y-4">
               <div className="flex justify-between">
-                <dt className="text-sm font-medium text-gray-500">Total de Artículos</dt>
+                <dt className="text-sm font-medium text-gray-500">{t('redemption_detail.total_items')}</dt>
                 <dd className="text-sm text-gray-900">
                   {redemption.lines.reduce((sum, line) => sum + line.quantity, 0)}
                 </dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-sm font-medium text-gray-500">Total de Puntos</dt>
+                <dt className="text-sm font-medium text-gray-500">{t('redemption_detail.total_points_label')}</dt>
                 <dd className="text-sm font-medium text-gray-900">
                   {formatPoints(redemption.total_points)} pts
                 </dd>
               </div>
               <div className="border-t pt-4">
                 <div className="flex justify-between">
-                  <dt className="text-base font-medium text-gray-900">Total Final</dt>
+                  <dt className="text-base font-medium text-gray-900">{t('redemption_detail.final_total')}</dt>
                   <dd className="text-base font-bold text-gray-900">
                     {formatPoints(redemption.total_points)} pts
                   </dd>

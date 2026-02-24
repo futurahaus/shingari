@@ -28,6 +28,12 @@ export class OrderLineResponseDto {
 
   @ApiProperty({ description: 'URL de la imagen del producto', required: false })
   product_image?: string;
+
+  @ApiProperty({ description: 'SKU del producto', required: false })
+  product_sku?: string;
+
+  @ApiProperty({ description: 'IVA del producto (porcentaje)', required: false })
+  product_iva?: number;
 }
 
 export class OrderAddressResponseDto {
@@ -100,6 +106,12 @@ export class OrderResponseDto {
 
   @ApiProperty({ description: 'Nombre comercial del usuario' })
   user_trade_name?: string;
+
+  @ApiProperty({ description: 'ID interno del cliente', required: false })
+  user_internal_id?: string;
+
+  @ApiProperty({ description: 'Si el usuario es empresa (precios sin IVA)', required: false })
+  user_is_business?: boolean;
 
   @ApiProperty({ 
     description: 'Estado de la orden',

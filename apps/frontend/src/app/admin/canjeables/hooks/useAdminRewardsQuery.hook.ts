@@ -2,6 +2,7 @@ import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
+import { useTranslation } from '@/contexts/I18nContext';
 import { RewardsResponse, CreateRewardDto, UpdateRewardDto, Reward } from '../interfaces/reward.interfaces';
 
 // Function to fetch rewards with pagination, search, and sorting
@@ -49,6 +50,7 @@ export const useAdminRewards = ({
   enabled = true 
 }: UseAdminRewardsOptions) => {
   const { showError } = useNotificationContext();
+  const { t } = useTranslation();
 
   const {
     data,
@@ -67,11 +69,11 @@ export const useAdminRewards = ({
   // Handle errors with useEffect
   React.useEffect(() => {
     if (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
-      showError('Error', `Error al cargar canjeables: ${errorMsg}`);
+      const errorMsg = error instanceof Error ? error.message : t('errors.unknown');
+      showError(t('common.error'), t('admin.rewards.hooks.load_error', { error: errorMsg }));
       console.error('Error fetching admin rewards:', error);
     }
-  }, [error, showError]);
+  }, [error, showError, t]);
 
   return {
     rewards: data?.rewards || [],
@@ -80,7 +82,7 @@ export const useAdminRewards = ({
     lastPage: data?.lastPage || 1,
     limit: data?.limit || limit,
     loading,
-    error: error ? (error instanceof Error ? error.message : 'Error desconocido') : null,
+    error: error ? (error instanceof Error ? error.message : t('errors.unknown')) : null,
     refetch
   };
 };
@@ -89,6 +91,7 @@ export const useAdminRewards = ({
 export const useCreateReward = () => {
   const queryClient = useQueryClient();
   const { showSuccess, showError } = useNotificationContext();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async (rewardData: CreateRewardDto) => {
@@ -96,13 +99,12 @@ export const useCreateReward = () => {
       return response;
     },
     onSuccess: () => {
-      // Invalidate and refetch rewards queries
       queryClient.invalidateQueries({ queryKey: ['admin-rewards'] });
-      showSuccess('Éxito', 'Canjeable creado exitosamente');
+      showSuccess(t('common.success'), t('admin.rewards.hooks.create_success'));
     },
     onError: (error: Error) => {
-      const errorMsg = error.message || 'Error desconocido';
-      showError('Error', `Error al crear canjeable: ${errorMsg}`);
+      const errorMsg = error.message || t('errors.unknown');
+      showError(t('common.error'), t('admin.rewards.hooks.create_error', { error: errorMsg }));
       console.error('Error creating reward:', error);
     },
   });
@@ -112,6 +114,7 @@ export const useCreateReward = () => {
 export const useUpdateReward = () => {
   const queryClient = useQueryClient();
   const { showSuccess, showError } = useNotificationContext();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async ({ id, rewardData }: { id: number; rewardData: UpdateRewardDto }) => {
@@ -119,13 +122,12 @@ export const useUpdateReward = () => {
       return response;
     },
     onSuccess: () => {
-      // Invalidate and refetch rewards queries
       queryClient.invalidateQueries({ queryKey: ['admin-rewards'] });
-      showSuccess('Éxito', 'Canjeable actualizado exitosamente');
+      showSuccess(t('common.success'), t('admin.rewards.hooks.update_success'));
     },
     onError: (error: Error) => {
-      const errorMsg = error.message || 'Error desconocido';
-      showError('Error', `Error al actualizar canjeable: ${errorMsg}`);
+      const errorMsg = error.message || t('errors.unknown');
+      showError(t('common.error'), t('admin.rewards.hooks.update_error', { error: errorMsg }));
       console.error('Error updating reward:', error);
     },
   });
@@ -135,6 +137,7 @@ export const useUpdateReward = () => {
 export const useDeleteReward = () => {
   const queryClient = useQueryClient();
   const { showSuccess, showError } = useNotificationContext();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async (id: number) => {
@@ -142,13 +145,12 @@ export const useDeleteReward = () => {
       return id;
     },
     onSuccess: () => {
-      // Invalidate and refetch rewards queries
       queryClient.invalidateQueries({ queryKey: ['admin-rewards'] });
-      showSuccess('Éxito', 'Canjeable eliminado exitosamente');
+      showSuccess(t('common.success'), t('admin.rewards.hooks.delete_success'));
     },
     onError: (error: Error) => {
-      const errorMsg = error.message || 'Error desconocido';
-      showError('Error', `Error al eliminar canjeable: ${errorMsg}`);
+      const errorMsg = error.message || t('errors.unknown');
+      showError(t('common.error'), t('admin.rewards.hooks.delete_error', { error: errorMsg }));
       console.error('Error deleting reward:', error);
     },
   });

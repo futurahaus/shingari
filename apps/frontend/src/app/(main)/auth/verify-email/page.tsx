@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import RoleSelectionModal from '@/components/auth/RoleSelectionModal';
+import { useTranslation } from '@/contexts/I18nContext';
 
 interface User {
   id: string;
@@ -16,6 +17,7 @@ interface User {
 export default function VerifyEmailPage() {
   const router = useRouter();
   const { login } = useAuth();
+  const { t } = useTranslation();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
   const [isExpired, setIsExpired] = useState(false);
@@ -44,7 +46,7 @@ export default function VerifyEmailPage() {
 
         if (!accessToken || !refreshToken) {
           setStatus('error');
-          setMessage('No verification parameters found. Please check your verification link and try again.');
+          setMessage(t('auth.verify_email.error_no_params'));
           return;
         }
         // Call NestJS backend directly with access token as query parameter
@@ -66,7 +68,7 @@ export default function VerifyEmailPage() {
             localStorage.removeItem('refreshToken');
             localStorage.removeItem('user');
           }
-          throw new Error(user || 'Failed to verify email');
+          throw new Error(typeof user === 'object' && user?.message ? user.message : t('auth.verify_email.error_verify'));
         }
 
         if (user) {
@@ -79,7 +81,7 @@ export default function VerifyEmailPage() {
 
               setVerifiedUser(user);
               setStatus('success');
-              setMessage('Email verified successfully!');
+              setMessage(t('auth.verify_email.success'));
               
               // Check if user already has a role assigned
               const hasRole = user.roles && user.roles.length > 0 && 
@@ -107,13 +109,13 @@ export default function VerifyEmailPage() {
                 }
               }
           } catch {
-            throw new Error('Failed to complete authentication. Please try logging in manually.');
+            throw new Error(t('auth.verify_email.error_complete'));
           }
         }
 
       } catch (error) {
         setStatus('error');
-        setMessage(error instanceof Error ? error.message : 'Failed to verify email');
+        setMessage(error instanceof Error ? error.message : t('auth.verify_email.error_verify'));
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
@@ -121,11 +123,11 @@ export default function VerifyEmailPage() {
     };
 
     verifyEmail();
-  }, [login, router]);
+  }, [login, router, t]);
 
   const handleRoleSelected = (role: string) => {
     setShowRoleModal(false);
-    setMessage(`¡Rol ${role === 'consumer' ? 'Consumidor Final' : 'Empresa'} asignado exitosamente! Redirigiendo...`);
+    setMessage(t('auth.verify_email.role_assigned', { role: role === 'consumer' ? t('auth.verify_email.role_consumer') : t('auth.verify_email.role_business') }));
     
     // Redirect based on role
     if (role === 'consumer') {
@@ -147,13 +149,13 @@ export default function VerifyEmailPage() {
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
             <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-              Email Verification
+              {t('auth.verify_email.title')}
             </h2>
             <div className="mt-4">
               {status === 'loading' && (
                 <div className="flex flex-col items-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-                  <p className="mt-2 text-sm text-gray-600">Verifying your email...</p>
+                  <p className="mt-2 text-sm text-gray-600">{t('auth.verify_email.verifying')}</p>
                 </div>
               )}
               {status === 'success' && (
@@ -183,14 +185,14 @@ export default function VerifyEmailPage() {
                       {isExpired && (
                         <div className="mt-2">
                           <p className="text-sm text-red-700">
-                            The verification link has expired. Please request a new one by:
+                            {t('auth.verify_email.link_expired')}
                           </p>
                           <div className="mt-3">
                             <Link
                               href="/login"
                               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                             >
-                              Go to Login
+                              {t('auth.verify_email.go_to_login')}
                             </Link>
                           </div>
                         </div>

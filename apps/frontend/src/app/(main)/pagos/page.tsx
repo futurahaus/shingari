@@ -7,11 +7,13 @@ import { api } from '@/lib/api';
 import { Button } from '@/app/ui/components/Button';
 import { useTranslation } from '@/contexts/I18nContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNotificationContext } from '@/contexts/NotificationContext';
 
 export default function PagosPage() {
   const { cart, clearCart } = useCart();
   const router = useRouter();
   const { t, locale } = useTranslation();
+  const { showWarning, showError } = useNotificationContext();
   const { user } = useAuth();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
     const [userPoints, setUserPoints] = useState<number>(0);
@@ -176,11 +178,11 @@ export default function PagosPage() {
 
   const handlePaymentConfirmation = async () => {
     if (!selectedPaymentMethod) {
-      alert(t('payment.select_payment_method'));
+      showWarning(t('common.warning'), t('payment.select_payment_method'));
       return;
     }
     if (selectedPaymentMethod === 'card' && (!cardData.cardNumber || !cardData.expiry || !cardData.cvc || !cardData.cardholderName || !cardData.id)) {
-      alert(t('payment.complete_card_fields'));
+      showWarning(t('common.warning'), t('payment.complete_card_fields'));
       return;
     }
 
@@ -241,7 +243,7 @@ export default function PagosPage() {
 
       router.push(`/congrats?orderId=${order.id}`);
     } catch {
-      alert(t('payment.payment_error'));
+      showError(t('common.error'), t('payment.payment_error'));
     } finally {
       setIsLoading(false);
     }

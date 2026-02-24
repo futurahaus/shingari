@@ -22,7 +22,9 @@ export async function exportProductsToExcel(): Promise<void> {
   const accessToken = getAccessToken();
 
   if (!accessToken) {
-    throw new Error("No se encontró token de autenticación");
+    const err = new Error("No se encontró token de autenticación");
+    (err as Error & { translationKey?: string }).translationKey = "admin.products.export.no_token";
+    throw err;
   }
 
   const response = await fetch(`${API_BASE_URL}/products/admin/export`, {
@@ -34,12 +36,19 @@ export async function exportProductsToExcel(): Promise<void> {
 
   if (!response.ok) {
     if (response.status === 401) {
-      throw new Error("No autorizado. Por favor, inicia sesión nuevamente.");
+      const err = new Error("No autorizado. Por favor, inicia sesión nuevamente.");
+      (err as Error & { translationKey?: string }).translationKey = "admin.products.export.unauthorized";
+      throw err;
     }
     if (response.status === 403) {
-      throw new Error("No tienes permisos para exportar productos.");
+      const err = new Error("No tienes permisos para exportar productos.");
+      (err as Error & { translationKey?: string }).translationKey = "errors.forbidden";
+      throw err;
     }
-    throw new Error(`Error al exportar productos: ${response.statusText}`);
+    const err = new Error(`Error al exportar productos: ${response.statusText}`);
+    (err as Error & { translationKey?: string }).translationKey = "admin.products.export.export_error";
+    (err as Error & { translationParams?: Record<string, string> }).translationParams = { statusText: response.statusText };
+    throw err;
   }
 
   // Obtener el nombre del archivo del header Content-Disposition

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
+import * as XLSX from 'xlsx';
 import { useNotificationContext } from '@/contexts/NotificationContext';
+import { useTranslation } from '@/contexts/I18nContext';
 
 interface ImportSpecialPricesModalProps {
   userId: string;
@@ -8,6 +10,7 @@ interface ImportSpecialPricesModalProps {
 }
 
 export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> = ({ userId, onClose, onImported }) => {
+  const { t } = useTranslation();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [processedFile, setProcessedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -24,9 +27,12 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
     }
 
     const csvMimeTypes = ['text/csv', 'application/csv'];
+    const excelMimeTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+    const isCsv = csvMimeTypes.includes(file.type) || file.name.toLowerCase().endsWith('.csv');
+    const isExcel = excelMimeTypes.includes(file.type) || file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls');
 
-    if (!csvMimeTypes.includes(file.type) && !file.name.toLowerCase().endsWith('.csv')) {
-      setUploadError('Este importador solo acepta CSV (.csv)');
+    if (!isCsv && !isExcel) {
+      setUploadError(t('admin.users.import_special_prices.invalid_format'));
       setSelectedFile(null);
       setProcessedFile(null);
       return;
@@ -36,128 +42,140 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
     setSelectedFile(file);
     setUploadResult(null);
 
-    // Read and transform CSV to inject USER_ID column when missing
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const text = String(reader.result || '');
-        const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
-        if (lines.length === 0) {
-          setUploadError('El archivo CSV está vacío');
-          showError('Importación', 'El archivo CSV está vacío', 0);
-          setProcessedFile(null);
-          return;
-        }
-
-        // Parse CSV properly handling quoted fields
-        const parseCSVLine = (line: string): string[] => {
-          const result: string[] = [];
-          let current = '';
-          let inQuotes = false;
-
-          for (let i = 0; i < line.length; i++) {
-            const char = line[i];
-
-            if (char === '"') {
-              inQuotes = !inQuotes;
-            } else if (char === ',' && !inQuotes) {
-              result.push(current.trim());
-              current = '';
-            } else {
-              current += char;
-            }
-          }
-          result.push(current.trim());
-          return result;
-        };
-
-        const originalHeader = parseCSVLine(lines[0]);
-        const hasUserId = originalHeader.some(h => h.toUpperCase() === 'USER_ID');
-
-        // Always enforce our header order and overwrite USER_ID with current user
-        const newHeader: string[] = ['SKU', 'USER_ID', 'PRECIO', 'VALIDO_DESDE', 'VALIDO_HASTA', 'ESTADO'];
-
-        // Helper function to escape CSV values (add quotes if needed)
-        const escapeCSVValue = (value: string): string => {
-          // If value contains comma, newline, or quote, wrap it in quotes
-          if (value.includes(',') || value.includes('\n') || value.includes('"')) {
-            // Escape existing quotes by doubling them
-            return `"${value.replace(/"/g, '""')}"`;
-          }
-          return value;
-        };
-
-        const dataLines = lines.slice(1);
-        const newLines = [newHeader.join(',')];
-        for (const line of dataLines) {
-          const cols = parseCSVLine(line);
-          if (cols.every(c => c.trim() === '')) continue;
-
-          // Map input based on whether original provided USER_ID
-          if (hasUserId) {
-            // Expected input with USER_ID: [SKU, USER_ID, PRECIO, VALIDO_DESDE, VALIDO_HASTA, ESTADO]
-            const sku = escapeCSVValue((cols[0] || '').trim());
-            const precio = escapeCSVValue((cols[2] || '').trim());
-            const validoDesde = escapeCSVValue((cols[3] || '').trim());
-            const validoHasta = escapeCSVValue((cols[4] || '').trim());
-            const estado = escapeCSVValue((cols[5] || '').trim());
-            const row = [sku, userId, precio, validoDesde, validoHasta, estado].join(',');
-            newLines.push(row);
-          } else {
-            // Expected input without USER_ID: [SKU, PRECIO, VALIDO_DESDE, VALIDO_HASTA, ESTADO]
-            const sku = escapeCSVValue((cols[0] || '').trim());
-            const precio = escapeCSVValue((cols[1] || '').trim());
-            const validoDesde = escapeCSVValue((cols[2] || '').trim());
-            const validoHasta = escapeCSVValue((cols[3] || '').trim());
-            const estado = escapeCSVValue((cols[4] || '').trim());
-            const row = [sku, userId, precio, validoDesde, validoHasta, estado].join(',');
-            newLines.push(row);
-          }
-        }
-
-        const csvOut = newLines.join('\n');
-        const blob = new Blob([csvOut], { type: 'text/csv' });
-        const newFile = new File([blob], file.name.replace(/\.csv$/i, '') + '_with_user.csv', { type: 'text/csv' });
-        setProcessedFile(newFile);
-      } catch {
-        setUploadError('No se pudo procesar el CSV');
-        showError('Importación', 'No se pudo procesar el CSV', 0);
-        setProcessedFile(null);
+    const excelDateToIso = (c: unknown): string => {
+      if (c == null || c === '') return '';
+      if (typeof c === 'number' && c >= 1 && c < 100000) {
+        const d = new Date((c - 25569) * 86400 * 1000);
+        return isNaN(d.getTime()) ? String(c) : d.toISOString().slice(0, 10);
       }
+      return String(c ?? '');
     };
-    reader.readAsText(file);
+
+    const transformRowsToCsv = (data: unknown[][], dateColIndices?: number[]): string => {
+      if (data.length === 0) return '';
+      const originalHeader = (data[0] || []).map(h => String(h || '').trim());
+      const hasUserId = originalHeader.some(h => h.toUpperCase() === 'USER_ID');
+      const newHeader = ['SKU', 'USER_ID', 'PRECIO', 'VALIDO_DESDE', 'VALIDO_HASTA', 'ESTADO'];
+      const escapeCSVValue = (value: string): string => {
+        if (value.includes(',') || value.includes('\n') || value.includes('"')) {
+          return `"${value.replace(/"/g, '""')}"`;
+        }
+        return value;
+      };
+      const newLines = [newHeader.join(',')];
+      for (let i = 1; i < data.length; i++) {
+        const rawRow = data[i];
+        const cols = (dateColIndices
+          ? rawRow.map((c, ci) => (dateColIndices.includes(ci) ? excelDateToIso(c) : String(c ?? '').trim()))
+          : rawRow.map(c => String(c ?? '').trim())
+        );
+        if (cols.every(c => c === '')) continue;
+        let sku: string; let precio: string; let validoDesde: string; let validoHasta: string; let estado: string;
+        if (hasUserId) {
+          sku = cols[0] || ''; precio = cols[2] || ''; validoDesde = cols[3] || ''; validoHasta = cols[4] || ''; estado = cols[5] || '';
+        } else {
+          sku = cols[0] || ''; precio = cols[1] || ''; validoDesde = cols[2] || ''; validoHasta = cols[3] || ''; estado = cols[4] || '';
+        }
+        newLines.push([escapeCSVValue(sku), userId, escapeCSVValue(precio), escapeCSVValue(validoDesde), escapeCSVValue(validoHasta), escapeCSVValue(estado)].join(','));
+      }
+      return newLines.join('\n');
+    };
+
+    if (isExcel) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const buffer = reader.result as ArrayBuffer;
+          const workbook = XLSX.read(buffer, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const data: unknown[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+          if (!data.length || data.every(row => row.every(c => !String(c).trim()))) {
+            const msg = t('admin.users.import_special_prices.file_empty');
+            setUploadError(msg);
+            showError(t('admin.users.import_special_prices.import_title'), msg, 0);
+            setProcessedFile(null);
+            return;
+          }
+          const header = (data[0] || []).map(h => String(h || '').trim().toUpperCase());
+          const dateColIndices = header
+            .map((h, i) => (h === 'VALIDO_DESDE' || h === 'VALIDO DESDE' || h === 'VALIDO_HASTA' || h === 'VALIDO HASTA' ? i : -1))
+            .filter(i => i >= 0);
+          const csvOut = transformRowsToCsv(data, dateColIndices);
+          const blob = new Blob([csvOut], { type: 'text/csv' });
+          const newFile = new File([blob], file.name.replace(/\.(xlsx|xls)$/i, '') + '_with_user.csv', { type: 'text/csv' });
+          setProcessedFile(newFile);
+        } catch {
+          const msg = t('admin.users.import_special_prices.process_error');
+          setUploadError(msg);
+          showError(t('admin.users.import_special_prices.import_title'), msg, 0);
+          setProcessedFile(null);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const text = String(reader.result || '').replace(/^\uFEFF/, '');
+          const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+          if (lines.length === 0) {
+            const msg = t('admin.users.import_special_prices.file_empty');
+            setUploadError(msg);
+            showError(t('admin.users.import_special_prices.import_title'), msg, 0);
+            setProcessedFile(null);
+            return;
+          }
+          const delimiter = lines[0].includes(';') ? ';' : ',';
+          const parseCSVLine = (line: string): string[] => {
+            const result: string[] = [];
+            let current = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+              const char = line[i];
+              if (char === '"') inQuotes = !inQuotes;
+              else if (char === delimiter && !inQuotes) { result.push(current.trim()); current = ''; }
+              else current += char;
+            }
+            result.push(current.trim());
+            return result;
+          };
+          const data = lines.map(l => parseCSVLine(l));
+          const csvOut = transformRowsToCsv(data);
+          const blob = new Blob([csvOut], { type: 'text/csv' });
+          const newFile = new File([blob], file.name.replace(/\.csv$/i, '') + '_with_user.csv', { type: 'text/csv' });
+          setProcessedFile(newFile);
+        } catch {
+          const msg = t('admin.users.import_special_prices.process_error');
+          setUploadError(msg);
+          showError(t('admin.users.import_special_prices.import_title'), msg, 0);
+          setProcessedFile(null);
+        }
+      };
+      reader.readAsText(file);
+    }
   };
 
   const handleDownloadTemplate = () => {
-    const header = ['SKU', 'PRECIO', 'VALIDO_DESDE', 'VALIDO_HASTA', 'ESTADO'];
-    const sampleData = [
+    const data = [
+      ['SKU', 'PRECIO', 'VALIDO_DESDE', 'VALIDO_HASTA', 'ESTADO'],
       ['C2391', '10.50', '2025-01-01', '2025-12-31', 'activo'],
       ['C2392', '15.75', '2025-01-01', '2025-12-31', 'activo'],
-      ['C2393', '8.25', '2025-01-01', '2025-12-31', 'activo']
+      ['C2393', '8.25', '2025-01-01', '2025-12-31', 'activo'],
     ];
-
-    // Create CSV with simple formatting
-    const csvContent = [
-      header.join(','),
-      ...sampleData.map(row => row.join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'plantilla_precios_especiales.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    showSuccess('Plantilla descargada', 'Se ha descargada la plantilla CSV correctamente', 0);
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    ws['!cols'] = [
+      { wch: 12 }, { wch: 10 }, { wch: 14 }, { wch: 14 }, { wch: 10 }
+    ];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Plantilla');
+    XLSX.writeFile(wb, 'plantilla_precios_especiales.xlsx');
+    showSuccess(t('admin.users.import_special_prices.template_downloaded'), t('admin.users.import_special_prices.template_success'), 0);
   };
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      setUploadError('Seleccione un archivo primero');
+      setUploadError(t('admin.users.import_special_prices.select_first'));
       return;
     }
 
@@ -246,78 +264,78 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
         
         if (errorsByType.productNotFound.length > 0) {
           const skus = errorsByType.productNotFound.slice(0, 5).join(', ');
-          const more = errorsByType.productNotFound.length > 5 ? ` (+${errorsByType.productNotFound.length - 5} más)` : '';
-          errorMessages.push(`❌ Productos no encontrados: ${skus}${more}`);
+          const more = errorsByType.productNotFound.length > 5 ? t('admin.users.import_special_prices.plus_more', { count: errorsByType.productNotFound.length - 5 }) : '';
+          errorMessages.push(`❌ ${t('admin.users.import_special_prices.products_not_found')}: ${skus}${more}`);
         }
         
         if (errorsByType.userNotFound.length > 0) {
-          errorMessages.push(`❌ Usuario no válido: ${errorsByType.userNotFound.length} fila(s)`);
+          errorMessages.push(`❌ ${t('admin.users.import_special_prices.invalid_user')}: ${errorsByType.userNotFound.length} ${t('admin.users.import_special_prices.rows')}`);
         }
         
         if (errorsByType.invalidFields.length > 0) {
           const skus = errorsByType.invalidFields.slice(0, 3).join(', ');
-          const more = errorsByType.invalidFields.length > 3 ? ` (+${errorsByType.invalidFields.length - 3} más)` : '';
-          errorMessages.push(`⚠️ Campos inválidos: ${skus}${more}`);
+          const more = errorsByType.invalidFields.length > 3 ? t('admin.users.import_special_prices.plus_more', { count: errorsByType.invalidFields.length - 3 }) : '';
+          errorMessages.push(`⚠️ ${t('admin.users.import_special_prices.invalid_fields')}: ${skus}${more}`);
         }
         
         if (errorsByType.invalidDates.length > 0) {
           const skus = errorsByType.invalidDates.slice(0, 3).join(', ');
-          const more = errorsByType.invalidDates.length > 3 ? ` (+${errorsByType.invalidDates.length - 3} más)` : '';
-          errorMessages.push(`📅 Fechas inválidas: ${skus}${more}`);
+          const more = errorsByType.invalidDates.length > 3 ? t('admin.users.import_special_prices.plus_more', { count: errorsByType.invalidDates.length - 3 }) : '';
+          errorMessages.push(`📅 ${t('admin.users.import_special_prices.invalid_dates')}: ${skus}${more}`);
         }
         
         if (errorsByType.duplicates.length > 0) {
           const skus = errorsByType.duplicates.slice(0, 5).join(', ');
-          const more = errorsByType.duplicates.length > 5 ? ` (+${errorsByType.duplicates.length - 5} más)` : '';
-          errorMessages.push(`ℹ️ Duplicados omitidos: ${skus}${more}`);
+          const more = errorsByType.duplicates.length > 5 ? t('admin.users.import_special_prices.plus_more', { count: errorsByType.duplicates.length - 5 }) : '';
+          errorMessages.push(`ℹ️ ${t('admin.users.import_special_prices.duplicates_skipped')}: ${skus}${more}`);
         }
         
         if (errorsByType.other.length > 0) {
           const skus = errorsByType.other.slice(0, 3).join(', ');
-          const more = errorsByType.other.length > 3 ? ` (+${errorsByType.other.length - 3} más)` : '';
-          errorMessages.push(`⚠️ Otros errores: ${skus}${more}`);
+          const more = errorsByType.other.length > 3 ? t('admin.users.import_special_prices.plus_more', { count: errorsByType.other.length - 3 }) : '';
+          errorMessages.push(`⚠️ ${t('admin.users.import_special_prices.other_errors')}: ${skus}${more}`);
         }
 
         // Show summary notification
-        const summaryParts = [`✅ Importados: ${result.success}`];
-        if (hasErrors) summaryParts.push(`❌ Errores: ${result.errors}`);
-        if (hasSkipped) summaryParts.push(`ℹ️ Omitidos: ${errorsByType.duplicates.length}`);
+        const summaryParts = [`✅ ${t('admin.users.import_special_prices.imported')}: ${result.success}`];
+        if (hasErrors) summaryParts.push(`❌ ${t('admin.users.import_special_prices.errors')}: ${result.errors}`);
+        if (hasSkipped) summaryParts.push(`ℹ️ ${t('admin.users.import_special_prices.omitted')}: ${errorsByType.duplicates.length}`);
         const summary = summaryParts.join(' | ');
         const details = errorMessages.join('\n');
         
         if (hasErrors) {
-          showWarning('Importación completada con errores', `${summary}\n\n${details}`, 0); // No desaparece automáticamente
+          showWarning(t('admin.users.import_special_prices.completed_with_errors'), `${summary}\n\n${details}`, 0); // No desaparece automáticamente
         } else {
-          showWarning('Importación completada', `${summary}\n\n${details}`, 0); // No desaparece automáticamente
+          showWarning(t('admin.users.import_special_prices.completed'), `${summary}\n\n${details}`, 0); // No desaparece automáticamente
         }
         
         // Show individual notifications for specific issues
         if (errorsByType.productNotFound.length > 0) {
           showError(
-            'Productos no encontrados', 
-            `${errorsByType.productNotFound.length} producto(s) no existen en el sistema. Verifica los SKUs e inténtalo de nuevo.`, 
+            t('admin.users.import_special_prices.products_not_found'), 
+            t('admin.users.import_special_prices.products_not_found_message', { count: errorsByType.productNotFound.length }), 
             0 // No desaparece automáticamente
           );
         }
         
         if (errorsByType.duplicates.length > 0 && !hasErrors) {
           showWarning(
-            'Descuentos duplicados omitidos',
-            `${errorsByType.duplicates.length} descuento(s) ya existían con los mismos valores y fueron omitidos.`,
+            t('admin.users.import_special_prices.duplicates_omitted'),
+            t('admin.users.import_special_prices.duplicates_omitted_message', { count: errorsByType.duplicates.length }),
             0 // No desaparece automáticamente
           );
         }
       } else if (result?.success > 0) {
-        showSuccess('✅ Importación completada', `${result.success} precio(s) especial(es) importado(s) correctamente`, 0); // No desaparece automáticamente
+        showSuccess(t('admin.users.import_special_prices.success_imported'), t('admin.users.import_special_prices.success_count', { count: result.success }), 0); // No desaparece automáticamente
       } else {
-        showWarning('Sin cambios', 'No se importaron registros', 0); // No desaparece automáticamente
+        showWarning(t('admin.users.import_special_prices.no_records'), t('admin.users.import_special_prices.no_records_message'), 0); // No desaparece automáticamente
       }
       // After successful upload, refresh parent list
       onImported();
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Error al subir el archivo';
+      const message = error instanceof Error ? error.message : t('admin.users.import_special_prices.upload_error');
       setUploadError(message);
-      showError('Error de importación', message, 0);
+      showError(t('admin.users.import_special_prices.error_import_title'), message, 0);
     } finally {
       setIsUploading(false);
     }
@@ -328,8 +346,8 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h3 className="text-lg font-semibold">Importar precios</h3>
-            <p className="text-sm text-gray-500">Usuario actual: <span className="font-mono">{userId}</span></p>
+            <h3 className="text-lg font-semibold">{t('admin.users.import_special_prices.title')}</h3>
+            <p className="text-sm text-gray-500">{t('admin.users.import_special_prices.current_user')} <span className="font-mono">{userId}</span></p>
           </div>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700 cursor-pointer">✕</button>
         </div>
@@ -337,16 +355,16 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
         <div className="space-y-4">
           <div>
             <label htmlFor="import-file" className="block text-sm font-medium text-gray-700 mb-2">
-              Seleccione archivo CSV
+              {t('admin.users.import_special_prices.select_file')}
             </label>
             <input
               id="import-file"
               type="file"
-              accept=".csv"
+              accept=".csv,.xlsx,.xls"
               onChange={handleFileChange}
               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointers"
             />
-            <p className="mt-1 text-xs text-gray-500">Formato permitido: CSV (.csv). El ID del usuario se agregará automáticamente.</p>
+            <p className="mt-1 text-xs text-gray-500">{t('admin.users.import_special_prices.format_info')}</p>
 
             <div className="mt-3">
               <button
@@ -356,7 +374,7 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                Descargar plantilla CSV
+                {t('admin.users.import_special_prices.download_template')}
               </button>
             </div>
           </div>
@@ -366,7 +384,7 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
             disabled={!selectedFile || isUploading}
             className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-2.5 px-4 rounded-md transition-colors cursor-pointer"
           >
-            {isUploading ? 'Procesando…' : 'Subir y procesar'}
+            {isUploading ? t('admin.users.import_special_prices.processing') : t('admin.users.import_special_prices.upload_button')}
           </button>
 
           {uploadError && (
@@ -379,11 +397,11 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div className="bg-white rounded-lg p-3">
-                  <p className="text-sm font-medium text-gray-900">Correctos</p>
+                  <p className="text-sm font-medium text-gray-900">{t('admin.users.import_special_prices.correct')}</p>
                   <p className="text-2xl font-bold text-green-600">{uploadResult.success}</p>
                 </div>
                 <div className="bg-white rounded-lg p-3">
-                  <p className="text-sm font-medium text-gray-900">Errores</p>
+                  <p className="text-sm font-medium text-gray-900">{t('admin.users.import_special_prices.errors')}</p>
                   <p className="text-2xl font-bold text-red-600">{uploadResult.errors}</p>
                 </div>
               </div>
@@ -393,10 +411,10 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
                   <table className="min-w-full divide-y divide-gray-200 text-sm">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fila</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.import_special_prices.row')}</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.import_special_prices.sku')}</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.import_special_prices.user')}</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.users.import_special_prices.status')}</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
@@ -417,7 +435,7 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
 
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
             <p className="text-xs text-amber-800">
-              Nota: no incluya la columna <span className="font-mono">USER_ID</span>. Se insertará automáticamente con el ID del usuario actual mostrado arriba.
+              {t('admin.users.import_special_prices.note_no_column')} <span className="font-mono">USER_ID</span>{t('admin.users.import_special_prices.note_auto_insert')}
             </p>
             <div className="mt-2 bg-white border border-gray-200 rounded">
               <table className="min-w-full text-xs font-mono">
@@ -445,7 +463,7 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
         </div>
 
         <div className="mt-6 flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 rounded border border-gray-200 text-gray-700 hover:bg-gray-50 cursor-pointer">Cerrar</button>
+          <button onClick={onClose} className="px-4 py-2 rounded border border-gray-200 text-gray-700 hover:bg-gray-50 cursor-pointer">{t('admin.users.import_special_prices.close')}</button>
         </div>
       </div>
     </div>

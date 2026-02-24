@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import Sidebar from '@/components/layout/Sidebar';
 import { useTranslation } from '@/contexts/I18nContext';
+import { useNotificationContext } from '@/contexts/NotificationContext';
 
 interface UserProfile extends Record<string, unknown> {
   nombre: string;
@@ -26,6 +27,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const { accessToken } = useAuth();
   const { t } = useTranslation();
+  const { showSuccess } = useNotificationContext();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState<UserProfile>({
@@ -83,8 +85,7 @@ export default function ProfilePage() {
 
     try {
       await api.put('/auth/profile', formData);
-      // Show success message or redirect
-      alert(t('dashboard.profile_updated'));
+      showSuccess(t('common.success'), t('dashboard.profile_updated'));
     } catch (err) {
       setError(err instanceof Error ? err.message : t('dashboard.profile_update_error'));
     }

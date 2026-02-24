@@ -7,6 +7,7 @@ import { EditUserModal } from './components/EditUserModal';
 import { UserInfo } from './components/UserInfo';
 import { UserOrders } from './components/UserOrders';
 import { UserSpecialPrices } from './components/UserSpecialPrices';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 
 export interface UserDetails {
   id: string;
@@ -44,6 +45,7 @@ export default function UserDetailsPage() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [showDeleteUserConfirm, setShowDeleteUserConfirm] = useState(false);
 
   useEffect(() => {
     if (user) setEditForm(user);
@@ -84,7 +86,6 @@ export default function UserDetailsPage() {
 
   const handleDeleteUser = async () => {
     if (!userId) return;
-    if (!window.confirm(t('admin.users.detail.confirm_delete_account'))) return;
     setDeleting(true);
     setDeleteError(null);
     try {
@@ -95,6 +96,7 @@ export default function UserDetailsPage() {
       setDeleteError(t('admin.users.detail.error_deleting_account') + ': ' + error);
     } finally {
       setDeleting(false);
+      setShowDeleteUserConfirm(false);
     }
   };
 
@@ -110,7 +112,7 @@ export default function UserDetailsPage() {
           <button className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer" onClick={() => setShowEditModal(true)}>
             + {t('admin.users.detail.edit_client_details')}
           </button>
-          <button className="ml-2 px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer" onClick={handleDeleteUser} disabled={deleting}>
+          <button className="ml-2 px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer" onClick={() => setShowDeleteUserConfirm(true)} disabled={deleting}>
             {deleting ? t('admin.users.detail.cancelling') : t('admin.users.detail.cancel_account')}
           </button>
         </div>
@@ -146,6 +148,17 @@ export default function UserDetailsPage() {
       />
 
       {deleteError && <div className="text-red-600 text-sm mb-4">{deleteError}</div>}
+
+      <ConfirmModal
+        isOpen={showDeleteUserConfirm}
+        onClose={() => setShowDeleteUserConfirm(false)}
+        onConfirm={handleDeleteUser}
+        title={t('admin.users.detail.cancel_account')}
+        message={t('admin.users.detail.confirm_delete_account')}
+        confirmLabel={t('common.delete')}
+        variant="danger"
+        confirmLoading={deleting}
+      />
     </div>
   );
 }

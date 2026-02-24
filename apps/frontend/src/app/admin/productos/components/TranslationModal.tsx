@@ -135,7 +135,7 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
         });
       }
 
-      setSuccess(existingTranslation ? 'Traducción actualizada exitosamente' : 'Traducción guardada exitosamente');
+      setSuccess(existingTranslation ? t('admin.products.modals.translation.translation_updated') : t('admin.products.modals.translation.translation_saved'));
       onTranslationUpdated();
 
       // Close modal after a short delay
@@ -151,16 +151,16 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
         if (apiError.response?.data?.message) {
           setError(apiError.response.data.message);
         } else if (apiError.response?.status === 401) {
-          setError('No autorizado. Por favor, inicia sesión nuevamente.');
+          setError(t('errors.unauthorized'));
         } else if (apiError.response?.status === 403) {
-          setError('No tienes permisos para realizar esta acción.');
+          setError(t('errors.forbidden'));
         } else if (apiError.response?.status === 404) {
-          setError('Producto no encontrado.');
+          setError(t('admin.products.modals.translation.product_not_found'));
         } else {
-          setError(`Error del servidor: ${apiError.response?.status || 'Desconocido'}`);
+          setError(t('errors.server', { status: String(apiError.response?.status || 'Desconocido') }));
         }
       } else {
-        setError('Error al guardar la traducción');
+        setError(t('admin.products.modals.translation.error_saving'));
       }
     } finally {
       setLoading(false);
@@ -176,7 +176,7 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
     try {
       await api.delete(`/products/${product.id}/translations/${translationData.locale}`);
 
-      setSuccess('Traducción eliminada exitosamente');
+      setSuccess(t('admin.products.modals.translation.translation_deleted'));
       setExistingTranslation(null);
       setTranslationData(prev => ({
         ...prev,
@@ -199,16 +199,16 @@ export function TranslationModal({ isOpen, onClose, product, onTranslationUpdate
         if (apiError.response?.data?.message) {
           setError(apiError.response.data.message);
         } else if (apiError.response?.status === 401) {
-          setError('No autorizado. Por favor, inicia sesión nuevamente.');
+          setError(t('errors.unauthorized'));
         } else if (apiError.response?.status === 403) {
-          setError('No tienes permisos para realizar esta acción.');
+          setError(t('errors.forbidden'));
         } else if (apiError.response?.status === 404) {
-          setError('Traducción no encontrada.');
+          setError(t('admin.products.modals.translation.translation_not_found'));
         } else {
-          setError(`Error del servidor: ${apiError.response?.status || 'Desconocido'}`);
+          setError(t('errors.server', { status: String(apiError.response?.status || 'Desconocido') }));
         }
       } else {
-        setError('Error al eliminar la traducción');
+        setError(t('admin.products.modals.translation.error_deleting'));
       }
     } finally {
       setLoading(false);
