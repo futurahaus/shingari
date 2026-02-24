@@ -2,9 +2,11 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Decimal } from '@prisma/client/runtime/library';
+import { product_states } from '../../../generated/prisma';
 
 // Interface for product with images from Prisma query
 interface ProductImage {
@@ -192,6 +194,12 @@ export class FavoritesService {
       throw new NotFoundException(`Product with ID ${productId} not found`);
     }
 
+    if (product.status !== product_states.active) {
+      throw new BadRequestException(
+        'Cannot add a deactivated product to favorites',
+      );
+    }
+
     // Check if already favorited
     const existingFavorite = await this.prisma.favorites.findUnique({
       where: {
@@ -248,7 +256,12 @@ export class FavoritesService {
     const userRole = await this.getUserRole(userId);
 
     const favorites = await this.prisma.favorites.findMany({
-      where: { user_id: userId },
+      where: {
+        user_id: userId,
+        products: {
+          status: product_states.active,
+        },
+      },
       include: {
         products: {
           include: {
