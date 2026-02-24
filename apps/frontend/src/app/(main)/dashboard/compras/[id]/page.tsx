@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Sidebar from '@/components/layout/Sidebar';
 import { useTranslation, useI18n } from '@/contexts/I18nContext';
@@ -212,6 +212,7 @@ const OrderDetailSkeleton = () => (
 
 export default function OrderDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const orderId = params.id as string;
   const { t } = useTranslation();
   const { locale } = useI18n();
@@ -221,6 +222,7 @@ export default function OrderDetailPage() {
   const [showAddProductModal, setShowAddProductModal] = useState(false);
   const [updatingLineId, setUpdatingLineId] = useState<string | null>(null);
   const [confirmRemoveLine, setConfirmRemoveLine] = useState<string | null>(null);
+  const [confirmCancelOrder, setConfirmCancelOrder] = useState<string | null>(null);
 
   const isOrderEditable = order?.status === 'pending' || order?.status === 'accepted';
 
@@ -235,6 +237,29 @@ export default function OrderDetailPage() {
       showError(t('common.error'), t('errors.unknown'));
     } finally {
       setUpdatingLineId(null);
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    if (!orderId) return;
+    setUpdatingLineId(confirmCancelOrder);
+    try {
+      const now = new Date();
+      await api.put(`/orders/${orderId}`, {
+        status: 'cancelled',
+        cancellation_reason: t('order_edit.cancel_order_reason'),
+        cancellation_date: now.toISOString(),
+      });
+      showSuccess(t('common.success'), t('order_edit.order_cancelled'));
+      router.push('/dashboard/compras');
+    } catch (err: unknown) {
+      const msg = err && typeof err === 'object' && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : null;
+      showError(t('common.error'), msg || t('errors.unknown'));
+    } finally {
+      setUpdatingLineId(null);
+      setConfirmCancelOrder(null);
     }
   };
 
@@ -491,11 +516,15 @@ export default function OrderDetailPage() {
                           )}
                         </p>
                       </div>
-                      {isOrderEditable && order.order_lines.length > 1 && (
+                      {isOrderEditable && (
                         <button
                           type="button"
                           disabled={updatingLineId === line.id}
-                          onClick={() => setConfirmRemoveLine(line.id)}
+                          onClick={() =>
+                            order.order_lines.length === 1
+                              ? setConfirmCancelOrder(line.id)
+                              : setConfirmRemoveLine(line.id)
+                          }
                           className="p-2 text-red-600 hover:bg-red-50 rounded"
                           title={t('order_edit.remove_product')}
                         >
@@ -566,11 +595,15 @@ export default function OrderDetailPage() {
                     <div className="flex items-center gap-4">
                       <span className="text-sm text-gray-900 w-20 text-center">{formatCurrency(line.unit_price)}</span>
                       <span className="text-sm text-gray-900 w-20 text-center">{formatCurrency(line.total_price)}</span>
-                      {isOrderEditable && order.order_lines.length > 1 && (
+                      {isOrderEditable && (
                         <button
                           type="button"
                           disabled={updatingLineId === line.id}
-                          onClick={() => setConfirmRemoveLine(line.id)}
+                          onClick={() =>
+                            order.order_lines.length === 1
+                              ? setConfirmCancelOrder(line.id)
+                              : setConfirmRemoveLine(line.id)
+                          }
                           className="p-2 text-red-600 hover:bg-red-50 rounded"
                           title={t('order_edit.remove_product')}
                         >
@@ -659,6 +692,16 @@ export default function OrderDetailPage() {
         confirmLabel={t('common.delete')}
         variant="danger"
         confirmLoading={updatingLineId === confirmRemoveLine}
+      />
+      <ConfirmModal
+        isOpen={!!confirmCancelOrder}
+        onClose={() => setConfirmCancelOrder(null)}
+        onConfirm={handleCancelOrder}
+        title={t('order_edit.last_product_warning')}
+        message={t('order_edit.cancel_order_confirm')}
+        confirmLabel={t('common.confirm')}
+        variant="danger"
+        confirmLoading={updatingLineId === confirmCancelOrder}
       />
     </div>
   );

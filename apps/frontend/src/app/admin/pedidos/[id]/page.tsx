@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from '@/contexts/I18nContext';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { OrdersDetailSkeleton } from '../components/OrdersDetailSkeleton';
 import { StatusChip } from '../components/StatusChip';
@@ -131,6 +131,7 @@ function computePriceBreakdown(
 export default function AdminOrderDetailPage() {
   const { t } = useTranslation();
   const params = useParams();
+  const router = useRouter();
   const orderId = params.id as string;
   const { showSuccess, showError } = useNotificationContext();
 
@@ -146,6 +147,7 @@ export default function AdminOrderDetailPage() {
   const [updatingLineId, setUpdatingLineId] = useState<string | null>(null);
   const [confirmRemoveLine, setConfirmRemoveLine] = useState<string | null>(null);
   const [confirmDeleteFile, setConfirmDeleteFile] = useState<string | null>(null);
+  const [confirmCancelOrder, setConfirmCancelOrder] = useState<string | null>(null);
 
   const isOrderEditable = order?.status === 'pending' || order?.status === 'accepted';
 
@@ -160,6 +162,29 @@ export default function AdminOrderDetailPage() {
       showError(t('common.error'), t('errors.unknown'));
     } finally {
       setUpdatingLineId(null);
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    if (!orderId) return;
+    setUpdatingLineId(confirmCancelOrder);
+    try {
+      const now = new Date();
+      await api.put(`/orders/${orderId}`, {
+        status: 'cancelled',
+        cancellation_reason: t('order_edit.cancel_order_reason'),
+        cancellation_date: now.toISOString(),
+      });
+      showSuccess(t('common.success'), t('order_edit.order_cancelled'));
+      router.push('/admin/pedidos');
+    } catch (err: unknown) {
+      const msg = err && typeof err === 'object' && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : null;
+      showError(t('common.error'), msg || t('errors.unknown'));
+    } finally {
+      setUpdatingLineId(null);
+      setConfirmCancelOrder(null);
     }
   };
 
@@ -497,8 +522,12 @@ export default function AdminOrderDetailPage() {
                       <td className="px-6 py-4">
                         <button
                           type="button"
-                          disabled={updatingLineId === line.id || order.order_lines.length <= 1}
-                          onClick={() => setConfirmRemoveLine(line.id)}
+                          disabled={updatingLineId === line.id}
+                          onClick={() =>
+                            order.order_lines.length === 1
+                              ? setConfirmCancelOrder(line.id)
+                              : setConfirmRemoveLine(line.id)
+                          }
                           className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                           title={t('order_edit.remove_product')}
                         >
@@ -658,6 +687,16 @@ export default function AdminOrderDetailPage() {
         confirmLabel={t('common.delete')}
         variant="danger"
         confirmLoading={deleting}
+      />
+      <ConfirmModal
+        isOpen={!!confirmCancelOrder}
+        onClose={() => setConfirmCancelOrder(null)}
+        onConfirm={handleCancelOrder}
+        title={t('order_edit.last_product_warning')}
+        message={t('order_edit.cancel_order_confirm')}
+        confirmLabel={t('common.confirm')}
+        variant="danger"
+        confirmLoading={updatingLineId === confirmCancelOrder}
       />
     </div>
   );

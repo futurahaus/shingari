@@ -1242,7 +1242,14 @@
     "min_one_product": "订单必须至少有一个产品",
     "product_added": "产品已添加到订单",
     "product_removed": "产品已从订单中删除",
-    "quantity_updated": "数量已更新"
+    "quantity_updated": "数量已更新",
+    "last_product_warning": "这是订单中的最后一个产品",
+    "cancel_order_confirm": "删除后，订单将被取消。是否继续？",
+    "order_cancelled": "订单已取消",
+    "cancel_order_reason": "因删除最后一个产品而取消",
+    "select_product": "选择",
+    "no_products_found": "未找到产品",
+    "showing_products": "显示 {{count}} 个产品"
   },
   "profile": {
     "name": "姓名",

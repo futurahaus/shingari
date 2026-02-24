@@ -1272,7 +1272,14 @@
     "min_one_product": "El pedido debe tener al menos un producto",
     "product_added": "Producto agregado al pedido",
     "product_removed": "Producto eliminado del pedido",
-    "quantity_updated": "Cantidad actualizada"
+    "quantity_updated": "Cantidad actualizada",
+    "last_product_warning": "Este es el último producto del pedido",
+    "cancel_order_confirm": "Al eliminarlo, el pedido será cancelado. ¿Deseas continuar?",
+    "order_cancelled": "Pedido cancelado",
+    "cancel_order_reason": "Cancelado por eliminación del último producto",
+    "select_product": "Seleccionar",
+    "no_products_found": "No se encontraron productos",
+    "showing_products": "Mostrando {{count}} productos"
   },
   "profile": {
     "name": "Nombre",
