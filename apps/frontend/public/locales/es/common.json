@@ -379,6 +379,7 @@
         "delete": "Eliminar",
         "table": {
           "product_name": "Nombre de Producto",
+          "sku": "SKU",
           "quantity": "Cantidad",
           "price": "Precio",
           "subtotal": "Subtotal",

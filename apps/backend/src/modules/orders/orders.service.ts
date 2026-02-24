@@ -68,6 +68,7 @@ export class OrdersService {
               products: {
                 select: {
                   image_url: true,
+                  sku: true,
                 },
               },
             },
@@ -168,6 +169,7 @@ export class OrdersService {
             products: {
               select: {
                 image_url: true,
+                sku: true,
               },
             },
           },
@@ -234,6 +236,7 @@ export class OrdersService {
               products: {
                 select: {
                   image_url: true,
+                  sku: true,
                 },
               },
             },
@@ -265,6 +268,7 @@ export class OrdersService {
             products: {
               select: {
                 image_url: true,
+                sku: true,
               },
             },
           },
@@ -300,6 +304,7 @@ export class OrdersService {
             products: {
               select: {
                 image_url: true,
+                sku: true,
               },
             },
           },
@@ -353,6 +358,7 @@ export class OrdersService {
               products: {
                 select: {
                   image_url: true,
+                  sku: true,
                 },
               },
             },
@@ -523,6 +529,7 @@ export class OrdersService {
         unit_price: line.unit_price,
         total_price: line.total_price,
         product_image: line.products?.image_url || null,
+        product_sku: line.products?.sku || null,
       })),
       order_addresses: order.order_addresses.map((address: any) => ({
         id: address.id,

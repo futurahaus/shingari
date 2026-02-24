@@ -28,6 +28,9 @@ export class OrderLineResponseDto {
 
   @ApiProperty({ description: 'URL de la imagen del producto', required: false })
   product_image?: string;
+
+  @ApiProperty({ description: 'SKU del producto', required: false })
+  product_sku?: string;
 }
 
 export class OrderAddressResponseDto {

@@ -376,6 +376,7 @@
         "delete": "删除",
         "table": {
           "product_name": "产品名称",
+          "sku": "SKU",
           "quantity": "数量",
           "price": "价格",
           "subtotal": "小计",

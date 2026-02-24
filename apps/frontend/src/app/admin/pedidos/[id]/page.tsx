@@ -14,6 +14,7 @@ interface OrderLine {
   id: string;
   product_id: number;
   product_name: string;
+  product_sku?: string;
   quantity: number;
   unit_price: string;
   total_price: string;
@@ -364,6 +365,7 @@ export default function AdminOrderDetailPage() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left font-medium text-gray-500">{t('admin.orders.detail.table.product_name')}</th>
+                  <th className="px-6 py-3 text-left font-medium text-gray-500">{t('admin.orders.detail.table.sku')}</th>
                   <th className="px-6 py-3 text-left font-medium text-gray-500">{t('admin.orders.detail.table.quantity')}</th>
                   <th className="px-6 py-3 text-left font-medium text-gray-500">{t('admin.orders.detail.table.price')}</th>
                   <th className="px-6 py-3 text-left font-medium text-gray-500">{t('admin.orders.detail.table.subtotal')}</th>
@@ -373,6 +375,7 @@ export default function AdminOrderDetailPage() {
                 {order.order_lines.map((line) => (
                   <tr key={line.id} className="border-t border-gray-100">
                     <td className="px-6 py-4 text-gray-900">{line.product_name}</td>
+                    <td className="px-6 py-4 text-gray-900">{line.product_sku || '-'}</td>
                     <td className="px-6 py-4 text-gray-900">{line.quantity}</td>
                     <td className="px-6 py-4 text-gray-900">{formatCurrency(line.unit_price)}</td>
                     <td className="px-6 py-4 text-gray-900">{formatCurrency((Number(line.unit_price) * line.quantity).toString())}</td>
@@ -381,7 +384,7 @@ export default function AdminOrderDetailPage() {
               </tbody>
               <tfoot>
                 <tr className="bg-gray-50 border-t border-gray-200">
-                  <td className="px-6 py-4 text-right font-bold" colSpan={3}>{t('admin.orders.detail.table.total')}</td>
+                  <td className="px-6 py-4 text-right font-bold" colSpan={4}>{t('admin.orders.detail.table.total')}</td>
                   <td className="px-6 py-4 text-gray-900 font-bold">
                     {formatCurrency(order.order_lines.reduce((acc, line) => acc + Number(line.unit_price) * line.quantity, 0).toString())}
                   </td>
