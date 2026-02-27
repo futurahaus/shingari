@@ -1305,7 +1305,8 @@
     "cancel_order_reason": "Cancelado por eliminación del último producto",
     "select_product": "Seleccionar",
     "no_products_found": "No se encontraron productos",
-    "showing_products": "Mostrando {{count}} productos"
+    "showing_products": "Mostrando {{count}} productos",
+    "stock_available": "Stock: {{count}}"
   },
   "profile": {
     "name": "Nombre",

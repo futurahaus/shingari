@@ -5,12 +5,14 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Sidebar from '@/components/layout/Sidebar';
 import { useTranslation, useI18n } from '@/contexts/I18nContext';
-import { useOrderDetail } from '@/hooks/useOrdersQuery';
+import { useQueryClient } from '@tanstack/react-query';
+import { useOrderDetail, ordersKeys, type Order } from '@/hooks/useOrdersQuery';
 import { formatCurrency as formatCurrencyUtil } from '@/lib/currency';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { AddProductToOrderModal } from '@/components/orders/AddProductToOrderModal';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { QuantityInput } from '@/components/ui/QuantityInput';
 
 const getStatusConfig = (status: string, t: (key: string) => string) => {
   switch (status.toLowerCase()) {
@@ -218,6 +220,7 @@ export default function OrderDetailPage() {
   const { locale } = useI18n();
   const { showSuccess, showError } = useNotificationContext();
 
+  const queryClient = useQueryClient();
   const { data: order, isLoading, error, refetch } = useOrderDetail(orderId);
   const [showAddProductModal, setShowAddProductModal] = useState(false);
   const [updatingLineId, setUpdatingLineId] = useState<string | null>(null);
@@ -229,12 +232,23 @@ export default function OrderDetailPage() {
   const handleUpdateQuantity = async (lineId: string, newQuantity: number) => {
     if (!orderId || newQuantity < 1) return;
     setUpdatingLineId(lineId);
+    queryClient.setQueryData(ordersKeys.detail(orderId), (prev: typeof order) =>
+      prev
+        ? {
+            ...prev,
+            order_lines: prev.order_lines.map((l) =>
+              l.id === lineId ? { ...l, quantity: newQuantity } : l
+            ),
+          }
+        : prev
+    );
     try {
-      await api.patch(`/orders/${orderId}/lines/${lineId}`, { quantity: newQuantity });
+      const updatedOrder = await api.patch<Order, { quantity: number }>(`/orders/${orderId}/lines/${lineId}`, { quantity: newQuantity });
       showSuccess(t('common.success'), t('order_edit.quantity_updated'));
-      refetch();
+      queryClient.setQueryData(ordersKeys.detail(orderId), updatedOrder);
     } catch {
       showError(t('common.error'), t('errors.unknown'));
+      refetch();
     } finally {
       setUpdatingLineId(null);
     }
@@ -493,23 +507,15 @@ export default function OrderDetailPage() {
                           {t('order_details.quantity')}:{' '}
                           {isOrderEditable ? (
                             <span className="inline-flex items-center gap-1">
-                              <button
-                                type="button"
-                                disabled={updatingLineId === line.id || line.quantity <= 1}
-                                onClick={() => handleUpdateQuantity(line.id, line.quantity - 1)}
-                                className="w-6 h-6 flex items-center justify-center border rounded text-xs disabled:opacity-50"
-                              >
-                                -
-                              </button>
-                              {line.quantity}
-                              <button
-                                type="button"
+                              <QuantityInput
+                                value={line.quantity}
+                                onChange={(q) => handleUpdateQuantity(line.id, q)}
+                                min={1}
+                                max={line.product_stock != null && line.product_stock > 0 ? line.product_stock : undefined}
                                 disabled={updatingLineId === line.id}
-                                onClick={() => handleUpdateQuantity(line.id, line.quantity + 1)}
-                                className="w-6 h-6 flex items-center justify-center border rounded text-xs disabled:opacity-50"
-                              >
-                                +
-                              </button>
+                                size="sm"
+                                stockHint={line.product_stock != null ? t('order_edit.stock_available', { count: line.product_stock }) : undefined}
+                              />
                             </span>
                           ) : (
                             line.quantity
@@ -568,23 +574,15 @@ export default function OrderDetailPage() {
                           {t('order_details.quantity')}:{' '}
                           {isOrderEditable ? (
                             <span className="inline-flex items-center gap-1">
-                              <button
-                                type="button"
-                                disabled={updatingLineId === line.id || line.quantity <= 1}
-                                onClick={() => handleUpdateQuantity(line.id, line.quantity - 1)}
-                                className="w-7 h-7 flex items-center justify-center border rounded hover:bg-gray-50 disabled:opacity-50"
-                              >
-                                -
-                              </button>
-                              {line.quantity}
-                              <button
-                                type="button"
+                              <QuantityInput
+                                value={line.quantity}
+                                onChange={(q) => handleUpdateQuantity(line.id, q)}
+                                min={1}
+                                max={line.product_stock != null && line.product_stock > 0 ? line.product_stock : undefined}
                                 disabled={updatingLineId === line.id}
-                                onClick={() => handleUpdateQuantity(line.id, line.quantity + 1)}
-                                className="w-7 h-7 flex items-center justify-center border rounded hover:bg-gray-50 disabled:opacity-50"
-                              >
-                                +
-                              </button>
+                                size="sm"
+                                stockHint={line.product_stock != null ? t('order_edit.stock_available', { count: line.product_stock }) : undefined}
+                              />
                             </span>
                           ) : (
                             line.quantity

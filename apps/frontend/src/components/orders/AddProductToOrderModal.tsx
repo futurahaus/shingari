@@ -6,6 +6,7 @@ import { useTranslation } from '@/contexts/I18nContext';
 import { api } from '@/lib/api';
 import { useLocalizedAPI } from '@/hooks/useLocalizedAPI';
 import { formatCurrency } from '@/lib/currency';
+import { QuantityInput } from '@/components/ui/QuantityInput';
 
 interface Product {
   id: number | string;
@@ -13,6 +14,7 @@ interface Product {
   price: number;
   sku?: string;
   images?: string[];
+  stock?: number;
 }
 
 interface PaginatedResponse {
@@ -214,25 +216,15 @@ export function AddProductToOrderModal({
                       <div className="flex items-center gap-2 flex-wrap">
                       {isSelected ? (
                         <>
-                          <div className="flex items-center border border-gray-300 rounded-lg">
-                            <button
-                              type="button"
-                              disabled={quantity <= 1 || submitting}
-                              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                              className="w-9 h-9 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-l-lg"
-                            >
-                              -
-                            </button>
-                            <span className="w-10 text-center text-sm font-medium">{quantity}</span>
-                            <button
-                              type="button"
-                              disabled={submitting}
-                              onClick={() => setQuantity((q) => q + 1)}
-                              className="w-9 h-9 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-50 rounded-r-lg"
-                            >
-                              +
-                            </button>
-                          </div>
+                          <QuantityInput
+                            value={quantity}
+                            onChange={setQuantity}
+                            min={1}
+                            max={p.stock != null && p.stock > 0 ? p.stock : undefined}
+                            disabled={submitting}
+                            showButtons
+                            stockHint={p.stock != null ? t('order_edit.stock_available', { count: p.stock }) : undefined}
+                          />
                           <button
                             type="button"
                             onClick={() => handleAdd(p)}

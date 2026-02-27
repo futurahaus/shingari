@@ -34,6 +34,9 @@ export class OrderLineResponseDto {
 
   @ApiProperty({ description: 'IVA del producto (porcentaje)', required: false })
   product_iva?: number;
+
+  @ApiProperty({ description: 'Stock disponible del producto', required: false })
+  product_stock?: number;
 }
 
 export class OrderAddressResponseDto {

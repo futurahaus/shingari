@@ -1275,7 +1275,8 @@
     "cancel_order_reason": "因删除最后一个产品而取消",
     "select_product": "选择",
     "no_products_found": "未找到产品",
-    "showing_products": "显示 {{count}} 个产品"
+    "showing_products": "显示 {{count}} 个产品",
+    "stock_available": "库存: {{count}}"
   },
   "profile": {
     "name": "姓名",

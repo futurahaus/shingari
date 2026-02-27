@@ -181,6 +181,7 @@ export class OrdersService {
                 image_url: true,
                 sku: true,
                 iva: true,
+                products_stock: { take: 1, select: { quantity: true } },
               },
             },
           },
@@ -292,6 +293,7 @@ export class OrdersService {
                 image_url: true,
                 sku: true,
                 iva: true,
+                products_stock: { take: 1, select: { quantity: true } },
               },
             },
           },
@@ -334,6 +336,7 @@ export class OrdersService {
                 image_url: true,
                 sku: true,
                 iva: true,
+                products_stock: { take: 1, select: { quantity: true } },
               },
             },
           },
@@ -777,6 +780,9 @@ export class OrdersService {
           const ivaNum = typeof ivaRaw === 'object' && ivaRaw.toNumber ? ivaRaw.toNumber() : Number(ivaRaw);
           productIva = ivaNum < 1 && ivaNum > 0 ? ivaNum * 100 : ivaNum;
         }
+        const stockQty = line.products?.products_stock?.[0]?.quantity;
+        const productStock =
+          stockQty != null ? Number(stockQty) : undefined;
         return {
           id: line.id,
           product_id: line.product_id,
@@ -787,6 +793,7 @@ export class OrdersService {
           product_image: line.products?.image_url || null,
           product_sku: line.products?.sku || null,
           product_iva: productIva,
+          product_stock: productStock,
         };
       }),
       order_addresses: order.order_addresses.map((address: any) => ({
