@@ -301,6 +301,7 @@
     "translation_deleted": "翻译删除成功",
     "sidebar": {
       "dashboard": "仪表板",
+      "analytics": "分析",
       "users": "用户",
       "products": "产品",
       "orders": "订单",
@@ -513,9 +514,25 @@
       "recent_users": "最近用户",
       "kpis": {
         "active_users": "活跃用户",
+        "total_users": "总用户数",
+        "new_users": "新用户",
         "products": "产品",
+        "total_orders": "总订单",
         "sales_today": "今日销售",
-        "monthly_revenue": "月收入"
+        "monthly_revenue": "月收入",
+        "avg_ticket": "平均客单价"
+      },
+      "charts": {
+        "monthly_revenue": "月收入",
+        "orders_per_month": "每月订单",
+        "order_status": "订单状态",
+        "top_products": "热门产品",
+        "user_growth": "用户增长",
+        "top_clients": "顶级客户",
+        "inactive_users": "不活跃用户",
+        "recent_orders": "最近订单",
+        "no_activity_days": "天无活动",
+        "orders_count": "订单"
       },
       "roles": {
         "admin": "管理员",
@@ -535,6 +552,11 @@
         "status": "状态",
         "last_access": "最后访问"
       }
+    },
+    "analytics": {
+      "title": "分析",
+      "subtitle": "销售和客户的详细图表与指标",
+      "back_to_dashboard": "返回仪表板"
     },
     "users": {
       "title": "客户",
@@ -1203,9 +1225,11 @@
   },
   "order_status": {
     "pending": "待处理",
+    "accepted": "已接受",
+    "delivered": "已送达",
+    "cancelled": "已取消",
     "completed": "已开票",
     "paid": "已开票",
-    "cancelled": "已取消",
     "processing": "处理中"
   },
   "order_details": {
@@ -1251,7 +1275,8 @@
     "cancel_order_reason": "因删除最后一个产品而取消",
     "select_product": "选择",
     "no_products_found": "未找到产品",
-    "showing_products": "显示 {{count}} 个产品"
+    "showing_products": "显示 {{count}} 个产品",
+    "stock_available": "库存: {{count}}"
   },
   "profile": {
     "name": "姓名",

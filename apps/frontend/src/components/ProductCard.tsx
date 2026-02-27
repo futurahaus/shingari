@@ -23,6 +23,7 @@ export interface Product {
     sku?: string;
     units_per_box?: number;
     iva?: number;
+    stock?: number;
     translations?: Array<{
         locale: string;
         name: string;
@@ -89,9 +90,10 @@ export const ProductCard = ({ product }: { product: Product }) => {
                     productId={product.id}
                     productName={displayName}
                     productPrice={product.price}
-                    productImage={product.images[0]}
+                    productImage={product.images[0] ?? ''}
                     unitsPerBox={product.units_per_box}
                     iva={product.iva}
+                    stock={product.stock}
                 />
             </div>
             <div className="p-4 flex flex-col flex-1">

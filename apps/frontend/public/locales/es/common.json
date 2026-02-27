@@ -301,6 +301,7 @@
     "translation_deleted": "Traducción eliminada exitosamente",
     "sidebar": {
       "dashboard": "Dashboard",
+      "analytics": "Analíticas",
       "users": "Usuarios",
       "products": "Productos",
       "orders": "Pedidos",
@@ -543,9 +544,25 @@
       "redemption": "Canje",
       "kpis": {
         "active_users": "Usuarios activos",
+        "total_users": "Total usuarios",
+        "new_users": "Nuevos usuarios",
         "products": "Productos",
+        "total_orders": "Total pedidos",
         "sales_today": "Ventas hoy",
-        "monthly_revenue": "Ingresos mensuales"
+        "monthly_revenue": "Ingresos mensuales",
+        "avg_ticket": "Ticket promedio"
+      },
+      "charts": {
+        "monthly_revenue": "Ingresos mensuales",
+        "orders_per_month": "Pedidos por mes",
+        "order_status": "Estado de pedidos",
+        "top_products": "Top productos",
+        "user_growth": "Crecimiento de usuarios",
+        "top_clients": "Top clientes",
+        "inactive_users": "Usuarios inactivos",
+        "recent_orders": "Últimos pedidos",
+        "no_activity_days": "días sin actividad",
+        "orders_count": "Pedidos"
       },
       "roles": {
         "admin": "admin",
@@ -565,6 +582,11 @@
         "status": "Estado",
         "last_access": "Último acceso"
       }
+    },
+    "analytics": {
+      "title": "Analíticas",
+      "subtitle": "Gráficos y métricas detalladas de ventas y clientes",
+      "back_to_dashboard": "Volver al Dashboard"
     },
     "users": {
       "title": "Clientes",
@@ -1233,9 +1255,11 @@
   },
   "order_status": {
     "pending": "Pendiente",
+    "accepted": "Aceptado",
+    "delivered": "Entregado",
+    "cancelled": "Cancelado",
     "completed": "Compra facturada",
     "paid": "Compra facturada",
-    "cancelled": "Compra cancelada",
     "processing": "En proceso"
   },
   "order_details": {
@@ -1281,7 +1305,8 @@
     "cancel_order_reason": "Cancelado por eliminación del último producto",
     "select_product": "Seleccionar",
     "no_products_found": "No se encontraron productos",
-    "showing_products": "Mostrando {{count}} productos"
+    "showing_products": "Mostrando {{count}} productos",
+    "stock_available": "Stock: {{count}}"
   },
   "profile": {
     "name": "Nombre",

@@ -2046,9 +2046,13 @@ export class ProductsService {
     }
   }
 
+  /** Límite máximo de productos en exportación para evitar consumo excesivo de memoria */
+  private static readonly MAX_EXPORT_PRODUCTS = 5000;
+
   /**
    * Exporta todos los productos activos a un archivo Excel.
    * Incluye: SKU, Nombre, Descripción, Precio_mayorista, Precio_minorista, IVA
+   * Limitado a MAX_EXPORT_PRODUCTS para evitar consumo excesivo de memoria.
    * @returns Buffer del archivo Excel generado
    */
   async exportProducts(): Promise<{
@@ -2056,13 +2060,14 @@ export class ProductsService {
     filename: string;
     mimeType: string;
   }> {
-    // Obtener todos los productos no eliminados
+    // Obtener productos no eliminados (limitado para evitar memoria excesiva)
     const products = await this.prisma.products.findMany({
       where: {
         status: {
           not: product_states.deleted,
         },
       },
+      take: ProductsService.MAX_EXPORT_PRODUCTS,
       select: {
         sku: true,
         name: true,

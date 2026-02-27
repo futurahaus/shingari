@@ -17,18 +17,18 @@ async function bootstrap() {
   const port = configService.get<number>('PORT', 3001);
   const logger = new Logger('Bootstrap');
 
-  // Configuración de Swagger
-  const config = new DocumentBuilder()
-    .setTitle('Shingari API')
-    .setDescription('Documentación de la API del proyecto Shingari')
-    .setVersion('1.0')
-    // .addTag('auth') // Puedes añadir tags para agrupar endpoints
-    // .addTag('user')
-    .addServer('/api')
-    .addBearerAuth() // Si usas autenticación Bearer (JWT)
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-docs', app, document); // La UI estará en /api-docs
+  // Configuración de Swagger (solo en desarrollo para ahorrar memoria)
+  if (process.env.NODE_ENV !== 'production') {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle('Shingari API')
+      .setDescription('Documentación de la API del proyecto Shingari')
+      .setVersion('1.0')
+      .addServer('/api')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup('api-docs', app, document);
+  }
 
   // Security middleware
   app.use(helmet()); // Adds various HTTP headers for security
@@ -62,8 +62,10 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   await app.listen(port);
   logger.log(`Application is running on: ${await app.getUrl()}`);
-  logger.log(
-    `Swagger documentation is available at: ${await app.getUrl()}/api-docs`,
-  );
+  if (process.env.NODE_ENV !== 'production') {
+    logger.log(
+      `Swagger documentation is available at: ${await app.getUrl()}/api-docs`,
+    );
+  }
 }
 bootstrap();

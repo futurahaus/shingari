@@ -10,6 +10,7 @@ export interface OrderLine {
   unit_price: string;
   total_price: string;
   product_image?: string;
+  product_stock?: number;
 }
 
 export interface OrderAddress {

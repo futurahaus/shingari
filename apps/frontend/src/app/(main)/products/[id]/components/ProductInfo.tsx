@@ -47,10 +47,11 @@ export function ProductInfo({ product }: ProductInfoProps) {
             productId={product.id}
             productName={product.name}
             productPrice={product.price}
-            productImage={product.images[0]}
+            productImage={product.images[0] ?? ''}
             unitsPerBox={product.units_per_box}
             variant="inline"
             iva={product.iva}
+            stock={product.stock}
           />
         </div>
       </div>

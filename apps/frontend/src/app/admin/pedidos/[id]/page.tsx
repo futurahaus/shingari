@@ -11,6 +11,7 @@ import { formatCurrency as formatCurrencyUtil } from '@/lib/currency';
 import { FileDropzone } from '@/components/ui/FileDropzone';
 import { AddProductToOrderModal } from '@/components/orders/AddProductToOrderModal';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
+import { QuantityInput } from '@/components/ui/QuantityInput';
 
 interface OrderLine {
   id: string;
@@ -18,6 +19,7 @@ interface OrderLine {
   product_name: string;
   product_sku?: string;
   product_iva?: number;
+  product_stock?: number;
   quantity: number;
   unit_price: string;
   total_price: string;
@@ -154,12 +156,23 @@ export default function AdminOrderDetailPage() {
   const handleUpdateQuantity = async (lineId: string, newQuantity: number) => {
     if (!orderId || newQuantity < 1) return;
     setUpdatingLineId(lineId);
+    setOrder((prev) =>
+      prev
+        ? {
+            ...prev,
+            order_lines: prev.order_lines.map((l) =>
+              l.id === lineId ? { ...l, quantity: newQuantity } : l
+            ),
+          }
+        : null
+    );
     try {
-      await api.patch(`/orders/${orderId}/lines/${lineId}`, { quantity: newQuantity });
+      const updatedOrder = await api.patch<Order, { quantity: number }>(`/orders/${orderId}/lines/${lineId}`, { quantity: newQuantity });
       showSuccess(t('common.success'), t('order_edit.quantity_updated'));
-      refreshOrderData();
+      setOrder(updatedOrder);
     } catch {
       showError(t('common.error'), t('errors.unknown'));
+      refreshOrderData();
     } finally {
       setUpdatingLineId(null);
     }
@@ -493,24 +506,15 @@ export default function AdminOrderDetailPage() {
                     <td className="px-6 py-4 text-gray-900">{line.product_sku || '-'}</td>
                     <td className="px-6 py-4 text-gray-900">
                       {isOrderEditable ? (
-                        <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            disabled={updatingLineId === line.id || line.quantity <= 1}
-                            onClick={() => handleUpdateQuantity(line.id, line.quantity - 1)}
-                            className="w-7 h-7 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            -
-                          </button>
-                          <span className="min-w-[1.5rem] text-center">{line.quantity}</span>
-                          <button
-                            type="button"
+                        <div className="flex items-center gap-2">
+                          <QuantityInput
+                            value={line.quantity}
+                            onChange={(q) => handleUpdateQuantity(line.id, q)}
+                            min={1}
+                            max={line.product_stock != null && line.product_stock > 0 ? line.product_stock : undefined}
                             disabled={updatingLineId === line.id}
-                            onClick={() => handleUpdateQuantity(line.id, line.quantity + 1)}
-                            className="w-7 h-7 flex items-center justify-center border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            +
-                          </button>
+                            stockHint={line.product_stock != null ? t('order_edit.stock_available', { count: line.product_stock }) : undefined}
+                          />
                         </div>
                       ) : (
                         line.quantity
