@@ -6,7 +6,7 @@ import { formatCurrency } from '@/lib/currency';
 import { QuantityControls } from './QuantityControls';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFavorites } from '@/hooks/useFavorites';
-import { FaStar, FaRegStar } from 'react-icons/fa';
+import { FaRegStar, FaShoppingCart, FaStar } from 'react-icons/fa';
 import { useState } from 'react';
 import { useProductTranslations } from '@/hooks/useLocalizedAPI';
 import { useTranslation } from '@/contexts/I18nContext';
@@ -145,7 +145,7 @@ export const ProductCard = ({ product }: { product: Product }) => {
                         type="primary"
                         text={t('products.view_details')}
                         testID={`add-to-cart-${product.id}`}
-                        icon="FaShoppingCart"
+                        icon={FaShoppingCart}
                     />
                 </div>
             </div>

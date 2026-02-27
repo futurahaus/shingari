@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -39,7 +38,6 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Instrument Sans', sans-serif;
 }
 
 li {
@@ -58,7 +56,6 @@ nav.main-navbar {
 }
 
 nav a {
-  font-family: 'Instrument Sans', sans-serif;
   font-weight: 500;
   font-size: 14px;
   line-height: 21px;

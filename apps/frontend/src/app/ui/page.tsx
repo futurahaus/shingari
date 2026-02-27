@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { FaBell, FaCalendar, FaCheck, FaCog, FaEdit, FaEye, FaPlus, FaQuestionCircle, FaSave, FaSearch, FaShoppingCart, FaTimes, FaTrash, FaUser } from 'react-icons/fa';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
 import { Input } from '@/app/ui/components/Input';
@@ -135,7 +136,7 @@ export default function ComponentsListPage() {
                         type="primary"
                         text="Guardar"
                         testID="save-button"
-                        icon="FaSave"
+                        icon={FaSave}
                       />
                       
                       <Button
@@ -143,7 +144,7 @@ export default function ComponentsListPage() {
                         type="primary"
                         text="Buscar"
                         testID="search-button"
-                        icon="FaSearch"
+                        icon={FaSearch}
                       />
                       
                       <Button
@@ -151,7 +152,7 @@ export default function ComponentsListPage() {
                         type="primary"
                         text="Agregar"
                         testID="add-button"
-                        icon="FaPlus"
+                        icon={FaPlus}
                       />
                       
                       <Button
@@ -159,7 +160,7 @@ export default function ComponentsListPage() {
                         type="primary"
                         text="Confirmar"
                         testID="confirm-button"
-                        icon="FaCheck"
+                        icon={FaCheck}
                       />
                       
                       <Button
@@ -180,7 +181,7 @@ export default function ComponentsListPage() {
                         type="secondary"
                         text="Cancelar"
                         testID="cancel-button"
-                        icon="FaTimes"
+                        icon={FaTimes}
                       />
                       
                       <Button
@@ -188,7 +189,7 @@ export default function ComponentsListPage() {
                         type="secondary"
                         text="Editar"
                         testID="edit-button"
-                        icon="FaEdit"
+                        icon={FaEdit}
                       />
                       
                       <Button
@@ -196,7 +197,7 @@ export default function ComponentsListPage() {
                         type="secondary"
                         text="Eliminar"
                         testID="delete-button"
-                        icon="FaTrash"
+                        icon={FaTrash}
                       />
                       
                       <Button
@@ -204,7 +205,7 @@ export default function ComponentsListPage() {
                         type="secondary"
                         text="Ver Detalles"
                         testID="details-button"
-                        icon="FaEye"
+                        icon={FaEye}
                       />
                       
                       <Button
@@ -225,7 +226,7 @@ export default function ComponentsListPage() {
                         type="primary"
                         text="Usuario"
                         testID="user-button"
-                        icon="FaUser"
+                        icon={FaUser}
                       />
                       
                       <Button
@@ -233,7 +234,7 @@ export default function ComponentsListPage() {
                         type="primary"
                         text="Carrito"
                         testID="cart-button"
-                        icon="FaShoppingCart"
+                        icon={FaShoppingCart}
                       />
                       
                       <Button
@@ -241,7 +242,7 @@ export default function ComponentsListPage() {
                         type="secondary"
                         text="Configuración"
                         testID="settings-button"
-                        icon="FaCog"
+                        icon={FaCog}
                       />
                       
                       <Button
@@ -249,7 +250,7 @@ export default function ComponentsListPage() {
                         type="secondary"
                         text="Notificaciones"
                         testID="notifications-button"
-                        icon="FaBell"
+                        icon={FaBell}
                       />
                       
                       <Button
@@ -257,7 +258,7 @@ export default function ComponentsListPage() {
                         type="secondary"
                         text="Ayuda"
                         testID="help-button"
-                        icon="FaQuestionCircle"
+                        icon={FaQuestionCircle}
                       />
                     </div>
                   </div>
@@ -276,14 +277,14 @@ export default function ComponentsListPage() {
                               type="primary"
                               text="Guardar"
                               testID="form-save-button"
-                              icon="FaSave"
+                              icon={FaSave}
                             />
                             <Button
                               onPress={() => handleButtonClick('Cancelar Formulario')}
                               type="secondary"
                               text="Cancelar"
                               testID="form-cancel-button"
-                              icon="FaTimes"
+                              icon={FaTimes}
                             />
                           </div>
                         </div>
@@ -299,21 +300,21 @@ export default function ComponentsListPage() {
                               type="primary"
                               text="Agregar"
                               testID="add-item-button"
-                              icon="FaPlus"
+                              icon={FaPlus}
                             />
                             <Button
                               onPress={() => handleButtonClick('Editar Item')}
                               type="secondary"
                               text="Editar"
                               testID="edit-item-button"
-                              icon="FaEdit"
+                              icon={FaEdit}
                             />
                             <Button
                               onPress={() => handleButtonClick('Eliminar Item')}
                               type="secondary"
                               text="Eliminar"
                               testID="delete-item-button"
-                              icon="FaTrash"
+                              icon={FaTrash}
                             />
                           </div>
                         </div>
@@ -494,7 +495,7 @@ export default function ComponentsListPage() {
                         onChangeValue={() => {}}
                         type="password"
                         placeholder="Ingresa tu contraseña"
-                        iconRight="FaEye"
+                        iconRight={FaEye}
                         iconRightOnPress={() => {}}
                         testID="password-input"
                       />
@@ -504,7 +505,7 @@ export default function ComponentsListPage() {
                         value=""
                         onChangeValue={() => {}}
                         placeholder="Buscar productos..."
-                        iconRight="FaSearch"
+                        iconRight={FaSearch}
                         iconRightOnPress={() => {}}
                         testID="search-input"
                       />
@@ -514,7 +515,7 @@ export default function ComponentsListPage() {
                         value="texto de ejemplo"
                         onChangeValue={() => {}}
                         placeholder="Escribe algo..."
-                        iconRight="FaTimes"
+                        iconRight={FaTimes}
                         iconRightOnPress={() => {}}
                         testID="clear-input"
                       />
@@ -524,7 +525,7 @@ export default function ComponentsListPage() {
                         value=""
                         onChangeValue={() => {}}
                         placeholder="Seleccionar fecha"
-                        iconRight="FaCalendar"
+                        iconRight={FaCalendar}
                         iconRightOnPress={() => {}}
                         testID="calendar-input"
                       />
@@ -593,7 +594,7 @@ export default function ComponentsListPage() {
                             onChangeValue={() => {}}
                             type="password"
                             placeholder="Tu contraseña"
-                            iconRight="FaEye"
+                            iconRight={FaEye}
                             iconRightOnPress={() => {}}
                             testID="login-password"
                           />
@@ -631,7 +632,7 @@ export default function ComponentsListPage() {
                             onChangeValue={() => {}}
                             type="password"
                             placeholder="Mínimo 8 caracteres"
-                            iconRight="FaEye"
+                            iconRight={FaEye}
                             iconRightOnPress={() => {}}
                             testID="register-password"
                           />
@@ -667,7 +668,7 @@ export default function ComponentsListPage() {
                       <li><code>type: &apos;primary&apos; | &apos;secondary&apos;</code> - Tipo de botón</li>
                       <li><code>text: string</code> - Texto del botón</li>
                       <li><code>testID: string</code> - Identificador para testing</li>
-                      <li><code>icon?: keyof typeof FaIcons</code> - Icono opcional de Font Awesome</li>
+                      <li><code>icon?: React.ComponentType</code> - Componente de icono opcional</li>
                       <li><code>inline?: boolean</code> - Si el botón debe ocupar todo el ancho</li>
                       <li><code>textProps?: Omit&lt;TextProps, &apos;children&apos;&gt;</code> - Props para personalizar el texto</li>
                     </ul>
@@ -692,7 +693,7 @@ export default function ComponentsListPage() {
                       <li><code>label: string</code> - Etiqueta del campo de entrada</li>
                       <li><code>value: string</code> - Valor actual del input</li>
                       <li><code>onChangeValue: (value: string) =&gt; void</code> - Función que se ejecuta cuando cambia el valor</li>
-                      <li><code>iconRight?: keyof typeof FaIcons</code> - Icono de FontAwesome que se muestra a la derecha</li>
+                      <li><code>iconRight?: React.ComponentType</code> - Componente de icono a la derecha</li>
                       <li><code>iconRightOnPress?: () =&gt; void</code> - Función que se ejecuta al hacer clic en el icono</li>
                       <li><code>placeholder?: string</code> - Texto de placeholder</li>
                       <li><code>type?: &apos;text&apos; | &apos;email&apos; | &apos;password&apos; | &apos;number&apos; | &apos;tel&apos; | &apos;url&apos;</code> - Tipo de input</li>

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { FaSearch } from 'react-icons/fa';
+import { FaCog, FaSearch, FaShoppingCart, FaUser } from 'react-icons/fa';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import LoginModal from '@/components/auth/LoginModal';
@@ -69,7 +69,7 @@ const SearchHeaderDesktop = () => {
                   type="primary"
                   text={t('navigation.profile')}
                   testID="profile-button"
-                  icon="FaUser"
+                  icon={FaUser}
                   textProps={{
                     size: 'sm',
                   }}
@@ -81,7 +81,7 @@ const SearchHeaderDesktop = () => {
                   type="primary"
                   text={t('navigation.login')}
                   testID="login-button"
-                  icon="FaUser"
+                  icon={FaUser}
                   textProps={{
                     size: 'sm',
                   }}
@@ -94,7 +94,7 @@ const SearchHeaderDesktop = () => {
                   onPress={() => router.push('/admin/dashboard')}
                   type="primary"
                   testID="admin-settings-button"
-                  icon="FaCog"
+                  icon={FaCog}
                   textProps={{
                     size: 'sm',
                   }}
@@ -106,7 +106,7 @@ const SearchHeaderDesktop = () => {
                   onPress={openCart}
                   type="primary"
                   testID="cart-button"
-                  icon="FaShoppingCart"
+                  icon={FaShoppingCart}
                   textProps={{
                     size: 'sm',
                   }}
@@ -156,7 +156,7 @@ const SearchHeaderMobile = () => {
                   onPress={() => router.push('/dashboard')}
                   type="tertiary"
                   testID="profile-button-mobile"
-                  icon="FaUser"
+                  icon={FaUser}
                   size='sm'
                   textProps={{
                     size: 'sm',
@@ -168,7 +168,7 @@ const SearchHeaderMobile = () => {
                   onPress={() => setIsLoginModalOpen(true)}
                   type="tertiary"
                   testID="login-button-mobile"
-                  icon="FaUser"
+                  icon={FaUser}
                   size='sm'
                   textProps={{
                     size: 'sm',
@@ -182,7 +182,7 @@ const SearchHeaderMobile = () => {
                   onPress={() => router.push('/admin/dashboard')}
                   type="tertiary"
                   testID="admin-settings-button-mobile"
-                  icon="FaCog"
+                  icon={FaCog}
                   size='sm'
                   textProps={{
                     size: 'sm',
@@ -195,7 +195,7 @@ const SearchHeaderMobile = () => {
                   onPress={openCart}
                   type="tertiary"
                   testID="cart-button-mobile"
-                  icon="FaShoppingCart"
+                  icon={FaShoppingCart}
                   size='sm'
                   textProps={{
                     size: 'sm',

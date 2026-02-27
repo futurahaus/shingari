@@ -22,7 +22,7 @@ import { Button } from "@/app/ui/components/Button";
 import { Product } from "./interfaces/product.interfaces";
 import { useAdminProducts, useCategories } from "./hooks/useAdminProducts.hook";
 import { Text } from "@/app/ui/components/Text";
-import { FaSearch } from "react-icons/fa";
+import { FaDownload, FaPlus, FaSearch, FaUpload } from "react-icons/fa";
 import { exportProductsToExcel } from "./services/productExport.service";
 import {
   importProductsFromExcel,
@@ -268,7 +268,7 @@ export default function AdminProductsPage() {
                     : t("admin.products.export_products")
                 }
                 testID="export-products-button"
-                icon="FaDownload"
+                icon={FaDownload}
                 inline
                 disabled={isExporting}
               />
@@ -281,7 +281,7 @@ export default function AdminProductsPage() {
                     : t("admin.products.import_products")
                 }
                 testID="import-products-button"
-                icon="FaUpload"
+                icon={FaUpload}
                 inline
                 disabled={isImporting}
               />
@@ -290,7 +290,7 @@ export default function AdminProductsPage() {
                 type="primary-admin"
                 text={t("admin.products.new_product")}
                 testID="create-product-button"
-                icon="FaPlus"
+                icon={FaPlus}
                 inline
               />
             </div>
@@ -700,7 +700,7 @@ export default function AdminProductsPage() {
                 type="primary-admin"
                 text={t("admin.products.new_product")}
                 testID="create-product-empty-button"
-                icon="FaPlus"
+                icon={FaPlus}
                 inline
               />
             </div>

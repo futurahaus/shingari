@@ -1,14 +1,19 @@
 import React from 'react';
-import * as FaIcons from 'react-icons/fa';
 import { colors } from '../colors';
 import { Text, TextProps } from './Text';
+
+type IconComponent = React.ComponentType<{
+  size?: number;
+  color?: string;
+  className?: string;
+}>;
 
 interface ButtonProps {
   onPress: () => void;
   type: 'primary' | 'primary-admin' | 'secondary' | 'tertiary';
   text?: string;
   testID: string;
-  icon?: keyof typeof FaIcons;
+  icon?: IconComponent;
   inline?: boolean;
   textProps?: Omit<TextProps, 'children'>;
   htmlType?: 'button' | 'submit' | 'reset';
@@ -63,7 +68,7 @@ export const Button: React.FC<ButtonProps> = ({
     ? `${baseClasses} ${secondaryClasses}`
     : `${baseClasses} ${tertiaryClasses}`;
 
-  const IconComponent = icon ? FaIcons[icon] : null;
+  const IconComponent = icon;
 
   // Valores por defecto para el texto del botón
   const defaultTextProps: Omit<TextProps, 'children'> = {

@@ -10,7 +10,7 @@ import { Button } from '@/app/ui/components/Button';
 import { Reward } from './interfaces/reward.interfaces';
 import { useAdminRewards } from './hooks/useAdminRewardsQuery.hook';
 import { Text } from '@/app/ui/components/Text';
-import { FaSearch } from 'react-icons/fa';
+import { FaPlus, FaSearch } from 'react-icons/fa';
 
 export default function AdminRewardsPage() {
   const { t } = useTranslation();
@@ -102,7 +102,7 @@ export default function AdminRewardsPage() {
               type="primary-admin"
               text={t('admin.rewards.new_reward')}
               testID="create-reward-button"
-              icon="FaPlus"
+              icon={FaPlus}
               inline
             />
           </div>
@@ -289,7 +289,7 @@ export default function AdminRewardsPage() {
                 type="primary-admin"
                 text={t('admin.rewards.new_reward')}
                 testID="create-reward-empty-button"
-                icon="FaPlus"
+                icon={FaPlus}
                 inline
               />
             </div>

@@ -17,6 +17,7 @@ import { usePoints } from '@/hooks/usePoints';
 import RewardsCart from '@/components/cart/RewardsCart';
 import Image from 'next/image';
 import { Button } from '@/app/ui/components/Button';
+import { FaBox, FaMoneyBillAlt, FaShoppingCart } from 'react-icons/fa';
 
 interface Category {
     id: string;
@@ -228,7 +229,7 @@ const RewardCard = ({ reward }: { reward: Reward }) => {
                                 <Button
                                     type="primary"
                                     onPress={handleAddToCart}
-                                    icon={!canAfford ? "FaMoneyBillAlt" : reward.stock !== null && inCart && inCart.quantity >= reward.stock ? "FaBox" : "FaShoppingCart"}
+                                    icon={!canAfford ? FaMoneyBillAlt : reward.stock !== null && inCart && inCart.quantity >= reward.stock ? FaBox : FaShoppingCart}
                                     disabled={!canAfford || (reward.stock !== null && inCart && inCart.quantity >= reward.stock)}
                                     testID="add-to-cart"
                                     text={!canAfford ? (

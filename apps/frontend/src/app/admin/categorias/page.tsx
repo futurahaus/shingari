@@ -269,7 +269,7 @@ export default function AdminCategoriasPage() {
       <div className="">
         <div className="flex items-center justify-between mb-4">
           <Text size="3xl" weight="bold" color="gray-900" as="h1">{t('admin.categories.title')}</Text>
-          <Button text={t('admin.categories.add_new_category')} type="primary-admin" onPress={() => openAddModal()} testID="add-root" icon="FaPlus" inline />
+          <Button text={t('admin.categories.add_new_category')} type="primary-admin" onPress={() => openAddModal()} testID="add-root" icon={FaPlus} inline />
         </div>
         {loading ? (
           <div className="bg-white rounded-lg shadow-sm p-6">
@@ -288,7 +288,7 @@ export default function AdminCategoriasPage() {
             <FaFolder className="text-gray-300 w-12 h-12 mb-4" />
             <Text size="xl" weight="bold" color="gray-700" as="h2" className="mb-2">{t('admin.categories.no_categories')}</Text>
             <Text size="md" color="gray-500" as="p" className="mb-4">{t('admin.categories.start_creating_category')}</Text>
-            <Button text={t('admin.categories.add_category')} type="primary-admin" onPress={() => openAddModal()} testID="add-root-empty" icon="FaPlus" />
+            <Button text={t('admin.categories.add_category')} type="primary-admin" onPress={() => openAddModal()} testID="add-root-empty" icon={FaPlus} />
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-sm p-4">
@@ -321,7 +321,7 @@ export default function AdminCategoriasPage() {
             </label>
             <div className="flex justify-end gap-2 mt-6">
               <Button text={t('admin.categories.cancel')} type="secondary" onPress={closeModal} testID="cancel-modal" />
-              <Button text={modalMode === 'add' ? t('admin.categories.add') : t('admin.categories.save')} type="primary-admin" htmlType="submit" testID="submit-modal" onPress={() => { }} disabled={saving} icon={modalMode === 'add' ? 'FaPlus' : 'FaEdit'} />
+              <Button text={modalMode === 'add' ? t('admin.categories.add') : t('admin.categories.save')} type="primary-admin" htmlType="submit" testID="submit-modal" onPress={() => { }} disabled={saving} icon={modalMode === 'add' ? FaPlus : FaEdit} />
             </div>
           </form>
         </div>
@@ -337,7 +337,7 @@ export default function AdminCategoriasPage() {
             <Text size="md" color="gray-700" as="p" className="mb-4">{t('admin.categories.confirm_delete_category', { name: (() => { const cat = categories.find(c => c.id === deleteId); return cat ? getTranslatedName(cat) : ''; })() })}</Text>
             <div className="flex justify-end gap-2 mt-6">
               <Button text={t('admin.categories.cancel')} type="secondary" onPress={closeDelete} testID="cancel-delete" disabled={deleting} />
-              <Button text={deleting ? t('admin.categories.deleting') : t('admin.categories.delete')} type="secondary" onPress={handleDelete} testID="confirm-delete" disabled={deleting} icon="FaTrash" />
+              <Button text={deleting ? t('admin.categories.deleting') : t('admin.categories.delete')} type="secondary" onPress={handleDelete} testID="confirm-delete" disabled={deleting} icon={FaTrash} />
             </div>
           </div>
         </div>
