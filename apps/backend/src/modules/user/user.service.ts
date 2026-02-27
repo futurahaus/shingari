@@ -123,6 +123,7 @@ export class UserService {
   async getAllUsers() {
     try {
       const users = await this.prismaService.auth_users.findMany({
+        take: 100,
         select: {
           id: true,
           email: true,
@@ -442,6 +443,7 @@ export class UserService {
         where: {
           user_id: userId,
         },
+        take: 100,
         include: {
           order_lines: {
             include: {
@@ -481,6 +483,7 @@ export class UserService {
         user_id: userId,
         is_active: true,
       },
+      take: 100,
       include: {
         products: {
           select: {

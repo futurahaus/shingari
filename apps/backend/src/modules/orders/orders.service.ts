@@ -285,6 +285,7 @@ export class OrdersService {
   async findByUserId(userId: string): Promise<OrderResponseDto[]> {
     const orders = await this.prisma.orders.findMany({
       where: { user_id: userId },
+      take: 100,
       include: {
         order_lines: {
           include: {
@@ -328,6 +329,7 @@ export class OrdersService {
 
   async findAll(): Promise<OrderResponseDto[]> {
     const orders = await this.prisma.orders.findMany({
+      take: 100,
       include: {
         order_lines: {
           include: {
