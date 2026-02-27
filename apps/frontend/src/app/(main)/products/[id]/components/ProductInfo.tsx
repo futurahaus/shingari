@@ -2,6 +2,7 @@ import { QuantityControls } from "@/components/QuantityControls";
 import { Product } from "@/components/ProductCard";
 import { Button } from "@/app/ui/components/Button";
 import { useRouter } from "next/navigation";
+import { FaShoppingCart } from "react-icons/fa";
 
 interface ProductInfoProps {
   product: Product;
@@ -53,7 +54,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
           />
         </div>
       </div>
-      <Button icon="FaShoppingCart" text="Ir al carrito" type="primary" onPress={() => router.push('/carrito')} testID="go-cart" />
+      <Button icon={FaShoppingCart} text="Ir al carrito" type="primary" onPress={() => router.push('/carrito')} testID="go-cart" />
     </div>
   );
 }

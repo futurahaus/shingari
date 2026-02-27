@@ -45,7 +45,7 @@ function getTranslatedAuthError(
 }
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { FaTimes } from 'react-icons/fa';
+import { FaEye, FaEyeSlash, FaTimes } from 'react-icons/fa';
 import ForgotPasswordModal from './ForgotPasswordModal';
 import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
@@ -218,7 +218,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
                 onChangeValue={(value) => setFormData(prev => ({ ...prev, password: value }))}
                 type={showPassword ? "text" : "password"}
                 placeholder={t('auth.password_placeholder')}
-                iconRight={showPassword ? "FaEyeSlash" : "FaEye"}
+                iconRight={showPassword ? FaEyeSlash : FaEye}
                 iconRightOnPress={togglePasswordVisibility}
                 disabled={isLoadingLogin || isLoadingRegister}
                 testID="login-password-input"

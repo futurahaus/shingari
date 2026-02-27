@@ -18,6 +18,7 @@ export const Banner = () => {
             src="/9ee078916623dc2b5afcb79fe6e5d374dee50ff9.png"
             alt={t('banner.alt_text')}
             fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1200px"
             className="object-cover transition-transform duration-300 group-hover:scale-105"
             priority
           />

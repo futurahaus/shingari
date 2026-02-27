@@ -1,12 +1,17 @@
 import React from 'react';
-import * as FaIcons from 'react-icons/fa';
 import { Text } from './Text';
+
+type IconComponent = React.ComponentType<{
+  size?: number;
+  color?: string;
+  className?: string;
+}>;
 
 interface InputProps {
   label: string;
   value: string;
   onChangeValue: (value: string) => void;
-  iconRight?: keyof typeof FaIcons;
+  iconRight?: IconComponent;
   iconRightOnPress?: () => void;
   placeholder?: string;
   type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url';
@@ -27,7 +32,7 @@ export const Input: React.FC<InputProps> = ({
   error,
   testID,
 }) => {
-  const IconComponent = iconRight ? FaIcons[iconRight] : null;
+  const IconComponent = iconRight;
 
   const baseInputClasses = `
     w-full px-4 py-3 rounded-[10px] border transition-all duration-200 

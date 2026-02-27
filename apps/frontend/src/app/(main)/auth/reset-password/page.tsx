@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useTranslation } from '@/contexts/I18nContext';
 import { Input } from '@/app/ui/components/Input';
 import { Button } from '@/app/ui/components/Button';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 function ResetPasswordPageContent() {
   const { t } = useTranslation();
@@ -122,7 +123,7 @@ function ResetPasswordPageContent() {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 disabled={isLoading}
-                iconRight={showPassword ? 'FaEyeSlash' : 'FaEye'}
+                iconRight={showPassword ? FaEyeSlash : FaEye}
                 iconRightOnPress={() => setShowPassword(!showPassword)}
               />
             </div>
@@ -134,7 +135,7 @@ function ResetPasswordPageContent() {
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmPassword}
                 disabled={isLoading}
-                iconRight={showConfirmPassword ? 'FaEyeSlash' : 'FaEye'}
+                iconRight={showConfirmPassword ? FaEyeSlash : FaEye}
                 iconRightOnPress={() => setShowConfirmPassword(!showConfirmPassword)}
               />
             </div>
