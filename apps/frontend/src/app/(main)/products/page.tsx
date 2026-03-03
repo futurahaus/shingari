@@ -531,6 +531,65 @@ const CategorySidebar = ({
     );
 };
 
+const MobileSectionSelector = ({
+    isFavoritesSelected,
+    isRewardsSelected,
+    onSelectFavorites,
+    onSelectRewards,
+    onSelectCategory,
+    user,
+}: {
+    isFavoritesSelected: boolean;
+    isRewardsSelected: boolean;
+    onSelectFavorites: () => void;
+    onSelectRewards: () => void;
+    onSelectCategory: (name: string | null) => void;
+    user: { id: string } | null;
+}) => {
+    const { t } = useTranslation();
+    const isProductsSelected = !isFavoritesSelected && !isRewardsSelected;
+
+    return (
+        <div className="md:hidden flex gap-2 mb-4 overflow-x-auto pb-2">
+            <button
+                type="button"
+                onClick={() => onSelectCategory(null)}
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    isProductsSelected
+                        ? 'bg-[#EA3D15] text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+            >
+                {t('products.all_products')}
+            </button>
+            {user && (
+                <button
+                    type="button"
+                    onClick={onSelectFavorites}
+                    className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                        isFavoritesSelected
+                            ? 'bg-[#EA3D15] text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                >
+                    ⭐ {t('products.favorites')}
+                </button>
+            )}
+            <button
+                type="button"
+                onClick={onSelectRewards}
+                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    isRewardsSelected
+                        ? 'bg-[#EA3D15] text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+            >
+                🎁 {t('products.rewards')}
+            </button>
+        </div>
+    );
+};
+
 const Breadcrumb = ({
     selectedCategory,
 }: {
@@ -816,6 +875,7 @@ const ProductsSection = ({
 function ProductsPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { user } = useAuth();
     const categoryFilter = searchParams.get('categoryFilters');
     const favoritesFilter = searchParams.get('favorites');
     const rewardsFilter = searchParams.get('rewards');
@@ -885,6 +945,17 @@ function ProductsPageContent() {
 
     return (
         <div className="mx-auto px-4 md:px-16 py-8 bg-white">
+            {/* Solo movil: barra de secciones Productos / Favoritos / Canjeables */}
+            <div className="md:hidden mb-4">
+                <MobileSectionSelector
+                    isFavoritesSelected={isFavoritesSelected}
+                    isRewardsSelected={isRewardsSelected}
+                    onSelectFavorites={handleSelectFavorites}
+                    onSelectRewards={handleSelectRewards}
+                    onSelectCategory={handleSelectCategory}
+                    user={user}
+                />
+            </div>
             <div className="flex">
                 <CategorySidebar
                     categories={categories}
