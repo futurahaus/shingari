@@ -49,19 +49,18 @@ export default function ProductDetailPage() {
         <Link href="/" className="hover:text-gray-700">{t('navigation.home')}</Link> / <Link href="/products" className="hover:text-gray-700">{t('navigation.products')}</Link> / <span className="font-semibold">{product.name}</span>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
+        <div className="order-1 lg:col-span-2">
           <ProductImageGallery images={product.images} />
-
-          <div className="mt-8">
-            <ProductTabs product={product} />
-          </div>
-
-          <div className="border-t" style={{ borderColor: 'var(--color-gray-200)' }} />
-
-          <SimilarProducts product={product} />
         </div>
-        <div className="flex flex-col gap-6">
+        <div className="order-2 lg:col-span-2">
+          <ProductTabs product={product} />
+        </div>
+        <div className="order-3 lg:col-span-1 lg:row-span-3 lg:row-start-1 lg:col-start-3 flex flex-col gap-6">
           <ProductInfo product={product} />
+        </div>
+        <div className="order-4 lg:col-span-2">
+          <div className="border-t" style={{ borderColor: 'var(--color-gray-200)' }} />
+          <SimilarProducts product={product} />
         </div>
       </div>
     </div>
