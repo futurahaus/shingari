@@ -153,6 +153,17 @@ export default function Navbar() {
               {user && (
                 <>
                   <div className="border-t border-white/20 my-2"></div>
+                  <Link
+                    href="/products?favorites=true"
+                    onClick={closeMenu}
+                    className="block py-3 hover:bg-primary-dark transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Text as="span" size="md" color="white">
+                        ⭐ {t('products.favorites')}
+                      </Text>
+                    </div>
+                  </Link>
                   {sidebarItems.map((item) => (
                     <Link
                       key={item.href}
