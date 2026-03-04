@@ -18,9 +18,9 @@ export function ProductCard({ product }: ProductCardProps) {
         <Image
           src={product.image}
           alt={product.name}
-          layout="fill"
-          objectFit="contain"
-          className="rounded-lg"
+          fill
+          className="rounded-lg object-contain"
+          sizes="256px"
         />
         <span className="absolute top-2 right-2 px-2 py-1 text-sm font-bold text-white bg-orange-500 rounded-md">
           {product.discount}

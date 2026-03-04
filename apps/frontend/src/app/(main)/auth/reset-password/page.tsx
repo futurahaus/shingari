@@ -98,7 +98,7 @@ function ResetPasswordPageContent() {
     <div className="max-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
         <div className="flex flex-col items-center justify-center py-8 gap-4">
-          <Image src="/shingari.webp" alt="Shingari Foods" width={200} height={200} />
+          <Image src="/shingari.webp" alt="Shingari Foods" width={200} height={200} style={{ width: 'auto', height: 'auto' }} />
           <h2 className="text-center text-3xl font-extrabold text-gray-900">
             {t('auth.reset_password.title')}
           </h2>

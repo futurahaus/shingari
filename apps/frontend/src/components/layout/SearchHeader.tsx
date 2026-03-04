@@ -39,7 +39,7 @@ const SearchHeaderDesktop = () => {
         <div className="mx-auto px-4 sm:px-6 lg:px-16">
           <div className="flex items-center justify-between">
             <Link href="/" className="text-red-600 font-bold text-xl flex items-center gap-2">
-              <Image src="/shingari.webp" alt="Shingari logo" width={105} height={24} priority />
+              <Image src="/shingari.webp" alt="Shingari logo" width={105} height={24} priority style={{ width: 'auto', height: 'auto' }} />
             </Link>
 
             <div className="flex-1 max-w-2xl mx-8">
@@ -144,7 +144,7 @@ const SearchHeaderMobile = () => {
         <div className="mx-auto px-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="text-red-600 font-bold text-xl flex items-center gap-2">
-              <Image src="/shingari.webp" alt="Shingari logo" width={105} height={24} priority />
+              <Image src="/shingari.webp" alt="Shingari logo" width={105} height={24} priority style={{ width: 'auto', height: 'auto' }} />
             </Link>
 
             <div className="flex items-center space-x-4">

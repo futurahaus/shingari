@@ -28,9 +28,9 @@ export function ProductImageGallery({ images }: ProductImageGalleryProps) {
             <Image
               src={img}
               alt={`Product thumbnail ${idx + 1}`}
-              layout="fill"
-              objectFit="cover"
-              className="rounded-md"
+              fill
+              className="rounded-md object-cover"
+              sizes="64px"
             />
           </div>
         ))}
@@ -45,9 +45,9 @@ export function ProductImageGallery({ images }: ProductImageGalleryProps) {
         <Image
           src={mainImage}
           alt="Main product image"
-          layout="fill"
-          objectFit="contain"
-          className="rounded-lg"
+          fill
+          className="rounded-lg object-contain"
+          sizes="100vw"
         />
       </div>
     </div>
