@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import * as XLSX from 'xlsx';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { useTranslation } from '@/contexts/I18nContext';
 
@@ -83,8 +82,9 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
 
     if (isExcel) {
       const reader = new FileReader();
-      reader.onload = () => {
+      reader.onload = async () => {
         try {
+          const XLSX = await import('xlsx');
           const buffer = reader.result as ArrayBuffer;
           const workbook = XLSX.read(buffer, { type: 'array' });
           const sheetName = workbook.SheetNames[0];
@@ -156,7 +156,8 @@ export const ImportSpecialPricesModal: React.FC<ImportSpecialPricesModalProps> =
     }
   };
 
-  const handleDownloadTemplate = () => {
+  const handleDownloadTemplate = async () => {
+    const XLSX = await import('xlsx');
     const data = [
       ['SKU', 'PRECIO', 'VALIDO_DESDE', 'VALIDO_HASTA', 'ESTADO'],
       ['C2391', '10.50', '2025-01-01', '2025-12-31', 'activo'],

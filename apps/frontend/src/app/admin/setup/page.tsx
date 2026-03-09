@@ -3,7 +3,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from '@/contexts/I18nContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
-import QRCode from 'qrcode';
 
 // Tab interface
 interface Tab {
@@ -739,6 +738,7 @@ export default function AdminSetupPage() {
           setQrCodeDataUrl(base64);
         } else if (data.pairingCode || data.code) {
           const qrContent = data.code || data.pairingCode || '';
+          const { default: QRCode } = await import('qrcode');
           const dataUrl = await QRCode.toDataURL(qrContent, {
             width: 250,
             margin: 2,
