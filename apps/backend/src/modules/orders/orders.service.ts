@@ -7,6 +7,10 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { DatabaseService } from '../database/database.service';
+import {
+  getBufferFromMulterFile,
+  cleanupMulterFile,
+} from '../../common/multer.util';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { AddOrderLineDto } from './dto/add-order-line.dto';
@@ -469,10 +473,17 @@ export class OrdersService {
       const fileName = `${orderId}_${documentType}_${timestamp}.${fileExtension}`;
       const filePath = `orders/${orderId}/${fileName}`;
 
+      let buffer: Buffer;
+      try {
+        buffer = await getBufferFromMulterFile(file);
+      } finally {
+        await cleanupMulterFile(file);
+      }
+
       // Subir archivo a Supabase Storage
       const { data, error } = await this.databaseService.getAdminClient().storage
         .from('shingari')
-        .upload(filePath, file.buffer, {
+        .upload(filePath, buffer, {
           contentType: file.mimetype,
           cacheControl: '3600',
           upsert: false,

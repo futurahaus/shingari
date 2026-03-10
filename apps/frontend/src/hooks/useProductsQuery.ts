@@ -94,7 +94,8 @@ export function useProductsInfinite(filters: Omit<ProductFilters, 'page'> = {}) 
     },
     enabled: isReady, // Only fetch when i18n is ready
     staleTime: 1 * 60 * 1000, // 1 minute
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes (reduce memory retention)
+    maxPages: 5, // Limit cached pages for infinite scroll
     retry: 1,
   });
 }

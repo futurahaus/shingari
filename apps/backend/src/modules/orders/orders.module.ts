@@ -5,13 +5,14 @@ import { OrdersController } from './orders.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { DatabaseModule } from '../database/database.module';
 import { MailService } from '../mail/mail.service';
+import { multerDiskStorage } from '../../common/multer-disk.config';
 
 @Module({
   imports: [
     PrismaModule,
     DatabaseModule,
     MulterModule.register({
-      storage: undefined, // Usar memoria para procesar el archivo
+      storage: multerDiskStorage,
       limits: {
         fileSize: 10 * 1024 * 1024, // 10MB
       },

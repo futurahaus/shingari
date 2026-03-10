@@ -19,6 +19,10 @@ import { PaginatedRedemptionsResponseDto } from './dto/paginated-redemptions-res
 import { UpdateRedemptionStatusDto } from './dto/update-redemption-status.dto';
 import { rewards as RewardPrismaType } from '../../../generated/prisma';
 import { DatabaseService } from 'src/modules/database/database.service';
+import {
+  getBufferFromMulterFile,
+  cleanupMulterFile,
+} from '../../common/multer.util';
 
 @Injectable()
 export class RewardsService {
@@ -271,7 +275,7 @@ export class RewardsService {
       const rewards = await this.prisma.rewards.findMany({
         where,
         orderBy: { points_cost: 'asc' },
-        take: limit,
+        take: limit ?? 100,
       });
 
       this.logger.log(`Found ${rewards.length} public rewards`);
@@ -413,11 +417,18 @@ export class RewardsService {
       const fileName = `reward_image_${timestamp}.${fileExtension}`;
       const filePath = `rewards/${fileName}`;
 
+      let buffer: Buffer;
+      try {
+        buffer = await getBufferFromMulterFile(file);
+      } finally {
+        await cleanupMulterFile(file);
+      }
+
       // Subir archivo a Supabase Storage
       const { error } = await this.databaseService
         .getAdminClient()
         .storage.from('shingari')
-        .upload(filePath, file.buffer, {
+        .upload(filePath, buffer, {
           contentType: file.mimetype,
           cacheControl: '3600',
         });

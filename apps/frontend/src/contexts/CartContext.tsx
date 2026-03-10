@@ -39,6 +39,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Migration function to add missing IVA data to existing cart items
+  // Uses concurrency limit (3) to avoid overwhelming the API with parallel requests
   const migrateCartItems = async (cartItems: CartProduct[]): Promise<CartProduct[]> => {
     const itemsNeedingMigration = cartItems.filter(item => item.iva === undefined);
     
@@ -46,21 +47,27 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       return cartItems;
     }
 
-    try {
-      // Fetch product data for items missing IVA
-      const productPromises = itemsNeedingMigration.map(async (item) => {
-        try {
-          const response = await api.get(`/products/${item.id}`) as { data?: { iva?: number } };
-          return { id: item.id, iva: response.data?.iva };
-        } catch {
-          return { id: item.id, iva: undefined };
-        }
-      });
+    const CONCURRENCY = 3;
+    const productData: Array<{ id: string; iva?: number }> = [];
 
-      const productData = await Promise.all(productPromises);
+    try {
+      for (let i = 0; i < itemsNeedingMigration.length; i += CONCURRENCY) {
+        const chunk = itemsNeedingMigration.slice(i, i + CONCURRENCY);
+        const chunkResults = await Promise.all(
+          chunk.map(async (item) => {
+            try {
+              const response = await api.get(`/products/${item.id}`) as { data?: { iva?: number } };
+              return { id: item.id, iva: response.data?.iva };
+            } catch {
+              return { id: item.id, iva: undefined };
+            }
+          })
+        );
+        productData.push(...chunkResults);
+      }
+
       const ivaMap = new Map(productData.map(p => [p.id, p.iva]));
 
-      // Update cart items with IVA data
       return cartItems.map(item => ({
         ...item,
         iva: item.iva !== undefined ? item.iva : ivaMap.get(item.id)

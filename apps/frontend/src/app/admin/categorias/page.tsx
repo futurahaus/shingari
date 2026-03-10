@@ -1,5 +1,7 @@
 "use client";
 
+import dynamic from "next/dynamic";
+import type { DropResult } from "@hello-pangea/dnd";
 import { Text } from '@/app/ui/components/Text';
 import { useTranslation } from '@/contexts/I18nContext';
 import { useCategories, Category } from '../productos/hooks/useCategories.hook';
@@ -8,10 +10,13 @@ import { Button } from '@/app/ui/components/Button';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { FaEdit, FaTrash, FaPlus, FaFolder, FaExclamationTriangle, FaGlobe, FaCheck } from 'react-icons/fa';
-import Image from 'next/image';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import React from 'react';
 import { CategoryTranslationModal } from './components/CategoryTranslationModal';
+
+const CategoryTreeWithDnd = dynamic(
+  () => import('./CategoryTreeWithDnd').then((mod) => ({ default: mod.CategoryTreeWithDnd })),
+  { ssr: false }
+);
 
 interface CategoryFormState {
   id?: string;
@@ -187,83 +192,6 @@ export default function AdminCategoriasPage() {
     }
   };
 
-  // Recursive drag-and-drop tree
-  function renderDraggableTree(nodes: CategoryWithChildren[], level = 0, parentId?: string) {
-    // Sort nodes by order, then by name
-    const sortedNodes = [...nodes].sort((a, b) => {
-      if ((a.order ?? 0) !== (b.order ?? 0)) return (a.order ?? 0) - (b.order ?? 0);
-      return a.name.localeCompare(b.name);
-    });
-    return (
-      <DragDropContext onDragEnd={result => handleDragEnd(result, sortedNodes, parentId)}>
-        <Droppable droppableId={parentId ? `droppable-${parentId}` : 'root-categories'}>
-          {(provided) => (
-            <ul ref={provided.innerRef} {...provided.droppableProps} className={level === 0 ? 'space-y-1' : 'ml-5 border-l-2 border-gray-100 pl-3 space-y-1 flex-1'}>
-              {sortedNodes.map((cat, idx) => (
-                <Draggable key={cat.id} draggableId={cat.id} index={idx}>
-                  {(provided, snapshot) => (
-                    <li
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      className={`flex items-center group rounded px-1 py-1 hover:bg-gray-50 transition relative bg-white ${snapshot.isDragging ? 'ring-2 ring-primary-main' : ''}`}
-                      style={{ minHeight: 28, ...provided.draggableProps.style }}
-                    >
-                      <span className="flex items-center mr-2">
-                        {cat.image ? (
-                          <Image src={cat.image} alt={cat.name} width={18} height={18} className="rounded object-cover" />
-                        ) : (
-                          <FaFolder className="text-gray-400 w-4 h-4" />
-                        )}
-                      </span>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-gray-900 truncate text-base" title={getTranslatedName(cat)}>{getTranslatedName(cat)}</span>
-                        
-                        </div>
-                        {/* Translation indicator */}
-                        {cat.translations && cat.translations.length > 0 && (
-                          <div className="flex items-center mt-1">
-                            <FaCheck className="w-3 h-3 text-green-500 mr-1" />
-                            <span className="text-xs text-green-600 font-medium">
-                              {t('admin.categories.translated')} ({cat.translations.map(t => t.locale).join(', ')})
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button 
-                          onClick={() => openTranslationModal(cat)} 
-                          className={`p-1 rounded-lg transition ${
-                            cat.translations && cat.translations.length > 0
-                              ? 'text-green-600 hover:text-green-700'
-                              : 'text-gray-600 hover:text-blue-600'
-                          }`}
-                          title={cat.translations && cat.translations.length > 0
-                            ? t('admin.categories.translate_category_already', { locales: cat.translations.map(t => t.locale).join(', ') })
-                            : t('admin.categories.translate_category')
-                          }
-                          type="button"
-                        >
-                          <FaGlobe size={13} />
-                        </button>
-                        <button onClick={() => openEditModal(cat)} className="p-1 text-gray-600 hover:text-blue-600 rounded-lg transition" title={t('admin.categories.edit_category')} type="button"><FaEdit size={13} /></button>
-                        <button onClick={() => openDelete(cat.id)} className="p-1 text-gray-600 hover:text-red-600 rounded-lg transition" title={t('admin.categories.delete_category')} type="button"><FaTrash size={13} /></button>
-                        <button onClick={() => openAddModal(cat.id)} className="p-1 text-gray-600 hover:text-green-600 rounded-lg transition" title={t('admin.categories.add_subcategory')} type="button"><FaPlus size={13} /></button>
-                      </div>
-                      {cat.children && cat.children.length > 0 && renderDraggableTree(cat.children, level + 1, cat.id)}
-                    </li>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </ul>
-          )}
-        </Droppable>
-      </DragDropContext>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="">
@@ -291,9 +219,18 @@ export default function AdminCategoriasPage() {
             <Button text={t('admin.categories.add_category')} type="primary-admin" onPress={() => openAddModal()} testID="add-root-empty" icon={FaPlus} />
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            {renderDraggableTree([...localTree].sort(sortByOrder))}
-          </div>
+          <CategoryTreeWithDnd
+            localTree={localTree}
+            tree={tree}
+            onDragEnd={handleDragEnd}
+            sortByOrder={sortByOrder}
+            getTranslatedName={getTranslatedName}
+            t={t}
+            openTranslationModal={openTranslationModal}
+            openEditModal={openEditModal}
+            openDelete={openDelete}
+            openAddModal={openAddModal}
+          />
         )}
       </div>
       {/* Modal for add/edit */}

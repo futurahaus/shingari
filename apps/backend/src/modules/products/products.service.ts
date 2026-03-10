@@ -7,6 +7,10 @@ import {
   Logger,
 } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
+import {
+  getBufferFromMulterFile,
+  cleanupMulterFile,
+} from '../../common/multer.util';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   Prisma,
@@ -1694,11 +1698,18 @@ export class ProductsService {
       const fileName = `product_image_${timestamp}.${fileExtension}`;
       const filePath = `products/${fileName}`;
 
+      let buffer: Buffer;
+      try {
+        buffer = await getBufferFromMulterFile(file);
+      } finally {
+        await cleanupMulterFile(file);
+      }
+
       // Subir archivo a Supabase Storage
       const { error } = await this.databaseService
         .getAdminClient()
         .storage.from('shingari')
-        .upload(filePath, file.buffer, {
+        .upload(filePath, buffer, {
           contentType: file.mimetype,
           cacheControl: '3600',
         });
@@ -1755,13 +1766,20 @@ export class ProductsService {
       message: string;
     }>;
   }> {
+    let buffer: Buffer;
+    try {
+      buffer = await getBufferFromMulterFile(file);
+    } finally {
+      await cleanupMulterFile(file);
+    }
+
     try {
       // Read Excel or CSV file
       let data: any[][];
 
       if (file.mimetype === 'text/csv' || file.mimetype === 'application/csv') {
         // Handle CSV files - parse manually to handle quoted values with commas correctly
-        const csvText = file.buffer.toString('utf-8');
+        const csvText = buffer.toString('utf-8');
         const lines = csvText.split(/\r?\n/).filter((l) => l.trim().length > 0);
 
         // Parse CSV manually handling quoted fields
@@ -1789,7 +1807,7 @@ export class ProductsService {
         data = lines.map((line) => parseCSVLine(line));
       } else {
         // Handle Excel files
-        const workbook = XLSX.read(file.buffer, { type: 'buffer' });
+        const workbook = XLSX.read(buffer, { type: 'buffer' });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
         data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
@@ -2161,6 +2179,8 @@ export class ProductsService {
   }
 
   // Constantes para importación
+  // NOTE: XLSX.read loads entire workbook in memory. For very large files (>10k rows),
+  // consider streaming CSV parsing (e.g. csv-parse) to reduce memory spikes.
   private readonly IMPORT_MAX_ROWS = 10000;
   private readonly IMPORT_MAX_NAME_LENGTH = 255;
   private readonly IMPORT_MAX_DESCRIPTION_LENGTH = 2000;
@@ -2204,9 +2224,16 @@ export class ProductsService {
       }>,
     };
 
+    let buffer: Buffer;
+    try {
+      buffer = await getBufferFromMulterFile(file);
+    } finally {
+      await cleanupMulterFile(file);
+    }
+
     try {
       // Leer el archivo Excel
-      const workbook = XLSX.read(file.buffer, { type: 'buffer' });
+      const workbook = XLSX.read(buffer, { type: 'buffer' });
       const sheetName = workbook.SheetNames[0];
       const data = XLSX.utils.sheet_to_json<string[]>(
         workbook.Sheets[sheetName],
