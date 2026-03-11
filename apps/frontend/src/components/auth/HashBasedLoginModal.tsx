@@ -35,14 +35,10 @@ export default function HashBasedLoginModal() {
     // Check hash immediately
     checkHash();
 
-    // Check hash periodically to catch any changes
-    const intervalId = setInterval(checkHash, 100);
-
-    // Also listen for hash changes as backup
+    // Listen for hash changes
     window.addEventListener('hashchange', checkHash);
 
     return () => {
-      clearInterval(intervalId);
       window.removeEventListener('hashchange', checkHash);
     };
   }, []);

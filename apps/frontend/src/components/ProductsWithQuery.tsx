@@ -4,11 +4,11 @@ import { useSearchParams } from 'next/navigation';
 import { ProductCard } from '@/components/ProductCard';
 import ProductCardSkeleton from '@/components/ProductCardSkeleton';
 import { Text } from '@/app/ui/components/Text';
-import { useProductsQuery, useProductsInfinite } from '@/hooks/useProductsQuery';
+import { ProductFilters, useProductCategories, useProductsInfinite, useProductsList } from '@/hooks/useProductsQuery';
 import { useFavoritesQuery } from '@/hooks/useFavoritesQuery';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTranslation } from '@/contexts/I18nContext';
-import { useEffect, useRef } from 'react';
+import { RefObject, useEffect, useRef } from 'react';
 
 interface ProductsWithQueryProps {
   selectedCategory: string | null;
@@ -17,108 +17,39 @@ interface ProductsWithQueryProps {
   enableInfiniteScroll?: boolean;
 }
 
-export function ProductsWithQuery({
-  selectedCategory,
-  categoryFilter,
-  isFavoritesSelected,
-  enableInfiniteScroll = true
-}: ProductsWithQueryProps) {
-  const { t } = useTranslation();
-  const searchParams = useSearchParams();
-  const observerRef = useRef<HTMLDivElement | null>(null);
-  
-  // Get search query from URL
-  const searchQuery = searchParams.get('search');
-  
-  // Get price filter from URL
-  const priceFilter = searchParams.get('sortByPrice') as 'ASC' | 'DESC' | undefined;
-  
-  // Use favorites query when favorites are selected
-  const { favorites, isLoading: favoritesLoading } = useFavoritesQuery();
-  
-  // Build filters for products query
-  const productFilters = {
-    categoryFilters: selectedCategory || categoryFilter || undefined,
-    search: searchQuery || undefined,
-    sortByPrice: priceFilter,
-    limit: 20,
-  };
-  
-  // Use infinite query for better performance with pagination
-  const {
-    data: infiniteData,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading: productsLoading,
-    error: productsError,
-  } = useProductsInfinite(
-    enableInfiniteScroll ? productFilters : {}
-  );
-  
-  // Use regular query for non-infinite scroll
-  const {
-    products: regularProducts,
-    isLoading: regularLoading,
-    error: regularError,
-  } = useProductsQuery(
-    !enableInfiniteScroll ? productFilters : {}
-  );
-  
-  // Determine which data to use
-  const isLoading = isFavoritesSelected ? favoritesLoading : 
-    (enableInfiniteScroll ? productsLoading : regularLoading);
-  
-  const error = isFavoritesSelected ? null : 
-    (enableInfiniteScroll ? productsError : regularError);
-  
-  const products = isFavoritesSelected 
-    ? favorites.map(fav => ({
-        id: fav.product_id.toString(),
-        name: fav.product.name,
-        price: fav.product.price,
-        originalPrice: fav.product.originalPrice,
-        discount: fav.product.discount,
-        description: fav.product.description || '',
-        images: fav.product.images || [],
-        categories: [],
-        sku: fav.product.sku,
-        iva: fav.product.iva,
-      }))
-    : enableInfiniteScroll 
-      ? infiniteData?.pages.flatMap(page => page.data) || []
-      : regularProducts;
-  
-  // Apply client-side sorting for favorites if needed
-  const sortedProducts = isFavoritesSelected && priceFilter
-    ? [...products].sort((a, b) => 
-        priceFilter === 'ASC' ? a.price - b.price : b.price - a.price
-      )
-    : products;
-  
-  // Intersection Observer for infinite scroll
-  useEffect(() => {
-    if (!enableInfiniteScroll || isFavoritesSelected || !hasNextPage || isFetchingNextPage) return;
-    
-    const observer = new window.IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          fetchNextPage();
-        }
-      },
-      { root: null, rootMargin: '200px', threshold: 0.1 }
-    );
-    
-    const sentinel = observerRef.current;
-    if (sentinel) observer.observe(sentinel);
-    
-    return () => {
-      if (sentinel) observer.unobserve(sentinel);
-    };
-  }, [enableInfiniteScroll, isFavoritesSelected, hasNextPage, isFetchingNextPage, fetchNextPage]);
+interface ProductGridProps {
+  products: Array<{
+    id: string;
+    name: string;
+    price: number;
+    originalPrice?: number;
+    discount?: number;
+    description: string;
+    images: string[];
+    categories: string[];
+    sku?: string;
+    iva?: number;
+  }>;
+  isLoading: boolean;
+  error: Error | null;
+  emptyMessage: string;
+  loadingMore?: boolean;
+  observerRef?: RefObject<HTMLDivElement | null>;
+  showInfiniteSentinel?: boolean;
+}
 
-  // Loading state
-  if (isLoading && sortedProducts.length === 0) {
+function ProductGrid({
+  products,
+  isLoading,
+  error,
+  emptyMessage,
+  loadingMore = false,
+  observerRef,
+  showInfiniteSentinel = false,
+}: ProductGridProps) {
+  const { t } = useTranslation();
+
+  if (isLoading && products.length === 0) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 3xl:grid-cols-6 gap-6 animate-pulse">
         {[...Array(10)].map((_, i) => (
@@ -127,8 +58,7 @@ export function ProductsWithQuery({
       </div>
     );
   }
-  
-  // Error state
+
   if (error) {
     return (
       <Text as="p" size="md" color="error" testID="error-message">
@@ -136,35 +66,30 @@ export function ProductsWithQuery({
       </Text>
     );
   }
-  
-  // Empty state
-  if (sortedProducts.length === 0) {
+
+  if (products.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
         <Text as="p" size="xl" color="secondary" className="mb-2" testID="empty-category-message">
-          {isFavoritesSelected 
-            ? t('products.no_favorites_found')
-            : t('products.no_products_found')
-          }
+          {emptyMessage}
         </Text>
       </div>
     );
   }
-  
+
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5 3xl:grid-cols-6 gap-6">
-        {sortedProducts.map((product) => (
+        {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
-      
-      {/* Infinite scroll sentinel */}
-      {enableInfiniteScroll && !isFavoritesSelected && (
+
+      {showInfiniteSentinel && observerRef && (
         <>
           <div ref={observerRef} className="h-8 w-full" />
           <div className="text-center mt-8">
-            {isFetchingNextPage && (
+            {loadingMore && (
               <Text as="span" size="md" color="secondary">
                 {t('products.loading_more')}
               </Text>
@@ -174,6 +99,132 @@ export function ProductsWithQuery({
       )}
     </>
   );
+}
+
+function FavoritesProductsView({ priceFilter }: { priceFilter?: 'ASC' | 'DESC' }) {
+  const { t } = useTranslation();
+  const { favorites, isLoading } = useFavoritesQuery();
+
+  const products = favorites.map(fav => ({
+    id: fav.product_id.toString(),
+    name: fav.product.name,
+    price: fav.product.price,
+    originalPrice: fav.product.originalPrice,
+    discount: fav.product.discount,
+    description: fav.product.description || '',
+    images: fav.product.images || [],
+    categories: [],
+    sku: fav.product.sku,
+    iva: fav.product.iva,
+  }));
+
+  const sortedProducts = priceFilter
+    ? [...products].sort((a, b) => (priceFilter === 'ASC' ? a.price - b.price : b.price - a.price))
+    : products;
+
+  return (
+    <ProductGrid
+      products={sortedProducts}
+      isLoading={isLoading}
+      error={null}
+      emptyMessage={t('products.no_favorites_found')}
+    />
+  );
+}
+
+function InfiniteProductsView({ productFilters }: { productFilters: ProductFilters }) {
+  const { t } = useTranslation();
+  const observerRef = useRef<HTMLDivElement | null>(null);
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    error,
+  } = useProductsInfinite(productFilters);
+
+  useEffect(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+
+    const observer = new window.IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          fetchNextPage();
+        }
+      },
+      { root: null, rootMargin: '200px', threshold: 0.1 }
+    );
+
+    const sentinel = observerRef.current;
+    if (sentinel) observer.observe(sentinel);
+
+    return () => {
+      if (sentinel) observer.unobserve(sentinel);
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const products = data?.pages.flatMap(page => page.data) || [];
+
+  return (
+    <ProductGrid
+      products={products}
+      isLoading={isLoading}
+      error={error as Error | null}
+      emptyMessage={t('products.no_products_found')}
+      loadingMore={isFetchingNextPage}
+      observerRef={observerRef}
+      showInfiniteSentinel={true}
+    />
+  );
+}
+
+function RegularProductsView({ productFilters }: { productFilters: ProductFilters }) {
+  const { t } = useTranslation();
+  const { data, isLoading, error } = useProductsList(productFilters);
+  const products = data?.data || [];
+
+  return (
+    <ProductGrid
+      products={products}
+      isLoading={isLoading}
+      error={error as Error | null}
+      emptyMessage={t('products.no_products_found')}
+    />
+  );
+}
+
+export function ProductsWithQuery({
+  selectedCategory,
+  categoryFilter,
+  isFavoritesSelected,
+  enableInfiniteScroll = true
+}: ProductsWithQueryProps) {
+  const searchParams = useSearchParams();
+  
+  // Get search query from URL
+  const searchQuery = searchParams.get('search');
+  
+  // Get price filter from URL
+  const priceFilter = searchParams.get('sortByPrice') as 'ASC' | 'DESC' | undefined;
+  
+  // Build filters for products query
+  const productFilters = {
+    categoryFilters: selectedCategory || categoryFilter || undefined,
+    search: searchQuery || undefined,
+    sortByPrice: priceFilter,
+    limit: 20,
+  };
+
+  if (isFavoritesSelected) {
+    return <FavoritesProductsView priceFilter={priceFilter} />;
+  }
+
+  if (enableInfiniteScroll) {
+    return <InfiniteProductsView productFilters={productFilters} />;
+  }
+
+  return <RegularProductsView productFilters={productFilters} />;
 }
 
 // Simple sidebar component with React Query categories
@@ -190,7 +241,7 @@ export function CategorySidebarWithQuery({
 }) {
   const { user } = useAuth();
   const { t } = useTranslation();
-  const { categories, isCategoriesLoading } = useProductsQuery();
+  const { data: categories = [], isLoading: isCategoriesLoading } = useProductCategories();
   
   // Build parent-children map
   const parentCategories = categories.filter(cat => !cat.parentId || cat.parentId === '');

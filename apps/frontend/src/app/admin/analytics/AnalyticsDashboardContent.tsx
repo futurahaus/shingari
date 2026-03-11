@@ -85,6 +85,15 @@ interface AnalyticsDashboardContentProps {
   t: (key: string) => string;
 }
 
+function getNumericTooltipValue(value: unknown): number | null {
+  if (typeof value === "number") return value;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? null : parsed;
+  }
+  return null;
+}
+
 export function AnalyticsDashboardContent({ data, t }: AnalyticsDashboardContentProps) {
   const revenueChartData = data.monthlyRevenue.map((r) => ({
     name: `${r.month} ${r.year}`,
@@ -178,7 +187,12 @@ export function AnalyticsDashboardContent({ data, t }: AnalyticsDashboardContent
               <XAxis dataKey="name" tick={{ fontSize: 12 }} />
               <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `€${v}`} />
               <Tooltip
-                formatter={(value: number | undefined) => value != null ? [`€${value.toLocaleString("es-ES")}`, t("admin.dashboard.charts.monthly_revenue")] : null}
+                formatter={(value) => {
+                  const amount = getNumericTooltipValue(value);
+                  return amount != null
+                    ? [`€${amount.toLocaleString("es-ES")}`, t("admin.dashboard.charts.monthly_revenue")]
+                    : null;
+                }}
                 contentStyle={{ borderRadius: "8px" }}
               />
               <Area
@@ -237,7 +251,13 @@ export function AnalyticsDashboardContent({ data, t }: AnalyticsDashboardContent
                     <Cell key={i} fill={statusChartData[i].fill} stroke="#fff" strokeWidth={2} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number | undefined) => value != null ? [value, t("admin.dashboard.table.status")] : null} contentStyle={{ borderRadius: "8px" }} />
+                <Tooltip
+                  formatter={(value) => {
+                    const count = getNumericTooltipValue(value);
+                    return count != null ? [count, t("admin.dashboard.table.status")] : null;
+                  }}
+                  contentStyle={{ borderRadius: "8px" }}
+                />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
