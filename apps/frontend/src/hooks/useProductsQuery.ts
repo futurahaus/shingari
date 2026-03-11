@@ -71,7 +71,7 @@ export function useProductsList(filters: ProductFilters = {}) {
     },
     enabled: isReady, // Only fetch when i18n is ready
     staleTime: 3 * 60 * 1000, // 3 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
   });
 }
@@ -114,7 +114,7 @@ export function useProduct(id: string) {
     },
     enabled: !!id,
     staleTime: 1 * 60 * 1000, // 1 minute
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
   });
 }
@@ -129,7 +129,7 @@ export function useProductCategories() {
     queryFn: () => localizedAPI.get<Category[]>('/products/categories'),
     enabled: isReady, // Only fetch when i18n is ready
     staleTime: 1 * 60 * 1000, // 1 minute - categories don't change often
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
   });
 }

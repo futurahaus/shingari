@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from '@/contexts/I18nContext';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -150,6 +150,7 @@ export default function AdminOrderDetailPage() {
   const [confirmRemoveLine, setConfirmRemoveLine] = useState<string | null>(null);
   const [confirmDeleteFile, setConfirmDeleteFile] = useState<string | null>(null);
   const [confirmCancelOrder, setConfirmCancelOrder] = useState<string | null>(null);
+  const uploadProgressIntervalRef = useRef<number | null>(null);
 
   const isOrderEditable = order?.status === 'pending' || order?.status === 'accepted';
 
@@ -243,6 +244,14 @@ export default function AdminOrderDetailPage() {
       .finally(() => setLoading(false));
   }, [orderId, t, refreshKey]); // Added refreshKey as dependency
 
+  useEffect(() => {
+    return () => {
+      if (uploadProgressIntervalRef.current !== null) {
+        clearInterval(uploadProgressIntervalRef.current);
+      }
+    };
+  }, []);
+
   const handleFileUpload = async (file: File) => {
     if (!file || !orderId) {
       return;
@@ -265,13 +274,9 @@ export default function AdminOrderDetailPage() {
       const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/orders/${orderId}/upload-document`;
 
       // Simulate upload progress
-      const progressInterval = setInterval(() => {
+      uploadProgressIntervalRef.current = window.setInterval(() => {
         setUploadProgress(prev => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
+          return prev >= 90 ? 90 : prev + 10;
         });
       }, 100);
 
@@ -284,7 +289,10 @@ export default function AdminOrderDetailPage() {
         body: formData,
       });
 
-      clearInterval(progressInterval);
+      if (uploadProgressIntervalRef.current !== null) {
+        clearInterval(uploadProgressIntervalRef.current);
+        uploadProgressIntervalRef.current = null;
+      }
       setUploadProgress(100);
 
       if (!response.ok) {
@@ -308,6 +316,10 @@ export default function AdminOrderDetailPage() {
     } catch (error) {
       showError(t('admin.upload.upload_failed'), error instanceof Error ? error.message : t('admin.orders.detail.unknown_error'));
     } finally {
+      if (uploadProgressIntervalRef.current !== null) {
+        clearInterval(uploadProgressIntervalRef.current);
+        uploadProgressIntervalRef.current = null;
+      }
       setTimeout(() => {
         setUploading(false);
         setUploadProgress(0);
