@@ -224,6 +224,8 @@ export default function AdminHomeCarouselPage() {
           text={t('admin.home_carousel.add_slide')}
           icon={FaPlus}
           testID="admin-home-carousel-add-slide"
+          inline
+          size="md"
         />
       </div>
 
