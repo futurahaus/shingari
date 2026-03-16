@@ -2,13 +2,13 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/app/ui/components/Button';
 import { Text } from '@/app/ui/components/Text';
+import { Button } from '@/app/ui/components/Button';
 import { useTranslation } from '@/contexts/I18nContext';
 
 export const Banner = () => {
-  const router = useRouter();
   const { t } = useTranslation();
+  const router = useRouter();
 
   return (
     <div className="h-[480px] relative my-8 mx-4 sm:mx-6 lg:mx-8 group">
@@ -22,44 +22,43 @@ export const Banner = () => {
             className="object-cover transition-transform duration-300 group-hover:scale-105"
             priority
           />
-          <div className="absolute inset-0 bg-black opacity-60"></div>
-          <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
-            <Text 
-              as="h1" 
-              size="3xl" 
-              weight="bold" 
-              color="primary-contrast" 
-              className="mb-4 leading-tight"
-              testID="banner-title"
-            >
-              {t('banner.title')}
-            </Text>
-            <Text 
-              as="p" 
-              size="lg" 
-              weight="normal" 
-              color="primary-contrast" 
-              className="mb-10"
-              testID="banner-subtitle"
-            >
-              {t('banner.subtitle')}
-            </Text>
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full max-w-2xl justify-center">
+          <div className="absolute inset-0 bg-black opacity-60" />
+          <div className="absolute inset-0 flex flex-col justify-center items-center text-center px-4 gap-6">
+            <div className="flex flex-col gap-2">
+              <Text
+                as="h1"
+                size="3xl"
+                weight="bold"
+                color="primary-contrast"
+                className="leading-tight"
+                testID="banner-title"
+              >
+                {t('banner.title')}
+              </Text>
+              <Text
+                as="p"
+                size="lg"
+                weight="normal"
+                color="primary-contrast"
+                testID="banner-subtitle"
+              >
+                {t('banner.subtitle')}
+              </Text>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
               <Button
-                onPress={() => {
-                  // Lógica para navegar a tienda particulares
-                }}
+                onPress={() => router.push('/products')}
                 type="primary"
                 text={t('banner.button_individuals')}
-                testID="banner-button-particulares"
+                testID="home-cta-particulares"
+                inline
               />
               <Button
-                onPress={() => {
-                  router.push('/products');
-                }}
+                onPress={() => router.push('/products')}
                 type="primary"
                 text={t('banner.button_businesses')}
-                testID="banner-button-hosteleros"
+                testID="home-cta-hosteleros"
+                inline
               />
             </div>
           </div>

@@ -1,7 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { ProductImageCarousel } from '@/components/ProductImageCarousel';
 import { Text } from '@/app/ui/components/Text';
 import { useTranslation } from '@/contexts/I18nContext';
 import { useHomeProducts } from '@/hooks/useProductsQuery';
@@ -72,19 +72,11 @@ export default function ProductGrid() {
                         onClick={() => router.push(`/products/${product.id}`)}
                     >
                         <div className="w-full aspect-square relative overflow-hidden rounded-2xl">
-                            {product.images && product.images.length > 0 ? (
-                                <Image
-                                    src={product.images[0]}
-                                    alt={product.name}
-                                    fill
-                                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 16vw"
-                                    className="object-contain object-center rounded-2xl transition-transform duration-300 group-hover:scale-105"
-                                />
-                            ) : (
-                                <Text as="div" size="sm" color="gray-400" className="w-full h-40 flex items-center justify-center bg-gray-100 rounded-t-2xl">
-                                    {t('products.no_image')}
-                                </Text>
-                            )}
+                            <ProductImageCarousel
+                                images={product.images || []}
+                                alt={product.name}
+                                className="object-contain object-center rounded-2xl transition-transform duration-300 group-hover:scale-105"
+                            />
                         </div>
                         <div className="py-4">
                             <Text as="div" size="lg" weight="semibold" color="primary" className="text-black">

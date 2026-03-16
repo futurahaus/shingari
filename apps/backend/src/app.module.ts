@@ -12,6 +12,7 @@ import { RewardsModule } from './modules/rewards/rewards.module';
 import { FavoritesModule } from './modules/favorites/favorites.module';
 import { PointsModule } from './modules/points/points.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { HomeCarouselModule } from './modules/home-carousel/home-carousel.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { MailModule } from './modules/mail/mail.module';
 import { WhatsAppModule } from './modules/whatsapp/whatsapp.module';
@@ -41,6 +42,7 @@ import * as redisStore from 'cache-manager-ioredis';
     FavoritesModule,
     PointsModule,
     AnalyticsModule,
+    HomeCarouselModule,
   ],
   controllers: [AppController],
   providers: [AppService],
