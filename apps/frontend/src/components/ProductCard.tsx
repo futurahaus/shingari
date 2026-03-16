@@ -1,5 +1,5 @@
-import Image from 'next/image';
 import { Button } from '@/app/ui/components/Button';
+import { ProductImageCarousel } from './ProductImageCarousel';
 import { Text } from '@/app/ui/components/Text';
 import { useRouter } from 'next/navigation';
 import { formatCurrency } from '@/lib/currency';
@@ -72,19 +72,11 @@ export const ProductCard = ({ product }: { product: Product }) => {
                         )}
                     </button>
                 )}
-                {product.images.length > 0 ? (
-                    <Image
-                        src={product.images[0]}
-                        alt={product.name}
-                        fill
-                        className="object-contain object-center transition-transform duration-300 group-hover:scale-105"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
-                ) : (
-                    <Text as="div" size="sm" color="gray-400" className="text-center">
-                        {t('products.no_image')}
-                    </Text>
-                )}
+                <ProductImageCarousel
+                    images={product.images}
+                    alt={displayName}
+                    className="object-contain object-center transition-transform duration-300 group-hover:scale-105"
+                />
                 {/* Quantity controls */}
                 <QuantityControls
                     productId={product.id}
