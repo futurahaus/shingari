@@ -306,6 +306,7 @@
     "sidebar": {
       "dashboard": "仪表板",
       "analytics": "分析",
+      "home_carousel": "首页轮播",
       "users": "用户",
       "products": "产品",
       "orders": "订单",
@@ -315,6 +316,27 @@
       "settings": "设置",
       "welcome": "欢迎",
       "logout": "退出登录"
+    },
+    "home_carousel": {
+      "title": "首页轮播",
+      "subtitle": "管理首页展示的促销图片",
+      "add_slide": "添加幻灯片",
+      "no_slides": "暂无幻灯片。添加第一个以在首页显示。",
+      "create_slide": "创建幻灯片",
+      "edit_slide": "编辑幻灯片",
+      "image_recommendation": "推荐尺寸",
+      "image": "图片",
+      "upload_image": "上传图片",
+      "link_url": "链接地址",
+      "title_label": "标题",
+      "sort_order": "顺序",
+      "is_active": "启用",
+      "active": "启用",
+      "inactive": "禁用",
+      "image_required": "图片为必填项",
+      "confirm_delete": "确定删除此幻灯片？",
+      "delete_slide": "删除幻灯片",
+      "remove_image": "移除图片"
     },
     "orders": {
       "title": "订单",

@@ -306,6 +306,7 @@
     "sidebar": {
       "dashboard": "Dashboard",
       "analytics": "Analíticas",
+      "home_carousel": "Carrusel Home",
       "users": "Usuarios",
       "products": "Productos",
       "orders": "Pedidos",
@@ -315,6 +316,27 @@
       "settings": "Configuración",
       "welcome": "Bienvenido",
       "logout": "Cerrar Sesión"
+    },
+    "home_carousel": {
+      "title": "Carrusel de la Home",
+      "subtitle": "Gestiona las imágenes promocionales que se muestran en la página principal",
+      "add_slide": "Añadir slide",
+      "no_slides": "No hay slides. Añade el primero para mostrarlos en la home.",
+      "create_slide": "Crear slide",
+      "edit_slide": "Editar slide",
+      "image_recommendation": "Tamaño recomendado",
+      "image": "Imagen",
+      "upload_image": "Subir imagen",
+      "link_url": "URL de enlace",
+      "title_label": "Título",
+      "sort_order": "Orden",
+      "is_active": "Activo",
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "image_required": "La imagen es obligatoria",
+      "confirm_delete": "¿Eliminar este slide?",
+      "delete_slide": "Eliminar slide",
+      "remove_image": "Quitar imagen"
     },
     "orders": {
       "title": "Pedidos",

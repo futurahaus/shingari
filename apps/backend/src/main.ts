@@ -2,6 +2,7 @@ import { config } from 'dotenv';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, Logger } from '@nestjs/common';
+import { MulterExceptionFilter } from './common/http-exception.filter';
 import { ConfigService } from '@nestjs/config';
 import * as cookieParser from 'cookie-parser';
 import helmet from 'helmet';
@@ -47,6 +48,8 @@ async function bootstrap() {
   });
 
   app.use(cookieParser());
+
+  app.useGlobalFilters(new MulterExceptionFilter());
 
   app.useGlobalPipes(
     new ValidationPipe({
