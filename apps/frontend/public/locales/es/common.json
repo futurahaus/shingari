@@ -229,6 +229,10 @@
     "invalid_credentials": "Usuario o contraseña incorrectos",
     "service_unavailable": "Servicio de registro temporalmente no disponible. Por favor, inténtalo más tarde.",
     "email_auth_not_configured": "La autenticación por correo no está configurada correctamente. Contacta al soporte.",
+    "phone_label": "Teléfono",
+    "phone_placeholder": "Ej: +34 612 345 678",
+    "phone_required": "El teléfono es obligatorio",
+    "phone_invalid": "El teléfono no es válido",
     "reset_password": {
       "title": "Restablecer Contraseña",
       "new_password": "Nueva Contraseña",

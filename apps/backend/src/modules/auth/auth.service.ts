@@ -60,6 +60,7 @@ export class AuthService {
           email: registerDto.email,
           password: registerDto.password,
           options: {
+            data: { phone: registerDto.phone },
             emailRedirectTo: `${process.env.FRONTEND_URL}/auth/verify-email`,
           },
         });
@@ -119,6 +120,20 @@ export class AuthService {
         const identities = (data.user as { identities?: unknown[] }).identities ?? [];
         if (identities.length === 0) {
           throw new ConflictException('Este correo electrónico ya está registrado');
+        }
+
+        // Create public.users record with phone for new user
+        const { error: upsertError } = await this.databaseService
+          .getAdminClient()
+          .from('users')
+          .upsert(
+            { uuid: data.user.id, phone: registerDto.phone },
+            { onConflict: 'uuid' },
+          );
+
+        if (upsertError) {
+          this.logger.logError('Public users upsert on registration', upsertError);
+          // Don't fail registration - phone is in metadata; user can complete profile later
         }
       }
 

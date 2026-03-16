@@ -118,6 +118,9 @@ export function I18nProvider({ children }: I18nProviderProps) {
             'auth.registration_failed': 'Error en el registro. Por favor, inténtalo más tarde.',
             'auth.confirm_email_first': 'Por favor, confirma tu correo electrónico antes de iniciar sesión',
             'auth.invalid_credentials': 'Usuario o contraseña incorrectos',
+            'auth.phone_label': 'Teléfono',
+            'auth.phone_required': 'El teléfono es obligatorio',
+            'auth.phone_invalid': 'El teléfono no es válido',
           };
           return fallbacks[key] || key;
         }
@@ -128,6 +131,9 @@ export function I18nProvider({ children }: I18nProviderProps) {
           'auth.registration_failed': { es: 'Error en el registro. Por favor, inténtalo más tarde.', zh: '注册失败。请稍后重试。' },
           'auth.confirm_email_first': { es: 'Por favor, confirma tu correo electrónico antes de iniciar sesión', zh: '请先确认您的邮箱后再登录' },
           'auth.invalid_credentials': { es: 'Usuario o contraseña incorrectos', zh: '用户名或密码错误' },
+          'auth.phone_label': { es: 'Teléfono', zh: '电话' },
+          'auth.phone_required': { es: 'El teléfono es obligatorio', zh: '电话为必填项' },
+          'auth.phone_invalid': { es: 'El teléfono no es válido', zh: '电话号码无效' },
         };
         const fb = authFallbacks[key];
         return fb ? fb[locale === 'zh' ? 'zh' : 'es'] : key;

@@ -1,6 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import PhoneInput from 'react-phone-number-input';
+import { isValidPhoneNumber } from 'libphonenumber-js';
+import 'react-phone-number-input/style.css';
 
 /** Fallbacks when t() returns the key (translations not loaded) */
 const AUTH_ERROR_FALLBACKS: Record<string, { es: string; zh: string }> = {
@@ -10,6 +13,8 @@ const AUTH_ERROR_FALLBACKS: Record<string, { es: string; zh: string }> = {
   'auth.invalid_credentials': { es: 'Usuario o contraseña incorrectos', zh: '用户名或密码错误' },
   'auth.service_unavailable': { es: 'Servicio de registro temporalmente no disponible. Por favor, inténtalo más tarde.', zh: '注册服务暂时不可用。请稍后重试。' },
   'auth.email_auth_not_configured': { es: 'La autenticación por correo no está configurada correctamente. Contacta al soporte.', zh: '邮箱认证配置不正确。请联系客服。' },
+  'auth.phone_required': { es: 'El teléfono es obligatorio', zh: '电话为必填项' },
+  'auth.phone_invalid': { es: 'El teléfono no es válido', zh: '电话号码无效' },
 };
 
 /** Maps known backend auth messages (Spanish/English) to translated strings. Returns original message if no match. */
@@ -33,6 +38,8 @@ function getTranslatedAuthError(
     'registration service temporarily unavailable': 'auth.service_unavailable',
     'please confirm your email before logging in': 'auth.confirm_email_first',
     'invalid login credentials': 'auth.invalid_credentials',
+    'el teléfono es obligatorio': 'auth.phone_required',
+    'formato de teléfono inválido': 'auth.phone_invalid',
   };
   for (const [pattern, key] of Object.entries(known)) {
     if (trimmed.includes(pattern) || trimmed === pattern) {
@@ -55,6 +62,7 @@ import { useTranslation } from '@/contexts/I18nContext';
 interface LoginFormData extends Record<string, unknown> {
   email: string;
   password: string;
+  phone: string;
 }
 
 interface LoginModalProps {
@@ -69,7 +77,8 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
   const { t, locale } = useTranslation();
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
-    password: ''
+    password: '',
+    phone: '',
   });
   const [error, setError] = useState('');
   const [isLoadingLogin, setIsLoadingLogin] = useState(false);
@@ -84,13 +93,26 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
     setIsLoadingRegister(true);
 
     try {
+      const phone = formData.phone?.trim();
+      if (!phone) {
+        const msg = t('auth.phone_required');
+        setError(msg !== 'auth.phone_required' ? msg : 'El teléfono es obligatorio');
+        setIsLoadingRegister(false);
+        return;
+      }
+      if (!isValidPhoneNumber(phone)) {
+        const msg = t('auth.phone_invalid');
+        setError(msg !== 'auth.phone_invalid' ? msg : 'El teléfono no es válido');
+        setIsLoadingRegister(false);
+        return;
+      }
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ email: formData.email, password: formData.password, phone }),
       });
 
       const data = await response.json();
@@ -103,7 +125,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
       const successMsg = t('auth.registration_success');
       const fallback = locale === 'zh' ? '注册成功。请检查您的邮箱以确认您的账户。' : 'Registro exitoso. Revisa tu correo electrónico para confirmar tu cuenta.';
       setSuccessMessage(successMsg !== 'auth.registration_success' ? successMsg : fallback);
-      setFormData({ email: '', password: '' });
+      setFormData({ email: '', password: '', phone: '' });
     } catch (err) {
       const msg = err instanceof Error ? err.message : '';
       const translated = getTranslatedAuthError(msg, t, locale) || t('auth.register_error');
@@ -129,7 +151,7 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ email: formData.email, password: formData.password }),
       });
 
       const data = await response.json();
@@ -223,6 +245,21 @@ export default function LoginModal({ isOpen, onClose, redirectPath }: LoginModal
                 disabled={isLoadingLogin || isLoadingRegister}
                 testID="login-password-input"
               />
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('auth.phone_label')}
+                </label>
+                <PhoneInput
+                  international
+                  defaultCountry="ES"
+                  value={formData.phone}
+                  onChange={(value) => setFormData(prev => ({ ...prev, phone: value || '' }))}
+                  placeholder={t('auth.phone_placeholder')}
+                  disabled={isLoadingLogin || isLoadingRegister}
+                  className="flex rounded-md border border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 px-3 py-2 text-sm w-full"
+                />
+              </div>
 
               <div className="text-right">
                 <button
