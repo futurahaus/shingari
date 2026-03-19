@@ -85,7 +85,12 @@ export default function CompleteProfilePage() {
 
     try {
       await api.put('/auth/profile', formData);
-      router.push('/dashboard');
+      if (localStorage.getItem('hostelerosIntent')) {
+        localStorage.removeItem('hostelerosIntent');
+        router.push('/products');
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : t('dashboard.profile_update_error'));
     }

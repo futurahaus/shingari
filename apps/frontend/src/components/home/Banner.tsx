@@ -5,10 +5,21 @@ import { useRouter } from 'next/navigation';
 import { Text } from '@/app/ui/components/Text';
 import { Button } from '@/app/ui/components/Button';
 import { useTranslation } from '@/contexts/I18nContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const Banner = () => {
   const { t } = useTranslation();
   const router = useRouter();
+  const { user } = useAuth();
+
+  const handleHostelerosClick = () => {
+    if (!user) {
+      localStorage.setItem('hostelerosIntent', '1');
+      window.location.hash = '#login?from=/products';
+      return;
+    }
+    router.push('/products');
+  };
 
   return (
     <div className="h-[480px] relative my-8 mx-4 sm:mx-6 lg:mx-8 group">
@@ -54,7 +65,7 @@ export const Banner = () => {
                 inline
               />
               <Button
-                onPress={() => router.push('/products')}
+                onPress={handleHostelerosClick}
                 type="primary"
                 text={t('banner.button_businesses')}
                 testID="home-cta-hosteleros"
