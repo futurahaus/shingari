@@ -11,6 +11,7 @@ export interface OrderLine {
   total_price: string;
   product_image?: string;
   product_stock?: number;
+  product_iva?: number | null;
 }
 
 export interface OrderAddress {
@@ -39,6 +40,7 @@ export interface OrderPayment {
 export interface Order {
   id: string;
   user_id?: string;
+  user_is_business?: boolean;
   status: string;
   total_amount: string;
   currency: string;

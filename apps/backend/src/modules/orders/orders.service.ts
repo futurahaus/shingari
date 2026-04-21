@@ -125,6 +125,31 @@ export class OrdersService {
         })
       );
 
+      // Recompute total_amount from lines so it always includes IVA for
+      // business (mayorista) users, regardless of what the client sent.
+      const recomputedTotal = await this.computeTotalWithIvaIfBusiness(
+        orderRecord.id,
+      );
+      const firstPaymentRecord = orderPayments[0];
+      await this.prisma.$transaction([
+        this.prisma.orders.update({
+          where: { id: orderRecord.id },
+          data: { total_amount: recomputedTotal },
+        }),
+        ...(firstPaymentRecord
+          ? [
+              this.prisma.order_payments.update({
+                where: { id: firstPaymentRecord.id },
+                data: { amount: recomputedTotal },
+              }),
+            ]
+          : []),
+      ]);
+      orderRecord.total_amount = recomputedTotal;
+      if (firstPaymentRecord) {
+        firstPaymentRecord.amount = recomputedTotal as any;
+      }
+
       // Construct the complete order object
       const order = {
         ...orderRecord,
@@ -682,16 +707,7 @@ export class OrdersService {
   }
 
   private async recalculateTotals(orderId: string): Promise<void> {
-    const lines = await this.prisma.order_lines.findMany({
-      where: { order_id: orderId },
-    });
-
-    let total = 0;
-    for (const line of lines) {
-      const unitPrice = Number(line.unit_price);
-      total += unitPrice * line.quantity;
-    }
-    total = Math.round(total * 100) / 100;
+    const total = await this.computeTotalWithIvaIfBusiness(orderId);
 
     const firstPayment = await this.prisma.order_payments.findFirst({
       where: { order_id: orderId },
@@ -714,6 +730,58 @@ export class OrdersService {
           ]
         : []),
     ]);
+  }
+
+  /**
+   * Computes the order total. For business (mayorista) users the stored
+   * `unit_price` is ex-IVA (the products module returns wholesale prices
+   * without IVA), so we must add IVA per line using `products.iva`.
+   * For everyone else `unit_price` already includes IVA, so we just sum it up.
+   */
+  private async computeTotalWithIvaIfBusiness(orderId: string): Promise<number> {
+    const order = await this.prisma.orders.findUnique({
+      where: { id: orderId },
+      select: { user_id: true },
+    });
+    if (!order) {
+      throw new NotFoundException(`Orden con ID ${orderId} no encontrada`);
+    }
+
+    const businessRole = await this.prisma.user_roles.findFirst({
+      where: {
+        user_id: order.user_id,
+        roles: { name: 'business' },
+      },
+    });
+    const isBusiness = !!businessRole;
+
+    const lines = await this.prisma.order_lines.findMany({
+      where: { order_id: orderId },
+      include: {
+        products: { select: { iva: true } },
+      },
+    });
+
+    let total = 0;
+    for (const line of lines) {
+      const unitPrice = Number(line.unit_price);
+      const lineSubtotal = unitPrice * line.quantity;
+      if (isBusiness) {
+        const ivaRaw = line.products?.iva;
+        let ivaPct = 21;
+        if (ivaRaw != null) {
+          const ivaNum =
+            typeof ivaRaw === 'object' && (ivaRaw as any).toNumber
+              ? (ivaRaw as any).toNumber()
+              : Number(ivaRaw);
+          ivaPct = ivaNum < 1 && ivaNum > 0 ? ivaNum * 100 : ivaNum;
+        }
+        total += lineSubtotal * (1 + ivaPct / 100);
+      } else {
+        total += lineSubtotal;
+      }
+    }
+    return Math.round(total * 100) / 100;
   }
 
   async isUserAdmin(userId: string): Promise<boolean> {

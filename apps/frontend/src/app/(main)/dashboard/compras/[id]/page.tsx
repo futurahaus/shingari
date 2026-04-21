@@ -8,6 +8,7 @@ import { useTranslation, useI18n } from '@/contexts/I18nContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { useOrderDetail, ordersKeys, type Order } from '@/hooks/useOrdersQuery';
 import { formatCurrency as formatCurrencyUtil } from '@/lib/currency';
+import { computeOrderBreakdown } from '@/lib/orderPricing';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { AddProductToOrderModal } from '@/components/orders/AddProductToOrderModal';
@@ -324,6 +325,15 @@ export default function OrderDetailPage() {
   const statusConfig = getStatusConfig(order.status, t);
   const shippingAddress = order.order_addresses.find(addr => addr.type === 'shipping');
   const payment = order.order_payments[0];
+  const userIsBusiness = order.user_is_business ?? false;
+  const breakdown = computeOrderBreakdown({
+    orderLines: order.order_lines.map((line) => ({
+      unit_price: line.unit_price,
+      quantity: line.quantity,
+      product_iva: line.product_iva ?? null,
+    })),
+    userIsBusiness,
+  });
 
   return (
     <div className="mx-auto px-4 sm:px-6 lg:px-16 py-8 lg:py-12">
@@ -419,7 +429,7 @@ export default function OrderDetailPage() {
                   {payment?.payment_method === 'card' ? t('order_details.credit_card') : payment?.payment_method}
                 </p>
                 <p className="text-sm text-gray-900">
-                  {formatCurrency(order.total_amount)} - {t('order_details.payment_single')} {formatCurrency(order.total_amount)}
+                  {formatCurrency(breakdown.total.toString())} - {t('order_details.payment_single')} {formatCurrency(breakdown.total.toString())}
                 </p>
               </div>
               <div className="mt-4">
@@ -435,10 +445,23 @@ export default function OrderDetailPage() {
                 <h3 className="text-sm font-bold text-gray-900">{t('order_details.summary')}</h3>
               </div>
               <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-sm font-medium text-gray-900">{t('order_details.subtotal')}</span>
-                  <span className="text-sm text-gray-900">{formatCurrency(order.total_amount)}</span>
-                </div>
+                {userIsBusiness ? (
+                  <>
+                    <div className="flex justify-between">
+                      <span className="text-sm font-medium text-gray-900">{t('payment.subtotal_without_iva')}</span>
+                      <span className="text-sm text-gray-900">{formatCurrency(breakdown.subtotal.toString())}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm font-medium text-gray-900">{t('payment.total_iva')}</span>
+                      <span className="text-sm text-gray-900">{formatCurrency(breakdown.iva.toString())}</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex justify-between">
+                    <span className="text-sm font-medium text-gray-900">{t('order_details.subtotal')}</span>
+                    <span className="text-sm text-gray-900">{formatCurrency(breakdown.subtotal.toString())}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-sm font-medium text-gray-900">{t('order_details.discounts')}</span>
                   <span className="text-sm text-gray-900">-€0,00</span>
@@ -450,7 +473,7 @@ export default function OrderDetailPage() {
                 <div className="border-t pt-2 mt-2">
                   <div className="flex justify-between">
                     <span className="text-sm font-bold text-gray-900">{t('dashboard.total')}</span>
-                    <span className="text-sm font-bold text-gray-900">{formatCurrency(order.total_amount)}</span>
+                    <span className="text-sm font-bold text-gray-900">{formatCurrency(breakdown.total.toString())}</span>
                   </div>
                 </div>
               </div>

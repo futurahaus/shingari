@@ -56,6 +56,28 @@ export const CartModal = () => {
   const discount = 0;
   const discountedTotal = total - discount;
 
+  // For business (mayorista) users, prices are ex-IVA. We must add IVA per
+  // line so the total shown actually matches what the customer will pay.
+  const businessBreakdown = (() => {
+    if (!isBusinessUser) {
+      return { subtotal: total, iva: 0, total };
+    }
+    let subtotal = 0;
+    let iva = 0;
+    for (const item of cart) {
+      const lineSubtotal = item.price * item.quantity;
+      subtotal += lineSubtotal;
+      if (item.iva && item.iva > 0) {
+        const ivaPct = item.iva < 1 ? item.iva * 100 : item.iva;
+        iva += lineSubtotal * (ivaPct / 100);
+      }
+    }
+    const round2 = (n: number) => Math.round(n * 100) / 100;
+    subtotal = round2(subtotal);
+    iva = round2(iva);
+    return { subtotal, iva, total: round2(subtotal + iva) };
+  })();
+
   if (!isCartOpen) return null;
 
   return (
@@ -151,18 +173,37 @@ export const CartModal = () => {
           >{t('cart.remove_all')}</button>
 
           <div className="text-sm space-y-1 mb-6">
-            <div className="flex justify-between">
-              <span>{t('cart.product_prices')}</span>
-              <span>€{total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
-            </div>
-            <div className="flex justify-between font-bold">
-              <span>{t('cart.discount_price')}</span>
-              <span>€{discountedTotal.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>{t('cart.total_products')}</span>
-              <span>€{total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
-            </div>
+            {isBusinessUser ? (
+              <>
+                <div className="flex justify-between">
+                  <span>{t('payment.subtotal_without_iva')}</span>
+                  <span>€{businessBreakdown.subtotal.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>{t('payment.total_iva')}</span>
+                  <span>€{businessBreakdown.iva.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
+                </div>
+                <div className="flex justify-between font-bold">
+                  <span>{t('cart.total_products')}</span>
+                  <span>€{businessBreakdown.total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex justify-between">
+                  <span>{t('cart.product_prices')}</span>
+                  <span>€{total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
+                </div>
+                <div className="flex justify-between font-bold">
+                  <span>{t('cart.discount_price')}</span>
+                  <span>€{discountedTotal.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>{t('cart.total_products')}</span>
+                  <span>€{total.toLocaleString('es-ES', { minimumFractionDigits: 2 })}</span>
+                </div>
+              </>
+            )}
           </div>
           <button className="w-full bg-[#F24E1E] text-white py-3 rounded-md font-semibold text-lg hover:bg-[#d43e0e] transition cursor-pointer"
             onClick={() => {

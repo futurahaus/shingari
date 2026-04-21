@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { api } from '@/lib/api';
+import { normalizeIvaPercent } from '@/lib/orderPricing';
 
 export interface CartProduct {
   id: string;
@@ -56,8 +57,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         const chunkResults = await Promise.all(
           chunk.map(async (item) => {
             try {
-              const response = await api.get(`/products/${item.id}`) as { data?: { iva?: number } };
-              return { id: item.id, iva: response.data?.iva };
+              // api.get returns the JSON body directly (no .data wrapper),
+              // so the product fields live on the top-level response object.
+              const response = await api.get<{ iva?: number | null }>(
+                `/products/${item.id}`,
+              );
+              const ivaValue =
+                response?.iva != null ? normalizeIvaPercent(response.iva) : undefined;
+              return { id: item.id, iva: ivaValue };
             } catch {
               return { id: item.id, iva: undefined };
             }

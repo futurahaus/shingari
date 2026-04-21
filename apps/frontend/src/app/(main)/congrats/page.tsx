@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import { useTranslation } from '@/contexts/I18nContext';
 import { formatCurrency } from '@/lib/currency';
+import { computeOrderBreakdown } from '@/lib/orderPricing';
 
 interface UserProfile {
   nombre: string;
@@ -19,6 +20,7 @@ interface OrderLine {
   quantity: number;
   unit_price: string; // Decimal se serializa como string
   total_price: string; // Decimal se serializa como string
+  product_iva?: number | null;
 }
 
 interface OrderAddress {
@@ -47,6 +49,7 @@ interface OrderPayment {
 interface Order {
   id: string;
   user_id?: string;
+  user_is_business?: boolean;
   status: string;
   total_amount: string; // Decimal se serializa como string
   currency: string;
@@ -174,6 +177,15 @@ const CongratsContent = () => {
     `${user.nombre}${user.apellidos ? ` ${user.apellidos}` : ''}` : 
     t('congrats.client');
 
+  const breakdown = computeOrderBreakdown({
+    orderLines: order.order_lines.map((line) => ({
+      unit_price: line.unit_price,
+      quantity: line.quantity,
+      product_iva: line.product_iva ?? null,
+    })),
+    userIsBusiness: order.user_is_business ?? false,
+  });
+
   return (
     <div className="min-h-screen bg-white">
       {/* Main Content */}
@@ -208,7 +220,7 @@ const CongratsContent = () => {
               {/* Order Details */}
               <div className="text-sm text-gray-600 space-y-2">
                 <p>{t('congrats.order')} #{order.id.slice(0, 8).toUpperCase()}</p>
-                <p>{t('congrats.total')}: {formatCurrency(Number(order.total_amount))}</p>
+                <p>{t('congrats.total')}: {formatCurrency(breakdown.total)}</p>
                 <p>{t('congrats.status')}: {order.status}</p>
               </div>
 

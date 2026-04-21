@@ -8,6 +8,7 @@ import { StatusChip } from '../components/StatusChip';
 import { api } from '@/lib/api';
 import { useNotificationContext } from '@/contexts/NotificationContext';
 import { formatCurrency as formatCurrencyUtil } from '@/lib/currency';
+import { computeOrderBreakdown } from '@/lib/orderPricing';
 import { FileDropzone } from '@/components/ui/FileDropzone';
 import { AddProductToOrderModal } from '@/components/orders/AddProductToOrderModal';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
@@ -95,39 +96,18 @@ const formatDateTime = (dateString: string) => {
   });
 };
 
-function computePriceBreakdown(
+function getOrderBreakdown(
   orderLines: OrderLine[],
-  totalAmount: number,
-  userIsBusiness: boolean
-): { subtotal: number; iva: number; total: number } {
-  const DEFAULT_IVA = 21;
-  let subtotal = 0;
-  let ivaAmount = 0;
-
-  if (userIsBusiness) {
-    for (const line of orderLines) {
-      const lineSubtotal = Number(line.unit_price) * line.quantity;
-      const ivaPct = line.product_iva ?? DEFAULT_IVA;
-      const lineIva = Math.round(lineSubtotal * (ivaPct / 100) * 100) / 100;
-      subtotal += lineSubtotal;
-      ivaAmount += lineIva;
-    }
-    subtotal = Math.round(subtotal * 100) / 100;
-    ivaAmount = Math.round(ivaAmount * 100) / 100;
-    return { subtotal, iva: ivaAmount, total: totalAmount };
-  }
-
-  for (const line of orderLines) {
-    const lineTotal = Number(line.unit_price) * line.quantity;
-    const ivaPct = line.product_iva ?? DEFAULT_IVA;
-    const lineSubtotal = Math.round((lineTotal / (1 + ivaPct / 100)) * 100) / 100;
-    const lineIva = Math.round((lineTotal - lineSubtotal) * 100) / 100;
-    subtotal += lineSubtotal;
-    ivaAmount += lineIva;
-  }
-  subtotal = Math.round(subtotal * 100) / 100;
-  ivaAmount = Math.round(ivaAmount * 100) / 100;
-  return { subtotal, iva: ivaAmount, total: totalAmount };
+  userIsBusiness: boolean,
+) {
+  return computeOrderBreakdown({
+    orderLines: orderLines.map((line) => ({
+      unit_price: line.unit_price,
+      quantity: line.quantity,
+      product_iva: line.product_iva,
+    })),
+    userIsBusiness,
+  });
 }
 
 export default function AdminOrderDetailPage() {
@@ -378,6 +358,7 @@ export default function AdminOrderDetailPage() {
 
   const shippingAddress = order.order_addresses.find(addr => addr.type === 'shipping');
   const payment = order.order_payments[0];
+  const breakdown = getOrderBreakdown(order.order_lines, order.user_is_business ?? false);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center py-8 px-16">
@@ -476,7 +457,7 @@ export default function AdminOrderDetailPage() {
             </div>
             <div className="grid grid-cols-2 gap-x-4 py-6 border-b border-gray-200">
               <div className="text-gray-500">{t('admin.orders.detail.total')}</div>
-              <div className="text-gray-900 font-medium text-right">{formatCurrency(order.total_amount)}</div>
+              <div className="text-gray-900 font-medium text-right">{formatCurrency(breakdown.total.toString())}</div>
             </div>
             <div className="grid grid-cols-2 gap-x-4 py-6">
               <div className="text-gray-500">{t('admin.orders.detail.payment_method')}</div>
@@ -560,7 +541,7 @@ export default function AdminOrderDetailPage() {
                 <tr className="bg-gray-50 border-t border-gray-200">
                   <td className="px-6 py-4 text-right font-bold" colSpan={isOrderEditable ? 5 : 4}>{t('admin.orders.detail.table.total')}</td>
                   <td className="px-6 py-4 text-gray-900 font-bold">
-                    {formatCurrency(order.order_lines.reduce((acc, line) => acc + Number(line.unit_price) * line.quantity, 0).toString())}
+                    {formatCurrency(breakdown.total.toString())}
                   </td>
                 </tr>
               </tfoot>
@@ -576,29 +557,20 @@ export default function AdminOrderDetailPage() {
           {order.order_lines.length > 0 && (
             <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
               <h4 className="font-semibold text-sm text-gray-700 mb-3">{t('admin.orders.detail.price_breakdown')}</h4>
-              {(() => {
-                const breakdown = computePriceBreakdown(
-                  order.order_lines,
-                  Number(order.total_amount),
-                  order.user_is_business ?? false
-                );
-                return (
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">{t('admin.orders.detail.subtotal_without_iva')}</span>
-                      <span className="text-gray-900 font-medium">{formatCurrency(breakdown.subtotal.toString())}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">{t('admin.orders.detail.total_iva')}</span>
-                      <span className="text-gray-900 font-medium">{formatCurrency(breakdown.iva.toString())}</span>
-                    </div>
-                    <div className="flex justify-between pt-2 border-t border-gray-200">
-                      <span className="text-gray-900 font-bold">{t('admin.orders.detail.table.total')}</span>
-                      <span className="text-gray-900 font-bold">{formatCurrency(order.total_amount)}</span>
-                    </div>
-                  </div>
-                );
-              })()}
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">{t('admin.orders.detail.subtotal_without_iva')}</span>
+                  <span className="text-gray-900 font-medium">{formatCurrency(breakdown.subtotal.toString())}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">{t('admin.orders.detail.total_iva')}</span>
+                  <span className="text-gray-900 font-medium">{formatCurrency(breakdown.iva.toString())}</span>
+                </div>
+                <div className="flex justify-between pt-2 border-t border-gray-200">
+                  <span className="text-gray-900 font-bold">{t('admin.orders.detail.table.total')}</span>
+                  <span className="text-gray-900 font-bold">{formatCurrency(breakdown.total.toString())}</span>
+                </div>
+              </div>
             </div>
           )}
         </div>
