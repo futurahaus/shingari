@@ -12,17 +12,16 @@ interface ProductImageCarouselProps {
   className?: string;
 }
 
-const AUTO_ADVANCE_MS = 2000;
 const FADE_DURATION_MS = 300;
 
 export function ProductImageCarousel({ images, alt, className = '' }: ProductImageCarouselProps) {
   const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFading, setIsFading] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const hasMultipleImages = images.length > 1;
+  const imagesSignature = images.join('\u0001');
 
   const goToIndex = (newIndex: number) => {
     if (newIndex === currentIndex) return;
@@ -35,47 +34,32 @@ export function ProductImageCarousel({ images, alt, className = '' }: ProductIma
     }, FADE_DURATION_MS);
   };
 
-  const advance = () => {
-    goToIndex((currentIndex + 1) % images.length);
-  };
+  useEffect(() => {
+    setCurrentIndex((i) => {
+      if (images.length === 0) return 0;
+      return Math.min(i, images.length - 1);
+    });
+  }, [images.length, imagesSignature]);
 
   useEffect(() => {
-    if (!hasMultipleImages) return;
-
-    intervalRef.current = setInterval(advance, AUTO_ADVANCE_MS);
-
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
     };
-  }, [images.length, hasMultipleImages, currentIndex]);
+  }, []);
 
   const goToPrev = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!hasMultipleImages) return;
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
     goToIndex(currentIndex === 0 ? images.length - 1 : currentIndex - 1);
-    intervalRef.current = setInterval(advance, AUTO_ADVANCE_MS);
   };
 
   const goToNext = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!hasMultipleImages) return;
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
     goToIndex((currentIndex + 1) % images.length);
-    intervalRef.current = setInterval(advance, AUTO_ADVANCE_MS);
   };
 
   if (images.length === 0) {
