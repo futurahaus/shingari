@@ -13,13 +13,40 @@ import { useRef } from 'react';
 import { LanguageSelector, LanguageSelectorCompact } from '@/components/language/LanguageSelector';
 import { useTranslation } from '@/contexts/I18nContext';
 
-const SearchHeaderDesktop = () => {
-  const { user } = useAuth();
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+interface HeaderSearchInputProps {
+  searchQuery: string;
+  onChange: (value: string) => void;
+  onSearch: () => void;
+  onKeyPress: (e: React.KeyboardEvent) => void;
+  placeholder: string;
+}
+
+const HeaderSearchInput = ({
+  searchQuery,
+  onChange,
+  onSearch,
+  onKeyPress,
+  placeholder,
+}: HeaderSearchInputProps) => (
+  <div className="relative">
+    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+      <FaSearch />
+    </span>
+    <input
+      type="text"
+      placeholder={placeholder}
+      value={searchQuery}
+      onChange={(e) => onChange(e.target.value)}
+      onBlur={onSearch}
+      onKeyPress={onKeyPress}
+      className="w-full pl-10 pr-4 py-2 rounded-md focus:outline-none focus:ring-2 bg-[color:var(--search-background)]"
+    />
+  </div>
+);
+
+const useHeaderSearch = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
-  const { openCart, cart } = useCart();
-  const { t } = useTranslation();
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -33,6 +60,17 @@ const SearchHeaderDesktop = () => {
     }
   };
 
+  return { searchQuery, setSearchQuery, handleSearch, handleKeyPress };
+};
+
+const SearchHeaderDesktop = () => {
+  const { user } = useAuth();
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const { searchQuery, setSearchQuery, handleSearch, handleKeyPress } = useHeaderSearch();
+  const router = useRouter();
+  const { openCart, cart } = useCart();
+  const { t } = useTranslation();
+
   return (
     <>
       <div className="bg-white py-4">
@@ -43,20 +81,13 @@ const SearchHeaderDesktop = () => {
             </Link>
 
             <div className="flex-1 max-w-2xl mx-8">
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                  <FaSearch />
-                </span>
-                <input
-                  type="text"
-                  placeholder={t('common.search')}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onBlur={handleSearch}
-                  onKeyPress={handleKeyPress}
-                  className="w-full pl-10 pr-4 py-2 rounded-md focus:outline-none focus:ring-2 bg-[color:var(--search-background)]"
-                />
-              </div>
+              <HeaderSearchInput
+                searchQuery={searchQuery}
+                onChange={setSearchQuery}
+                onSearch={handleSearch}
+                onKeyPress={handleKeyPress}
+                placeholder={t('common.search')}
+              />
             </div>
 
             <div className="flex items-center gap-4">
@@ -135,8 +166,10 @@ const SearchHeaderDesktop = () => {
 const SearchHeaderMobile = () => {
   const { user } = useAuth();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const { searchQuery, setSearchQuery, handleSearch, handleKeyPress } = useHeaderSearch();
   const router = useRouter();
   const { openCart, cart } = useCart();
+  const { t } = useTranslation();
 
   return (
     <>
@@ -209,6 +242,15 @@ const SearchHeaderMobile = () => {
                 )}
               </div>
             </div>
+          </div>
+          <div className="mt-3">
+            <HeaderSearchInput
+              searchQuery={searchQuery}
+              onChange={setSearchQuery}
+              onSearch={handleSearch}
+              onKeyPress={handleKeyPress}
+              placeholder={t('common.search')}
+            />
           </div>
         </div>
       </div>
