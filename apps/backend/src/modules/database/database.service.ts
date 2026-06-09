@@ -1,7 +1,11 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { DatabaseLogger } from './database.logger';
-import { PostgrestBuilder } from '@supabase/postgrest-js';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+
+type SupabaseQueryResult<T> = PromiseLike<{
+  data: T | null;
+  error: Error | null;
+}>;
 
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
@@ -57,7 +61,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
   async executeQuery<T>(
     operation: string,
-    queryFn: () => PostgrestBuilder<T>,
+    queryFn: () => SupabaseQueryResult<T>,
   ): Promise<T> {
     try {
       this.logger.logQuery(operation, { startTime: new Date().toISOString() });
@@ -67,6 +71,10 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       if (error) {
         this.logger.logError(operation, error);
         throw error;
+      }
+
+      if (data === null) {
+        throw new Error(`${operation} returned no data`);
       }
 
       this.logger.logQuery(operation, {
