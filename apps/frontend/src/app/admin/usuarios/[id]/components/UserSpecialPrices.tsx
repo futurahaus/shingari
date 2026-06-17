@@ -32,6 +32,8 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
   const [showImportModal, setShowImportModal] = useState(false);
   const [editingSpecialPrice, setEditingSpecialPrice] = useState<SpecialPrice | null>(null);
   const [specialPriceToDelete, setSpecialPriceToDelete] = useState<string | null>(null);
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
+  const [deletingAll, setDeletingAll] = useState(false);
 
       const loadSpecialPrices = useCallback(() => {
     if (!userId) return;
@@ -84,6 +86,20 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
     }
   };
 
+  const handleDeleteAllSpecialPrices = async () => {
+    setDeletingAll(true);
+    try {
+      await api.delete(`/user/admin/${userId}/special-prices`);
+      loadSpecialPrices();
+    } catch (err) {
+      const error = err instanceof Error ? err.message : 'Unknown error';
+      setError(t('admin.users.detail.error_deleting_all_special_prices') + ': ' + error);
+      throw err;
+    } finally {
+      setDeletingAll(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="mb-8">
@@ -133,6 +149,13 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">{t('admin.users.detail.special_price_list')}</h2>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowDeleteAllConfirm(true)}
+            disabled={specialPrices.length === 0}
+            className="px-4 py-2 border border-red-600 text-red-600 rounded hover:bg-red-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+          >
+            {t('admin.users.detail.delete_all_special_prices')}
+          </button>
           <button
             onClick={() => setShowImportModal(true)}
             className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 cursor-pointer"
@@ -227,6 +250,17 @@ export const UserSpecialPrices: React.FC<UserSpecialPricesProps> = ({ userId, on
         message={t('admin.users.detail.confirm_delete_special_price')}
         confirmLabel={t('common.delete')}
         variant="danger"
+      />
+
+      <ConfirmModal
+        isOpen={showDeleteAllConfirm}
+        onClose={() => setShowDeleteAllConfirm(false)}
+        onConfirm={handleDeleteAllSpecialPrices}
+        title={t('admin.users.detail.delete_all_special_prices')}
+        message={t('admin.users.detail.confirm_delete_all_special_prices')}
+        confirmLabel={t('common.delete')}
+        variant="danger"
+        confirmLoading={deletingAll}
       />
     </div>
   );

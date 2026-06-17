@@ -734,6 +734,47 @@ export class UserService {
     };
   }
 
+  // Delete all special prices for a user
+  async deleteAllSpecialPrices(userId: string) {
+    const specialPrices = await this.prismaService.products_discounts.findMany({
+      where: { user_id: userId },
+      select: { product_id: true },
+    });
+
+    if (specialPrices.length === 0) {
+      return {
+        success: true,
+        message: 'No special prices to delete',
+        deletedCount: 0,
+      };
+    }
+
+    const productIds = specialPrices
+      .map((sp) => sp.product_id)
+      .filter((id): id is number => id != null);
+
+    await this.prismaService.$transaction(async (tx) => {
+      await tx.products_discounts.deleteMany({
+        where: { user_id: userId },
+      });
+
+      if (productIds.length > 0) {
+        await tx.favorites.deleteMany({
+          where: {
+            user_id: userId,
+            product_id: { in: productIds },
+          },
+        });
+      }
+    });
+
+    return {
+      success: true,
+      message: 'All special prices deleted successfully',
+      deletedCount: specialPrices.length,
+    };
+  }
+
   // Delete a special price for a user
   async deleteSpecialPrice(userId: string, specialPriceId: string) {
     // Verify that the special price exists and belongs to the user
