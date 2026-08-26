@@ -12,6 +12,31 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 // Load environment variables before anything else
 config();
 
+function normalizeOrigin(origin: string): string {
+  return origin.trim().replace(/\/+$/, '');
+}
+
+function parseCorsOrigins(): string[] {
+  const defaults = [
+    'http://localhost:3000',
+    'https://shingarifoods.es',
+    'https://www.shingarifoods.es',
+    'https://shingari.onrender.com',
+  ];
+  const fromFrontendUrl = process.env.FRONTEND_URL ?? '';
+  const fromCorsOrigins = (process.env.CORS_ORIGINS ?? '')
+    .split(',')
+    .map((origin) => origin.trim());
+
+  return [
+    ...new Set(
+      [...defaults, fromFrontendUrl, ...fromCorsOrigins]
+        .filter(Boolean)
+        .map(normalizeOrigin),
+    ),
+  ];
+}
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
@@ -37,10 +62,7 @@ async function bootstrap() {
 
   // Configure CORS for frontend
   app.enableCors({
-    origin: [
-      process.env.FRONTEND_URL || 'http://localhost:3000',
-      'https://shingarifoods.es',
-    ],
+    origin: parseCorsOrigins(),
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

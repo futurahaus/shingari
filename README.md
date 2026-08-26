@@ -86,7 +86,8 @@ See [.env.example](.env.example) for the full list. Required variables:
 | JWT_REFRESH_SECRET       | Yes      | JWT refresh token secret       |
 | SENDGRID_API_KEY         | Yes      | SendGrid API key for email     |
 | SENDGRID_SENDER_EMAIL    | Yes      | Verified sender email          |
-| FRONTEND_URL             | Yes      | Frontend URL (e.g. http://localhost:3000) |
+| FRONTEND_URL             | Yes      | Frontend URL (e.g. http://localhost:3000). Also allowed as a CORS origin. |
+| CORS_ORIGINS             | No       | Extra CORS origins, comma-separated (e.g. https://preview.onrender.com). Defaults already include localhost, shingarifoods.es, www.shingarifoods.es and https://shingari.onrender.com. |
 
 Optional: `EVOLUTION_API_*`, `ADMIN_WHATSAPP_NUMBER` (WhatsApp), `REDIS_HOST`, `REDIS_PORT`, `PORT`.
 
